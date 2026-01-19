@@ -371,14 +371,40 @@ export const MACROCATEGORIA_INFO: Record<MacroCategoria, { label: string; descri
   }
 };
 
-export function getProfiloDescription(tipo: ProfiloTipo): ProfiloDescription {
-  return PROFILO_DESCRIPTIONS[tipo];
+// Default profile for unknown/legacy types
+const DEFAULT_PROFILE: ProfiloDescription = {
+  label: 'Conservatore',
+  macrocategoria: 'PROTAGONISTA',
+  motto: 'Voglio essere IL PIÙ FURBO',
+  descrizione_breve: 'Persona prudente che investe, non spreca. Cerca il valore duraturo, la solidità.',
+  cosa_vuole: ['Investimenti sicuri e duraturi', 'Valore nel tempo', 'Garanzie e affidabilità'],
+  paura_principale: 'Sprecare risorse o essere ingannato',
+  come_riconoscerlo: ['Valuta attentamente costi e benefici', 'Preferisce soluzioni consolidate'],
+  come_gestirlo: ['Presentare investimenti a lungo termine', 'Fornire garanzie e track record'],
+  errori_da_evitare: ['Proporre soluzioni effimere', 'Essere pressanti'],
+  ruoli_ideali: ['Amministrazione', 'Finanza', 'Operations'],
+  colore: 'bg-amber-600',
+  colorBg: 'bg-amber-100',
+  colorText: 'text-amber-700'
+};
+
+export function getProfiloDescription(tipo: ProfiloTipo | string | null | undefined): ProfiloDescription {
+  if (!tipo || !(tipo in PROFILO_DESCRIPTIONS)) {
+    return DEFAULT_PROFILE;
+  }
+  return PROFILO_DESCRIPTIONS[tipo as ProfiloTipo];
 }
 
-export function getMacrocategoria(tipo: ProfiloTipo): MacroCategoria {
-  return PROFILO_DESCRIPTIONS[tipo].macrocategoria;
+export function getMacrocategoria(tipo: ProfiloTipo | string | null | undefined): MacroCategoria {
+  if (!tipo || !(tipo in PROFILO_DESCRIPTIONS)) {
+    return 'PROTAGONISTA';
+  }
+  return PROFILO_DESCRIPTIONS[tipo as ProfiloTipo].macrocategoria;
 }
 
-export function getProfiloColor(tipo: ProfiloTipo): string {
-  return PROFILO_DESCRIPTIONS[tipo].colore;
+export function getProfiloColor(tipo: ProfiloTipo | string | null | undefined): string {
+  if (!tipo || !(tipo in PROFILO_DESCRIPTIONS)) {
+    return 'bg-amber-600';
+  }
+  return PROFILO_DESCRIPTIONS[tipo as ProfiloTipo].colore;
 }
