@@ -185,6 +185,42 @@ const PATTERN_CRITICI: PatternCritico[] = [
     condizione: (s) => (s['SC'] || 100) < 60 && (s['EF'] || 100) < 80,
     descrizione: 'Schematicità molto bassa + Efficienza bassa. Altissima flessibilità ma totale disorganizzazione. Fatica a seguire procedure e mantenere costanza. Può essere creativo ma inaffidabile nelle consegne.',
     tipo: 'attenzione'
+  },
+  
+  // NUOVI PATTERN dal Manuale V3 Cap. 14.3
+  {
+    id: 'caricatore_deresponsabilizzato',
+    nome: 'Carica Molto ma Non Risponde',
+    condizione: (s) => (s['QN'] || 100) > 130 && (s['QR'] || 100) < 70,
+    descrizione: 'Gap significativo tra Quantità caricata (QN alto) e Qualità Relazionale (QR basso). Tende a caricarsi di molti impegni ma senza sentirsi responsabile dei risultati. Promette molto, poi cerca scuse quando le cose non vanno. Verificare in colloquio come gestisce i fallimenti.',
+    tipo: 'critico'
+  },
+  
+  // PATTERN ESECUTORE PURO (dal Caso Luiza)
+  {
+    id: 'esecutore_puro_fragile',
+    nome: 'Esecutore Puro con Fragilità',
+    condizione: (s) => (s['EF'] || 100) > 150 && (s['EC'] || 100) < 80 && (s['CF'] || 100) < 90,
+    descrizione: 'Altissima efficienza operativa ma scarsa determinazione e resilienza moderata. Esegue perfettamente compiti definiti ma si blocca davanti a problemi imprevisti. Non adatto a ruoli con autonomia decisionale.',
+    tipo: 'attenzione'
+  },
+  
+  // PATTERN MOTIVAZIONE DISCONNESSA
+  {
+    id: 'motivazione_disconnessa',
+    nome: 'Motivazione Disconnessa dalla Realtà',
+    condizione: (s) => (s['MO'] || 100) > 160 && (s['EF'] || 100) < 80 && (s['EC'] || 100) < 80,
+    descrizione: 'Altissima motivazione dichiarata ma scarsa capacità di tradurla in risultati concreti (EF+EC bassi). Potrebbe essere un "sognatore" che si entusiasma ma non conclude. Verificare track record effettivo.',
+    tipo: 'attenzione'
+  },
+  
+  // PATTERN ANZIANITÀ + RIGIDITÀ (Caso Luiza specifico)
+  {
+    id: 'eta_rigidita_rischio',
+    nome: 'Rigidità Consolidata',
+    condizione: (s) => (s['SC'] || 100) > 165 && (s['CF'] || 100) < 85,
+    descrizione: 'Alta schematicità combinata con resilienza moderata-bassa. Pattern tipico di professionisti che hanno sviluppato rigidità nel tempo e faticano ad adattarsi. Rischio elevato in contesti di cambiamento organizzativo.',
+    tipo: 'attenzione'
   }
 ];
 
