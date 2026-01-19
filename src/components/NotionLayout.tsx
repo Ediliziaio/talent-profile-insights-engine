@@ -31,25 +31,25 @@ export function NotionLayout({ children }: NotionLayoutProps) {
       {/* Sidebar */}
       <aside 
         className={cn(
-          "bg-sidebar-background text-sidebar-foreground border-r border-sidebar-border flex flex-col transition-all duration-300",
-          collapsed ? "w-16" : "w-64"
+          "bg-sidebar-background text-sidebar-foreground border-r border-sidebar-border flex flex-col transition-all duration-300 shadow-sm",
+          collapsed ? "w-20" : "w-72"
         )}
       >
         {/* Logo */}
-        <div className="p-4">
-          <Link to="/" className="flex items-center gap-3">
+        <div className={cn("p-5", collapsed ? "p-3" : "p-6")}>
+          <Link to="/" className="flex items-center justify-center">
             <img 
               src="/talentprofile_logo.png" 
               alt="Talent Profile" 
               className={cn(
-                "transition-all duration-300",
-                collapsed ? "h-8 w-8 object-contain" : "h-12 w-auto max-w-[180px]"
+                "transition-all duration-300 object-contain",
+                collapsed ? "h-10 w-10" : "h-16 w-auto max-w-[200px]"
               )}
             />
           </Link>
         </div>
 
-        <Separator className="bg-sidebar-border" />
+        <Separator className="bg-sidebar-border mx-3" />
 
         {/* Navigation */}
         <nav className="flex-1 p-2 space-y-1">
