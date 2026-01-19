@@ -38,18 +38,7 @@ import { Plus, Users, Copy, Check, ExternalLink, Eye } from 'lucide-react';
 import { Candidato, Azienda, RUOLI_AZIENDALI, FUNZIONI } from '@/types/database';
 import { Link } from 'react-router-dom';
 
-function generatePassword(): string {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
-  let password = '';
-  for (let i = 0; i < 10; i++) {
-    password += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return password;
-}
-
-function generateToken(): string {
-  return crypto.randomUUID().replace(/-/g, '').slice(0, 24);
-}
+// Credentials are now generated server-side by the edge function
 
 export default function Candidati() {
   const { profile } = useAuth();
@@ -59,7 +48,7 @@ export default function Candidati() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [filterAzienda, setFilterAzienda] = useState<string>('all');
   const [generatedCredentials, setGeneratedCredentials] = useState<{
-    email: string;
+    username: string;
     password: string;
     nome: string;
     cognome: string;
@@ -112,74 +101,50 @@ export default function Candidati() {
 
   const createMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
-      const password = generatePassword();
-      const token = generateToken();
       const aziendaId = isSuperadmin ? data.azienda_id : profile?.azienda_id;
 
       if (!aziendaId) throw new Error('Azienda non specificata');
-      if (!data.email) throw new Error('Email obbligatoria');
 
-      // 1. Create user
-      const { data: authData, error: signUpError } = await supabase.auth.signUp({
-        email: data.email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/`,
-          data: {
+      // Get current session token
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData.session) throw new Error('Non autenticato');
+
+      // Call edge function to create candidate
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-candidate`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${sessionData.session.access_token}`,
+          },
+          body: JSON.stringify({
             nome: data.nome,
             cognome: data.cognome,
-            ruolo: 'candidato',
-          }
-        }
-      });
-
-      if (signUpError) throw signUpError;
-
-      // 2. Create candidato
-      const { data: candidato, error: candidatoError } = await supabase
-        .from('candidati')
-        .insert({
-          nome: data.nome,
-          cognome: data.cognome,
-          email: data.email,
-          eta: data.eta ? parseInt(data.eta) : null,
-          telefono: data.telefono || null,
-          ruolo_attuale: data.ruolo_attuale || null,
-          funzione: data.funzione || null,
-          azienda_id: aziendaId,
-          user_id: authData.user?.id,
-          test_link_token: token,
-          test_completato: false,
-        })
-        .select()
-        .single();
-
-      if (candidatoError) throw candidatoError;
-
-      // 3. Update profile
-      if (authData.user) {
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .update({
-            ruolo: 'candidato',
+            email: data.email || null,
+            eta: data.eta || null,
+            telefono: data.telefono || null,
+            ruolo_attuale: data.ruolo_attuale || null,
+            funzione: data.funzione || null,
             azienda_id: aziendaId,
-            nome: data.nome,
-            cognome: data.cognome,
-            email: data.email,
-          })
-          .eq('user_id', authData.user.id);
+          }),
+        }
+      );
 
-        if (profileError) throw profileError;
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'Errore nella creazione del candidato');
       }
 
-      return { candidato, email: data.email, password };
+      return result;
     },
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['candidati'] });
       setIsDialogOpen(false);
       resetForm();
       setGeneratedCredentials({
-        email: result.email,
+        username: result.username,
         password: result.password,
         nome: result.candidato.nome,
         cognome: result.candidato.cognome,
@@ -309,14 +274,17 @@ export default function Candidati() {
                         </div>
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="email">Email *</Label>
+                        <Label htmlFor="email">Email (opzionale)</Label>
                         <Input
                           id="email"
                           type="email"
                           value={formData.email}
                           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                          required
+                          placeholder="email@esempio.it"
                         />
+                        <p className="text-xs text-muted-foreground">
+                          Se lasciata vuota, verrà generato un username
+                        </p>
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
@@ -473,15 +441,15 @@ export default function Candidati() {
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label>Email</Label>
+                <Label>Username</Label>
                 <div className="flex gap-2">
-                  <Input value={generatedCredentials?.email || ''} readOnly />
+                  <Input value={generatedCredentials?.username || ''} readOnly />
                   <Button
                     variant="outline"
                     size="icon"
-                    onClick={() => copyToClipboard(generatedCredentials?.email || '', 'cred-email')}
+                    onClick={() => copyToClipboard(generatedCredentials?.username || '', 'cred-username')}
                   >
-                    {copiedId === 'cred-email' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                    {copiedId === 'cred-username' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                   </Button>
                 </div>
               </div>
@@ -516,7 +484,7 @@ export default function Candidati() {
               <Button 
                 variant="outline"
                 onClick={() => {
-                  const text = `Credenziali per il test Talent Profile:\n\nEmail: ${generatedCredentials?.email}\nPassword: ${generatedCredentials?.password}\nLink: ${window.location.origin}/auth`;
+                  const text = `Credenziali per il test Talent Profile:\n\nUsername: ${generatedCredentials?.username}\nPassword: ${generatedCredentials?.password}\nLink: ${window.location.origin}/auth`;
                   copyToClipboard(text, 'cred-all');
                 }}
               >

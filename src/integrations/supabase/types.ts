@@ -70,6 +70,7 @@ export type Database = {
           test_link_token: string | null
           updated_at: string | null
           user_id: string | null
+          username: string | null
         }
         Insert: {
           azienda_id: string
@@ -87,6 +88,7 @@ export type Database = {
           test_link_token?: string | null
           updated_at?: string | null
           user_id?: string | null
+          username?: string | null
         }
         Update: {
           azienda_id?: string
@@ -104,6 +106,7 @@ export type Database = {
           test_link_token?: string | null
           updated_at?: string | null
           user_id?: string | null
+          username?: string | null
         }
         Relationships: [
           {
