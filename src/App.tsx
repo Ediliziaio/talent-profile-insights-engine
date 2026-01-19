@@ -8,6 +8,7 @@ import Dashboard from "./pages/Dashboard";
 import Auth from "./pages/Auth";
 import Aziende from "./pages/Aziende";
 import Candidati from "./pages/Candidati";
+import CandidatoDettaglio from "./pages/CandidatoDettaglio";
 import Risultati from "./pages/Risultati";
 import RisultatoDettaglio from "./pages/RisultatoDettaglio";
 import ConsensoPrivacy from "./pages/ConsensoPrivacy";
@@ -49,6 +50,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/aziende" element={<Aziende />} />
             <Route path="/candidati" element={<Candidati />} />
+            <Route path="/candidati/:id" element={<CandidatoDettaglio />} />
             <Route path="/risultati" element={<Risultati />} />
             <Route path="/risultati/:id" element={<RisultatoDettaglio />} />
             <Route path="/test/anagrafica" element={<FormAnagrafico />} />
