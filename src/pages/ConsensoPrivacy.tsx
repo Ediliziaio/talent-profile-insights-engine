@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Brain, Shield, Lock, FileText } from 'lucide-react';
+import { Brain, Shield, Lock, FileText, Lightbulb, Clock, Target, Heart, CheckCircle } from 'lucide-react';
 
 export default function ConsensoPrivacy() {
   const { profile, loading } = useAuth();
@@ -40,11 +40,65 @@ export default function ConsensoPrivacy() {
           </div>
           <CardTitle className="text-2xl">Talent Profile Assessment</CardTitle>
           <CardDescription>
-            Benvenuto/a, {profile?.nome || 'Candidato'}! Prima di iniziare il test, leggi e accetta l'informativa sulla privacy.
+            Benvenuto/a, {profile?.nome || 'Candidato'}! Prima di iniziare, leggi attentamente le linee guida e l'informativa sulla privacy.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="flex gap-4 text-sm text-muted-foreground">
+          {/* Psychological Guidelines */}
+          <Card className="border-accent/30 bg-accent/5">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center gap-2 text-accent">
+                <Lightbulb className="h-5 w-5" />
+                Linee Guida per il Candidato
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-3">
+                <div className="flex items-start gap-3">
+                  <div className="p-1.5 rounded-full bg-primary/10 mt-0.5">
+                    <Clock className="h-4 w-4 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm">Questo sistema di analisi non è a tempo</p>
+                    <p className="text-xs text-muted-foreground">Prenditi tutto il tempo necessario per riflettere su ogni domanda.</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="p-1.5 rounded-full bg-primary/10 mt-0.5">
+                    <Target className="h-4 w-4 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm">L'obiettivo è trovare spunti di riflessione e crescita personale</p>
+                    <p className="text-xs text-muted-foreground">Non esistono risposte giuste o sbagliate, solo quelle che ti rappresentano.</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="p-1.5 rounded-full bg-primary/10 mt-0.5">
+                    <CheckCircle className="h-4 w-4 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm">Comprendi bene il senso della domanda prima di rispondere</p>
+                    <p className="text-xs text-muted-foreground">Leggi attentamente ogni quesito e le opzioni di risposta disponibili.</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="p-1.5 rounded-full bg-accent/20 mt-0.5">
+                    <Heart className="h-4 w-4 text-accent" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm text-accent">Descrivi come SEI realmente, non come vorresti essere</p>
+                    <p className="text-xs text-muted-foreground">L'autenticità delle risposte garantisce un profilo accurato e utile per te.</p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Security badges */}
+          <div className="flex gap-4 text-sm text-muted-foreground justify-center">
             <div className="flex items-center gap-2">
               <Shield className="h-4 w-4" />
               <span>Dati protetti</span>
@@ -59,7 +113,7 @@ export default function ConsensoPrivacy() {
             </div>
           </div>
 
-          <ScrollArea className="h-64 rounded-md border p-4">
+          <ScrollArea className="h-48 rounded-md border p-4">
             <div className="space-y-4 text-sm">
               <h3 className="font-semibold text-base">Informativa sul Trattamento dei Dati Personali</h3>
               
@@ -126,7 +180,7 @@ export default function ConsensoPrivacy() {
               htmlFor="privacy"
               className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
             >
-              Dichiaro di aver letto e compreso l'informativa sulla privacy e acconsento al trattamento 
+              Dichiaro di aver letto e compreso le linee guida e l'informativa sulla privacy, e acconsento al trattamento 
               dei miei dati personali per le finalità indicate.
             </label>
           </div>
@@ -136,6 +190,7 @@ export default function ConsensoPrivacy() {
             size="lg" 
             onClick={handleContinue} 
             disabled={!accepted}
+            className="bg-accent hover:bg-accent/90"
           >
             Accetto e Proseguo
           </Button>

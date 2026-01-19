@@ -32,6 +32,7 @@ export interface Candidato {
   cognome: string;
   nome: string;
   eta: number | null;
+  sesso: string | null;
   email: string | null;
   telefono: string | null;
   ruolo_attuale: string | null;
@@ -39,6 +40,17 @@ export interface Candidato {
   data_test: string | null;
   test_completato: boolean;
   test_link_token: string | null;
+  username: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AccessoAzienda {
+  id: string;
+  azienda_id: string;
+  username: string;
+  password_plain: string;
+  attivo: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -105,6 +117,14 @@ export const SCALE_LABELS: Record<ScalaCode, string> = {
   LE: 'Leadership'
 };
 
+// Ruoli candidato per il form anagrafico
+export const RUOLI_CANDIDATO = [
+  'Intermedio',
+  'Operativo',
+  'Candidato'
+];
+
+// Ruoli aziendali completi
 export const RUOLI_AZIENDALI = [
   'Top Management',
   'Intermedio',
@@ -112,16 +132,15 @@ export const RUOLI_AZIENDALI = [
   'Candidato'
 ];
 
+// Funzioni aziendali aggiornate
 export const FUNZIONI = [
-  'Direzione',
-  'HR',
-  'Marketing',
-  'Vendite',
-  'Amministrazione',
+  'Direzione generale',
+  'Ufficio risorse umane',
+  'Ufficio marketing',
+  'Ufficio vendite',
+  'Ufficio tecnico',
+  'Ufficio acquisti',
   'Produzione',
-  'IT',
   'Logistica',
-  'Customer Care',
-  'R&D',
-  'Altro'
+  'Amministrazione'
 ];

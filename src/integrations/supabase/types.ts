@@ -14,6 +14,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      accessi_azienda: {
+        Row: {
+          attivo: boolean | null
+          azienda_id: string
+          created_at: string | null
+          id: string
+          password_hash: string
+          password_plain: string
+          updated_at: string | null
+          username: string
+        }
+        Insert: {
+          attivo?: boolean | null
+          azienda_id: string
+          created_at?: string | null
+          id?: string
+          password_hash: string
+          password_plain: string
+          updated_at?: string | null
+          username: string
+        }
+        Update: {
+          attivo?: boolean | null
+          azienda_id?: string
+          created_at?: string | null
+          id?: string
+          password_hash?: string
+          password_plain?: string
+          updated_at?: string | null
+          username?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accessi_azienda_azienda_id_fkey"
+            columns: ["azienda_id"]
+            isOneToOne: true
+            referencedRelation: "aziende"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       aziende: {
         Row: {
           attiva: boolean | null
@@ -65,6 +106,7 @@ export type Database = {
           id: string
           nome: string
           ruolo_attuale: string | null
+          sesso: string | null
           telefono: string | null
           test_completato: boolean | null
           test_link_token: string | null
@@ -83,6 +125,7 @@ export type Database = {
           id?: string
           nome: string
           ruolo_attuale?: string | null
+          sesso?: string | null
           telefono?: string | null
           test_completato?: boolean | null
           test_link_token?: string | null
@@ -101,6 +144,7 @@ export type Database = {
           id?: string
           nome?: string
           ruolo_attuale?: string | null
+          sesso?: string | null
           telefono?: string | null
           test_completato?: boolean | null
           test_link_token?: string | null

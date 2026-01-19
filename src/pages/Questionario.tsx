@@ -4,15 +4,14 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { DOMANDE } from '@/data/questionario';
 import { calcolaProfilo, RispostaInput } from '@/lib/scoring';
-import { Brain, ChevronLeft, ChevronRight, Send, Loader2 } from 'lucide-react';
+import { Brain, ChevronLeft, ChevronRight, Send, Loader2, Check } from 'lucide-react';
 import { Candidato } from '@/types/database';
+import { cn } from '@/lib/utils';
 
 const QUESTIONS_PER_PAGE = 5;
 
@@ -66,7 +65,6 @@ export default function Questionario() {
     mutationFn: async ({ domandaId, valore }: { domandaId: number; valore: 'A' | 'B' | 'C' }) => {
       if (!candidato) throw new Error('Candidato non trovato');
 
-      // Upsert the answer
       const { error } = await supabase
         .from('risposte')
         .upsert({
@@ -91,7 +89,7 @@ export default function Questionario() {
   const isLastPage = currentPage === totalPages - 1;
   const allAnswered = Object.keys(risposte).length === DOMANDE.length;
 
-  // Only candidato role can access this page - check AFTER all hooks
+  // Only candidato role can access this page
   if (!authLoading && profile?.ruolo !== 'candidato') {
     return <Navigate to="/" replace />;
   }
@@ -101,14 +99,12 @@ export default function Questionario() {
 
     setIsSubmitting(true);
     try {
-      // Calculate profile
       const risposteArray: RispostaInput[] = Object.entries(risposte).map(([id, valore]) => ({
         domanda_id: parseInt(id),
         valore,
       }));
       const profilo = calcolaProfilo(risposteArray);
 
-      // Save risultati for each scale
       const risultatiData = Object.entries(profilo.scale_punteggi).map(([scala, punteggio]) => ({
         candidato_id: candidato.id,
         scala,
@@ -122,7 +118,6 @@ export default function Questionario() {
 
       if (risultatiError) throw risultatiError;
 
-      // Save profilo_candidato
       const { error: profiloError } = await supabase
         .from('profili_candidato')
         .insert({
@@ -140,7 +135,6 @@ export default function Questionario() {
 
       if (profiloError) throw profiloError;
 
-      // Update candidato
       const { error: updateError } = await supabase
         .from('candidati')
         .update({
@@ -157,10 +151,11 @@ export default function Questionario() {
       });
 
       navigate('/test/completato');
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Si è verificato un errore durante l\'invio';
       toast({
         title: 'Errore',
-        description: error.message || 'Si è verificato un errore durante l\'invio',
+        description: message,
         variant: 'destructive',
       });
     } finally {
@@ -180,12 +175,14 @@ export default function Questionario() {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
         <Card className="max-w-md">
-          <CardHeader>
-            <CardTitle>Errore</CardTitle>
-            <CardDescription>
-              Non è stato possibile trovare il tuo profilo candidato. Contatta l'amministratore.
-            </CardDescription>
-          </CardHeader>
+          <CardContent className="pt-6">
+            <div className="text-center space-y-2">
+              <h2 className="text-xl font-semibold">Errore</h2>
+              <p className="text-muted-foreground">
+                Non è stato possibile trovare il tuo profilo candidato. Contatta l'amministratore.
+              </p>
+            </div>
+          </CardContent>
         </Card>
       </div>
     );
@@ -198,64 +195,122 @@ export default function Questionario() {
 
   return (
     <div className="min-h-screen bg-background py-6 px-4">
-      <div className="max-w-2xl mx-auto space-y-6">
+      <div className="max-w-5xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-primary rounded-lg">
-            <Brain className="h-6 w-6 text-primary-foreground" />
+        <div className="flex items-center gap-3 bg-primary text-primary-foreground rounded-lg p-4">
+          <div className="p-2 bg-white/20 rounded-lg">
+            <Brain className="h-6 w-6" />
           </div>
-          <div>
+          <div className="flex-1">
             <h1 className="font-bold text-lg">Talent Profile Assessment</h1>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm opacity-90">
               Domanda {startIndex + 1}-{Math.min(startIndex + QUESTIONS_PER_PAGE, DOMANDE.length)} di {DOMANDE.length}
             </p>
+          </div>
+          <div className="text-right">
+            <span className="text-2xl font-bold">{Math.round(progress)}%</span>
           </div>
         </div>
 
         {/* Progress */}
-        <div className="space-y-2">
-          <div className="flex justify-between text-sm">
-            <span>Progresso</span>
-            <span className="font-medium">{Math.round(progress)}%</span>
-          </div>
-          <Progress value={progress} className="h-2" />
+        <div className="h-3 bg-muted rounded-full overflow-hidden">
+          <div 
+            className="h-full progress-gradient transition-all duration-300" 
+            style={{ width: `${progress}%` }}
+          />
         </div>
 
-        {/* Questions */}
+        {/* Questions - 4 Column Grid */}
         <div className="space-y-4">
           {currentQuestions.map((domanda, idx) => (
-            <Card key={domanda.id} className={risposte[domanda.id] ? 'border-primary/30' : ''}>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base font-medium flex gap-2">
-                  <span className="text-muted-foreground">{startIndex + idx + 1}.</span>
-                  {domanda.testo}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <RadioGroup
-                  value={risposte[domanda.id] || ''}
-                  onValueChange={(value) => handleAnswer(domanda.id, value as 'A' | 'B' | 'C')}
-                  className="space-y-3"
-                >
-                  <div className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-accent/50 cursor-pointer">
-                    <RadioGroupItem value="A" id={`${domanda.id}-A`} />
-                    <Label htmlFor={`${domanda.id}-A`} className="flex-1 cursor-pointer">
-                      <span className="font-medium">A.</span> Sì, sempre / Decisamente sì
-                    </Label>
+            <Card key={domanda.id} className={cn(
+              "transition-all duration-200",
+              risposte[domanda.id] ? "border-accent/50 shadow-md" : ""
+            )}>
+              <CardContent className="p-4">
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-center">
+                  {/* Column 1: Question */}
+                  <div className="lg:col-span-1">
+                    <div className="flex gap-2 items-start">
+                      <span className="text-muted-foreground font-medium min-w-[2rem]">
+                        {startIndex + idx + 1}.
+                      </span>
+                      <p className="font-medium text-sm leading-relaxed">{domanda.testo}</p>
+                    </div>
                   </div>
-                  <div className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-accent/50 cursor-pointer">
-                    <RadioGroupItem value="B" id={`${domanda.id}-B`} />
-                    <Label htmlFor={`${domanda.id}-B`} className="flex-1 cursor-pointer">
-                      <span className="font-medium">B.</span> Incerto, a volte / Dipende
-                    </Label>
+
+                  {/* Columns 2-4: Answer Buttons */}
+                  <div className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {/* Answer A */}
+                    <button
+                      onClick={() => handleAnswer(domanda.id, 'A')}
+                      className={cn(
+                        "answer-button p-4 rounded-lg border-2 text-left transition-all",
+                        "hover:border-accent/50 hover:bg-accent/5",
+                        "min-h-[60px] flex items-center gap-3",
+                        risposte[domanda.id] === 'A'
+                          ? "answer-button-selected border-accent bg-accent text-accent-foreground"
+                          : "border-border bg-card"
+                      )}
+                    >
+                      <div className={cn(
+                        "w-8 h-8 rounded-full flex items-center justify-center shrink-0 font-bold text-sm",
+                        risposte[domanda.id] === 'A' 
+                          ? "bg-white/20" 
+                          : "bg-primary/10 text-primary"
+                      )}>
+                        {risposte[domanda.id] === 'A' ? <Check className="h-4 w-4" /> : 'A'}
+                      </div>
+                      <span className="text-sm font-medium">Sì, sempre</span>
+                    </button>
+
+                    {/* Answer B */}
+                    <button
+                      onClick={() => handleAnswer(domanda.id, 'B')}
+                      className={cn(
+                        "answer-button p-4 rounded-lg border-2 text-left transition-all",
+                        "hover:border-accent/50 hover:bg-accent/5",
+                        "min-h-[60px] flex items-center gap-3",
+                        risposte[domanda.id] === 'B'
+                          ? "answer-button-selected border-accent bg-accent text-accent-foreground"
+                          : "border-border bg-card"
+                      )}
+                    >
+                      <div className={cn(
+                        "w-8 h-8 rounded-full flex items-center justify-center shrink-0 font-bold text-sm",
+                        risposte[domanda.id] === 'B' 
+                          ? "bg-white/20" 
+                          : "bg-primary/10 text-primary"
+                      )}>
+                        {risposte[domanda.id] === 'B' ? <Check className="h-4 w-4" /> : 'B'}
+                      </div>
+                      <span className="text-sm font-medium">A volte</span>
+                    </button>
+
+                    {/* Answer C */}
+                    <button
+                      onClick={() => handleAnswer(domanda.id, 'C')}
+                      className={cn(
+                        "answer-button p-4 rounded-lg border-2 text-left transition-all",
+                        "hover:border-accent/50 hover:bg-accent/5",
+                        "min-h-[60px] flex items-center gap-3",
+                        risposte[domanda.id] === 'C'
+                          ? "answer-button-selected border-accent bg-accent text-accent-foreground"
+                          : "border-border bg-card"
+                      )}
+                    >
+                      <div className={cn(
+                        "w-8 h-8 rounded-full flex items-center justify-center shrink-0 font-bold text-sm",
+                        risposte[domanda.id] === 'C' 
+                          ? "bg-white/20" 
+                          : "bg-primary/10 text-primary"
+                      )}>
+                        {risposte[domanda.id] === 'C' ? <Check className="h-4 w-4" /> : 'C'}
+                      </div>
+                      <span className="text-sm font-medium">No, mai</span>
+                    </button>
                   </div>
-                  <div className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-accent/50 cursor-pointer">
-                    <RadioGroupItem value="C" id={`${domanda.id}-C`} />
-                    <Label htmlFor={`${domanda.id}-C`} className="flex-1 cursor-pointer">
-                      <span className="font-medium">C.</span> No, più no che sì / Mai
-                    </Label>
-                  </div>
-                </RadioGroup>
+                </div>
               </CardContent>
             </Card>
           ))}
@@ -265,6 +320,7 @@ export default function Questionario() {
         <div className="flex justify-between pt-4">
           <Button
             variant="outline"
+            size="lg"
             onClick={() => setCurrentPage((p) => p - 1)}
             disabled={currentPage === 0}
           >
@@ -273,7 +329,7 @@ export default function Questionario() {
           </Button>
 
           {isLastPage && allAnswered ? (
-            <Button onClick={handleSubmit} disabled={isSubmitting}>
+            <Button size="lg" onClick={handleSubmit} disabled={isSubmitting} className="bg-accent hover:bg-accent/90">
               {isSubmitting ? (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
               ) : (
@@ -283,6 +339,7 @@ export default function Questionario() {
             </Button>
           ) : (
             <Button
+              size="lg"
               onClick={() => setCurrentPage((p) => p + 1)}
               disabled={!canGoNext}
             >

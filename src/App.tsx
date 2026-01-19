@@ -13,6 +13,7 @@ import RisultatoDettaglio from "./pages/RisultatoDettaglio";
 import ConsensoPrivacy from "./pages/ConsensoPrivacy";
 import Questionario from "./pages/Questionario";
 import TestCompletato from "./pages/TestCompletato";
+import FormAnagrafico from "./pages/FormAnagrafico";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -50,6 +51,7 @@ const App = () => (
             <Route path="/candidati" element={<Candidati />} />
             <Route path="/risultati" element={<Risultati />} />
             <Route path="/risultati/:id" element={<RisultatoDettaglio />} />
+            <Route path="/test/anagrafica" element={<FormAnagrafico />} />
             <Route path="/test/privacy" element={<ConsensoPrivacy />} />
             <Route path="/test/questionario" element={<Questionario />} />
             <Route path="/test/completato" element={<TestCompletato />} />
