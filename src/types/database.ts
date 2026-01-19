@@ -100,7 +100,12 @@ export interface ProfiloCandidato {
 
 export type ScalaCode = 'SV' | 'MO' | 'CF' | 'EF' | 'EC' | 'QN' | 'QR' | 'SP' | 'PA' | 'SC' | 'ST' | 'LE';
 
-export type ProfiloTipo = 'EXECUTOR' | 'STRATEGIST' | 'LEADER' | 'IN_TRANSIZIONE';
+// 10 Profili Psicologici basati sul documento Vendita Ibrida
+export type ProfiloTipo = 
+  | 'PRESTIGIO' | 'ORIGINALE' | 'ANALITICO' | 'ESTETA' | 'CONSERVATORE'  // Protagonisti
+  | 'AFFETTO' | 'SICUREZZA' | 'COMODITA' | 'SVAGO' | 'RISPARMIO';        // Appartenenti
+
+export type MacroCategoria = 'PROTAGONISTA' | 'APPARTENENTE';
 
 export const SCALE_LABELS: Record<ScalaCode, string> = {
   SV: 'Stile di Vita',

@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { NotionLayout } from '@/components/NotionLayout';
@@ -103,6 +104,7 @@ export default function Candidati() {
   const { profile } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -1681,10 +1683,7 @@ export default function Candidati() {
                                         variant="default" 
                                         size="sm"
                                         className="h-7 px-2 text-xs"
-                                        onClick={() => {
-                                          setSelectedCandidato(candidato);
-                                          setIsDrawerOpen(true);
-                                        }}
+                                        onClick={() => navigate(`/candidati/${candidato.id}`)}
                                       >
                                         <Eye className="h-3 w-3 mr-1" />
                                         Vedi

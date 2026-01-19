@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { getProfiloTipoLabel, getProfiloTipoDescription } from '@/lib/scoring';
 import { ProfiloTipo } from '@/types/database';
+import { getProfiloDescription, getMacrocategoria } from '@/lib/profiloDescriptions';
 import { AlertTriangle, TrendingUp, TrendingDown, Activity } from 'lucide-react';
 
 interface ProfiloCardProps {
@@ -26,13 +27,11 @@ export function ProfiloCard({
   out_points,
   strength_points,
 }: ProfiloCardProps) {
-  const getBadgeVariant = (tipo: ProfiloTipo) => {
-    switch (tipo) {
-      case 'LEADER': return 'default';
-      case 'STRATEGIST': return 'secondary';
-      case 'EXECUTOR': return 'outline';
-      case 'IN_TRANSIZIONE': return 'destructive';
-    }
+  const profiloInfo = getProfiloDescription(profilo_tipo);
+  const macrocategoria = getMacrocategoria(profilo_tipo);
+  
+  const getBadgeVariant = () => {
+    return macrocategoria === 'PROTAGONISTA' ? 'default' : 'secondary';
   };
 
   return (
@@ -42,7 +41,7 @@ export function ProfiloCard({
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             Profilo Tipo
-            <Badge variant={getBadgeVariant(profilo_tipo)} className="text-sm">
+            <Badge variant={getBadgeVariant()} className="text-sm">
               {getProfiloTipoLabel(profilo_tipo)}
             </Badge>
           </CardTitle>

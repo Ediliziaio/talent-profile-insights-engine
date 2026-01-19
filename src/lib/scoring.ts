@@ -113,43 +113,71 @@ function determinaProfiloTipo(
   leadership: number,
   stressZone: boolean
 ): ProfiloTipo {
-  // LEADER: High across all areas
-  if (
-    leadership > 35 &&
-    Object.values(scale).every(v => v >= 120) &&
-    scale['QR'] >= 140 &&
-    scale['PA'] >= 140
-  ) {
-    return 'LEADER';
+  // Calcoliamo i punteggi medi per le diverse aree
+  const avgResults = (scale['QR'] + scale['SP'] + scale['PA']) / 3;
+  const avgPlanning = (scale['SV'] + scale['MO'] + scale['CF']) / 3;
+  const avgAction = (scale['QN'] + scale['EC'] + scale['EF']) / 3;
+  const schematicita = scale['SC'];
+  
+  // PRESTIGIO: Alto QR + PA alto + cerca esclusività
+  if (scale['QR'] >= 150 && scale['PA'] >= 140 && schematicita >= 120 && avgResults > avgPlanning) {
+    return 'PRESTIGIO';
   }
   
-  // IN_TRANSIZIONE: Mixed pattern with stress
-  if (stressZone || scale['SV'] < 100 && scale['CF'] < 100) {
-    return 'IN_TRANSIZIONE';
+  // ORIGINALE: Alto EC + PA alto + bassa schematicità (innovativo)
+  if (scale['EC'] >= 150 && scale['PA'] >= 130 && schematicita < 100 && scale['MO'] >= 130) {
+    return 'ORIGINALE';
   }
   
-  // STRATEGIST: High Planning, Medium Action
-  if (
-    scale['SV'] > 140 &&
-    scale['MO'] > 140 &&
-    scale['EC'] > 130 &&
-    scale['EF'] < 130 &&
-    scale['SC'] > 130
-  ) {
-    return 'STRATEGIST';
+  // ANALITICO: Alta schematicità + alto EF + metodico
+  if (schematicita >= 150 && scale['EF'] >= 140 && scale['CF'] >= 130) {
+    return 'ANALITICO';
   }
   
-  // EXECUTOR: High Action, Lower Planning
-  if (
-    scale['EC'] > 150 &&
-    scale['EF'] > 150 &&
-    scale['SV'] < 120
-  ) {
-    return 'EXECUTOR';
+  // ESTETA: Alto SP + PA alto + attenzione immagine
+  if (scale['SP'] >= 150 && scale['PA'] >= 140 && scale['QR'] >= 120) {
+    return 'ESTETA';
   }
   
-  // Default to EXECUTOR if no specific match
-  return 'EXECUTOR';
+  // CONSERVATORE: Alto EF + schematicità alta + QR alto (prudente strategico)
+  if (scale['EF'] >= 140 && schematicita >= 130 && scale['QR'] >= 130 && scale['MO'] >= 120) {
+    return 'CONSERVATORE';
+  }
+  
+  // AFFETTO: PA altissimo + MO alto + orientato alle relazioni
+  if (scale['PA'] >= 160 && scale['MO'] >= 140 && scale['CF'] >= 120) {
+    return 'AFFETTO';
+  }
+  
+  // SICUREZZA: SV basso + CF basso (zona stress) - cerca rassicurazioni
+  if (stressZone || (scale['SV'] < 100 && scale['CF'] < 100)) {
+    return 'SICUREZZA';
+  }
+  
+  // COMODITA: EF medio + QN basso + delega (vuole soluzioni semplici)
+  if (scale['QN'] < 100 && scale['EF'] >= 100 && scale['EF'] < 140) {
+    return 'COMODITA';
+  }
+  
+  // SVAGO: SP alto + equilibrio vita-lavoro
+  if (scale['SP'] >= 140 && scale['SV'] >= 120 && avgAction < avgPlanning) {
+    return 'SVAGO';
+  }
+  
+  // RISPARMIO: Tutti i punteggi medio-bassi, orientato al budget
+  const avgAll = (avgResults + avgPlanning + avgAction) / 3;
+  if (avgAll < 110) {
+    return 'RISPARMIO';
+  }
+  
+  // Default: determina in base al pattern dominante
+  if (avgResults > avgPlanning && avgResults > avgAction) {
+    return 'PRESTIGIO'; // Orientato ai risultati
+  } else if (avgPlanning > avgAction) {
+    return 'CONSERVATORE'; // Orientato alla pianificazione
+  } else {
+    return 'ORIGINALE'; // Orientato all'azione/innovazione
+  }
 }
 
 export function getScaleForRadarChart(punteggi: Record<string, number>): ScalaPunteggio[] {
@@ -178,20 +206,32 @@ export function getScoreColorClass(score: number): string {
 
 export function getProfiloTipoLabel(tipo: ProfiloTipo): string {
   const labels: Record<ProfiloTipo, string> = {
-    'EXECUTOR': 'Executor',
-    'STRATEGIST': 'Strategist',
-    'LEADER': 'Leader',
-    'IN_TRANSIZIONE': 'In Transizione'
+    'PRESTIGIO': 'Prestigio',
+    'ORIGINALE': 'Originale',
+    'ANALITICO': 'Analitico',
+    'ESTETA': 'Esteta',
+    'CONSERVATORE': 'Conservatore',
+    'AFFETTO': 'Affetto',
+    'SICUREZZA': 'Sicurezza',
+    'COMODITA': 'Comodità',
+    'SVAGO': 'Svago',
+    'RISPARMIO': 'Risparmio'
   };
   return labels[tipo];
 }
 
 export function getProfiloTipoDescription(tipo: ProfiloTipo): string {
   const descriptions: Record<ProfiloTipo, string> = {
-    'EXECUTOR': 'Persona orientata all\'azione immediata, efficiente nell\'esecuzione. Ruoli ideali: Operations, Produzione, Vendite operative.',
-    'STRATEGIST': 'Persona riflessiva che analizza prima di agire. Eccellente nella pianificazione. Ruoli ideali: Management, Consulenza, R&D.',
-    'LEADER': 'Profilo equilibrato con capacità di visione e di esecuzione. Naturale propensione alla guida. Ruoli ideali: Direzione, Project Management.',
-    'IN_TRANSIZIONE': 'Profilo che mostra segnali di difficoltà temporanea. Potenziale presente ma bloccato da fattori contingenti. Richiede approfondimento in colloquio.'
+    'PRESTIGIO': 'Cerca esclusività e status. Vuole sentirsi unico e privilegiato. Ruoli ideali: Direzione, Account Manager VIP, Rappresentanza.',
+    'ORIGINALE': 'Innovativo e pioniere. Vuole essere il primo e anticipare le tendenze. Ruoli ideali: R&D, Product Development, Marketing.',
+    'ANALITICO': 'Razionale e metodico. Basa tutto su dati e logica. Ruoli ideali: Controller, Analista, Quality Assurance.',
+    'ESTETA': 'Attento all\'estetica e all\'immagine. Cerca armonia e design. Ruoli ideali: Marketing, Comunicazione, Customer Experience.',
+    'CONSERVATORE': 'Prudente e strategico. Cerca valore duraturo e sicurezza. Ruoli ideali: Amministrazione, Finanza, Operations.',
+    'AFFETTO': 'Relazionale e empatico. Cerca armonia e approvazione. Ruoli ideali: HR, Customer Care, Team Leader.',
+    'SICUREZZA': 'Cerca stabilità e rassicurazioni. Preferisce procedure chiare. Ruoli ideali: Compliance, Back Office, Controllo Qualità.',
+    'COMODITA': 'Cerca soluzioni semplici e immediate. Delega volentieri. Ruoli ideali: Management, Direzione Commerciale.',
+    'SVAGO': 'Cerca equilibrio vita-lavoro. Valorizza la flessibilità. Ruoli ideali: Consulenza, Ruoli creativi, Marketing.',
+    'RISPARMIO': 'Orientato al costo e al budget. Cerca ottimizzazione. Ruoli ideali: Acquisti, Procurement, Cost Controller.'
   };
   return descriptions[tipo];
 }
