@@ -281,38 +281,40 @@ export default function Dashboard() {
               </Link>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {recentCandidati && recentCandidati.length > 0 ? (
                   recentCandidati.map((candidato: any) => (
-                    <div key={candidato.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+                    <div key={candidato.id} className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-muted/50 transition-colors">
                       <div className="flex items-center gap-4">
-                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                          <span className="text-primary font-semibold">
+                        <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                          <span className="text-primary font-bold text-lg">
                             {candidato.nome?.[0]}{candidato.cognome?.[0]}
                           </span>
                         </div>
                         <div>
-                          <p className="font-medium">{candidato.cognome} {candidato.nome}</p>
+                          <p className="font-semibold">{candidato.cognome} {candidato.nome}</p>
                           <p className="text-sm text-muted-foreground">
                             {candidato.aziende?.nome} • {candidato.funzione || 'N/D'}
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-4">
                         {candidato.analisi?.fit_score && (
-                          <span className="text-sm font-medium">{candidato.analisi.fit_score}%</span>
+                          <div className="text-right">
+                            <p className="text-xl font-bold text-primary">{candidato.analisi.fit_score}%</p>
+                            <p className="text-xs text-muted-foreground">Fit Score</p>
+                          </div>
                         )}
                         {getVerdictBadge(candidato.analisi?.fit_verdict)}
-                        <Link to={`/risultati/${candidato.id}`}>
-                          <Button variant="ghost" size="icon">
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                        </Link>
                       </div>
                     </div>
                   ))
                 ) : (
-                  <p className="text-muted-foreground text-center py-8">Nessun candidato recente</p>
+                  <div className="text-center py-12">
+                    <Users className="h-12 w-12 mx-auto text-muted-foreground/40 mb-3" />
+                    <p className="text-muted-foreground">Nessun candidato recente</p>
+                    <p className="text-sm text-muted-foreground/70">I candidati completati appariranno qui</p>
+                  </div>
                 )}
               </div>
             </CardContent>
@@ -331,16 +333,16 @@ export default function Dashboard() {
               <div className="space-y-4">
                 {topPerformers && topPerformers.length > 0 ? (
                   topPerformers.map((item: any, index: number) => (
-                    <div key={item.id} className="flex items-center gap-3">
-                      <div className={`h-8 w-8 rounded-full flex items-center justify-center font-bold text-sm ${
-                        index === 0 ? 'bg-yellow-100 text-yellow-700' :
-                        index === 1 ? 'bg-gray-100 text-gray-700' :
-                        'bg-orange-100 text-orange-700'
+                    <div key={item.id} className="flex items-center gap-4 p-3 rounded-lg bg-muted/30">
+                      <div className={`h-10 w-10 rounded-full flex items-center justify-center font-bold text-lg ${
+                        index === 0 ? 'bg-yellow-400 text-yellow-900' :
+                        index === 1 ? 'bg-gray-300 text-gray-700' :
+                        'bg-orange-300 text-orange-800'
                       }`}>
                         {index + 1}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium truncate">
+                        <p className="font-semibold truncate">
                           {item.candidati?.cognome} {item.candidati?.nome}
                         </p>
                         <p className="text-xs text-muted-foreground truncate">
@@ -348,12 +350,15 @@ export default function Dashboard() {
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="font-bold text-success">{item.fit_score}%</p>
+                        <p className="text-xl font-bold text-success">{item.fit_score}%</p>
                       </div>
                     </div>
                   ))
                 ) : (
-                  <p className="text-muted-foreground text-center py-4">Nessun dato</p>
+                  <div className="text-center py-8">
+                    <Target className="h-10 w-10 mx-auto text-muted-foreground/40 mb-2" />
+                    <p className="text-muted-foreground text-sm">Nessun dato disponibile</p>
+                  </div>
                 )}
               </div>
             </CardContent>

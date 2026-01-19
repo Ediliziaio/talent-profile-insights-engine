@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { NotionLayout } from '@/components/NotionLayout';
+import { cn } from '@/lib/utils';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { CandidatoDrawer } from '@/components/CandidatoDrawer';
 import { FitIndicator } from '@/components/FitIndicator';
@@ -473,14 +474,30 @@ export default function Candidati() {
     </TableHead>
   );
 
+  // Statistiche rapide
+  const statsTotal = sortedCandidati?.length ?? 0;
+  const statsCompletati = sortedCandidati?.filter(c => c.test_completato).length ?? 0;
+  const statsInAttesa = statsTotal - statsCompletati;
+
   return (
     <ProtectedRoute allowedRoles={['superadmin', 'azienda']}>
       <NotionLayout>
         <div className="space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <h1 className="text-2xl font-bold">Gestione Candidati</h1>
-              <p className="text-muted-foreground">Gestisci candidati, visualizza profili e risultati dei test</p>
+          {/* Header con statistiche rapide */}
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <h1 className="text-3xl font-bold tracking-tight">Gestione Candidati</h1>
+              <div className="flex flex-wrap items-center gap-4 text-sm">
+                <span className="text-muted-foreground">{statsTotal} totali</span>
+                <span className="flex items-center gap-1 text-green-600">
+                  <span className="h-2 w-2 rounded-full bg-green-500" />
+                  {statsCompletati} completati
+                </span>
+                <span className="flex items-center gap-1 text-yellow-600">
+                  <span className="h-2 w-2 rounded-full bg-yellow-500" />
+                  {statsInAttesa} in attesa
+                </span>
+              </div>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               {selectedIds.size > 0 && (
@@ -723,67 +740,79 @@ export default function Candidati() {
             </Card>
           )}
 
-          {/* Filtri Avanzati */}
-          <div className="flex flex-wrap gap-3">
-            <Select value={filterStato} onValueChange={setFilterStato}>
-              <SelectTrigger className="w-[150px]">
-                <SelectValue placeholder="Stato test" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tutti gli stati</SelectItem>
-                <SelectItem value="completato">Completato</SelectItem>
-                <SelectItem value="da_fare">Da fare</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={filterRuolo} onValueChange={setFilterRuolo}>
-              <SelectTrigger className="w-[150px]">
-                <SelectValue placeholder="Ruolo" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tutti i ruoli</SelectItem>
-                {RUOLI_AZIENDALI.map((ruolo) => (
-                  <SelectItem key={ruolo} value={ruolo}>{ruolo}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={filterFunzione} onValueChange={setFilterFunzione}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Funzione" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tutte le funzioni</SelectItem>
-                {FUNZIONI.map((funzione) => (
-                  <SelectItem key={funzione} value={funzione}>{funzione}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={filterFitVerdict} onValueChange={setFilterFitVerdict}>
-              <SelectTrigger className="w-[160px]">
-                <SelectValue placeholder="Fit Verdict" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tutti i Fit</SelectItem>
-                <SelectItem value="IDONEO">Idoneo</SelectItem>
-                <SelectItem value="VALUTARE">Valutare</SelectItem>
-                <SelectItem value="NON_IDONEO">Non Idoneo</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button variant="outline" onClick={exportCSV} disabled={!sortedCandidati || sortedCandidati.length === 0}>
-              <Download className="h-4 w-4 mr-2" />
-              Esporta CSV
-            </Button>
-            {isSuperadmin && (
-              <Button 
-                variant="outline" 
-                onClick={() => seedMutation.mutate()}
-                disabled={seedMutation.isPending}
-                className="border-accent/50 hover:bg-accent/10"
-              >
-                <TestTube2 className={`h-4 w-4 mr-2 ${seedMutation.isPending ? 'animate-pulse' : ''}`} />
-                {seedMutation.isPending ? 'Generazione...' : 'Rigenera Demo'}
-              </Button>
-            )}
-          </div>
+          {/* Filtri Avanzati - Compatti */}
+          <Card className="border-dashed">
+            <CardContent className="py-4">
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                  Filtri:
+                </div>
+                <Select value={filterStato} onValueChange={setFilterStato}>
+                  <SelectTrigger className="w-[140px] h-9">
+                    <SelectValue placeholder="Stato" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tutti gli stati</SelectItem>
+                    <SelectItem value="completato">Completato</SelectItem>
+                    <SelectItem value="da_fare">Da fare</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={filterRuolo} onValueChange={setFilterRuolo}>
+                  <SelectTrigger className="w-[140px] h-9">
+                    <SelectValue placeholder="Ruolo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tutti i ruoli</SelectItem>
+                    {RUOLI_AZIENDALI.map((ruolo) => (
+                      <SelectItem key={ruolo} value={ruolo}>{ruolo}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select value={filterFunzione} onValueChange={setFilterFunzione}>
+                  <SelectTrigger className="w-[160px] h-9">
+                    <SelectValue placeholder="Funzione" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tutte le funzioni</SelectItem>
+                    {FUNZIONI.map((funzione) => (
+                      <SelectItem key={funzione} value={funzione}>{funzione}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select value={filterFitVerdict} onValueChange={setFilterFitVerdict}>
+                  <SelectTrigger className="w-[140px] h-9">
+                    <SelectValue placeholder="Fit" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tutti i Fit</SelectItem>
+                    <SelectItem value="IDONEO">Idoneo</SelectItem>
+                    <SelectItem value="VALUTARE">Valutare</SelectItem>
+                    <SelectItem value="NON_IDONEO">Non Idoneo</SelectItem>
+                  </SelectContent>
+                </Select>
+                
+                <div className="flex-1" />
+                
+                <Button variant="outline" size="sm" onClick={exportCSV} disabled={!sortedCandidati || sortedCandidati.length === 0}>
+                  <Download className="h-4 w-4 mr-2" />
+                  CSV
+                </Button>
+                {isSuperadmin && (
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => seedMutation.mutate()}
+                    disabled={seedMutation.isPending}
+                    className="border-accent/50 hover:bg-accent/10"
+                  >
+                    <TestTube2 className={`h-4 w-4 mr-2 ${seedMutation.isPending ? 'animate-pulse' : ''}`} />
+                    Demo
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
 
           <Card>
             <CardContent className="p-0">
@@ -819,10 +848,14 @@ export default function Candidati() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {sortedCandidati.map((candidato) => (
+                      {sortedCandidati.map((candidato, index) => (
                         <TableRow 
                           key={candidato.id}
-                          className={selectedIds.has(candidato.id) ? 'bg-muted/50' : ''}
+                          className={cn(
+                            "transition-colors",
+                            selectedIds.has(candidato.id) ? 'bg-primary/10' : index % 2 === 0 ? 'bg-muted/20' : '',
+                            "hover:bg-muted/50"
+                          )}
                         >
                           <TableCell>
                             <Checkbox 
@@ -831,20 +864,30 @@ export default function Candidati() {
                             />
                           </TableCell>
                           <TableCell className="font-medium">
-                            <div className="flex items-center gap-2">
-                              <User className="h-4 w-4 text-muted-foreground" />
-                              {candidato.cognome} {candidato.nome}
+                            <div className="flex items-center gap-3">
+                              <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-sm">
+                                {candidato.nome?.[0]}{candidato.cognome?.[0]}
+                              </div>
+                              <div>
+                                <p className="font-medium">{candidato.cognome} {candidato.nome}</p>
+                                {candidato.email && (
+                                  <p className="text-xs text-muted-foreground">{candidato.email}</p>
+                                )}
+                              </div>
                             </div>
                           </TableCell>
                           {isSuperadmin && (
-                            <TableCell>{candidato.aziende?.nome || '-'}</TableCell>
+                            <TableCell className="text-sm">{candidato.aziende?.nome || '-'}</TableCell>
                           )}
-                          <TableCell>{candidato.sesso || '-'}</TableCell>
-                          <TableCell>{candidato.eta || '-'}</TableCell>
+                          <TableCell className="text-center">{candidato.sesso || '-'}</TableCell>
+                          <TableCell className="text-center">{candidato.eta || '-'}</TableCell>
                           <TableCell>{candidato.ruolo_attuale || '-'}</TableCell>
                           <TableCell className="max-w-[150px] truncate">{candidato.funzione || '-'}</TableCell>
                           <TableCell>
-                            <Badge variant={candidato.test_completato ? 'default' : 'secondary'}>
+                            <Badge 
+                              variant={candidato.test_completato ? 'default' : 'secondary'}
+                              className={candidato.test_completato ? 'bg-green-100 text-green-700 hover:bg-green-100' : ''}
+                            >
                               {candidato.test_completato ? 'Completato' : 'Da fare'}
                             </Badge>
                           </TableCell>
@@ -859,30 +902,33 @@ export default function Candidati() {
                           </TableCell>
                           <TableCell>
                             {Array.isArray(candidato.analisi_candidato) && candidato.analisi_candidato[0]?.fit_score != null ? (
-                              <FitIndicator 
-                                score={candidato.analisi_candidato[0].fit_score} 
-                                verdict={candidato.analisi_candidato[0].fit_verdict || undefined}
-                                size="sm"
-                              />
+                              <div className={cn(
+                                "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-sm font-bold",
+                                candidato.analisi_candidato[0].fit_score >= 65 ? "bg-green-100 text-green-700" :
+                                candidato.analisi_candidato[0].fit_score >= 40 ? "bg-yellow-100 text-yellow-700" :
+                                "bg-red-100 text-red-700"
+                              )}>
+                                {candidato.analisi_candidato[0].fit_score}%
+                              </div>
                             ) : (
                               <span className="text-muted-foreground">-</span>
                             )}
                           </TableCell>
-                          <TableCell>
+                          <TableCell className="text-center">
                             {candidato.profili_candidato?.leadership_pct != null ? (
                               <span className="font-medium">{candidato.profili_candidato.leadership_pct.toFixed(0)}%</span>
                             ) : (
                               <span className="text-muted-foreground">-</span>
                             )}
                           </TableCell>
-                          <TableCell>
+                          <TableCell className="text-center">
                             {candidato.profili_candidato?.maturita_pct != null ? (
                               <span className="font-medium">{candidato.profili_candidato.maturita_pct.toFixed(0)}%</span>
                             ) : (
                               <span className="text-muted-foreground">-</span>
                             )}
                           </TableCell>
-                          <TableCell>
+                          <TableCell className="text-center">
                             {candidato.profili_candidato?.potenziale_pct != null ? (
                               <span className="font-medium">{candidato.profili_candidato.potenziale_pct.toFixed(0)}%</span>
                             ) : (
@@ -890,24 +936,29 @@ export default function Candidati() {
                             )}
                           </TableCell>
                           <TableCell className="text-muted-foreground text-sm">
-                            {candidato.data_test 
-                              ? format(new Date(candidato.data_test), 'dd MMM yyyy', { locale: it })
-                              : format(new Date(candidato.created_at), 'dd MMM yyyy', { locale: it })
-                            }
+                            <div className="flex items-center gap-1">
+                              <Calendar className="h-3 w-3" />
+                              {candidato.data_test 
+                                ? format(new Date(candidato.data_test), 'dd MMM yy', { locale: it })
+                                : format(new Date(candidato.created_at), 'dd MMM yy', { locale: it })
+                              }
+                            </div>
                           </TableCell>
                           <TableCell className="text-right">
-                            <div className="flex justify-end gap-2">
+                            <div className="flex justify-end gap-1">
                               {!candidato.test_completato && (
                                 <Button
-                                  variant="outline"
-                                  size="sm"
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8"
                                   onClick={() => copyToClipboard(
                                     `Accedi al test: ${window.location.origin}/auth`,
                                     candidato.id
                                   )}
+                                  title="Copia link test"
                                 >
                                   {copiedId === candidato.id ? (
-                                    <Check className="h-4 w-4" />
+                                    <Check className="h-4 w-4 text-green-600" />
                                   ) : (
                                     <Copy className="h-4 w-4" />
                                   )}
@@ -915,16 +966,17 @@ export default function Candidati() {
                               )}
                               {candidato.test_completato && (
                                 <Button 
-                                  variant="outline" 
-                                  size="sm"
+                                  variant="ghost" 
+                                  size="icon"
+                                  className="h-8 w-8"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     setSelectedCandidato(candidato);
                                     setIsDrawerOpen(true);
                                   }}
+                                  title="Vedi dettaglio"
                                 >
-                                  <Eye className="h-4 w-4 mr-1" />
-                                  Dettaglio
+                                  <Eye className="h-4 w-4" />
                                 </Button>
                               )}
                             </div>
