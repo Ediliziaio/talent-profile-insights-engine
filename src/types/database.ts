@@ -100,12 +100,20 @@ export interface ProfiloCandidato {
 
 export type ScalaCode = 'SV' | 'MO' | 'CF' | 'EF' | 'EC' | 'QN' | 'QR' | 'SP' | 'PA' | 'SC' | 'ST' | 'LE';
 
-// 10 Profili Psicologici basati sul documento Vendita Ibrida
+// 10 Profili Professionali basati sul Manuale di Elaborazione V2
 export type ProfiloTipo = 
-  | 'PRESTIGIO' | 'ORIGINALE' | 'ANALITICO' | 'ESTETA' | 'CONSERVATORE'  // Protagonisti
-  | 'AFFETTO' | 'SICUREZZA' | 'COMODITA' | 'SVAGO' | 'RISPARMIO';        // Appartenenti
+  | 'LEADER_NATURALE'           // Leadership forte, QR>140, PA>130, CF>120, SC 90-140
+  | 'ESECUTORE_AFFIDABILE'      // Efficienza alta, disciplina, SC equilibrata
+  | 'CREATIVO_DESTABILIZZANTE'  // SC<80, alta SP/MO/PA, basso EF
+  | 'TECNICO_SPECIALISTA'       // SC molto alta, alta EF/EC, basso PA
+  | 'COMMERCIALE_NATURALE'      // PA>150, SP>140, MO>130, CF>120
+  | 'AMMINISTRATIVO_METODICO'   // SC alta, EF>140, QN nella norma
+  | 'COLLABORATORE_CRESCITA'    // Punteggi medi con potenziale
+  | 'PROFESSIONISTA_AUTONOMO'   // Alta autonomia, bassi QN, alti EC/EF
+  | 'SUPPORTO_OPERATIVO'        // Preferisce ruoli esecutivi strutturati
+  | 'IN_TRANSIZIONE';           // Stress Zone attiva O >2 scale critiche
 
-export type MacroCategoria = 'PROTAGONISTA' | 'APPARTENENTE';
+export type MacroCategoria = 'ALTA_PERFORMANCE' | 'CRESCITA' | 'ATTENZIONE';
 
 export const SCALE_LABELS: Record<ScalaCode, string> = {
   SV: 'Stile di Vita',
