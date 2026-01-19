@@ -16,7 +16,7 @@ import {
   getStressZoneText,
   getStressZoneSeverityLabel
 } from '@/lib/stressZone';
-import { getScaleTextForRange } from '@/lib/scaleTexts';
+import { getScaleRangeText } from '@/lib/scaleTexts';
 import { generateColloquioQuestions, ColloquioArea } from '@/lib/colloquioQuestions';
 import { cn } from '@/lib/utils';
 import { ScalaCode, SCALE_LABELS } from '@/types/database';
@@ -162,7 +162,7 @@ function ColloquioQuestionCard({ area }: { area: ColloquioArea }) {
 }
 
 function ScaleInterpretationCard({ scala, valore }: { scala: ScalaCode; valore: number }) {
-  const info = getScaleTextForRange(scala, valore);
+  const info = getScaleRangeText(scala, valore);
   
   const getZonaColor = (livello: string) => {
     switch (livello) {
