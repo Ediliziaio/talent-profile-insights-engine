@@ -722,13 +722,13 @@ export default function Candidati() {
               {fromDate ? format(fromDate, "dd/MM/yy", { locale: it }) : "Da"}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
+          <PopoverContent className="w-auto p-0 z-[100] bg-background shadow-lg border" align="start">
             <Calendar
               mode="single"
               selected={fromDate}
               onSelect={onFromChange}
               initialFocus
-              className="p-3 pointer-events-auto"
+              className="p-3 pointer-events-auto bg-background"
             />
           </PopoverContent>
         </Popover>
@@ -746,13 +746,13 @@ export default function Candidati() {
               {toDate ? format(toDate, "dd/MM/yy", { locale: it }) : "A"}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
+          <PopoverContent className="w-auto p-0 z-[100] bg-background shadow-lg border" align="start">
             <Calendar
               mode="single"
               selected={toDate}
               onSelect={onToChange}
               initialFocus
-              className="p-3 pointer-events-auto"
+              className="p-3 pointer-events-auto bg-background"
             />
           </PopoverContent>
         </Popover>
