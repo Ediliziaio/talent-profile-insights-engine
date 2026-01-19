@@ -6,7 +6,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Complete list of 200 questions with scale and polarity (from questionario.ts)
+// Complete list of 200 questions with scale and polarity
 const DOMANDE = [
   { id: 1, scala: 'SV', polarita: '-' },
   { id: 2, scala: 'MO', polarita: '-' },
@@ -210,303 +210,230 @@ const DOMANDE = [
   { id: 200, scala: 'CF', polarita: '-' },
 ];
 
-// Scale codes - main 10 scales
+// Main 10 scales
 const MAIN_SCALES = ['SV', 'MO', 'CF', 'EF', 'EC', 'QN', 'QR', 'SP', 'PA', 'SC'] as const;
 type ScalaCode = typeof MAIN_SCALES[number];
 type ProfiloTipo = 'EXECUTOR' | 'STRATEGIST' | 'LEADER' | 'IN_TRANSIZIONE';
 
-const SCALE_LABELS: Record<ScalaCode, string> = {
-  'SV': 'Stile di Vita',
-  'MO': 'Motivazione',
-  'CF': 'Capacità di Fronteggiare',
-  'EF': 'Efficienza',
-  'EC': 'Efficacia',
-  'QN': 'Quantità Responsabilità',
-  'QR': 'Qualità Responsabilità',
-  'SP': 'Spazio Vitale',
-  'PA': 'Partecipazione',
-  'SC': 'Schematicità'
-};
+// Target scores for each candidate - these define their profile
+interface TargetScores {
+  SV: number;
+  MO: number;
+  CF: number;
+  EF: number;
+  EC: number;
+  QN: number;
+  QR: number;
+  SP: number;
+  PA: number;
+  SC: number;
+}
 
-// Candidate profiles with FIXED deterministic responses for each question
-// Each candidate has a specific response pattern that produces predictable scores
-interface CandidateProfile {
+interface CandidateConfig {
   nome: string;
   cognome: string;
   email: string;
   eta: number;
   sesso: 'M' | 'F';
-  ruolo: string;
+  ruolo_attuale: string;
   funzione: string;
   telefono: string;
+  targetScores: TargetScores;
   expectedProfile: ProfiloTipo;
-  // Fixed responses: map of domanda_id -> 'A' | 'B' | 'C'
-  responses: Record<number, 'A' | 'B' | 'C'>;
 }
 
-// Generate fixed responses for Marco Rossi - IN_TRANSIZIONE profile
-// Low scores on SV, MO, CF to trigger stress zone
-function generateMarcoRossiResponses(): Record<number, 'A' | 'B' | 'C'> {
-  const responses: Record<number, 'A' | 'B' | 'C'> = {};
-  
-  for (const domanda of DOMANDE) {
-    const id = domanda.id;
-    const scala = domanda.scala;
-    const polarita = domanda.polarita;
-    
-    // Skip non-main scales with neutral responses
-    if (!MAIN_SCALES.includes(scala as ScalaCode)) {
-      responses[id] = 'B';
-      continue;
-    }
-    
-    // Marco: very poor on SV, MO, CF (stress zone), poor on most others
-    if (scala === 'SV') {
-      // Target: ~68 - need mostly negative responses
-      // SV has 18 questions: need score = 68, base = 100, delta = -32
-      responses[id] = polarita === '+' ? 'C' : 'A';
-    } else if (scala === 'MO') {
-      // Target: ~55 - very negative
-      responses[id] = polarita === '+' ? 'C' : 'A';
-    } else if (scala === 'CF') {
-      // Target: ~62 - very negative
-      responses[id] = polarita === '+' ? 'C' : 'A';
-    } else if (scala === 'EC') {
-      // Target: ~58 - very negative
-      responses[id] = polarita === '+' ? 'C' : 'A';
-    } else if (scala === 'EF') {
-      // Target: ~82 - slightly negative
-      responses[id] = polarita === '+' ? (id % 3 === 0 ? 'B' : 'C') : (id % 3 === 0 ? 'B' : 'A');
-    } else if (scala === 'QN') {
-      // Target: ~72 - negative
-      responses[id] = polarita === '+' ? 'C' : 'A';
-    } else if (scala === 'QR') {
-      // Target: ~75 - negative
-      responses[id] = polarita === '+' ? 'C' : (id % 2 === 0 ? 'A' : 'B');
-    } else if (scala === 'SP') {
-      // Target: ~95 - neutral
-      responses[id] = 'B';
-    } else if (scala === 'PA') {
-      // Target: ~65 - negative
-      responses[id] = polarita === '+' ? 'C' : 'A';
-    } else if (scala === 'SC') {
-      // Target: ~108 - slightly positive
-      responses[id] = polarita === '+' ? (id % 2 === 0 ? 'A' : 'B') : 'C';
-    }
-  }
-  
-  return responses;
-}
-
-// Generate fixed responses for Luca Bianchi - LEADER profile
-// High scores across all scales
-function generateLucaBianchiResponses(): Record<number, 'A' | 'B' | 'C'> {
-  const responses: Record<number, 'A' | 'B' | 'C'> = {};
-  
-  for (const domanda of DOMANDE) {
-    const id = domanda.id;
-    const scala = domanda.scala;
-    const polarita = domanda.polarita;
-    
-    if (!MAIN_SCALES.includes(scala as ScalaCode)) {
-      responses[id] = 'B';
-      continue;
-    }
-    
-    // Luca: excellent on all scales (LEADER profile)
-    if (scala === 'SV') {
-      // Target: ~172
-      responses[id] = polarita === '+' ? 'A' : 'C';
-    } else if (scala === 'MO') {
-      // Target: ~178
-      responses[id] = polarita === '+' ? 'A' : 'C';
-    } else if (scala === 'CF') {
-      // Target: ~168
-      responses[id] = polarita === '+' ? 'A' : 'C';
-    } else if (scala === 'EC') {
-      // Target: ~175
-      responses[id] = polarita === '+' ? 'A' : 'C';
-    } else if (scala === 'EF') {
-      // Target: ~162
-      responses[id] = polarita === '+' ? 'A' : 'C';
-    } else if (scala === 'QN') {
-      // Target: ~155
-      responses[id] = polarita === '+' ? 'A' : 'C';
-    } else if (scala === 'QR') {
-      // Target: ~170
-      responses[id] = polarita === '+' ? 'A' : 'C';
-    } else if (scala === 'SP') {
-      // Target: ~165
-      responses[id] = polarita === '+' ? 'A' : 'C';
-    } else if (scala === 'PA') {
-      // Target: ~175
-      responses[id] = polarita === '+' ? 'A' : 'C';
-    } else if (scala === 'SC') {
-      // Target: ~138
-      responses[id] = polarita === '+' ? (id % 3 === 0 ? 'B' : 'A') : 'C';
-    }
-  }
-  
-  return responses;
-}
-
-// Generate fixed responses for Paolo Verdi - STRATEGIST profile
-// High on SV, MO, SC; lower on PA, QN
-function generatePaoloVerdiResponses(): Record<number, 'A' | 'B' | 'C'> {
-  const responses: Record<number, 'A' | 'B' | 'C'> = {};
-  
-  for (const domanda of DOMANDE) {
-    const id = domanda.id;
-    const scala = domanda.scala;
-    const polarita = domanda.polarita;
-    
-    if (!MAIN_SCALES.includes(scala as ScalaCode)) {
-      responses[id] = 'B';
-      continue;
-    }
-    
-    // Paolo: analytical strategist
-    if (scala === 'SV') {
-      // Target: ~145
-      responses[id] = polarita === '+' ? (id % 3 === 0 ? 'B' : 'A') : 'C';
-    } else if (scala === 'MO') {
-      // Target: ~142
-      responses[id] = polarita === '+' ? (id % 3 === 0 ? 'B' : 'A') : 'C';
-    } else if (scala === 'CF') {
-      // Target: ~108
-      responses[id] = 'B';
-    } else if (scala === 'EC') {
-      // Target: ~128
-      responses[id] = polarita === '+' ? (id % 2 === 0 ? 'A' : 'B') : (id % 2 === 0 ? 'C' : 'B');
-    } else if (scala === 'EF') {
-      // Target: ~135
-      responses[id] = polarita === '+' ? (id % 2 === 0 ? 'A' : 'B') : 'C';
-    } else if (scala === 'QN') {
-      // Target: ~88 - lower
-      responses[id] = polarita === '+' ? (id % 2 === 0 ? 'C' : 'B') : (id % 2 === 0 ? 'B' : 'A');
-    } else if (scala === 'QR') {
-      // Target: ~118
-      responses[id] = polarita === '+' ? (id % 2 === 0 ? 'A' : 'B') : (id % 2 === 0 ? 'C' : 'B');
-    } else if (scala === 'SP') {
-      // Target: ~112
-      responses[id] = 'B';
-    } else if (scala === 'PA') {
-      // Target: ~92 - lower (introverted)
-      responses[id] = polarita === '+' ? (id % 2 === 0 ? 'B' : 'C') : (id % 2 === 0 ? 'B' : 'A');
-    } else if (scala === 'SC') {
-      // Target: ~178 - very high (analytical)
-      responses[id] = polarita === '+' ? 'A' : 'C';
-    }
-  }
-  
-  return responses;
-}
-
-// Generate fixed responses for Simone Neri - EXECUTOR profile
-// Balanced good scores across all scales
-function generateSimoneNeriResponses(): Record<number, 'A' | 'B' | 'C'> {
-  const responses: Record<number, 'A' | 'B' | 'C'> = {};
-  
-  for (const domanda of DOMANDE) {
-    const id = domanda.id;
-    const scala = domanda.scala;
-    const polarita = domanda.polarita;
-    
-    if (!MAIN_SCALES.includes(scala as ScalaCode)) {
-      responses[id] = 'B';
-      continue;
-    }
-    
-    // Simone: balanced executor
-    if (scala === 'SV') {
-      // Target: ~142
-      responses[id] = polarita === '+' ? (id % 3 === 0 ? 'B' : 'A') : 'C';
-    } else if (scala === 'MO') {
-      // Target: ~138
-      responses[id] = polarita === '+' ? (id % 3 === 0 ? 'B' : 'A') : 'C';
-    } else if (scala === 'CF') {
-      // Target: ~145
-      responses[id] = polarita === '+' ? (id % 3 === 0 ? 'B' : 'A') : 'C';
-    } else if (scala === 'EC') {
-      // Target: ~148
-      responses[id] = polarita === '+' ? (id % 3 === 0 ? 'B' : 'A') : 'C';
-    } else if (scala === 'EF') {
-      // Target: ~155
-      responses[id] = polarita === '+' ? (id % 4 === 0 ? 'B' : 'A') : 'C';
-    } else if (scala === 'QN') {
-      // Target: ~142
-      responses[id] = polarita === '+' ? (id % 3 === 0 ? 'B' : 'A') : 'C';
-    } else if (scala === 'QR') {
-      // Target: ~135
-      responses[id] = polarita === '+' ? (id % 3 === 0 ? 'B' : 'A') : 'C';
-    } else if (scala === 'SP') {
-      // Target: ~140
-      responses[id] = polarita === '+' ? (id % 3 === 0 ? 'B' : 'A') : 'C';
-    } else if (scala === 'PA') {
-      // Target: ~132
-      responses[id] = polarita === '+' ? (id % 3 === 0 ? 'B' : 'A') : 'C';
-    } else if (scala === 'SC') {
-      // Target: ~128
-      responses[id] = polarita === '+' ? (id % 2 === 0 ? 'A' : 'B') : (id % 2 === 0 ? 'C' : 'B');
-    }
-  }
-  
-  return responses;
-}
-
-const CANDIDATE_PROFILES: CandidateProfile[] = [
+// 4 demo candidates with DISTINCT target scores
+const DEMO_CANDIDATES: CandidateConfig[] = [
   {
     nome: 'Marco',
     cognome: 'Rossi',
-    email: 'marco.rossi@demo.test',
-    eta: 28,
+    email: 'marco.rossi@test.com',
+    eta: 27,
     sesso: 'M',
-    ruolo: 'Operativo',
+    ruolo_attuale: 'Candidato',
     funzione: 'Ufficio vendite',
-    telefono: '+39 333 1111111',
+    telefono: '3331112222',
     expectedProfile: 'IN_TRANSIZIONE',
-    responses: generateMarcoRossiResponses()
+    // Low SV and CF trigger stress zone -> IN_TRANSIZIONE
+    targetScores: {
+      SV: 70,
+      MO: 65,
+      CF: 72,
+      EF: 85,
+      EC: 68,
+      QN: 75,
+      QR: 78,
+      SP: 95,
+      PA: 70,
+      SC: 110
+    }
   },
   {
     nome: 'Luca',
     cognome: 'Bianchi',
-    email: 'luca.bianchi@demo.test',
-    eta: 42,
+    email: 'luca.bianchi@test.com',
+    eta: 34,
     sesso: 'M',
-    ruolo: 'Intermedio',
-    funzione: 'Direzione generale',
-    telefono: '+39 333 2222222',
+    ruolo_attuale: 'Candidato',
+    funzione: 'Ufficio vendite',
+    telefono: '3332223333',
     expectedProfile: 'LEADER',
-    responses: generateLucaBianchiResponses()
+    // High scores across all scales -> LEADER
+    targetScores: {
+      SV: 170,
+      MO: 175,
+      CF: 165,
+      EF: 160,
+      EC: 172,
+      QN: 155,
+      QR: 168,
+      SP: 162,
+      PA: 175,
+      SC: 135
+    }
   },
   {
     nome: 'Paolo',
     cognome: 'Verdi',
-    email: 'paolo.verdi@demo.test',
-    eta: 35,
+    email: 'paolo.verdi@test.com',
+    eta: 41,
     sesso: 'M',
-    ruolo: 'Intermedio',
+    ruolo_attuale: 'Candidato',
     funzione: 'Amministrazione',
-    telefono: '+39 333 3333333',
+    telefono: '3333334444',
     expectedProfile: 'STRATEGIST',
-    responses: generatePaoloVerdiResponses()
+    // High SV, MO, SC but lower PA, QN -> STRATEGIST
+    targetScores: {
+      SV: 148,
+      MO: 145,
+      CF: 112,
+      EF: 130,
+      EC: 125,
+      QN: 88,
+      QR: 118,
+      SP: 115,
+      PA: 90,
+      SC: 178
+    }
   },
   {
     nome: 'Simone',
     cognome: 'Neri',
-    email: 'simone.neri@demo.test',
-    eta: 31,
+    email: 'simone.neri@test.com',
+    eta: 30,
     sesso: 'M',
-    ruolo: 'Operativo',
+    ruolo_attuale: 'Candidato',
     funzione: 'Produzione',
-    telefono: '+39 333 4444444',
+    telefono: '3334445555',
     expectedProfile: 'EXECUTOR',
-    responses: generateSimoneNeriResponses()
+    // Balanced good scores, not extreme -> EXECUTOR
+    targetScores: {
+      SV: 138,
+      MO: 135,
+      CF: 142,
+      EF: 152,
+      EC: 148,
+      QN: 140,
+      QR: 132,
+      SP: 138,
+      PA: 128,
+      SC: 125
+    }
   }
 ];
 
+// Count questions per scale
+function countQuestionsPerScale(): Record<ScalaCode, { plus: number; minus: number }> {
+  const counts: Record<string, { plus: number; minus: number }> = {};
+  
+  for (const scala of MAIN_SCALES) {
+    counts[scala] = { plus: 0, minus: 0 };
+  }
+  
+  for (const d of DOMANDE) {
+    if (MAIN_SCALES.includes(d.scala as ScalaCode)) {
+      if (d.polarita === '+') {
+        counts[d.scala].plus++;
+      } else {
+        counts[d.scala].minus++;
+      }
+    }
+  }
+  
+  return counts as Record<ScalaCode, { plus: number; minus: number }>;
+}
+
+// Generate responses to achieve target scores
+function generateResponsesToTarget(targetScores: TargetScores): Record<number, 'A' | 'B' | 'C'> {
+  const responses: Record<number, 'A' | 'B' | 'C'> = {};
+  const scaleCounts = countQuestionsPerScale();
+  
+  // For each scale, calculate how many "positive" answers we need
+  // Base = 100, A on + polarity = +4, C on + polarity = -4
+  // A on - polarity = -4, C on - polarity = +4
+  // B always = 0
+  
+  // Group questions by scale
+  const questionsByScale: Record<string, typeof DOMANDE> = {};
+  for (const scala of MAIN_SCALES) {
+    questionsByScale[scala] = DOMANDE.filter(d => d.scala === scala);
+  }
+  
+  for (const scala of MAIN_SCALES) {
+    const target = targetScores[scala];
+    const delta = target - 100; // How much we need to deviate from base
+    const questions = questionsByScale[scala];
+    
+    if (!questions || questions.length === 0) continue;
+    
+    // Each extreme answer (A or C) contributes ±4 points
+    // We need to distribute answers to reach the target
+    const totalQuestions = questions.length;
+    
+    // Calculate how many "max positive" answers we need
+    // If delta > 0, we need more positive answers
+    // If delta < 0, we need more negative answers
+    
+    // Max possible delta = totalQuestions * 4
+    // So we need (delta / 4) questions answered at max
+    
+    const maxPositiveNeeded = Math.round(delta / 4);
+    const absNeeded = Math.abs(maxPositiveNeeded);
+    
+    // Sort questions to ensure deterministic ordering
+    const sortedQuestions = [...questions].sort((a, b) => a.id - b.id);
+    
+    for (let i = 0; i < sortedQuestions.length; i++) {
+      const q = sortedQuestions[i];
+      
+      if (i < absNeeded) {
+        // This question gets an extreme answer
+        if (delta > 0) {
+          // Need positive: + polarity -> A, - polarity -> C
+          responses[q.id] = q.polarita === '+' ? 'A' : 'C';
+        } else {
+          // Need negative: + polarity -> C, - polarity -> A
+          responses[q.id] = q.polarita === '+' ? 'C' : 'A';
+        }
+      } else {
+        // Neutral answer
+        responses[q.id] = 'B';
+      }
+    }
+  }
+  
+  // Fill in any non-main-scale questions with B
+  for (const d of DOMANDE) {
+    if (!(d.id in responses)) {
+      responses[d.id] = 'B';
+    }
+  }
+  
+  return responses;
+}
+
 // Calculate actual scores from responses
-function calculateScores(responses: Record<number, 'A' | 'B' | 'C'>): Record<ScalaCode, number> {
+function calculateScoresFromResponses(responses: Record<number, 'A' | 'B' | 'C'>): Record<ScalaCode, number> {
   const scores: Record<string, number> = {};
   
   for (const scala of MAIN_SCALES) {
@@ -517,19 +444,21 @@ function calculateScores(responses: Record<number, 'A' | 'B' | 'C'>): Record<Sca
     const scala = domanda.scala;
     if (!MAIN_SCALES.includes(scala as ScalaCode)) continue;
     
-    const valore = responses[domanda.id];
-    if (!valore) continue;
+    const risposta = responses[domanda.id];
+    const polarita = domanda.polarita;
     
-    if (domanda.polarita === '+') {
-      if (valore === 'A') scores[scala] += 10;
-      else if (valore === 'B') scores[scala] += 5;
-    } else {
-      if (valore === 'A') scores[scala] -= 10;
-      else if (valore === 'B') scores[scala] -= 5;
+    let delta = 0;
+    if (risposta === 'A') {
+      delta = polarita === '+' ? 4 : -4;
+    } else if (risposta === 'C') {
+      delta = polarita === '+' ? -4 : 4;
     }
+    // B = 0
+    
+    scores[scala] += delta;
   }
   
-  // Normalize to 0-200 range
+  // Clamp scores to valid range
   for (const scala of MAIN_SCALES) {
     scores[scala] = Math.max(0, Math.min(200, scores[scala]));
   }
@@ -537,40 +466,80 @@ function calculateScores(responses: Record<number, 'A' | 'B' | 'C'>): Record<Sca
   return scores as Record<ScalaCode, number>;
 }
 
-// Determine profile type based on scores
+// Determine profile type from scores
 function determinaProfiloTipo(scores: Record<ScalaCode, number>): ProfiloTipo {
-  const leadership = (scores.QR + scores.SP + scores.PA) / 600 * 100;
-  const stressZone = scores.SV < 100 && scores.CF < 100;
+  const { SV, MO, CF, EC, EF, QN, QR, SP, PA, SC } = scores;
   
-  // IN_TRANSIZIONE: stress zone active
-  if (stressZone) {
+  // Stress zone check: SV < 100 AND CF < 100
+  if (SV < 100 && CF < 100) {
     return 'IN_TRANSIZIONE';
   }
   
-  // LEADER: High across all areas
-  if (
-    leadership > 35 &&
-    Object.values(scores).every(v => v >= 120) &&
-    scores.QR >= 140 &&
-    scores.PA >= 140
-  ) {
+  // Leadership check: high across key scales + high leadership %
+  const leadershipPct = ((EC + EF + QN + QR + SP + PA) / 1200) * 100;
+  const avgMainScores = (SV + MO + CF + EC + EF + QN + QR + SP + PA) / 9;
+  
+  if (avgMainScores >= 150 && leadershipPct >= 70 && QR >= 150 && PA >= 150) {
     return 'LEADER';
   }
   
-  // STRATEGIST: High Planning, analytical (high SC)
-  if (
-    scores.SV > 140 &&
-    scores.MO > 140 &&
-    scores.SC > 150
-  ) {
+  // Strategist check: high SV, MO, SC but lower PA/QN
+  if (SV > 140 && MO > 140 && SC > 150 && (PA < 100 || QN < 100)) {
     return 'STRATEGIST';
   }
   
-  // EXECUTOR: Default
+  // Default to EXECUTOR
   return 'EXECUTOR';
 }
 
+// Calculate percentages
+function calculatePercentages(scores: Record<ScalaCode, number>) {
+  const { SV, MO, CF, EC, EF, QN, QR, SP, PA, SC } = scores;
+  
+  // Leadership % = (EC + EF + QN + QR + SP + PA) / 1200 * 100
+  const leadership = Math.round(((EC + EF + QN + QR + SP + PA) / 1200) * 100);
+  
+  // Maturità % = (SV + MO + CF) / 600 * 100
+  const maturita = Math.round(((SV + MO + CF) / 600) * 100);
+  
+  // Potenziale % = (EC + EF + CF) / 600 * 100
+  const potenziale = Math.round(((EC + EF + CF) / 600) * 100);
+  
+  return { leadership, maturita, potenziale };
+}
+
+// Identify strength points (>160) and out points (<80)
+function identifyPoints(scores: Record<ScalaCode, number>) {
+  const strengthPoints: string[] = [];
+  const outPoints: string[] = [];
+  
+  const labels: Record<ScalaCode, string> = {
+    'SV': 'Stile di Vita',
+    'MO': 'Motivazione',
+    'CF': 'Capacità di Fronteggiare',
+    'EF': 'Efficienza',
+    'EC': 'Efficacia',
+    'QN': 'Quantità Responsabilità',
+    'QR': 'Qualità Responsabilità',
+    'SP': 'Spazio Vitale',
+    'PA': 'Partecipazione',
+    'SC': 'Schematicità'
+  };
+  
+  for (const scala of MAIN_SCALES) {
+    if (scores[scala] > 160) {
+      strengthPoints.push(labels[scala]);
+    }
+    if (scores[scala] < 80) {
+      outPoints.push(labels[scala]);
+    }
+  }
+  
+  return { strengthPoints, outPoints };
+}
+
 serve(async (req) => {
+  // Handle CORS
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -580,26 +549,27 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    
-    // Verify superadmin
+
+    // Get authorization token
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
-      return new Response(JSON.stringify({ error: 'Authorization required' }), {
+      return new Response(JSON.stringify({ error: 'No authorization header' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
-    
+
+    // Verify user
     const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
     
-    if (authError || !user) {
+    if (userError || !user) {
       return new Response(JSON.stringify({ error: 'Invalid token' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
-    
+
     // Check if superadmin
     const { data: profile } = await supabase
       .from('profiles')
@@ -613,192 +583,219 @@ serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
-    
+
     // Get Teknofinestre company
     const { data: azienda, error: aziendaError } = await supabase
       .from('aziende')
       .select('id')
-      .ilike('nome', '%teknofinestre%')
+      .eq('nome', 'Teknofinestre')
       .single();
-    
+
     if (aziendaError || !azienda) {
-      return new Response(JSON.stringify({ error: 'Company Teknofinestre not found. Create it first.' }), {
+      return new Response(JSON.stringify({ error: 'Company Teknofinestre not found' }), {
         status: 404,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
-    
-    const createdCandidates: string[] = [];
-    
-    for (const candidateProfile of CANDIDATE_PROFILES) {
-      console.log(`Processing candidate: ${candidateProfile.nome} ${candidateProfile.cognome}`);
+
+    const results: Array<{
+      candidato: string;
+      email: string;
+      profilo_tipo: ProfiloTipo;
+      leadership_pct: number;
+      maturita_pct: number;
+      potenziale_pct: number;
+      scale_punteggi: Record<ScalaCode, number>;
+      strength_points: string[];
+      out_points: string[];
+      risposte_count: number;
+    }> = [];
+
+    console.log(`Starting seed for ${DEMO_CANDIDATES.length} candidates...`);
+
+    for (const candidate of DEMO_CANDIDATES) {
+      console.log(`\n=== Processing ${candidate.nome} ${candidate.cognome} ===`);
       
-      // Delete existing candidate if exists
-      const { data: existingCandidate } = await supabase
+      // 1. Delete existing data for this email
+      const { data: existingCandidato } = await supabase
         .from('candidati')
         .select('id')
-        .eq('email', candidateProfile.email)
-        .single();
-      
-      if (existingCandidate) {
-        // Delete in order: profile -> risposte -> risultati -> candidate
-        await supabase
-          .from('profili_candidato')
-          .delete()
-          .eq('candidato_id', existingCandidate.id);
+        .eq('email', candidate.email)
+        .maybeSingle();
+
+      if (existingCandidato) {
+        console.log(`Deleting existing candidate ${existingCandidato.id}...`);
         
-        await supabase
-          .from('risposte')
-          .delete()
-          .eq('candidato_id', existingCandidate.id);
+        // Delete in order: profili_candidato -> risultati -> risposte -> candidati
+        await supabase.from('profili_candidato').delete().eq('candidato_id', existingCandidato.id);
+        await supabase.from('risultati').delete().eq('candidato_id', existingCandidato.id);
+        await supabase.from('risposte').delete().eq('candidato_id', existingCandidato.id);
+        await supabase.from('candidati').delete().eq('id', existingCandidato.id);
         
-        await supabase
-          .from('risultati')
-          .delete()
-          .eq('candidato_id', existingCandidate.id);
-        
-        await supabase
-          .from('candidati')
-          .delete()
-          .eq('id', existingCandidate.id);
-        
-        console.log(`Deleted existing candidate: ${candidateProfile.email}`);
+        console.log('Deleted existing data.');
       }
-      
-      // Create candidate
-      const testDate = new Date();
-      testDate.setDate(testDate.getDate() - (CANDIDATE_PROFILES.indexOf(candidateProfile) * 7 + 1));
-      
-      const { data: newCandidate, error: candidateError } = await supabase
+
+      // 2. Create candidate
+      const { data: newCandidato, error: candidatoError } = await supabase
         .from('candidati')
         .insert({
+          nome: candidate.nome,
+          cognome: candidate.cognome,
+          email: candidate.email,
+          eta: candidate.eta,
+          sesso: candidate.sesso,
+          ruolo_attuale: candidate.ruolo_attuale,
+          funzione: candidate.funzione,
+          telefono: candidate.telefono,
           azienda_id: azienda.id,
-          nome: candidateProfile.nome,
-          cognome: candidateProfile.cognome,
-          email: candidateProfile.email,
-          eta: candidateProfile.eta,
-          sesso: candidateProfile.sesso,
-          ruolo: candidateProfile.ruolo,
-          funzione: candidateProfile.funzione,
-          telefono: candidateProfile.telefono,
           test_completato: true,
-          data_test: testDate.toISOString()
+          data_test: new Date().toISOString()
         })
         .select('id')
         .single();
-      
-      if (candidateError || !newCandidate) {
-        console.error(`Error creating candidate ${candidateProfile.email}:`, candidateError);
-        continue;
+
+      if (candidatoError || !newCandidato) {
+        console.error(`Failed to create candidate ${candidate.email}:`, candidatoError);
+        throw new Error(`Failed to create candidate: ${candidatoError?.message}`);
       }
+
+      console.log(`Created candidate with ID: ${newCandidato.id}`);
+
+      // 3. Generate responses based on target scores
+      const responses = generateResponsesToTarget(candidate.targetScores);
       
-      console.log(`Created candidate: ${candidateProfile.nome} ${candidateProfile.cognome} (${newCandidate.id})`);
-      
-      // Insert responses from fixed map
-      const responseRecords = DOMANDE.map(d => ({
-        candidato_id: newCandidate.id,
-        domanda_id: d.id,
-        valore: candidateProfile.responses[d.id] || 'B'
+      // 4. Insert responses
+      const risposteRows = Object.entries(responses).map(([domandaId, valore]) => ({
+        candidato_id: newCandidato.id,
+        domanda_id: parseInt(domandaId),
+        valore: valore
       }));
-      
-      const { error: responsesError } = await supabase
+
+      const { error: risposteError } = await supabase
         .from('risposte')
-        .insert(responseRecords);
-      
-      if (responsesError) {
-        console.error(`Error inserting responses for ${candidateProfile.email}:`, responsesError);
-        continue;
+        .insert(risposteRows);
+
+      if (risposteError) {
+        console.error(`Failed to insert responses:`, risposteError);
+        throw new Error(`Failed to insert responses: ${risposteError.message}`);
       }
-      
-      console.log(`Inserted ${responseRecords.length} responses for ${candidateProfile.nome}`);
-      
-      // Calculate actual scores from generated responses
-      const actualScores = calculateScores(candidateProfile.responses);
-      console.log(`Calculated scores for ${candidateProfile.nome}:`, JSON.stringify(actualScores));
-      
-      // Calculate profile indicators
-      const leadership_pct = ((actualScores.QR + actualScores.SP + actualScores.PA) / 600) * 100;
-      const maturita_pct = ((actualScores.SV + actualScores.MO + actualScores.CF) / 600) * 100;
-      const potenziale_pct = ((actualScores.QN + actualScores.EC + actualScores.EF) / 600) * 100;
-      
-      const stress_zone = actualScores.SV < 100 && actualScores.CF < 100;
-      
-      // Determine profile type
-      const profilo_tipo = determinaProfiloTipo(actualScores);
-      
-      // Calculate out_points and strength_points
-      const out_points: string[] = [];
-      const strength_points: string[] = [];
-      
-      for (const scala of MAIN_SCALES) {
-        if (scala === 'SC') continue;
-        
-        if (actualScores[scala] < 80) {
-          out_points.push(SCALE_LABELS[scala]);
-        }
-        if (actualScores[scala] > 160) {
-          strength_points.push(SCALE_LABELS[scala]);
-        }
+
+      // Verify response count
+      const { count: risposteCount } = await supabase
+        .from('risposte')
+        .select('*', { count: 'exact', head: true })
+        .eq('candidato_id', newCandidato.id);
+
+      console.log(`Inserted ${risposteCount} responses`);
+
+      if (risposteCount !== 200) {
+        throw new Error(`Expected 200 responses, got ${risposteCount}`);
       }
-      
-      console.log(`Profile for ${candidateProfile.nome}: type=${profilo_tipo}, leadership=${leadership_pct.toFixed(1)}%, maturita=${maturita_pct.toFixed(1)}%, potenziale=${potenziale_pct.toFixed(1)}%`);
-      console.log(`  Stress zone: ${stress_zone}`);
-      console.log(`  Out points: ${out_points.join(', ') || 'none'}`);
-      console.log(`  Strength points: ${strength_points.join(', ') || 'none'}`);
-      
-      // Insert risultati (individual scale scores)
-      const risultatiRecords = MAIN_SCALES.map(scala => ({
-        candidato_id: newCandidate.id,
-        scala,
-        punteggio_grezzo: actualScores[scala],
-        punteggio_normalizzato: actualScores[scala]
+
+      // 5. Calculate actual scores from responses
+      const scores = calculateScoresFromResponses(responses);
+      console.log('Calculated scores:', scores);
+
+      // 6. Insert risultati
+      const risultatiRows = MAIN_SCALES.map(scala => ({
+        candidato_id: newCandidato.id,
+        scala: scala,
+        punteggio_grezzo: scores[scala],
+        punteggio_normalizzato: scores[scala]
       }));
-      
+
       const { error: risultatiError } = await supabase
         .from('risultati')
-        .insert(risultatiRecords);
-      
+        .insert(risultatiRows);
+
       if (risultatiError) {
-        console.error(`Error inserting risultati for ${candidateProfile.email}:`, risultatiError);
+        console.error('Failed to insert risultati:', risultatiError);
+        throw new Error(`Failed to insert risultati: ${risultatiError.message}`);
       }
-      
-      // Insert profile
-      const { error: profileError } = await supabase
+
+      console.log('Inserted risultati');
+
+      // 7. Calculate profile data
+      const profiloTipo = determinaProfiloTipo(scores);
+      const percentages = calculatePercentages(scores);
+      const { strengthPoints, outPoints } = identifyPoints(scores);
+      const stressZone = scores.SV < 100 && scores.CF < 100;
+
+      console.log(`Profile type: ${profiloTipo}`);
+      console.log(`Percentages: L=${percentages.leadership}%, M=${percentages.maturita}%, P=${percentages.potenziale}%`);
+      console.log(`Strength points: ${strengthPoints.join(', ') || 'none'}`);
+      console.log(`Out points: ${outPoints.join(', ') || 'none'}`);
+      console.log(`Stress zone: ${stressZone}`);
+
+      // 8. Insert profili_candidato
+      const { error: profiloError } = await supabase
         .from('profili_candidato')
         .insert({
-          candidato_id: newCandidate.id,
-          scale_punteggi: actualScores,
-          leadership_pct: Math.round(leadership_pct * 10) / 10,
-          maturita_pct: Math.round(maturita_pct * 10) / 10,
-          potenziale_pct: Math.round(potenziale_pct * 10) / 10,
-          schematicita: actualScores.SC,
-          stress_zone,
-          profilo_tipo,
-          out_points,
-          strength_points
+          candidato_id: newCandidato.id,
+          profilo_tipo: profiloTipo,
+          leadership_pct: percentages.leadership,
+          maturita_pct: percentages.maturita,
+          potenziale_pct: percentages.potenziale,
+          schematicita: scores.SC,
+          stress_zone: stressZone,
+          strength_points: strengthPoints,
+          out_points: outPoints,
+          scale_punteggi: scores
         });
-      
-      if (profileError) {
-        console.error(`Error inserting profile for ${candidateProfile.email}:`, profileError);
-        continue;
+
+      if (profiloError) {
+        console.error('Failed to insert profilo:', profiloError);
+        throw new Error(`Failed to insert profilo: ${profiloError.message}`);
       }
-      
-      createdCandidates.push(`${candidateProfile.nome} ${candidateProfile.cognome} (${profilo_tipo})`);
-      console.log(`Successfully created complete profile for ${candidateProfile.nome} ${candidateProfile.cognome}`);
+
+      console.log('Inserted profilo_candidato');
+
+      // Verify profile was created with data
+      const { data: verifyProfile } = await supabase
+        .from('profili_candidato')
+        .select('*')
+        .eq('candidato_id', newCandidato.id)
+        .single();
+
+      if (!verifyProfile || Object.keys(verifyProfile.scale_punteggi || {}).length === 0) {
+        throw new Error(`Profile verification failed - scale_punteggi is empty!`);
+      }
+
+      console.log(`✓ Verified profile has ${Object.keys(verifyProfile.scale_punteggi).length} scale scores`);
+
+      results.push({
+        candidato: `${candidate.nome} ${candidate.cognome}`,
+        email: candidate.email,
+        profilo_tipo: profiloTipo,
+        leadership_pct: percentages.leadership,
+        maturita_pct: percentages.maturita,
+        potenziale_pct: percentages.potenziale,
+        scale_punteggi: scores,
+        strength_points: strengthPoints,
+        out_points: outPoints,
+        risposte_count: risposteCount || 0
+      });
     }
-    
+
+    console.log('\n=== SEED COMPLETED SUCCESSFULLY ===');
+    console.log(JSON.stringify(results, null, 2));
+
     return new Response(JSON.stringify({
       success: true,
-      message: `Created ${createdCandidates.length} demo candidates`,
-      candidates: createdCandidates
+      message: `Created ${results.length} demo candidates with distinct profiles`,
+      candidates: results
     }), {
+      status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
-    
+
   } catch (error: unknown) {
-    console.error('Error in seed-demo-candidates:', error);
+    console.error('Seed error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    return new Response(JSON.stringify({ error: errorMessage }), {
+    return new Response(JSON.stringify({ 
+      error: errorMessage,
+      details: error instanceof Error ? error.stack : undefined
+    }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
