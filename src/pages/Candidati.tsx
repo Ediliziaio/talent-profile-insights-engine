@@ -53,12 +53,18 @@ import { getProfiloTipoLabel } from '@/lib/scoring';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 
-type SortField = 'cognome' | 'eta' | 'ruolo_attuale' | 'funzione' | 'created_at' | 'data_test';
+type SortField = 'cognome' | 'eta' | 'ruolo_attuale' | 'funzione' | 'created_at' | 'data_test' | 'fit_score';
 type SortOrder = 'asc' | 'desc';
+
+type AnalisiCandidato = {
+  fit_score: number | null;
+  fit_verdict: string | null;
+};
 
 type CandidatoWithRelations = Candidato & { 
   aziende: { nome: string } | null;
   profili_candidato: ProfiloCandidato | null;
+  analisi_candidato: AnalisiCandidato[] | null;
 };
 
 export default function Candidati() {
@@ -71,6 +77,7 @@ export default function Candidati() {
   const [filterStato, setFilterStato] = useState<string>('all');
   const [filterRuolo, setFilterRuolo] = useState<string>('all');
   const [filterFunzione, setFilterFunzione] = useState<string>('all');
+  const [filterFitVerdict, setFilterFitVerdict] = useState<string>('all');
   const [sortField, setSortField] = useState<SortField>('created_at');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -132,11 +139,11 @@ export default function Candidati() {
   });
 
   const { data: candidati, isLoading } = useQuery({
-    queryKey: ['candidati', filterAzienda, filterStato, filterRuolo, filterFunzione],
+    queryKey: ['candidati', filterAzienda, filterStato, filterRuolo, filterFunzione, filterFitVerdict],
     queryFn: async () => {
       let query = supabase
         .from('candidati')
-        .select('*, aziende(nome), profili_candidato(*)')
+        .select('*, aziende(nome), profili_candidato(*), analisi_candidato(fit_score, fit_verdict)')
         .order('created_at', { ascending: false });
 
       if (filterAzienda && filterAzienda !== 'all') {
@@ -156,10 +163,17 @@ export default function Candidati() {
 
       const { data, error } = await query;
       if (error) throw error;
-      return data as (Candidato & { 
-        aziende: { nome: string } | null;
-        profili_candidato: ProfiloCandidato | null;
-      })[];
+      
+      // Filter by fit verdict if specified
+      let filteredData = (data || []) as unknown as CandidatoWithRelations[];
+      if (filterFitVerdict && filterFitVerdict !== 'all') {
+        filteredData = filteredData.filter(c => {
+          const verdict = Array.isArray(c.analisi_candidato) ? c.analisi_candidato[0]?.fit_verdict : null;
+          return verdict === filterFitVerdict;
+        });
+      }
+      
+      return filteredData;
     },
   });
 
@@ -379,8 +393,16 @@ export default function Candidati() {
   };
 
   const sortedCandidati = candidati ? [...candidati].sort((a, b) => {
-    let aVal: any = a[sortField];
-    let bVal: any = b[sortField];
+    let aVal: any;
+    let bVal: any;
+    
+    if (sortField === 'fit_score') {
+      aVal = Array.isArray(a.analisi_candidato) ? (a.analisi_candidato[0]?.fit_score ?? -1) : -1;
+      bVal = Array.isArray(b.analisi_candidato) ? (b.analisi_candidato[0]?.fit_score ?? -1) : -1;
+    } else {
+      aVal = a[sortField];
+      bVal = b[sortField];
+    }
     
     if (aVal === null || aVal === undefined) aVal = '';
     if (bVal === null || bVal === undefined) bVal = '';
@@ -735,6 +757,17 @@ export default function Candidati() {
                 ))}
               </SelectContent>
             </Select>
+            <Select value={filterFitVerdict} onValueChange={setFilterFitVerdict}>
+              <SelectTrigger className="w-[160px]">
+                <SelectValue placeholder="Fit Verdict" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tutti i Fit</SelectItem>
+                <SelectItem value="IDONEO">Idoneo</SelectItem>
+                <SelectItem value="VALUTARE">Valutare</SelectItem>
+                <SelectItem value="NON_IDONEO">Non Idoneo</SelectItem>
+              </SelectContent>
+            </Select>
             <Button variant="outline" onClick={exportCSV} disabled={!sortedCandidati || sortedCandidati.length === 0}>
               <Download className="h-4 w-4 mr-2" />
               Esporta CSV
@@ -777,6 +810,7 @@ export default function Candidati() {
                         <SortableHeader field="funzione">Funzione</SortableHeader>
                         <TableHead>Stato</TableHead>
                         <TableHead>Profilo</TableHead>
+                        <SortableHeader field="fit_score">Fit Score</SortableHeader>
                         <TableHead>Leadership</TableHead>
                         <TableHead>Maturità</TableHead>
                         <TableHead>Potenziale</TableHead>
@@ -819,6 +853,17 @@ export default function Candidati() {
                               <Badge variant={getBadgeVariant(candidato.profili_candidato.profilo_tipo)}>
                                 {getProfiloTipoLabel(candidato.profili_candidato.profilo_tipo as any)}
                               </Badge>
+                            ) : (
+                              <span className="text-muted-foreground">-</span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {Array.isArray(candidato.analisi_candidato) && candidato.analisi_candidato[0]?.fit_score != null ? (
+                              <FitIndicator 
+                                score={candidato.analisi_candidato[0].fit_score} 
+                                verdict={candidato.analisi_candidato[0].fit_verdict || undefined}
+                                size="sm"
+                              />
                             ) : (
                               <span className="text-muted-foreground">-</span>
                             )}
