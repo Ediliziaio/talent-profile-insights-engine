@@ -136,7 +136,7 @@ export default function Candidati() {
 
   // Mutation per generare/rigenerare credenziali azienda
   const credentialsMutation = useMutation({
-    mutationFn: async (aziendaId: string) => {
+    mutationFn: async ({ aziendaId, regenerate }: { aziendaId: string; regenerate: boolean }) => {
       const { data: sessionData } = await supabase.auth.getSession();
       if (!sessionData.session) throw new Error('Non autenticato');
 
@@ -148,7 +148,10 @@ export default function Candidati() {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${sessionData.session.access_token}`,
           },
-          body: JSON.stringify({ azienda_id: aziendaId }),
+          body: JSON.stringify({ 
+            azienda_id: aziendaId,
+            action: regenerate ? 'regenerate' : 'generate'
+          }),
         }
       );
 
@@ -498,7 +501,7 @@ export default function Candidati() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => credentialsMutation.mutate(currentAziendaId)}
+                    onClick={() => credentialsMutation.mutate({ aziendaId: currentAziendaId, regenerate: !!accessoAzienda })}
                     disabled={credentialsMutation.isPending}
                   >
                     <RefreshCw className={`h-4 w-4 mr-2 ${credentialsMutation.isPending ? 'animate-spin' : ''}`} />
