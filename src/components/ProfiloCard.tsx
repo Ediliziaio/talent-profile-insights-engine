@@ -31,7 +31,7 @@ export function ProfiloCard({
   const macrocategoria = getMacrocategoria(profilo_tipo);
   
   const getBadgeVariant = () => {
-    return macrocategoria === 'PROTAGONISTA' ? 'default' : 'secondary';
+    return macrocategoria === 'ALTA_PERFORMANCE' ? 'default' : 'secondary';
   };
 
   return (

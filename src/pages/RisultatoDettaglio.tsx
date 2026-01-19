@@ -155,7 +155,7 @@ export default function RisultatoDettaglio() {
                 leadership_pct={profilo.leadership_pct || 0}
                 maturita_pct={profilo.maturita_pct || 0}
                 potenziale_pct={profilo.potenziale_pct || 0}
-                profilo_tipo={(profilo.profilo_tipo as ProfiloTipo) || 'CONSERVATORE'}
+                profilo_tipo={(profilo.profilo_tipo as ProfiloTipo) || 'SUPPORTO_OPERATIVO'}
                 stress_zone={profilo.stress_zone || false}
                 schematicita={profilo.schematicita || 100}
                 out_points={outPoints}
