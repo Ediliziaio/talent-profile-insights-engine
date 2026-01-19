@@ -31,6 +31,7 @@ import {
   MACROCATEGORIA_INFO,
   ProfiloDescription 
 } from '@/lib/profiloDescriptions';
+import { calculateStressZoneSeverity } from '@/lib/stressZone';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -145,6 +146,12 @@ export default function CandidatoDettaglio() {
   const stressZone = profilo?.stress_zone || false;
   const schematicita = profilo?.schematicita || 100;
   
+  // Calcolo severità Stress Zone (Manuale V3)
+  const stressZoneSeverity = calculateStressZoneSeverity(
+    scalePunteggi['SV'] || 100,
+    scalePunteggi['CF'] || 100
+  );
+  
   // Usa il profilo dal DB, non ricalcolarlo
   const profiloTipo = (profilo?.profilo_tipo as ProfiloTipo) || null;
   const profiloInfo = getProfiloDescription(profiloTipo);
@@ -167,6 +174,10 @@ export default function CandidatoDettaglio() {
       tempo_onboarding: '',
       probabilita_successo_12m: 0,
     },
+    // Nuovi campi Manuale V3
+    domande_colloquio: (analisi as any).domande_colloquio || [],
+    stress_zone_severity: (analisi as any).stress_zone_severity || undefined,
+    stress_zone_analisi: (analisi as any).stress_zone_analisi || undefined,
   } : null;
 
   return (
@@ -349,8 +360,10 @@ export default function CandidatoDettaglio() {
                 scalePunteggi={scalePunteggi}
                 schematicita={schematicita}
                 stressZone={stressZone}
+                stressZoneSeverity={stressZoneSeverity}
                 outPoints={outPoints}
                 strengthPoints={strengthPoints}
+                profiloTipo={profiloTipo || undefined}
               />
 
               {/* Profilo Psicologico */}
