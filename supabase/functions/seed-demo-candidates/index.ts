@@ -584,6 +584,39 @@ serve(async (req) => {
       });
     }
 
+    // ============ SEED DOMANDE IF EMPTY ============
+    const { count: domandeCount } = await supabase
+      .from('domande')
+      .select('*', { count: 'exact', head: true });
+
+    if (!domandeCount || domandeCount === 0) {
+      console.log('Domande table is empty, seeding 200 questions...');
+      
+      // Create domande with required fields
+      const domandeToInsert = DOMANDE.map((d, index) => ({
+        id: d.id,
+        testo: `Domanda ${d.id}`, // Placeholder text
+        scala_primaria: d.scala,
+        polarita: d.polarita,
+        blocco_tematico: Math.floor(index / 25) + 1,
+        ordine: d.id
+      }));
+
+      const { error: domError } = await supabase
+        .from('domande')
+        .upsert(domandeToInsert, { onConflict: 'id' });
+
+      if (domError) {
+        console.error('Failed to seed domande:', domError);
+        throw new Error(`Failed to seed domande: ${domError.message}`);
+      }
+      
+      console.log('Successfully seeded 200 domande');
+    } else {
+      console.log(`Domande table already has ${domandeCount} entries`);
+    }
+    // ============ END SEED DOMANDE ============
+
     // Get Teknofinestre company
     const { data: azienda, error: aziendaError } = await supabase
       .from('aziende')
