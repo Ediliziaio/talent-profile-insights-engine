@@ -13,7 +13,7 @@ import { Brain, ChevronLeft, ChevronRight, Send, Loader2, Check } from 'lucide-r
 import { Candidato } from '@/types/database';
 import { cn } from '@/lib/utils';
 
-const QUESTIONS_PER_PAGE = 5;
+const QUESTIONS_PER_PAGE = 20;
 
 export default function Questionario() {
   const { user, profile, loading: authLoading } = useAuth();
@@ -25,7 +25,8 @@ export default function Questionario() {
 
   const totalPages = Math.ceil(DOMANDE.length / QUESTIONS_PER_PAGE);
   const startIndex = currentPage * QUESTIONS_PER_PAGE;
-  const currentQuestions = DOMANDE.slice(startIndex, startIndex + QUESTIONS_PER_PAGE);
+  const endIndex = Math.min(startIndex + QUESTIONS_PER_PAGE, DOMANDE.length);
+  const currentQuestions = DOMANDE.slice(startIndex, endIndex);
 
   const { data: candidato, isLoading: loadingCandidato } = useQuery({
     queryKey: ['candidato', user?.id],
@@ -194,8 +195,8 @@ export default function Questionario() {
   }
 
   return (
-    <div className="min-h-screen bg-background py-6 px-4">
-      <div className="max-w-5xl mx-auto space-y-6">
+    <div className="min-h-screen bg-background pb-24">
+      <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
         {/* Header */}
         <div className="flex items-center gap-3 bg-primary text-primary-foreground rounded-lg p-4">
           <div className="p-2 bg-white/20 rounded-lg">
@@ -204,7 +205,7 @@ export default function Questionario() {
           <div className="flex-1">
             <h1 className="font-bold text-lg">Talent Profile Assessment</h1>
             <p className="text-sm opacity-90">
-              Domanda {startIndex + 1}-{Math.min(startIndex + QUESTIONS_PER_PAGE, DOMANDE.length)} di {DOMANDE.length}
+              Pagina {currentPage + 1} di {totalPages} • Domanda {startIndex + 1}-{endIndex} di {DOMANDE.length}
             </p>
           </div>
           <div className="text-right">
@@ -220,36 +221,117 @@ export default function Questionario() {
           />
         </div>
 
-        {/* Questions - 4 Column Grid */}
-        <div className="space-y-4">
+        {/* Questions - Optimized Desktop Grid */}
+        <div className="space-y-3">
           {currentQuestions.map((domanda, idx) => (
             <Card key={domanda.id} className={cn(
-              "transition-all duration-200",
+              "transition-all duration-200 min-h-[72px]",
               risposte[domanda.id] ? "border-accent/50 shadow-md" : ""
             )}>
-              <CardContent className="p-4">
-                <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-center">
-                  {/* Column 1: Question */}
-                  <div className="lg:col-span-1">
-                    <div className="flex gap-2 items-start">
-                      <span className="text-muted-foreground font-medium min-w-[2rem]">
-                        {startIndex + idx + 1}.
-                      </span>
-                      <p className="font-medium text-sm leading-relaxed">{domanda.testo}</p>
-                    </div>
+              <CardContent className="p-3 lg:p-4">
+                {/* Desktop: 4 column grid [50% | 16% | 17% | 17%] */}
+                <div className="hidden lg:grid lg:grid-cols-[50%_16%_17%_17%] gap-3 items-center">
+                  {/* Column 1: Question - takes ~50% width */}
+                  <div className="flex gap-2 items-start">
+                    <span className="text-muted-foreground font-medium min-w-[2.5rem] text-sm">
+                      {startIndex + idx + 1}.
+                    </span>
+                    <p className="font-medium text-sm lg:text-base leading-snug line-clamp-2">
+                      {domanda.testo}
+                    </p>
                   </div>
 
-                  {/* Columns 2-4: Answer Buttons */}
-                  <div className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {/* Column 2: Answer A */}
+                  <button
+                    onClick={() => handleAnswer(domanda.id, 'A')}
+                    className={cn(
+                      "p-3 rounded-lg border-2 text-center transition-all",
+                      "hover:border-accent/50 hover:bg-accent/5",
+                      "flex items-center justify-center gap-2",
+                      risposte[domanda.id] === 'A'
+                        ? "border-accent bg-accent text-accent-foreground"
+                        : "border-border bg-card"
+                    )}
+                  >
+                    <div className={cn(
+                      "w-6 h-6 rounded-full flex items-center justify-center shrink-0 font-bold text-xs",
+                      risposte[domanda.id] === 'A' 
+                        ? "bg-white/20" 
+                        : "bg-primary/10 text-primary"
+                    )}>
+                      {risposte[domanda.id] === 'A' ? <Check className="h-3 w-3" /> : 'A'}
+                    </div>
+                    <span className="text-sm font-medium">Sì, sempre</span>
+                  </button>
+
+                  {/* Column 3: Answer B */}
+                  <button
+                    onClick={() => handleAnswer(domanda.id, 'B')}
+                    className={cn(
+                      "p-3 rounded-lg border-2 text-center transition-all",
+                      "hover:border-accent/50 hover:bg-accent/5",
+                      "flex items-center justify-center gap-2",
+                      risposte[domanda.id] === 'B'
+                        ? "border-accent bg-accent text-accent-foreground"
+                        : "border-border bg-card"
+                    )}
+                  >
+                    <div className={cn(
+                      "w-6 h-6 rounded-full flex items-center justify-center shrink-0 font-bold text-xs",
+                      risposte[domanda.id] === 'B' 
+                        ? "bg-white/20" 
+                        : "bg-primary/10 text-primary"
+                    )}>
+                      {risposte[domanda.id] === 'B' ? <Check className="h-3 w-3" /> : 'B'}
+                    </div>
+                    <span className="text-sm font-medium">A volte</span>
+                  </button>
+
+                  {/* Column 4: Answer C */}
+                  <button
+                    onClick={() => handleAnswer(domanda.id, 'C')}
+                    className={cn(
+                      "p-3 rounded-lg border-2 text-center transition-all",
+                      "hover:border-accent/50 hover:bg-accent/5",
+                      "flex items-center justify-center gap-2",
+                      risposte[domanda.id] === 'C'
+                        ? "border-accent bg-accent text-accent-foreground"
+                        : "border-border bg-card"
+                    )}
+                  >
+                    <div className={cn(
+                      "w-6 h-6 rounded-full flex items-center justify-center shrink-0 font-bold text-xs",
+                      risposte[domanda.id] === 'C' 
+                        ? "bg-white/20" 
+                        : "bg-primary/10 text-primary"
+                    )}>
+                      {risposte[domanda.id] === 'C' ? <Check className="h-3 w-3" /> : 'C'}
+                    </div>
+                    <span className="text-sm font-medium">No, mai</span>
+                  </button>
+                </div>
+
+                {/* Mobile: Stack layout */}
+                <div className="lg:hidden space-y-3">
+                  {/* Question */}
+                  <div className="flex gap-2 items-start">
+                    <span className="text-muted-foreground font-medium min-w-[2rem]">
+                      {startIndex + idx + 1}.
+                    </span>
+                    <p className="font-medium text-sm leading-relaxed">{domanda.testo}</p>
+                  </div>
+
+                  {/* Answer buttons - horizontal on mobile */}
+                  <div className="grid grid-cols-3 gap-2">
                     {/* Answer A */}
                     <button
                       onClick={() => handleAnswer(domanda.id, 'A')}
                       className={cn(
-                        "answer-button p-4 rounded-lg border-2 text-left transition-all",
+                        "p-3 rounded-lg border-2 text-center transition-all",
                         "hover:border-accent/50 hover:bg-accent/5",
-                        "min-h-[60px] flex items-center gap-3",
+                        "flex flex-col items-center gap-1",
                         risposte[domanda.id] === 'A'
-                          ? "answer-button-selected border-accent bg-accent text-accent-foreground"
+                          ? "border-accent bg-accent text-accent-foreground"
                           : "border-border bg-card"
                       )}
                     >
@@ -261,18 +343,18 @@ export default function Questionario() {
                       )}>
                         {risposte[domanda.id] === 'A' ? <Check className="h-4 w-4" /> : 'A'}
                       </div>
-                      <span className="text-sm font-medium">Sì, sempre</span>
+                      <span className="text-xs font-medium">Sì, sempre</span>
                     </button>
 
                     {/* Answer B */}
                     <button
                       onClick={() => handleAnswer(domanda.id, 'B')}
                       className={cn(
-                        "answer-button p-4 rounded-lg border-2 text-left transition-all",
+                        "p-3 rounded-lg border-2 text-center transition-all",
                         "hover:border-accent/50 hover:bg-accent/5",
-                        "min-h-[60px] flex items-center gap-3",
+                        "flex flex-col items-center gap-1",
                         risposte[domanda.id] === 'B'
-                          ? "answer-button-selected border-accent bg-accent text-accent-foreground"
+                          ? "border-accent bg-accent text-accent-foreground"
                           : "border-border bg-card"
                       )}
                     >
@@ -284,18 +366,18 @@ export default function Questionario() {
                       )}>
                         {risposte[domanda.id] === 'B' ? <Check className="h-4 w-4" /> : 'B'}
                       </div>
-                      <span className="text-sm font-medium">A volte</span>
+                      <span className="text-xs font-medium">A volte</span>
                     </button>
 
                     {/* Answer C */}
                     <button
                       onClick={() => handleAnswer(domanda.id, 'C')}
                       className={cn(
-                        "answer-button p-4 rounded-lg border-2 text-left transition-all",
+                        "p-3 rounded-lg border-2 text-center transition-all",
                         "hover:border-accent/50 hover:bg-accent/5",
-                        "min-h-[60px] flex items-center gap-3",
+                        "flex flex-col items-center gap-1",
                         risposte[domanda.id] === 'C'
-                          ? "answer-button-selected border-accent bg-accent text-accent-foreground"
+                          ? "border-accent bg-accent text-accent-foreground"
                           : "border-border bg-card"
                       )}
                     >
@@ -307,7 +389,7 @@ export default function Questionario() {
                       )}>
                         {risposte[domanda.id] === 'C' ? <Check className="h-4 w-4" /> : 'C'}
                       </div>
-                      <span className="text-sm font-medium">No, mai</span>
+                      <span className="text-xs font-medium">No, mai</span>
                     </button>
                   </div>
                 </div>
@@ -315,9 +397,11 @@ export default function Questionario() {
             </Card>
           ))}
         </div>
+      </div>
 
-        {/* Navigation */}
-        <div className="flex justify-between pt-4">
+      {/* Sticky Navigation Footer */}
+      <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur border-t py-4 px-4 z-50">
+        <div className="max-w-6xl mx-auto flex justify-between items-center gap-4">
           <Button
             variant="outline"
             size="lg"
@@ -327,6 +411,10 @@ export default function Questionario() {
             <ChevronLeft className="h-4 w-4 mr-2" />
             Indietro
           </Button>
+
+          <div className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground">
+            <span>{Object.keys(risposte).length} / {DOMANDE.length} risposte</span>
+          </div>
 
           {isLastPage && allAnswered ? (
             <Button size="lg" onClick={handleSubmit} disabled={isSubmitting} className="bg-accent hover:bg-accent/90">
