@@ -5,12 +5,51 @@ import { useToast } from '@/hooks/use-toast';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
-
 interface PDFExportButtonProps {
   targetRef: React.RefObject<HTMLDivElement>;
   fileName: string;
   className?: string;
 }
+
+// Helper function to load logo as base64
+const loadLogoAsBase64 = (): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(img, 0, 0);
+        resolve(canvas.toDataURL('image/png'));
+      } else {
+        reject(new Error('Cannot get canvas context'));
+      }
+    };
+    img.onerror = reject;
+    img.src = '/talentprofile_logo_v3.png';
+  });
+};
+
+// Function to add watermark to each page
+const addWatermarkToPage = (
+  pdf: jsPDF,
+  logoData: string,
+  pdfWidth: number,
+  pdfHeight: number
+) => {
+  const logoWidth = 35;  // mm
+  const logoHeight = 12; // mm (proportional)
+  const margin = 10;     // mm from edge
+  
+  // Position: bottom-right corner
+  const xPos = pdfWidth - logoWidth - margin;
+  const yPos = pdfHeight - logoHeight - margin;
+  
+  pdf.addImage(logoData, 'PNG', xPos, yPos, logoWidth, logoHeight);
+};
 
 export function PDFExportButton({ targetRef, fileName, className }: PDFExportButtonProps) {
   const [isExporting, setIsExporting] = useState(false);
@@ -29,7 +68,10 @@ export function PDFExportButton({ targetRef, fileName, className }: PDFExportBut
     setIsExporting(true);
     
     try {
-      // Temporarily expand any collapsed elements and prepare for capture
+      // Load logo for watermark
+      const logoData = await loadLogoAsBase64();
+      
+      // Prepare element for capture
       const element = targetRef.current;
       
       // Create canvas with high quality settings
@@ -66,15 +108,17 @@ export function PDFExportButton({ targetRef, fileName, className }: PDFExportBut
       let position = 0;
       const pageHeight = pdfHeight;
       
-      // First page
+      // First page with watermark
       pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, scaledHeight);
+      addWatermarkToPage(pdf, logoData, pdfWidth, pdfHeight);
       heightLeft -= pageHeight;
       
-      // Additional pages if needed
+      // Additional pages with watermark
       while (heightLeft > 0) {
         position = heightLeft - scaledHeight;
         pdf.addPage();
         pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, scaledHeight);
+        addWatermarkToPage(pdf, logoData, pdfWidth, pdfHeight);
         heightLeft -= pageHeight;
       }
 
