@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { NotionLayout } from '@/components/NotionLayout';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
@@ -8,6 +9,7 @@ import { CandleChart } from '@/components/CandleChart';
 import { InterpretazioneDati } from '@/components/InterpretazioneDati';
 import { AnalisiPsicologica, AnalisiPsicologicaPlaceholder, AnalisiAI } from '@/components/AnalisiPsicologica';
 import { FitIndicator } from '@/components/FitIndicator';
+import { PDFExportButton } from '@/components/PDFExportButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -43,6 +45,7 @@ export default function CandidatoDettaglio() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const reportRef = useRef<HTMLDivElement>(null);
 
   // Fetch candidato data
   const { data: candidato, isLoading } = useQuery({
@@ -188,9 +191,17 @@ export default function CandidatoDettaglio() {
                 </div>
               </div>
             </div>
-            {analisi?.fit_verdict && (
-              <FitIndicator verdict={analisi.fit_verdict as any} size="lg" showLabel />
-            )}
+            <div className="flex items-center gap-2">
+              {profilo && (
+                <PDFExportButton 
+                  targetRef={reportRef} 
+                  fileName={`${candidato.cognome}_${candidato.nome}`}
+                />
+              )}
+              {analisi?.fit_verdict && (
+                <FitIndicator verdict={analisi.fit_verdict as any} size="lg" showLabel />
+              )}
+            </div>
           </div>
 
           {/* Info candidato */}
@@ -238,7 +249,7 @@ export default function CandidatoDettaglio() {
           </Card>
 
           {profilo ? (
-            <>
+            <div ref={reportRef} className="space-y-6 bg-background">
               {/* Alert HR se presente */}
               {profiloInfo.alert_hr && (
                 <Alert variant={stressZone || outPoints.length >= 3 ? "destructive" : "default"}>
@@ -503,7 +514,7 @@ export default function CandidatoDettaglio() {
                   )}
                 </CardContent>
               </Card>
-            </>
+            </div>
           ) : (
             <Card>
               <CardContent className="py-12 text-center">

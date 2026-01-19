@@ -1,5 +1,7 @@
 import { cn } from '@/lib/utils';
 import { SCALE_LABELS, ScalaCode } from '@/types/database';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { HelpCircle } from 'lucide-react';
 
 interface ProfileCirclesProps {
   leadership_pct: number;
@@ -11,6 +13,7 @@ interface ProfileCirclesProps {
 interface CircleProps {
   title: string;
   subtitle: string;
+  tooltip: string;
   percentage: number;
   color: string;
   scales: { code: ScalaCode; label: string; value: number }[];
@@ -91,13 +94,25 @@ function ScaleBar({ label, value }: { label: string; value: number }) {
   );
 }
 
-function Circle({ title, subtitle, percentage, color, scales }: CircleProps) {
+function Circle({ title, subtitle, tooltip, percentage, color, scales }: CircleProps) {
   return (
     <div className="flex flex-col items-center p-4 bg-card rounded-xl border shadow-sm">
-      <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-1">
-        {title}
-      </h3>
-      <p className={cn("text-lg font-bold mb-3", color.replace('text-', 'text-'))}>{subtitle}</p>
+      <div className="flex items-center gap-1.5 mb-1">
+        <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+          {title}
+        </h3>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <HelpCircle className="h-3.5 w-3.5 text-muted-foreground/60 cursor-help" />
+            </TooltipTrigger>
+            <TooltipContent className="max-w-xs text-xs">
+              <p>{tooltip}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
+      <p className={cn("text-sm font-medium mb-3 text-muted-foreground")}>{subtitle}</p>
       <CircularProgress percentage={percentage} color={color} />
       <div className="w-full mt-4 space-y-2">
         {scales.map((scale) => (
@@ -121,7 +136,8 @@ export function ProfileCircles({
   const circles: CircleProps[] = [
     {
       title: 'Impatto Organizzativo',
-      subtitle: 'QR + SP + PA',
+      subtitle: 'Relazioni e Qualità',
+      tooltip: 'Misura la capacità di influenzare l\'organizzazione attraverso Qualità Relazionale (QR), Sensibilità Personale (SP) e Propensione all\'Azione (PA). Formula: (QR + SP + PA) / 600 × 100',
       percentage: leadership_pct,
       color: 'text-[#1e3a5f]',
       scales: [
@@ -132,7 +148,8 @@ export function ProfileCircles({
     },
     {
       title: 'Solidità Personale',
-      subtitle: 'SV + MO + CF',
+      subtitle: 'Stabilità e Motivazione',
+      tooltip: 'Valuta la stabilità interiore attraverso Stile di Vita (SV), Motivazione (MO) e Capacità di Fronteggiare (CF). Formula: (SV + MO + CF) / 600 × 100',
       percentage: maturita_pct,
       color: 'text-green-600',
       scales: [
@@ -143,7 +160,8 @@ export function ProfileCircles({
     },
     {
       title: 'Capacità Produttiva',
-      subtitle: 'QN + EC + EF',
+      subtitle: 'Esecuzione e Risultati',
+      tooltip: 'Indica l\'efficacia operativa attraverso Quantità (QN), Efficacia (EC) ed Efficienza (EF). Formula: (QN + EC + EF) / 600 × 100',
       percentage: potenziale_pct,
       color: 'text-[#f09133]',
       scales: [
