@@ -1,9 +1,13 @@
+import { useState } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { AlertTriangle, AlertCircle, CheckCircle2, Info, TrendingUp, Users, Target, RefreshCw, ChevronDown, MessageSquare } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { AlertTriangle, AlertCircle, CheckCircle2, Info, TrendingUp, Users, Target, RefreshCw, ChevronDown, MessageSquare, Copy, ClipboardCheck } from 'lucide-react';
 import { 
   generateInterpretazione, 
   calculateSecondaryIndices,
@@ -30,6 +34,8 @@ interface InterpretazioneDatiProps {
   outPoints: string[];
   strengthPoints: string[];
   profiloTipo?: string;
+  showStressZoneHero?: boolean;
+  showOnlyColloquio?: boolean;
 }
 
 function InterpretazioneCard({ item }: { item: InterpretazioneItem }) {
@@ -123,9 +129,50 @@ function IndiceSecondario({
   );
 }
 
-function ColloquioQuestionCard({ area }: { area: ColloquioArea }) {
+function ColloquioQuestionCard({ area, onQuestionComplete, completedQuestions }: { 
+  area: ColloquioArea;
+  onQuestionComplete: (areaId: string, questionIdx: number) => void;
+  completedQuestions: Record<string, number[]>;
+}) {
+  const { toast } = useToast();
+  const areaCompletedQuestions = completedQuestions[area.id] || [];
+  const completedCount = areaCompletedQuestions.length;
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast({
+        title: "Copiato!",
+        description: "Domanda copiata negli appunti",
+      });
+    } catch {
+      toast({
+        title: "Errore",
+        description: "Impossibile copiare",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const copyAllQuestions = async () => {
+    const allText = area.domande.map((d, i) => `${i + 1}. ${d}`).join('\n\n');
+    try {
+      await navigator.clipboard.writeText(`${area.area}\n\n${allText}`);
+      toast({
+        title: "Copiato!",
+        description: `Tutte le ${area.domande.length} domande copiate`,
+      });
+    } catch {
+      toast({
+        title: "Errore",
+        description: "Impossibile copiare",
+        variant: "destructive"
+      });
+    }
+  };
+
   return (
-    <Collapsible>
+    <Collapsible defaultOpen={area.priorita === 'alta'}>
       <CollapsibleTrigger className="w-full">
         <div className={cn(
           "border-l-4 p-4 rounded-r-lg flex items-center justify-between hover:bg-muted/50 transition-colors",
@@ -140,6 +187,11 @@ function ColloquioQuestionCard({ area }: { area: ColloquioArea }) {
             <span className="font-semibold text-sm">{area.area}</span>
           </div>
           <div className="flex items-center gap-2">
+            {completedCount > 0 && (
+              <Badge variant="outline" className="bg-green-100 text-green-700 border-green-300 text-xs">
+                {completedCount}/{area.domande.length}
+              </Badge>
+            )}
             <span className="text-xs text-muted-foreground">{area.domande.length} domande</span>
             <ChevronDown className="h-4 w-4 text-muted-foreground" />
           </div>
@@ -147,14 +199,58 @@ function ColloquioQuestionCard({ area }: { area: ColloquioArea }) {
       </CollapsibleTrigger>
       <CollapsibleContent>
         <div className="p-4 bg-muted/20 rounded-b-lg space-y-3">
-          <p className="text-xs text-muted-foreground italic">{area.motivazione}</p>
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-muted-foreground italic flex-1">{area.motivazione}</p>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={(e) => {
+                e.stopPropagation();
+                copyAllQuestions();
+              }}
+              className="ml-2 shrink-0"
+            >
+              <ClipboardCheck className="h-3 w-3 mr-1" />
+              Copia tutte
+            </Button>
+          </div>
           <ul className="space-y-2">
-            {area.domande.map((domanda, idx) => (
-              <li key={idx} className="text-sm flex items-start gap-2 bg-background p-2 rounded">
-                <span className="text-primary font-bold">{idx + 1}.</span>
-                <span className="text-foreground">"{domanda}"</span>
-              </li>
-            ))}
+            {area.domande.map((domanda, idx) => {
+              const isCompleted = areaCompletedQuestions.includes(idx);
+              return (
+                <li 
+                  key={idx} 
+                  className={cn(
+                    "text-sm flex items-start gap-3 bg-background p-3 rounded border transition-all",
+                    isCompleted && "opacity-60 bg-muted"
+                  )}
+                >
+                  <Checkbox 
+                    checked={isCompleted}
+                    onCheckedChange={() => onQuestionComplete(area.id, idx)}
+                    className="mt-0.5 shrink-0"
+                  />
+                  <span className={cn(
+                    "flex-1",
+                    isCompleted && "line-through"
+                  )}>
+                    <span className="text-primary font-bold mr-1">{idx + 1}.</span>
+                    "{domanda}"
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 shrink-0"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      copyToClipboard(domanda);
+                    }}
+                  >
+                    <Copy className="h-3.5 w-3.5" />
+                  </Button>
+                </li>
+              );
+            })}
           </ul>
         </div>
       </CollapsibleContent>
@@ -224,12 +320,18 @@ export function InterpretazioneDati({
   stressZoneSeverity: propSeverity,
   outPoints,
   strengthPoints,
-  profiloTipo
+  profiloTipo,
+  showStressZoneHero = true,
+  showOnlyColloquio = false,
 }: InterpretazioneDatiProps) {
+  const [completedQuestions, setCompletedQuestions] = useState<Record<string, number[]>>({});
+
   // Calcola la severità se non fornita
+  const sv = scalePunteggi['SV'];
+  const cf = scalePunteggi['CF'];
   const stressZoneSeverity = propSeverity || calculateStressZoneSeverity(
-    scalePunteggi['SV'] || 100,
-    scalePunteggi['CF'] || 100
+    sv !== undefined ? sv : 100,
+    cf !== undefined ? cf : 100
   );
 
   const interpretazioni = generateInterpretazione(
@@ -250,6 +352,23 @@ export function InterpretazioneDati({
     profiloTipo || ''
   );
 
+  const handleQuestionComplete = (areaId: string, questionIdx: number) => {
+    setCompletedQuestions(prev => {
+      const areaQuestions = prev[areaId] || [];
+      if (areaQuestions.includes(questionIdx)) {
+        return {
+          ...prev,
+          [areaId]: areaQuestions.filter(q => q !== questionIdx)
+        };
+      } else {
+        return {
+          ...prev,
+          [areaId]: [...areaQuestions, questionIdx]
+        };
+      }
+    });
+  };
+
   const critici = interpretazioni.filter(i => i.tipo === 'critico');
   const attenzione = interpretazioni.filter(i => i.tipo === 'attenzione');
   const forze = interpretazioni.filter(i => i.tipo === 'forza');
@@ -258,14 +377,65 @@ export function InterpretazioneDati({
   // Scale da mostrare nell'interpretazione dettagliata
   const scaleToShow: ScalaCode[] = ['SV', 'MO', 'CF', 'EF', 'EC', 'QN', 'QR', 'SP', 'PA'];
 
+  // Se showOnlyColloquio, mostra solo le domande per il colloquio
+  if (showOnlyColloquio) {
+    const totalQuestions = colloquioQuestions.reduce((acc, area) => acc + area.domande.length, 0);
+    const totalCompleted = Object.values(completedQuestions).flat().length;
+
+    return (
+      <div className="space-y-6">
+        <Card className="border-primary/30">
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <MessageSquare className="h-5 w-5 text-primary" />
+                Domande Suggerite per il Colloquio
+                <Badge variant="outline" className="ml-2">{colloquioQuestions.length} aree</Badge>
+              </CardTitle>
+              {totalCompleted > 0 && (
+                <Badge variant="secondary" className="bg-green-100 text-green-700">
+                  <CheckCircle2 className="h-3 w-3 mr-1" />
+                  {totalCompleted}/{totalQuestions} completate
+                </Badge>
+              )}
+            </div>
+            <p className="text-sm text-muted-foreground mt-2">
+              Usa i checkbox per tracciare le domande già fatte e i pulsanti per copiare le domande.
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {colloquioQuestions.length > 0 ? (
+              colloquioQuestions.map((area) => (
+                <ColloquioQuestionCard 
+                  key={area.id} 
+                  area={area} 
+                  onQuestionComplete={handleQuestionComplete}
+                  completedQuestions={completedQuestions}
+                />
+              ))
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <MessageSquare className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <p>Nessuna area critica identificata.</p>
+                <p className="text-sm">Il profilo rientra nella norma.</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      {/* Stress Zone Hero - Nuovo componente prominente */}
-      <StressZoneHero
-        sv={scalePunteggi['SV'] || 100}
-        cf={scalePunteggi['CF'] || 100}
-        severity={stressZoneSeverity}
-      />
+      {/* Stress Zone Hero - Solo se richiesto */}
+      {showStressZoneHero && (
+        <StressZoneHero
+          sv={sv !== undefined ? sv : 100}
+          cf={cf !== undefined ? cf : 100}
+          severity={stressZoneSeverity}
+        />
+      )}
 
       {/* Indici Secondari */}
       <Card>
@@ -301,24 +471,6 @@ export function InterpretazioneDati({
           </div>
         </CardContent>
       </Card>
-
-      {/* Domande Suggerite per il Colloquio */}
-      {colloquioQuestions.length > 0 && (
-        <Card className="border-primary/30">
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <MessageSquare className="h-5 w-5 text-primary" />
-              Domande Suggerite per il Colloquio
-              <Badge variant="outline" className="ml-2">{colloquioQuestions.length} aree</Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {colloquioQuestions.map((area) => (
-              <ColloquioQuestionCard key={area.id} area={area} />
-            ))}
-          </CardContent>
-        </Card>
-      )}
 
       {/* Interpretazione Dettagliata per Scala */}
       <Card>
