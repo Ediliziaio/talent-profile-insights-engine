@@ -48,7 +48,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Users, Copy, Check, Eye, Key, RefreshCw, Download, ArrowUpDown, TestTube2, Trash2, Calendar, User } from 'lucide-react';
+import { Plus, Users, Copy, Check, Eye, Key, RefreshCw, Download, ArrowUpDown, TestTube2, Trash2, Calendar, User, Search } from 'lucide-react';
 import { Candidato, Azienda, AccessoAzienda, ProfiloCandidato, RUOLI_AZIENDALI, FUNZIONI } from '@/types/database';
 import { getProfiloTipoLabel } from '@/lib/scoring';
 import { format } from 'date-fns';
@@ -79,6 +79,9 @@ export default function Candidati() {
   const [filterRuolo, setFilterRuolo] = useState<string>('all');
   const [filterFunzione, setFilterFunzione] = useState<string>('all');
   const [filterFitVerdict, setFilterFitVerdict] = useState<string>('all');
+  const [filterSesso, setFilterSesso] = useState<string>('all');
+  const [filterEta, setFilterEta] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState<string>('');
   const [sortField, setSortField] = useState<SortField>('created_at');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -140,7 +143,7 @@ export default function Candidati() {
   });
 
   const { data: candidati, isLoading } = useQuery({
-    queryKey: ['candidati', filterAzienda, filterStato, filterRuolo, filterFunzione, filterFitVerdict],
+    queryKey: ['candidati', filterAzienda, filterStato, filterRuolo, filterFunzione, filterFitVerdict, filterSesso, filterEta, searchTerm],
     queryFn: async () => {
       let query = supabase
         .from('candidati')
@@ -172,6 +175,37 @@ export default function Candidati() {
           const verdict = Array.isArray(c.analisi_candidato) ? c.analisi_candidato[0]?.fit_verdict : null;
           return verdict === filterFitVerdict;
         });
+      }
+      
+      // Filter by sex
+      if (filterSesso && filterSesso !== 'all') {
+        filteredData = filteredData.filter(c => c.sesso === filterSesso);
+      }
+      
+      // Filter by age range
+      if (filterEta && filterEta !== 'all') {
+        filteredData = filteredData.filter(c => {
+          if (!c.eta) return false;
+          switch (filterEta) {
+            case '18-30': return c.eta >= 18 && c.eta <= 30;
+            case '31-45': return c.eta >= 31 && c.eta <= 45;
+            case '46-60': return c.eta >= 46 && c.eta <= 60;
+            case '60+': return c.eta > 60;
+            default: return true;
+          }
+        });
+      }
+      
+      // Text search
+      if (searchTerm && searchTerm.trim()) {
+        const search = searchTerm.toLowerCase().trim();
+        filteredData = filteredData.filter(c => 
+          c.nome?.toLowerCase().includes(search) ||
+          c.cognome?.toLowerCase().includes(search) ||
+          c.email?.toLowerCase().includes(search) ||
+          c.ruolo_attuale?.toLowerCase().includes(search) ||
+          c.funzione?.toLowerCase().includes(search)
+        );
       }
       
       return filteredData;
@@ -740,9 +774,21 @@ export default function Candidati() {
             </Card>
           )}
 
-          {/* Filtri Avanzati - Compatti */}
+          {/* Ricerca e Filtri Avanzati */}
           <Card className="border-dashed">
-            <CardContent className="py-4">
+            <CardContent className="py-4 space-y-4">
+              {/* Search bar */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Cerca per nome, cognome, email, ruolo..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+              
+              {/* Filters row */}
               <div className="flex flex-wrap items-center gap-3">
                 <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
@@ -756,6 +802,28 @@ export default function Candidati() {
                     <SelectItem value="all">Tutti gli stati</SelectItem>
                     <SelectItem value="completato">Completato</SelectItem>
                     <SelectItem value="da_fare">Da fare</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={filterSesso} onValueChange={setFilterSesso}>
+                  <SelectTrigger className="w-[100px] h-9">
+                    <SelectValue placeholder="Sesso" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tutti</SelectItem>
+                    <SelectItem value="M">Maschio</SelectItem>
+                    <SelectItem value="F">Femmina</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={filterEta} onValueChange={setFilterEta}>
+                  <SelectTrigger className="w-[120px] h-9">
+                    <SelectValue placeholder="Età" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tutte le età</SelectItem>
+                    <SelectItem value="18-30">18-30 anni</SelectItem>
+                    <SelectItem value="31-45">31-45 anni</SelectItem>
+                    <SelectItem value="46-60">46-60 anni</SelectItem>
+                    <SelectItem value="60+">60+ anni</SelectItem>
                   </SelectContent>
                 </Select>
                 <Select value={filterRuolo} onValueChange={setFilterRuolo}>

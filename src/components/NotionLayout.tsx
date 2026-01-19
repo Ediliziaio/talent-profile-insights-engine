@@ -36,14 +36,14 @@ export function NotionLayout({ children }: NotionLayoutProps) {
         )}
       >
         {/* Logo */}
-        <div className={cn("flex items-center justify-center", collapsed ? "p-4" : "py-10 px-6")}>
+        <div className={cn("flex items-center justify-center", collapsed ? "p-3" : "py-6 px-4")}>
           <Link to="/" className="flex items-center justify-center">
             <img 
               src="/talentprofile_logo_v3.png?v=20260119" 
               alt="Talent Profile"
               className={cn(
                 "transition-all duration-300 object-contain",
-                collapsed ? "h-20 w-20" : "h-36 w-auto max-w-[300px]"
+                collapsed ? "h-10 w-10" : "h-[72px] w-auto max-w-[150px]"
               )}
             />
           </Link>

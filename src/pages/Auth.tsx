@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Brain, User, Building2, Loader2 } from 'lucide-react';
+import { User, Building2, Loader2 } from 'lucide-react';
 
 export default function Auth() {
   const [email, setEmail] = useState('');
@@ -115,9 +115,11 @@ export default function Auth() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <div className="p-3 bg-primary rounded-xl">
-              <Brain className="h-8 w-8 text-primary-foreground" />
-            </div>
+            <img 
+              src="/talentprofile_logo_v3.png?v=20260119" 
+              alt="Talent Profile" 
+              className="h-20 w-auto object-contain"
+            />
           </div>
           <CardTitle className="text-2xl font-bold">Talent Profile</CardTitle>
           <CardDescription>Sistema di Assessment HR</CardDescription>
