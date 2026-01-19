@@ -603,11 +603,11 @@ serve(async (req) => {
     // Check if superadmin
     const { data: profile } = await supabase
       .from('profiles')
-      .select('role')
+      .select('ruolo')
       .eq('user_id', user.id)
       .single();
     
-    if (profile?.role !== 'superadmin') {
+    if (profile?.ruolo !== 'superadmin') {
       return new Response(JSON.stringify({ error: 'Superadmin only' }), {
         status: 403,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
