@@ -1654,7 +1654,7 @@ export default function Candidati() {
                                 </TableCell>
                                 <TableCell className="text-muted-foreground text-xs">
                                   <div className="flex items-center gap-1">
-                                    <Calendar className="h-3 w-3" />
+                                    <CalendarIcon className="h-3 w-3" />
                                     {format(new Date(candidato.created_at), 'dd/MM/yy', { locale: it })}
                                   </div>
                                 </TableCell>
