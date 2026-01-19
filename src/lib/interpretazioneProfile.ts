@@ -1,6 +1,6 @@
 import { ScalaCode, SCALE_LABELS } from '@/types/database';
 import { StressZoneSeverity, getStressZoneText, getStressZoneSeverityLabel } from './stressZone';
-import { getScaleTextForRange } from './scaleTexts';
+import { getScaleRangeText } from './scaleTexts';
 
 export interface InterpretazioneItem {
   scala: string;
@@ -256,7 +256,7 @@ export function generateInterpretazione(
     if (valore === undefined) continue;
     
     const zona = getZonaInterpretazione(valore);
-    const scaleText = getScaleTextForRange(scala, valore);
+    const scaleText = getScaleRangeText(scala, valore);
     
     if (zona.zona === 'critica') {
       interpretazioni.push({
@@ -432,5 +432,5 @@ export function getDetailedScaleInterpretation(scala: ScalaCode, valore: number)
   implicazioni: string;
   domande_colloquio: string[];
 } {
-  return getScaleTextForRange(scala, valore);
+  return getScaleRangeText(scala, valore);
 }
