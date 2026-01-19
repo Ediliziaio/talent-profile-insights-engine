@@ -1,5 +1,6 @@
 import { DOMANDE } from '@/data/questionario';
 import { ProfiloTipo, ScalaCode, SCALE_LABELS } from '@/types/database';
+import { StressZoneSeverity, calculateStressZoneSeverity } from './stressZone';
 
 export interface RispostaInput {
   domanda_id: number;
@@ -23,10 +24,15 @@ export interface ProfiloCalcolato {
   potenziale_pct: number;
   schematicita: number;
   stress_zone: boolean;
+  stress_zone_severity: StressZoneSeverity;  // Manuale V3 - severità graduata
   profilo_tipo: ProfiloTipo;
   out_points: string[];
   strength_points: string[];
 }
+
+// Re-export per uso esterno
+export type { StressZoneSeverity };
+export { calculateStressZoneSeverity };
 
 // Main scale codes (excluding ST and LE which are sub-scales)
 const MAIN_SCALE_CODES: ScalaCode[] = ['SV', 'MO', 'CF', 'EF', 'EC', 'QN', 'QR', 'SP', 'PA', 'SC'];
@@ -80,6 +86,9 @@ export function calcolaProfilo(risposte: RispostaInput[]): ProfiloCalcolato {
   // Stress Zone: Stile Vita < 100 AND Cap. Fronteggiare < 100
   const stress_zone = scale_punteggi['SV'] < 100 && scale_punteggi['CF'] < 100;
   
+  // Manuale V3: Calcola severità graduata della Stress Zone
+  const stress_zone_severity = calculateStressZoneSeverity(scale_punteggi['SV'], scale_punteggi['CF']);
+  
   // Out Points: scores < 80 (excluding schematicità)
   const out_points: string[] = [];
   for (const [scala, punteggio] of Object.entries(scale_punteggi)) {
@@ -96,8 +105,8 @@ export function calcolaProfilo(risposte: RispostaInput[]): ProfiloCalcolato {
     }
   }
   
-  // Determine profile type (nuova logica Manuale V2)
-  const profilo_tipo = determinaProfiloTipo(scale_punteggi, stress_zone, out_points, strength_points);
+  // Determine profile type (Manuale V3: usa severità stress zone)
+  const profilo_tipo = determinaProfiloTipo(scale_punteggi, stress_zone, stress_zone_severity, out_points, strength_points);
   
   return {
     scale_punteggi,
@@ -110,6 +119,7 @@ export function calcolaProfilo(risposte: RispostaInput[]): ProfiloCalcolato {
     potenziale_pct: Math.round(capacita_produttiva_pct * 10) / 10,
     schematicita,
     stress_zone,
+    stress_zone_severity,
     profilo_tipo,
     out_points,
     strength_points
@@ -117,12 +127,14 @@ export function calcolaProfilo(risposte: RispostaInput[]): ProfiloCalcolato {
 }
 
 /**
- * Determina il profilo psicologico secondo il Manuale di Elaborazione V2
+ * Determina il profilo psicologico secondo il Manuale V3
  * 10 Profili Professionali con logica deterministica
+ * AGGIORNATO: usa la severità della Stress Zone per IN_TRANSIZIONE
  */
 function determinaProfiloTipo(
   scale: Record<string, number>,
   stressZone: boolean,
+  stressZoneSeverity: StressZoneSeverity,
   outPoints: string[],
   strengthPoints: string[]
 ): ProfiloTipo {
@@ -137,12 +149,14 @@ function determinaProfiloTipo(
   const sp = scale['SP'] || 100;
   const pa = scale['PA'] || 100;
   
-  // PRIORITÀ 1: IN_TRANSIZIONE - Stress Zone attiva O >2 scale sotto 70
+  // PRIORITÀ 1: IN_TRANSIZIONE (Manuale V3)
+  // - Stress Zone Severa o Critica
+  // - OPPURE >2 scale sotto 70
   const scaleCritiche = Object.entries(scale)
     .filter(([k, v]) => k !== 'SC' && v < 70)
     .length;
   
-  if (stressZone || scaleCritiche > 2) {
+  if (stressZoneSeverity === 'severa' || stressZoneSeverity === 'critica' || scaleCritiche > 2) {
     return 'IN_TRANSIZIONE';
   }
   
