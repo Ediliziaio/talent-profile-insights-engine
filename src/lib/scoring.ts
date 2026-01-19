@@ -93,7 +93,7 @@ export function calcolaProfilo(risposte: RispostaInput[]): ProfiloCalcolato {
   }
   
   // Determine profile type
-  const profilo_tipo = determinaProfiloTipo(scale_punteggi, leadership_pct, stress_zone);
+  const profilo_tipo = determinaProfiloTipo(scale_punteggi, stress_zone, out_points, strength_points);
   
   return {
     scale_punteggi,
@@ -108,75 +108,113 @@ export function calcolaProfilo(risposte: RispostaInput[]): ProfiloCalcolato {
   };
 }
 
+/**
+ * Determina il profilo psicologico in base ai DATI REALI del candidato.
+ * La logica segue pattern psicologici coerenti con i punteggi.
+ */
 function determinaProfiloTipo(
   scale: Record<string, number>,
-  leadership: number,
-  stressZone: boolean
+  stressZone: boolean,
+  outPoints: string[],
+  strengthPoints: string[]
 ): ProfiloTipo {
-  // Calcoliamo i punteggi medi per le diverse aree
-  const avgResults = (scale['QR'] + scale['SP'] + scale['PA']) / 3;
-  const avgPlanning = (scale['SV'] + scale['MO'] + scale['CF']) / 3;
-  const avgAction = (scale['QN'] + scale['EC'] + scale['EF']) / 3;
-  const schematicita = scale['SC'];
+  const schematicita = scale['SC'] || 100;
   
-  // PRESTIGIO: Alto QR + PA alto + cerca esclusività
-  if (scale['QR'] >= 150 && scale['PA'] >= 140 && schematicita >= 120 && avgResults > avgPlanning) {
-    return 'PRESTIGIO';
+  // PRIORITÀ 1: SICUREZZA - Zona stress attiva (vulnerabilità evidente)
+  // Persona con SV e CF bassi mostra segni di difficoltà, cerca protezione
+  if (stressZone) {
+    return 'SICUREZZA';
   }
   
-  // ORIGINALE: Alto EC + PA alto + bassa schematicità (innovativo)
-  if (scale['EC'] >= 150 && scale['PA'] >= 130 && schematicita < 100 && scale['MO'] >= 130) {
-    return 'ORIGINALE';
+  // PRIORITÀ 2: SICUREZZA - Molte aree critiche (OUT POINTS >= 3)
+  // Persona con molte fragilità cerca stabilità e rassicurazioni
+  if (outPoints.length >= 3) {
+    return 'SICUREZZA';
   }
   
-  // ANALITICO: Alta schematicità + alto EF + metodico
-  if (schematicita >= 150 && scale['EF'] >= 140 && scale['CF'] >= 130) {
+  // PRIORITÀ 3: ANALITICO - Alta schematicità + Efficienza alta
+  // Persona rigida, metodica, razionale che procede per logica
+  if (schematicita >= 150 && scale['EF'] >= 140) {
     return 'ANALITICO';
   }
   
-  // ESTETA: Alto SP + PA alto + attenzione immagine
-  if (scale['SP'] >= 150 && scale['PA'] >= 140 && scale['QR'] >= 120) {
-    return 'ESTETA';
+  // PRIORITÀ 4: PRESTIGIO - Leadership forte con alta partecipazione
+  // Persona che vuole emergere, essere riconosciuta come leader
+  if (scale['QR'] >= 150 && scale['PA'] >= 140 && scale['SP'] >= 130) {
+    return 'PRESTIGIO';
   }
   
-  // CONSERVATORE: Alto EF + schematicità alta + QR alto (prudente strategico)
-  if (scale['EF'] >= 140 && schematicita >= 130 && scale['QR'] >= 130 && scale['MO'] >= 120) {
-    return 'CONSERVATORE';
+  // PRIORITÀ 5: ORIGINALE - Alta efficacia con bassa schematicità (innovativo)
+  // Persona che cerca novità, non segue schemi, vuole essere il primo
+  if (scale['EC'] >= 150 && schematicita < 100 && scale['MO'] >= 130) {
+    return 'ORIGINALE';
   }
   
-  // AFFETTO: PA altissimo + MO alto + orientato alle relazioni
+  // PRIORITÀ 6: AFFETTO - Alta partecipazione e motivazione relazionale
+  // Persona orientata alle relazioni, cerca approvazione
   if (scale['PA'] >= 160 && scale['MO'] >= 140 && scale['CF'] >= 120) {
     return 'AFFETTO';
   }
   
-  // SICUREZZA: SV basso + CF basso (zona stress) - cerca rassicurazioni
-  if (stressZone || (scale['SV'] < 100 && scale['CF'] < 100)) {
-    return 'SICUREZZA';
+  // PRIORITÀ 7: ESTETA - Alto spazio personale con attenzione all'immagine
+  // Persona attenta all'estetica e alla presentazione
+  if (scale['SP'] >= 150 && scale['PA'] >= 140 && scale['QR'] >= 120) {
+    return 'ESTETA';
   }
   
-  // COMODITA: EF medio + QN basso + delega (vuole soluzioni semplici)
-  if (scale['QN'] < 100 && scale['EF'] >= 100 && scale['EF'] < 140) {
+  // PRIORITÀ 8: CONSERVATORE - Efficienza alta con schematicità e prudenza
+  // Persona strategica che valuta il lungo termine
+  if (scale['EF'] >= 140 && schematicita >= 130 && scale['MO'] >= 120) {
+    return 'CONSERVATORE';
+  }
+  
+  // PRIORITÀ 9: COMODITÀ - Quantità responsabilità bassa, delega
+  // Persona che cerca soluzioni semplici, evita complicazioni
+  if (scale['QN'] < 100 && scale['QR'] < 110) {
     return 'COMODITA';
   }
   
-  // SVAGO: SP alto + equilibrio vita-lavoro
-  if (scale['SP'] >= 140 && scale['SV'] >= 120 && avgAction < avgPlanning) {
+  // PRIORITÀ 10: SVAGO - Buon equilibrio vita-lavoro
+  // Persona che cerca flessibilità e work-life balance
+  if (scale['SP'] >= 130 && scale['SV'] >= 120 && scale['CF'] >= 110) {
     return 'SVAGO';
   }
   
-  // RISPARMIO: Tutti i punteggi medio-bassi, orientato al budget
-  const avgAll = (avgResults + avgPlanning + avgAction) / 3;
-  if (avgAll < 110) {
+  // PRIORITÀ 11: RISPARMIO - Punteggi generalmente bassi
+  // Persona orientata all'ottimizzazione e ai costi
+  const avgAllScales = Object.entries(scale)
+    .filter(([k]) => k !== 'SC')
+    .reduce((sum, [, v]) => sum + v, 0) / 9;
+  
+  if (avgAllScales < 105 && outPoints.length >= 2) {
     return 'RISPARMIO';
   }
   
-  // Default: determina in base al pattern dominante
-  if (avgResults > avgPlanning && avgResults > avgAction) {
-    return 'PRESTIGIO'; // Orientato ai risultati
-  } else if (avgPlanning > avgAction) {
-    return 'CONSERVATORE'; // Orientato alla pianificazione
+  // DEFAULT: Determina in base al pattern dominante delle aree
+  const avgRisultati = (scale['QR'] + scale['SP'] + scale['PA']) / 3;
+  const avgPianificazione = (scale['SV'] + scale['MO'] + scale['CF']) / 3;
+  const avgAzione = (scale['QN'] + scale['EC'] + scale['EF']) / 3;
+  
+  // Se ha punti di forza, usa quelli per determinare il profilo
+  if (strengthPoints.length > 0) {
+    if (strengthPoints.some(p => p.includes('Qualità') || p.includes('Leadership'))) {
+      return 'PRESTIGIO';
+    }
+    if (strengthPoints.some(p => p.includes('Efficacia'))) {
+      return avgRisultati > avgPianificazione ? 'ORIGINALE' : 'CONSERVATORE';
+    }
+    if (strengthPoints.some(p => p.includes('Partecipazione'))) {
+      return 'AFFETTO';
+    }
+  }
+  
+  // Pattern finale basato sulle aree dominanti
+  if (avgRisultati > avgPianificazione && avgRisultati > avgAzione) {
+    return schematicita > 120 ? 'ESTETA' : 'PRESTIGIO';
+  } else if (avgPianificazione > avgAzione) {
+    return schematicita > 120 ? 'CONSERVATORE' : 'AFFETTO';
   } else {
-    return 'ORIGINALE'; // Orientato all'azione/innovazione
+    return schematicita < 100 ? 'ORIGINALE' : 'ANALITICO';
   }
 }
 
@@ -217,21 +255,21 @@ export function getProfiloTipoLabel(tipo: ProfiloTipo): string {
     'SVAGO': 'Svago',
     'RISPARMIO': 'Risparmio'
   };
-  return labels[tipo];
+  return labels[tipo] || 'Non definito';
 }
 
 export function getProfiloTipoDescription(tipo: ProfiloTipo): string {
   const descriptions: Record<ProfiloTipo, string> = {
-    'PRESTIGIO': 'Cerca esclusività e status. Vuole sentirsi unico e privilegiato. Ruoli ideali: Direzione, Account Manager VIP, Rappresentanza.',
-    'ORIGINALE': 'Innovativo e pioniere. Vuole essere il primo e anticipare le tendenze. Ruoli ideali: R&D, Product Development, Marketing.',
-    'ANALITICO': 'Razionale e metodico. Basa tutto su dati e logica. Ruoli ideali: Controller, Analista, Quality Assurance.',
-    'ESTETA': 'Attento all\'estetica e all\'immagine. Cerca armonia e design. Ruoli ideali: Marketing, Comunicazione, Customer Experience.',
-    'CONSERVATORE': 'Prudente e strategico. Cerca valore duraturo e sicurezza. Ruoli ideali: Amministrazione, Finanza, Operations.',
-    'AFFETTO': 'Relazionale e empatico. Cerca armonia e approvazione. Ruoli ideali: HR, Customer Care, Team Leader.',
-    'SICUREZZA': 'Cerca stabilità e rassicurazioni. Preferisce procedure chiare. Ruoli ideali: Compliance, Back Office, Controllo Qualità.',
-    'COMODITA': 'Cerca soluzioni semplici e immediate. Delega volentieri. Ruoli ideali: Management, Direzione Commerciale.',
-    'SVAGO': 'Cerca equilibrio vita-lavoro. Valorizza la flessibilità. Ruoli ideali: Consulenza, Ruoli creativi, Marketing.',
-    'RISPARMIO': 'Orientato al costo e al budget. Cerca ottimizzazione. Ruoli ideali: Acquisti, Procurement, Cost Controller.'
+    'PRESTIGIO': 'Cerca esclusività e status. Vuole sentirsi unico e privilegiato.',
+    'ORIGINALE': 'Innovativo e pioniere. Vuole essere il primo e anticipare le tendenze.',
+    'ANALITICO': 'Razionale e metodico. Basa tutto su dati e logica.',
+    'ESTETA': 'Attento all\'estetica e all\'immagine. Cerca armonia e design.',
+    'CONSERVATORE': 'Prudente e strategico. Cerca valore duraturo e sicurezza.',
+    'AFFETTO': 'Relazionale e empatico. Cerca armonia e approvazione.',
+    'SICUREZZA': 'Cerca stabilità e rassicurazioni. In un momento di vulnerabilità.',
+    'COMODITA': 'Cerca soluzioni semplici e immediate. Delega volentieri.',
+    'SVAGO': 'Cerca equilibrio vita-lavoro. Valorizza la flessibilità.',
+    'RISPARMIO': 'Orientato al costo e al budget. Cerca ottimizzazione.'
   };
-  return descriptions[tipo];
+  return descriptions[tipo] || 'Profilo in valutazione';
 }

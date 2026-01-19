@@ -11,6 +11,7 @@ export interface ProfiloDescription {
   come_gestirlo: string[];
   errori_da_evitare: string[];
   ruoli_ideali: string[];
+  alert_hr?: string;
   colore: string;
   colorBg: string;
   colorText: string;
@@ -20,32 +21,33 @@ export const PROFILO_DESCRIPTIONS: Record<ProfiloTipo, ProfiloDescription> = {
   PRESTIGIO: {
     label: 'Prestigio',
     macrocategoria: 'PROTAGONISTA',
-    motto: "Voglio essere L'UNICO",
-    descrizione_breve: 'Persona che cerca esclusività e status. Vuole sentirsi unico, superiore e privilegiato. Non cerca prodotti o ruoli comuni: cerca ESCLUSIVITÀ.',
+    motto: "Voglio GUIDARE e essere RICONOSCIUTO",
+    descrizione_breve: 'Candidato con forte orientamento alla leadership e al riconoscimento. Cerca ruoli di responsabilità e visibilità. Ha elevate capacità relazionali e sa gestire situazioni complesse. Motivato dal raggiungimento di status e obiettivi ambiziosi.',
     cosa_vuole: [
-      'Sentirsi UNICO e irripetibile',
-      'Essere SUPERIORE agli altri',
-      'Trattamento PRIVILEGIATO',
-      'Far parte di un CLUB esclusivo'
+      'Ruoli di responsabilità e visibilità',
+      'Riconoscimento delle proprie competenze',
+      'Obiettivi sfidanti e misurabili',
+      'Autonomia decisionale'
     ],
-    paura_principale: 'Essere SCAVALCATO o trattato come tutti gli altri',
+    paura_principale: 'Essere sottovalutato o confinato in ruoli operativi senza crescita',
     come_riconoscerlo: [
-      'Chiede accesso esclusivo o trattamento speciale',
-      'Parla di brand di lusso o esperienze esclusive',
-      'Non vuole essere paragonato agli altri'
+      'Parla di risultati ottenuti in passato',
+      'Chiede informazioni sulla crescita di carriera',
+      'Mostra sicurezza nel presentare le proprie idee'
     ],
     come_gestirlo: [
-      'Farlo sentire parte di un gruppo ristretto ed elitario',
-      'Assegnargli progetti speciali o responsabilità esclusive',
-      'Riconoscimenti pubblici e visibilità',
-      'Evitare paragoni con altri dipendenti'
+      'Assegnare progetti con alta visibilità',
+      'Definire obiettivi chiari e misurabili',
+      'Riconoscere pubblicamente i successi',
+      'Offrire un percorso di crescita definito'
     ],
     errori_da_evitare: [
-      'Dire che "TUTTI" fanno così',
-      'Paragonarlo ad altri candidati o colleghi',
-      'Farlo sentire parte della massa'
+      'Assegnare solo compiti operativi e ripetitivi',
+      'Non fornire feedback sui risultati',
+      'Limitare l\'autonomia decisionale',
+      'Ignorare le sue proposte di miglioramento'
     ],
-    ruoli_ideali: ['Direzione', 'Account Manager VIP', 'Brand Ambassador', 'Ruoli di rappresentanza'],
+    ruoli_ideali: ['Direzione', 'Project Manager', 'Team Leader', 'Account Manager', 'Business Development'],
     colore: 'bg-purple-500',
     colorBg: 'bg-purple-100',
     colorText: 'text-purple-700'
@@ -54,32 +56,33 @@ export const PROFILO_DESCRIPTIONS: Record<ProfiloTipo, ProfiloDescription> = {
   ORIGINALE: {
     label: 'Originale',
     macrocategoria: 'PROTAGONISTA',
-    motto: 'Voglio essere IL PRIMO',
-    descrizione_breve: 'Persona innovativa che vuole distinguersi per originalità. Cerca sempre la novità, l\'avanguardia, essere il pioniere. Non segue: guida.',
+    motto: 'Voglio INNOVARE e fare la DIFFERENZA',
+    descrizione_breve: 'Candidato creativo e orientato all\'innovazione. Non segue schemi predefiniti, preferisce sperimentare nuovi approcci. Alta motivazione e determinazione nel raggiungere obiettivi in modo non convenzionale. Adatto a contesti dinamici e in trasformazione.',
     cosa_vuole: [
-      'Essere il PRIMO a provare cose nuove',
-      'Distinguersi dalla massa per ORIGINALITÀ',
-      'Anticipare le tendenze',
-      'Essere riconosciuto come INNOVATORE'
+      'Libertà di sperimentare nuovi approcci',
+      'Essere coinvolto in progetti innovativi',
+      'Ambiente che valorizzi le idee creative',
+      'Sfide che richiedono soluzioni originali'
     ],
-    paura_principale: 'Essere SUPERATO o considerato "già visto"',
+    paura_principale: 'Essere costretto in procedure rigide che limitano la creatività',
     come_riconoscerlo: [
-      'Parla sempre di novità e innovazione',
-      'Chiede se esistono versioni beta o anteprime',
-      'Vuole essere coinvolto in progetti pilota'
+      'Propone soluzioni non convenzionali',
+      'Chiede se ci sono progetti pilota o sperimentazioni',
+      'Mostra insofferenza per i processi troppo burocratici'
     ],
     come_gestirlo: [
-      'Coinvolgerlo nei progetti di innovazione',
-      'Dargli accesso anticipato a nuove iniziative',
-      'Valorizzare le sue idee creative',
-      'Assegnargli ruoli di sperimentazione'
+      'Coinvolgerlo in progetti di innovazione',
+      'Dare spazio alle sue proposte creative',
+      'Non imporre procedure troppo rigide',
+      'Valorizzare i risultati più che i metodi'
     ],
     errori_da_evitare: [
-      'Proporre soluzioni "standard" o "consolidate"',
-      'Ignorare le sue proposte innovative',
-      'Metterlo in ruoli troppo proceduralizzati'
+      'Imporre procedure standard senza flessibilità',
+      'Ignorare o bocciare le sue proposte innovative',
+      'Assegnarlo a ruoli troppo strutturati',
+      'Richiedere conformità senza spiegare il perché'
     ],
-    ruoli_ideali: ['R&D', 'Product Development', 'Marketing Innovativo', 'Startup interne'],
+    ruoli_ideali: ['R&D', 'Product Development', 'Marketing Strategico', 'Startup interne', 'Consulenza'],
     colore: 'bg-cyan-500',
     colorBg: 'bg-cyan-100',
     colorText: 'text-cyan-700'
@@ -88,32 +91,34 @@ export const PROFILO_DESCRIPTIONS: Record<ProfiloTipo, ProfiloDescription> = {
   ANALITICO: {
     label: 'Analitico',
     macrocategoria: 'PROTAGONISTA',
-    motto: 'Voglio essere IL PIÙ INTELLIGENTE',
-    descrizione_breve: 'Persona razionale che basa tutto su dati e logica. Analizza, confronta, valuta. Non decide d\'impulso: studia. Vuole capire il "perché" di tutto.',
+    motto: 'Voglio CAPIRE e decidere con DATI',
+    descrizione_breve: 'Candidato metodico e razionale. Elevata schematicità indica preferenza per procedure definite e decisioni basate su dati. Affidabile nell\'esecuzione di compiti che richiedono precisione. Può risultare rigido di fronte ai cambiamenti improvvisi.',
     cosa_vuole: [
-      'Dati, numeri, prove CONCRETE',
-      'Tempo per analizzare e confrontare',
-      'Spiegazioni LOGICHE e dettagliate',
-      'Essere riconosciuto per la sua COMPETENZA'
+      'Informazioni complete prima di decidere',
+      'Tempo per analizzare le situazioni',
+      'Procedure chiare e documentate',
+      'Riconoscimento della propria competenza tecnica'
     ],
-    paura_principale: 'Prendere decisioni SBAGLIATE o essere colto impreparato',
+    paura_principale: 'Prendere decisioni affrettate senza dati sufficienti',
     come_riconoscerlo: [
       'Fa molte domande tecniche e dettagliate',
-      'Chiede documentazione e specifiche',
-      'Prende appunti e confronta opzioni'
+      'Prende appunti e chiede documentazione',
+      'Valuta attentamente pro e contro'
     ],
     come_gestirlo: [
-      'Fornire dati e analisi dettagliate',
-      'Dargli tempo per elaborare le decisioni',
-      'Rispettare il suo bisogno di approfondimento',
-      'Valorizzare la sua capacità analitica'
+      'Fornire dati e analisi a supporto delle richieste',
+      'Concedere tempo per elaborare le decisioni',
+      'Comunicare i cambiamenti con anticipo',
+      'Valorizzare la sua precisione e affidabilità'
     ],
     errori_da_evitare: [
-      'Pressarlo per decisioni rapide',
-      'Essere vaghi o superficiali',
-      'Sottovalutare le sue domande'
+      'Pressare per decisioni immediate',
+      'Cambiare spesso direzione senza spiegazioni',
+      'Essere vaghi nelle comunicazioni',
+      'Sottovalutare il suo bisogno di approfondimento'
     ],
-    ruoli_ideali: ['Controller', 'Analista', 'Quality Assurance', 'Consulenza strategica'],
+    ruoli_ideali: ['Controller', 'Analista', 'Quality Assurance', 'Compliance', 'Revisione processi'],
+    alert_hr: 'Nota: Alta schematicità può indicare difficoltà ad adattarsi in contesti molto dinamici',
     colore: 'bg-blue-600',
     colorBg: 'bg-blue-100',
     colorText: 'text-blue-700'
@@ -122,32 +127,33 @@ export const PROFILO_DESCRIPTIONS: Record<ProfiloTipo, ProfiloDescription> = {
   ESTETA: {
     label: 'Esteta',
     macrocategoria: 'PROTAGONISTA',
-    motto: 'Voglio essere IL PIÙ BELLO',
-    descrizione_breve: 'Persona attenta all\'estetica e all\'immagine. L\'apparenza conta quanto la sostanza. Cerca armonia, design, eleganza in tutto ciò che fa.',
+    motto: 'Voglio QUALITÀ e ECCELLENZA',
+    descrizione_breve: 'Candidato attento alla qualità e all\'immagine. Elevati standard personali e professionali. Cerca ambienti di lavoro curati e ruoli che permettano di esprimere il proprio senso estetico. Orientato all\'eccellenza e al dettaglio.',
     cosa_vuole: [
-      'Ambienti di lavoro CURATI ed eleganti',
-      'Attenzione all\'IMMAGINE e alla presentazione',
-      'Prodotti e strumenti dal design RAFFINATO',
-      'Essere apprezzato per il suo GUSTO'
+      'Ambiente di lavoro curato e professionale',
+      'Ruoli che richiedano attenzione al dettaglio',
+      'Standard qualitativi elevati',
+      'Riconoscimento del proprio buon gusto'
     ],
-    paura_principale: 'Essere associato a cose BRUTTE o di cattivo gusto',
+    paura_principale: 'Essere associato a lavori approssimativi o di bassa qualità',
     come_riconoscerlo: [
-      'Molto curato nell\'aspetto personale',
-      'Nota i dettagli estetici dell\'ambiente',
+      'Curato nell\'aspetto e nella presentazione',
+      'Nota i dettagli dell\'ambiente',
       'Preferisce la qualità alla quantità'
     ],
     come_gestirlo: [
-      'Curare l\'ambiente e la presentazione',
-      'Valorizzare il suo senso estetico',
-      'Assegnargli compiti che richiedono cura del dettaglio',
-      'Coinvolgerlo nelle scelte di immagine aziendale'
+      'Assegnare compiti che richiedono cura del dettaglio',
+      'Coinvolgerlo in progetti di immagine aziendale',
+      'Mantenere standard qualitativi elevati',
+      'Apprezzare il suo contributo estetico'
     ],
     errori_da_evitare: [
-      'Ambienti trascurati o disordinati',
-      'Presentazioni approssimative',
-      'Ignorare l\'importanza dell\'immagine'
+      'Assegnare lavori frettolosi o approssimativi',
+      'Ignorare l\'importanza della presentazione',
+      'Ambienti trascurati o disorganizzati',
+      'Sottovalutare l\'impatto del "come" oltre al "cosa"'
     ],
-    ruoli_ideali: ['Marketing', 'Comunicazione', 'Eventi', 'Customer Experience'],
+    ruoli_ideali: ['Marketing', 'Comunicazione', 'Customer Experience', 'Eventi', 'Design'],
     colore: 'bg-pink-500',
     colorBg: 'bg-pink-100',
     colorText: 'text-pink-700'
@@ -156,32 +162,33 @@ export const PROFILO_DESCRIPTIONS: Record<ProfiloTipo, ProfiloDescription> = {
   CONSERVATORE: {
     label: 'Conservatore',
     macrocategoria: 'PROTAGONISTA',
-    motto: 'Voglio essere IL PIÙ FURBO',
-    descrizione_breve: 'Persona prudente che investe, non spreca. Cerca il valore duraturo, la solidità. Non è tirchio: è STRATEGICO. Pensa al lungo termine.',
+    motto: 'Voglio SOLIDITÀ e risultati DURATURI',
+    descrizione_breve: 'Candidato prudente e strategico. Preferisce investire nel lungo termine piuttosto che ottenere risultati effimeri. Affidabile e metodico, valuta attentamente rischi e opportunità. Ideale per ruoli che richiedono stabilità e visione di lungo periodo.',
     cosa_vuole: [
-      'Investimenti SICURI e duraturi',
-      'Valore nel TEMPO',
-      'Garanzie e AFFIDABILITÀ',
-      'Essere considerato SAGGIO nelle scelte'
+      'Stabilità contrattuale e aziendale',
+      'Progetti con impatto duraturo',
+      'Tempo per valutare le decisioni importanti',
+      'Garanzie e chiarezza sul futuro'
     ],
-    paura_principale: 'SPRECARE risorse o essere ingannato',
+    paura_principale: 'Investire energie in progetti effimeri o aziende instabili',
     come_riconoscerlo: [
-      'Chiede informazioni sulla durata e affidabilità',
-      'Valuta attentamente costi e benefici',
-      'Preferisce soluzioni consolidate'
+      'Chiede informazioni sulla solidità aziendale',
+      'Valuta il rapporto costi/benefici di ogni scelta',
+      'Preferisce la sicurezza alla velocità'
     ],
     come_gestirlo: [
-      'Presentare investimenti a lungo termine',
-      'Fornire garanzie e track record',
-      'Mostrare il ritorno sull\'investimento',
-      'Valorizzare le sue scelte prudenti'
+      'Presentare piani a lungo termine',
+      'Fornire garanzie e certezze dove possibile',
+      'Mostrare il track record aziendale',
+      'Valorizzare il suo approccio prudente'
     ],
     errori_da_evitare: [
-      'Proporre soluzioni effimere o trendy',
-      'Essere pressanti o aggressivi',
-      'Sottovalutare la sua prudenza'
+      'Proporre cambiamenti frequenti senza motivo',
+      'Essere pressanti sulle tempistiche',
+      'Non comunicare la visione di lungo periodo',
+      'Sottovalutare le sue preoccupazioni'
     ],
-    ruoli_ideali: ['Amministrazione', 'Finanza', 'Operations', 'Gestione patrimonio'],
+    ruoli_ideali: ['Amministrazione', 'Finanza', 'Operations', 'Gestione Risorse', 'Pianificazione'],
     colore: 'bg-amber-600',
     colorBg: 'bg-amber-100',
     colorText: 'text-amber-700'
@@ -190,32 +197,33 @@ export const PROFILO_DESCRIPTIONS: Record<ProfiloTipo, ProfiloDescription> = {
   AFFETTO: {
     label: 'Affetto',
     macrocategoria: 'APPARTENENTE',
-    motto: 'Voglio essere AMATO',
-    descrizione_breve: 'Persona relazionale che cerca approvazione e armonia. Le relazioni vengono prima di tutto. Vuole piacere e far felici gli altri.',
+    motto: 'Voglio FAR PARTE del TEAM',
+    descrizione_breve: 'Candidato con forte orientamento relazionale. Le connessioni umane sono prioritarie rispetto ai risultati individuali. Eccellente nel lavoro di squadra e nella mediazione. Cerca ambienti collaborativi dove sentirsi parte di una "famiglia" professionale.',
     cosa_vuole: [
-      'APPROVAZIONE dai colleghi e superiori',
-      'Ambiente di lavoro ARMONIOSO',
-      'Sentirsi PARTE della famiglia aziendale',
-      'Riconoscimento del suo contributo UMANO'
+      'Clima aziendale positivo e collaborativo',
+      'Sentirsi parte integrante del team',
+      'Relazioni autentiche con colleghi e superiori',
+      'Riconoscimento del proprio contributo umano'
     ],
-    paura_principale: 'Essere RIFIUTATO o creare conflitti',
+    paura_principale: 'Essere escluso dal gruppo o creare conflitti',
     come_riconoscerlo: [
-      'Parla molto delle relazioni personali',
-      'Cerca consenso prima di decidere',
-      'Evita i conflitti e media le situazioni'
+      'Chiede informazioni sul clima aziendale',
+      'Parla di esperienze di team del passato',
+      'Evita i conflitti e cerca mediazione'
     ],
     come_gestirlo: [
-      'Creare un ambiente familiare e accogliente',
-      'Coinvolgerlo nelle attività di team building',
+      'Creare un ambiente accogliente e inclusivo',
+      'Coinvolgerlo in attività di team building',
       'Apprezzare pubblicamente il suo contributo',
-      'Gestire i conflitti con delicatezza'
+      'Gestire i conflitti con sensibilità'
     ],
     errori_da_evitare: [
+      'Isolarlo in ruoli troppo autonomi',
+      'Creare situazioni di competizione interna',
       'Essere freddi o distaccati',
-      'Creare situazioni di conflitto',
-      'Ignorare l\'aspetto umano del lavoro'
+      'Ignorare l\'importanza delle relazioni'
     ],
-    ruoli_ideali: ['HR', 'Customer Care', 'Team Leader', 'Formazione'],
+    ruoli_ideali: ['HR', 'Customer Care', 'Team Leader', 'Formazione', 'Accoglienza'],
     colore: 'bg-rose-500',
     colorBg: 'bg-rose-100',
     colorText: 'text-rose-700'
@@ -224,32 +232,35 @@ export const PROFILO_DESCRIPTIONS: Record<ProfiloTipo, ProfiloDescription> = {
   SICUREZZA: {
     label: 'Sicurezza',
     macrocategoria: 'APPARTENENTE',
-    motto: 'Voglio essere PROTETTO',
-    descrizione_breve: 'Persona che cerca stabilità e rassicurazioni. Il mondo è incerto e cerca punti fermi. Ha bisogno di certezze e protezione.',
+    motto: 'Voglio STABILITÀ e CERTEZZE',
+    descrizione_breve: 'Candidato che attraversa un momento di vulnerabilità. I punteggi indicano difficoltà nello stile di vita e/o nella capacità di fronteggiare lo stress. Cerca un ambiente protetto, procedure chiare e rassicurazioni costanti. Richiede un inserimento graduale e supportivo.',
     cosa_vuole: [
-      'STABILITÀ e prevedibilità',
-      'RASSICURAZIONI continue',
-      'Procedure CHIARE e definite',
-      'Protezione dai RISCHI'
+      'Ambiente di lavoro stabile e prevedibile',
+      'Procedure chiare e ruoli definiti',
+      'Rassicurazioni costanti dal management',
+      'Tempo per adattarsi ai cambiamenti'
     ],
-    paura_principale: 'L\'INCERTEZZA e i cambiamenti improvvisi',
+    paura_principale: 'Instabilità e cambiamenti improvvisi che aumentino lo stress',
     come_riconoscerlo: [
-      'Chiede garanzie e conferme',
-      'Preferisce procedure consolidate',
-      'È cauto di fronte alle novità'
+      'Chiede molte garanzie e conferme',
+      'Mostra incertezza nelle risposte',
+      'Preferisce sapere esattamente cosa aspettarsi'
     ],
     come_gestirlo: [
-      'Fornire procedure chiare e documentate',
-      'Comunicare con anticipo i cambiamenti',
-      'Rassicurare con frequenza',
-      'Creare un ambiente stabile'
+      'Assegnare compiti con scadenze chiare e realistiche',
+      'Fornire feedback frequenti e costruttivi',
+      'Evitare sovraccarichi di responsabilità iniziali',
+      'Creare un percorso di onboarding graduale',
+      'Valutare supporto HR/welfare aziendale'
     ],
     errori_da_evitare: [
-      'Cambiamenti improvvisi senza preavviso',
-      'Lasciarlo nell\'incertezza',
-      'Sottovalutare le sue preoccupazioni'
+      'Inserirlo in ruoli ad alta pressione',
+      'Aspettarsi autonomia decisionale immediata',
+      'Cambiare spesso obiettivi o procedure',
+      'Ignorare i segnali di stress'
     ],
-    ruoli_ideali: ['Compliance', 'Back Office', 'Amministrazione', 'Controllo Qualità'],
+    ruoli_ideali: ['Back Office', 'Supporto Amministrativo', 'Ruoli operativi strutturati', 'Data Entry', 'Archivio'],
+    alert_hr: 'ATTENZIONE: Stress Zone o aree critiche rilevate. Consigliato colloquio approfondito per valutare situazione personale e capacità di inserimento.',
     colore: 'bg-slate-500',
     colorBg: 'bg-slate-100',
     colorText: 'text-slate-700'
@@ -258,32 +269,33 @@ export const PROFILO_DESCRIPTIONS: Record<ProfiloTipo, ProfiloDescription> = {
   COMODITA: {
     label: 'Comodità',
     macrocategoria: 'APPARTENENTE',
-    motto: 'Voglio essere SERVITO',
-    descrizione_breve: 'Persona che cerca soluzioni chiavi in mano. Non vuole complicazioni: vuole che tutto sia FACILE. Delega volentieri e apprezza il servizio.',
+    motto: 'Voglio SEMPLICITÀ ed EFFICIENZA',
+    descrizione_breve: 'Candidato che preferisce la semplicità alla complessità. Tende a delegare e a cercare soluzioni chiavi in mano. Non ama le complicazioni burocratiche. Può essere efficace in ruoli di coordinamento dove altri eseguono le attività operative.',
     cosa_vuole: [
-      'Soluzioni SEMPLICI e immediate',
-      'Qualcuno che si occupi dei DETTAGLI',
-      'Processi SNELLI e senza intoppi',
-      'Il minimo sforzo per il massimo risultato'
+      'Processi semplificati e diretti',
+      'Supporto operativo per le attività di dettaglio',
+      'Risultati senza eccessive complicazioni',
+      'Chiarezza su cosa ci si aspetta da lui/lei'
     ],
-    paura_principale: 'Le COMPLICAZIONI e le procedure farraginose',
+    paura_principale: 'Essere sovraccaricato di procedure complesse e burocratiche',
     come_riconoscerlo: [
-      'Chiede "quanto è semplice?"',
-      'Preferisce delegare',
-      'Evita i dettagli tecnici'
+      'Chiede "quanto è semplice?" o "chi mi supporta?"',
+      'Preferisce delegare i dettagli operativi',
+      'Evita approfondimenti troppo tecnici'
     ],
     come_gestirlo: [
-      'Offrire soluzioni chiavi in mano',
       'Semplificare processi e comunicazioni',
-      'Occuparsi dei dettagli al suo posto',
+      'Fornire supporto operativo strutturato',
+      'Definire chiaramente responsabilità e limiti',
       'Essere proattivi nell\'assistenza'
     ],
     errori_da_evitare: [
-      'Procedure complesse e burocratiche',
-      'Richiedere troppo impegno personale',
+      'Assegnare troppi compiti operativi di dettaglio',
+      'Procedure complesse senza supporto',
+      'Aspettarsi gestione autonoma di ogni aspetto',
       'Complicare le cose semplici'
     ],
-    ruoli_ideali: ['Management', 'Direzione Commerciale', 'Ruoli deleganti'],
+    ruoli_ideali: ['Coordinamento', 'Supervisione', 'Ruoli di interfaccia', 'Project Oversight'],
     colore: 'bg-teal-500',
     colorBg: 'bg-teal-100',
     colorText: 'text-teal-700'
@@ -292,32 +304,33 @@ export const PROFILO_DESCRIPTIONS: Record<ProfiloTipo, ProfiloDescription> = {
   SVAGO: {
     label: 'Svago',
     macrocategoria: 'APPARTENENTE',
-    motto: 'Voglio essere LIBERO',
-    descrizione_breve: 'Persona che cerca equilibrio vita-lavoro. Il lavoro non è tutto: c\'è la vita! Cerca libertà, flessibilità, tempo per sé.',
+    motto: 'Voglio EQUILIBRIO e QUALITÀ della vita',
+    descrizione_breve: 'Candidato con forte attenzione al work-life balance. I punteggi mostrano buon equilibrio tra sfera personale e professionale. Cerca flessibilità e ambienti che rispettino i tempi personali. Produttivo quando ha la giusta autonomia.',
     cosa_vuole: [
-      'FLESSIBILITÀ negli orari e modalità',
-      'Tempo LIBERO da dedicare alle passioni',
-      'Ambiente di lavoro DIVERTENTE',
-      'Work-life BALANCE'
+      'Flessibilità negli orari e modalità di lavoro',
+      'Rispetto del tempo personale',
+      'Ambiente di lavoro positivo e non oppressivo',
+      'Valutazione sui risultati, non sulla presenza'
     ],
-    paura_principale: 'Essere INGABBIATO in routine rigide',
+    paura_principale: 'Essere intrappolato in routine rigide che sacrificano la vita privata',
     come_riconoscerlo: [
       'Chiede informazioni su smart working e flessibilità',
-      'Parla dei suoi hobby e interessi',
+      'Parla dei suoi hobby e interessi personali',
       'Valuta molto il clima aziendale'
     ],
     come_gestirlo: [
       'Offrire flessibilità dove possibile',
-      'Rispettare il suo tempo personale',
-      'Creare momenti di svago aziendale',
-      'Valorizzare i risultati più che la presenza'
+      'Valutare i risultati più che la presenza',
+      'Rispettare i confini tra lavoro e vita privata',
+      'Creare momenti di socializzazione aziendale'
     ],
     errori_da_evitare: [
       'Orari rigidi e controllo eccessivo',
+      'Straordinari costanti senza motivo',
       'Ignorare il suo bisogno di equilibrio',
-      'Sovraccaricare costantemente'
+      'Cultura del "sempre disponibile"'
     ],
-    ruoli_ideali: ['Consulente esterno', 'Freelance interno', 'Ruoli creativi', 'Marketing'],
+    ruoli_ideali: ['Consulenza', 'Ruoli con obiettivi misurabili', 'Smart working', 'Project work'],
     colore: 'bg-green-500',
     colorBg: 'bg-green-100',
     colorText: 'text-green-700'
@@ -326,32 +339,34 @@ export const PROFILO_DESCRIPTIONS: Record<ProfiloTipo, ProfiloDescription> = {
   RISPARMIO: {
     label: 'Risparmio',
     macrocategoria: 'APPARTENENTE',
-    motto: 'Voglio NON SPENDERE',
-    descrizione_breve: 'Persona orientata al costo. Il prezzo è il fattore determinante. Non cerca il meglio: cerca il più conveniente. Budget-oriented al 100%.',
+    motto: 'Voglio OTTIMIZZARE le risorse',
+    descrizione_breve: 'Candidato orientato all\'efficienza e all\'ottimizzazione dei costi. I punteggi generalmente bassi possono indicare un approccio minimalista o difficoltà trasversali. Attento al rapporto costi/benefici di ogni azione. Può essere prezioso in ruoli di controllo budget.',
     cosa_vuole: [
-      'Il PREZZO più basso possibile',
-      'SCONTI e agevolazioni',
-      'Massimizzare il RISPARMIO',
-      'Ottimizzare i COSTI'
+      'Chiarezza sui costi e benefici',
+      'Efficienza nei processi',
+      'Evitare sprechi di tempo e risorse',
+      'Riconoscimento della propria utilità pratica'
     ],
-    paura_principale: 'PAGARE troppo o sprecare denaro',
+    paura_principale: 'Investire energie in attività senza ritorno misurabile',
     come_riconoscerlo: [
-      'La prima domanda è sempre sul prezzo',
-      'Confronta costantemente i costi',
-      'Negozia sempre'
+      'Chiede informazioni su budget e risorse',
+      'Confronta sempre le alternative',
+      'Cerca il modo più efficiente di fare le cose'
     ],
     come_gestirlo: [
-      'Essere trasparenti sui costi',
-      'Mostrare il value for money',
-      'Proporre ottimizzazioni di budget',
-      'Coinvolgerlo nelle scelte economiche'
+      'Essere trasparenti sui costi e investimenti',
+      'Mostrare il valore pratico delle attività',
+      'Coinvolgerlo nelle ottimizzazioni',
+      'Definire metriche chiare di successo'
     ],
     errori_da_evitare: [
-      'Proposte costose senza giustificazione',
-      'Nascondere i costi',
-      'Sottovalutare la sua attenzione al budget'
+      'Sprechi evidenti di risorse',
+      'Progetti senza ROI chiaro',
+      'Ignorare le sue proposte di ottimizzazione',
+      'Richiedere sforzi senza mostrare il ritorno'
     ],
-    ruoli_ideali: ['Acquisti', 'Procurement', 'Cost Controller', 'Operations'],
+    ruoli_ideali: ['Acquisti', 'Procurement', 'Cost Controller', 'Operations', 'Logistica'],
+    alert_hr: 'Nota: Punteggi generalmente bassi possono indicare necessità di approfondimento sulle motivazioni e le aspettative.',
     colore: 'bg-orange-500',
     colorBg: 'bg-orange-100',
     colorText: 'text-orange-700'
@@ -361,7 +376,7 @@ export const PROFILO_DESCRIPTIONS: Record<ProfiloTipo, ProfiloDescription> = {
 export const MACROCATEGORIA_INFO: Record<MacroCategoria, { label: string; descrizione: string; colore: string }> = {
   PROTAGONISTA: {
     label: 'Protagonista',
-    descrizione: 'Cerca di distinguersi, essere riconosciuto, emergere dalla massa',
+    descrizione: 'Cerca di distinguersi, essere riconosciuto, emergere per le proprie qualità',
     colore: 'bg-primary text-primary-foreground'
   },
   APPARTENENTE: {
@@ -373,19 +388,20 @@ export const MACROCATEGORIA_INFO: Record<MacroCategoria, { label: string; descri
 
 // Default profile for unknown/legacy types
 const DEFAULT_PROFILE: ProfiloDescription = {
-  label: 'Conservatore',
-  macrocategoria: 'PROTAGONISTA',
-  motto: 'Voglio essere IL PIÙ FURBO',
-  descrizione_breve: 'Persona prudente che investe, non spreca. Cerca il valore duraturo, la solidità.',
-  cosa_vuole: ['Investimenti sicuri e duraturi', 'Valore nel tempo', 'Garanzie e affidabilità'],
-  paura_principale: 'Sprecare risorse o essere ingannato',
-  come_riconoscerlo: ['Valuta attentamente costi e benefici', 'Preferisce soluzioni consolidate'],
-  come_gestirlo: ['Presentare investimenti a lungo termine', 'Fornire garanzie e track record'],
-  errori_da_evitare: ['Proporre soluzioni effimere', 'Essere pressanti'],
-  ruoli_ideali: ['Amministrazione', 'Finanza', 'Operations'],
-  colore: 'bg-amber-600',
-  colorBg: 'bg-amber-100',
-  colorText: 'text-amber-700'
+  label: 'In valutazione',
+  macrocategoria: 'APPARTENENTE',
+  motto: 'Profilo in fase di analisi',
+  descrizione_breve: 'Il profilo psicologico è in fase di elaborazione. I dati disponibili non permettono una classificazione definitiva. Si consiglia un colloquio approfondito.',
+  cosa_vuole: ['Chiarezza sulle aspettative', 'Ambiente di lavoro stabile'],
+  paura_principale: 'Incertezza sulla propria collocazione',
+  come_riconoscerlo: ['Profilo da approfondire con colloquio'],
+  come_gestirlo: ['Condurre un colloquio approfondito', 'Valutare caso per caso'],
+  errori_da_evitare: ['Assumere senza ulteriori verifiche'],
+  ruoli_ideali: ['Da valutare'],
+  alert_hr: 'Profilo con dati incompleti o non classificabili. Richiede valutazione manuale.',
+  colore: 'bg-gray-500',
+  colorBg: 'bg-gray-100',
+  colorText: 'text-gray-700'
 };
 
 export function getProfiloDescription(tipo: ProfiloTipo | string | null | undefined): ProfiloDescription {
@@ -397,14 +413,14 @@ export function getProfiloDescription(tipo: ProfiloTipo | string | null | undefi
 
 export function getMacrocategoria(tipo: ProfiloTipo | string | null | undefined): MacroCategoria {
   if (!tipo || !(tipo in PROFILO_DESCRIPTIONS)) {
-    return 'PROTAGONISTA';
+    return 'APPARTENENTE';
   }
   return PROFILO_DESCRIPTIONS[tipo as ProfiloTipo].macrocategoria;
 }
 
 export function getProfiloColor(tipo: ProfiloTipo | string | null | undefined): string {
   if (!tipo || !(tipo in PROFILO_DESCRIPTIONS)) {
-    return 'bg-amber-600';
+    return 'bg-gray-500';
   }
   return PROFILO_DESCRIPTIONS[tipo as ProfiloTipo].colore;
 }
