@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Brain } from 'lucide-react';
+import { Brain, User, Building2, Loader2 } from 'lucide-react';
 
 export default function Auth() {
   const [email, setEmail] = useState('');
@@ -15,6 +15,12 @@ export default function Auth() {
   const [nome, setNome] = useState('');
   const [cognome, setCognome] = useState('');
   const [loading, setLoading] = useState(false);
+  
+  // Candidate login state
+  const [candidateUsername, setCandidateUsername] = useState('');
+  const [candidatePassword, setCandidatePassword] = useState('');
+  const [candidateLoading, setCandidateLoading] = useState(false);
+  
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -53,6 +59,57 @@ export default function Auth() {
     }
   };
 
+  const handleCandidateLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCandidateLoading(true);
+
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/candidate-login`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            username: candidateUsername.trim().toLowerCase(),
+            password: candidatePassword,
+          }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Credenziali non valide');
+      }
+
+      // Store session info for the anagraphic form
+      sessionStorage.setItem('candidate_session', JSON.stringify({
+        sessionToken: result.sessionToken,
+        azienda: result.azienda,
+        expiresAt: result.expiresAt,
+      }));
+
+      toast({
+        title: 'Accesso effettuato',
+        description: 'Compila i tuoi dati per procedere',
+      });
+
+      navigate('/test/anagrafica');
+
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Credenziali non valide';
+      toast({
+        title: 'Errore',
+        description: message,
+        variant: 'destructive',
+      });
+    } finally {
+      setCandidateLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
@@ -66,23 +123,74 @@ export default function Auth() {
           <CardDescription>Sistema di Assessment HR</CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="login">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login">Accedi</TabsTrigger>
+          <Tabs defaultValue="candidate" className="space-y-4">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="candidate" className="flex items-center gap-1">
+                <User className="h-4 w-4" />
+                <span className="hidden sm:inline">Candidato</span>
+              </TabsTrigger>
+              <TabsTrigger value="azienda" className="flex items-center gap-1">
+                <Building2 className="h-4 w-4" />
+                <span className="hidden sm:inline">Azienda</span>
+              </TabsTrigger>
               <TabsTrigger value="register">Registrati</TabsTrigger>
             </TabsList>
-            
-            <TabsContent value="login">
-              <form onSubmit={handleSignIn} className="space-y-4 mt-4">
+
+            {/* Candidate Login Tab */}
+            <TabsContent value="candidate">
+              <form onSubmit={handleCandidateLogin} className="space-y-4 mt-4">
+                <div className="text-center text-sm text-muted-foreground mb-4">
+                  Accedi con le credenziali fornite dalla tua azienda
+                </div>
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email o Username</Label>
+                  <Label htmlFor="candidate-username">Username</Label>
+                  <Input 
+                    id="candidate-username" 
+                    type="text" 
+                    value={candidateUsername} 
+                    onChange={e => setCandidateUsername(e.target.value)} 
+                    required 
+                    placeholder="es. teknofinestre-a1b2"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="candidate-password">Password</Label>
+                  <Input 
+                    id="candidate-password" 
+                    type="password" 
+                    value={candidatePassword} 
+                    onChange={e => setCandidatePassword(e.target.value)} 
+                    required 
+                  />
+                </div>
+                <Button type="submit" className="w-full bg-accent hover:bg-accent/90" disabled={candidateLoading}>
+                  {candidateLoading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Accesso...
+                    </>
+                  ) : (
+                    'Accedi al Test'
+                  )}
+                </Button>
+              </form>
+            </TabsContent>
+            
+            {/* Company/Admin Login Tab */}
+            <TabsContent value="azienda">
+              <form onSubmit={handleSignIn} className="space-y-4 mt-4">
+                <div className="text-center text-sm text-muted-foreground mb-4">
+                  Accesso per aziende e amministratori
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
                   <Input 
                     id="email" 
-                    type="text" 
+                    type="email" 
                     value={email} 
                     onChange={e => setEmail(e.target.value)} 
                     required 
-                    placeholder="email@esempio.it o username"
+                    placeholder="email@azienda.it"
                   />
                 </div>
                 <div className="space-y-2">
@@ -90,11 +198,19 @@ export default function Auth() {
                   <Input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} required />
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? 'Accesso...' : 'Accedi'}
+                  {loading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Accesso...
+                    </>
+                  ) : (
+                    'Accedi'
+                  )}
                 </Button>
               </form>
             </TabsContent>
             
+            {/* Registration Tab */}
             <TabsContent value="register">
               <form onSubmit={handleSignUp} className="space-y-4 mt-4">
                 <div className="grid grid-cols-2 gap-4">
@@ -116,7 +232,14 @@ export default function Auth() {
                   <Input id="reg-password" type="password" value={password} onChange={e => setPassword(e.target.value)} required minLength={6} />
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? 'Registrazione...' : 'Registrati'}
+                  {loading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Registrazione...
+                    </>
+                  ) : (
+                    'Registrati'
+                  )}
                 </Button>
               </form>
             </TabsContent>

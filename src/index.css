@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 /* Talent Profile Design System - Professional HR Assessment */
+/* Brand Colors: Orange (Accent) + Blue (Primary) */
 
 @layer base {
   :root {
@@ -15,6 +16,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
 
+    /* Primary Blue - Brand */
     --primary: 221 83% 53%;
     --primary-foreground: 210 40% 98%;
 
@@ -24,8 +26,13 @@
     --muted: 210 40% 96%;
     --muted-foreground: 215 16% 47%;
 
-    --accent: 262 83% 58%;
-    --accent-foreground: 210 40% 98%;
+    /* Accent Orange - Brand */
+    --accent: 24 95% 53%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Selection Orange - for selected states */
+    --selection: 24 95% 53%;
+    --selection-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
@@ -56,6 +63,7 @@
     --chart-warning: 38 92% 50%;
     --chart-danger: 0 84% 60%;
     --chart-normal: 221 83% 53%;
+    --chart-accent: 24 95% 53%;
   }
 
   .dark {
@@ -68,6 +76,7 @@
     --popover: 222 47% 11%;
     --popover-foreground: 210 40% 98%;
 
+    /* Primary Blue - Brand */
     --primary: 221 83% 53%;
     --primary-foreground: 210 40% 98%;
 
@@ -77,8 +86,13 @@
     --muted: 222 47% 18%;
     --muted-foreground: 215 20% 65%;
 
-    --accent: 262 83% 58%;
-    --accent-foreground: 210 40% 98%;
+    /* Accent Orange - Brand */
+    --accent: 24 95% 53%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Selection Orange */
+    --selection: 24 95% 53%;
+    --selection-foreground: 0 0% 100%;
 
     --destructive: 0 63% 31%;
     --destructive-foreground: 210 40% 98%;
@@ -101,6 +115,9 @@
     --sidebar-accent-foreground: 210 40% 98%;
     --sidebar-border: 222 47% 14%;
     --sidebar-ring: 221 83% 53%;
+
+    /* Chart colors dark */
+    --chart-accent: 24 95% 53%;
   }
 }
 
@@ -117,5 +134,24 @@
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+}
+
+/* Custom questionnaire styles */
+@layer components {
+  .answer-button {
+    @apply transition-all duration-200 ease-in-out;
+  }
+
+  .answer-button:hover {
+    @apply scale-[1.02];
+  }
+
+  .answer-button-selected {
+    @apply bg-accent text-accent-foreground border-accent shadow-lg;
+  }
+
+  .progress-gradient {
+    background: linear-gradient(90deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
   }
 }
