@@ -55,6 +55,62 @@ export type Database = {
           },
         ]
       }
+      analisi_candidato: {
+        Row: {
+          candidato_id: string
+          created_at: string | null
+          fit_motivo: string | null
+          fit_score: number | null
+          fit_verdict: string | null
+          generated_at: string | null
+          id: string
+          profilo_sintetico: string | null
+          punti_debolezza: Json | null
+          punti_forza: Json | null
+          raccomandazione: Json | null
+          rischi_operativi: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          candidato_id: string
+          created_at?: string | null
+          fit_motivo?: string | null
+          fit_score?: number | null
+          fit_verdict?: string | null
+          generated_at?: string | null
+          id?: string
+          profilo_sintetico?: string | null
+          punti_debolezza?: Json | null
+          punti_forza?: Json | null
+          raccomandazione?: Json | null
+          rischi_operativi?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          candidato_id?: string
+          created_at?: string | null
+          fit_motivo?: string | null
+          fit_score?: number | null
+          fit_verdict?: string | null
+          generated_at?: string | null
+          id?: string
+          profilo_sintetico?: string | null
+          punti_debolezza?: Json | null
+          punti_forza?: Json | null
+          raccomandazione?: Json | null
+          rischi_operativi?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analisi_candidato_candidato_id_fkey"
+            columns: ["candidato_id"]
+            isOneToOne: true
+            referencedRelation: "candidati"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       aziende: {
         Row: {
           attiva: boolean | null
