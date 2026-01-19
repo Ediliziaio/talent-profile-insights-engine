@@ -1,11 +1,12 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Layout } from '@/components/Layout';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Table,
   TableBody,
@@ -21,18 +22,33 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { ClipboardList, Eye, Calendar, User } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { ClipboardList, Eye, Calendar, User, TestTube2, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { Candidato, Azienda, ProfiloCandidato } from '@/types/database';
 import { getProfiloTipoLabel } from '@/lib/scoring';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
+import { useToast } from '@/hooks/use-toast';
 
 export default function Risultati() {
   const { profile } = useAuth();
   const isSuperadmin = profile?.ruolo === 'superadmin';
   const [filterAzienda, setFilterAzienda] = useState<string>('all');
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const { data: aziende } = useQuery({
     queryKey: ['aziende'],
@@ -83,6 +99,75 @@ export default function Risultati() {
     }
   };
 
+  const seedMutation = useMutation({
+    mutationFn: async () => {
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData.session) throw new Error('Non autenticato');
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/seed-demo-candidates`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${sessionData.session.access_token}`,
+          },
+        }
+      );
+
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Errore generazione demo');
+      return result;
+    },
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: ['candidati-risultati'] });
+      toast({ title: 'Demo rigenerati', description: result.message });
+    },
+    onError: (error: Error) => {
+      toast({ title: 'Errore', description: error.message, variant: 'destructive' });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (ids: string[]) => {
+      for (const id of ids) {
+        await supabase.from('profili_candidato').delete().eq('candidato_id', id);
+        await supabase.from('risultati').delete().eq('candidato_id', id);
+        await supabase.from('risposte').delete().eq('candidato_id', id);
+        const { error } = await supabase.from('candidati').delete().eq('id', id);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['candidati-risultati'] });
+      const count = selectedIds.size;
+      setSelectedIds(new Set());
+      setIsDeleteDialogOpen(false);
+      toast({ title: 'Candidati eliminati', description: `${count} candidati rimossi` });
+    },
+    onError: (error: Error) => {
+      toast({ title: 'Errore', description: error.message, variant: 'destructive' });
+    },
+  });
+
+  const toggleSelect = (id: string) => {
+    const newSet = new Set(selectedIds);
+    if (newSet.has(id)) {
+      newSet.delete(id);
+    } else {
+      newSet.add(id);
+    }
+    setSelectedIds(newSet);
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === candidatiConProfilo?.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(candidatiConProfilo?.map(c => c.id) || []));
+    }
+  };
+
   return (
     <ProtectedRoute allowedRoles={['superadmin', 'azienda']}>
       <Layout>
@@ -92,19 +177,44 @@ export default function Risultati() {
               <h1 className="text-2xl font-bold">Risultati Test</h1>
               <p className="text-muted-foreground">Visualizza i profili dei candidati che hanno completato il test</p>
             </div>
-            {isSuperadmin && aziende && (
-              <Select value={filterAzienda} onValueChange={setFilterAzienda}>
-                <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="Filtra per azienda" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Tutte le aziende</SelectItem>
-                  {aziende.map((az) => (
-                    <SelectItem key={az.id} value={az.id}>{az.nome}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
+            <div className="flex flex-wrap items-center gap-2">
+              {selectedIds.size > 0 && (
+                <Button 
+                  variant="destructive" 
+                  onClick={() => setIsDeleteDialogOpen(true)}
+                  disabled={deleteMutation.isPending}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Elimina ({selectedIds.size})
+                </Button>
+              )}
+              
+              {isSuperadmin && (
+                <Button 
+                  variant="outline" 
+                  onClick={() => seedMutation.mutate()}
+                  disabled={seedMutation.isPending}
+                  className="border-accent/50 hover:bg-accent/10"
+                >
+                  <TestTube2 className={`h-4 w-4 mr-2 ${seedMutation.isPending ? 'animate-pulse' : ''}`} />
+                  {seedMutation.isPending ? 'Generazione...' : 'Rigenera Demo'}
+                </Button>
+              )}
+              
+              {isSuperadmin && aziende && (
+                <Select value={filterAzienda} onValueChange={setFilterAzienda}>
+                  <SelectTrigger className="w-[200px]">
+                    <SelectValue placeholder="Filtra per azienda" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tutte le aziende</SelectItem>
+                    {aziende.map((az) => (
+                      <SelectItem key={az.id} value={az.id}>{az.nome}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
           </div>
 
           <Card>
@@ -117,6 +227,12 @@ export default function Risultati() {
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead className="w-12">
+                        <Checkbox 
+                          checked={candidatiConProfilo.length > 0 && selectedIds.size === candidatiConProfilo.length}
+                          onCheckedChange={toggleSelectAll}
+                        />
+                      </TableHead>
                       <TableHead>Candidato</TableHead>
                       {isSuperadmin && <TableHead>Azienda</TableHead>}
                       <TableHead>Data Test</TableHead>
@@ -129,7 +245,13 @@ export default function Risultati() {
                   </TableHeader>
                   <TableBody>
                     {candidatiConProfilo.map((candidato) => (
-                      <TableRow key={candidato.id}>
+                      <TableRow key={candidato.id} className={selectedIds.has(candidato.id) ? 'bg-muted/50' : ''}>
+                        <TableCell>
+                          <Checkbox 
+                            checked={selectedIds.has(candidato.id)}
+                            onCheckedChange={() => toggleSelect(candidato.id)}
+                          />
+                        </TableCell>
                         <TableCell className="font-medium">
                           <div className="flex items-center gap-2">
                             <User className="h-4 w-4 text-muted-foreground" />
@@ -193,6 +315,27 @@ export default function Risultati() {
             </CardContent>
           </Card>
         </div>
+        
+        <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Conferma eliminazione</AlertDialogTitle>
+              <AlertDialogDescription>
+                Stai per eliminare {selectedIds.size} candidati e tutti i loro dati 
+                (risposte, risultati, profili). Questa azione non può essere annullata.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Annulla</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => deleteMutation.mutate(Array.from(selectedIds))}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {deleteMutation.isPending ? 'Eliminazione...' : 'Elimina definitivamente'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </Layout>
     </ProtectedRoute>
   );
