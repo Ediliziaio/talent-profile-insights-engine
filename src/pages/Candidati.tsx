@@ -7,7 +7,7 @@ import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
   TableBody,
@@ -34,11 +34,12 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Users, Copy, Check, ExternalLink, Eye } from 'lucide-react';
-import { Candidato, Azienda, RUOLI_AZIENDALI, FUNZIONI } from '@/types/database';
+import { Plus, Users, Copy, Check, Eye, Key, RefreshCw, Download, ArrowUpDown } from 'lucide-react';
+import { Candidato, Azienda, AccessoAzienda, RUOLI_AZIENDALI, FUNZIONI } from '@/types/database';
 import { Link } from 'react-router-dom';
 
-// Credentials are now generated server-side by the edge function
+type SortField = 'cognome' | 'eta' | 'ruolo_attuale' | 'funzione' | 'created_at';
+type SortOrder = 'asc' | 'desc';
 
 export default function Candidati() {
   const { profile } = useAuth();
@@ -47,6 +48,11 @@ export default function Candidati() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [filterAzienda, setFilterAzienda] = useState<string>('all');
+  const [filterStato, setFilterStato] = useState<string>('all');
+  const [filterRuolo, setFilterRuolo] = useState<string>('all');
+  const [filterFunzione, setFilterFunzione] = useState<string>('all');
+  const [sortField, setSortField] = useState<SortField>('created_at');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   const [generatedCredentials, setGeneratedCredentials] = useState<{
     username: string;
     password: string;
@@ -55,6 +61,7 @@ export default function Candidati() {
   } | null>(null);
 
   const isSuperadmin = profile?.ruolo === 'superadmin';
+  const currentAziendaId = isSuperadmin ? filterAzienda : profile?.azienda_id;
 
   const [formData, setFormData] = useState({
     nome: '',
@@ -81,8 +88,25 @@ export default function Candidati() {
     enabled: isSuperadmin,
   });
 
+  // Query credenziali azienda
+  const { data: accessoAzienda, isLoading: isLoadingAccesso } = useQuery({
+    queryKey: ['accesso-azienda', currentAziendaId],
+    queryFn: async () => {
+      if (!currentAziendaId || currentAziendaId === 'all') return null;
+      const { data, error } = await supabase
+        .from('accessi_azienda')
+        .select('*')
+        .eq('azienda_id', currentAziendaId)
+        .eq('attivo', true)
+        .maybeSingle();
+      if (error) throw error;
+      return data as AccessoAzienda | null;
+    },
+    enabled: !!currentAziendaId && currentAziendaId !== 'all',
+  });
+
   const { data: candidati, isLoading } = useQuery({
-    queryKey: ['candidati', filterAzienda],
+    queryKey: ['candidati', filterAzienda, filterStato, filterRuolo, filterFunzione],
     queryFn: async () => {
       let query = supabase
         .from('candidati')
@@ -92,10 +116,59 @@ export default function Candidati() {
       if (filterAzienda && filterAzienda !== 'all') {
         query = query.eq('azienda_id', filterAzienda);
       }
+      if (filterStato === 'completato') {
+        query = query.eq('test_completato', true);
+      } else if (filterStato === 'da_fare') {
+        query = query.eq('test_completato', false);
+      }
+      if (filterRuolo && filterRuolo !== 'all') {
+        query = query.eq('ruolo_attuale', filterRuolo);
+      }
+      if (filterFunzione && filterFunzione !== 'all') {
+        query = query.eq('funzione', filterFunzione);
+      }
 
       const { data, error } = await query;
       if (error) throw error;
       return data as (Candidato & { aziende: { nome: string } })[];
+    },
+  });
+
+  // Mutation per generare/rigenerare credenziali azienda
+  const credentialsMutation = useMutation({
+    mutationFn: async (aziendaId: string) => {
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData.session) throw new Error('Non autenticato');
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/manage-company-access`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${sessionData.session.access_token}`,
+          },
+          body: JSON.stringify({ azienda_id: aziendaId }),
+        }
+      );
+
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Errore nella generazione credenziali');
+      return result;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['accesso-azienda'] });
+      toast({
+        title: 'Credenziali generate',
+        description: 'Le nuove credenziali sono state create con successo',
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Errore',
+        description: error.message,
+        variant: 'destructive',
+      });
     },
   });
 
@@ -105,11 +178,9 @@ export default function Candidati() {
 
       if (!aziendaId) throw new Error('Azienda non specificata');
 
-      // Get current session token
       const { data: sessionData } = await supabase.auth.getSession();
       if (!sessionData.session) throw new Error('Non autenticato');
 
-      // Call edge function to create candidate
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-candidate`,
         {
@@ -188,9 +259,73 @@ export default function Candidati() {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const getTestLink = (token: string) => {
-    return `${window.location.origin}/auth`;
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortOrder('asc');
+    }
   };
+
+  const sortedCandidati = candidati ? [...candidati].sort((a, b) => {
+    let aVal: any = a[sortField];
+    let bVal: any = b[sortField];
+    
+    if (aVal === null || aVal === undefined) aVal = '';
+    if (bVal === null || bVal === undefined) bVal = '';
+    
+    if (typeof aVal === 'string') aVal = aVal.toLowerCase();
+    if (typeof bVal === 'string') bVal = bVal.toLowerCase();
+    
+    if (aVal < bVal) return sortOrder === 'asc' ? -1 : 1;
+    if (aVal > bVal) return sortOrder === 'asc' ? 1 : -1;
+    return 0;
+  }) : [];
+
+  const exportCSV = () => {
+    if (!sortedCandidati || sortedCandidati.length === 0) return;
+
+    const headers = ['Cognome', 'Nome', 'Sesso', 'Età', 'Ruolo', 'Funzione', 'Email', 'Telefono', 'Stato Test', 'Data Creazione', 'Azienda'];
+    const rows = sortedCandidati.map(c => [
+      c.cognome,
+      c.nome,
+      c.sesso || '',
+      c.eta?.toString() || '',
+      c.ruolo_attuale || '',
+      c.funzione || '',
+      c.email || '',
+      c.telefono || '',
+      c.test_completato ? 'Completato' : 'Da fare',
+      new Date(c.created_at).toLocaleDateString('it-IT'),
+      c.aziende?.nome || ''
+    ]);
+
+    const csvContent = [headers, ...rows]
+      .map(row => row.map(cell => `"${cell}"`).join(','))
+      .join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `candidati_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+    URL.revokeObjectURL(link.href);
+
+    toast({ title: 'Esportazione completata', description: `${sortedCandidati.length} candidati esportati` });
+  };
+
+  const SortableHeader = ({ field, children }: { field: SortField; children: React.ReactNode }) => (
+    <TableHead 
+      className="cursor-pointer hover:bg-muted/50 transition-colors"
+      onClick={() => handleSort(field)}
+    >
+      <div className="flex items-center gap-1">
+        {children}
+        <ArrowUpDown className={`h-3 w-3 ${sortField === field ? 'text-primary' : 'text-muted-foreground'}`} />
+      </div>
+    </TableHead>
+  );
 
   return (
     <ProtectedRoute allowedRoles={['superadmin', 'azienda']}>
@@ -351,73 +486,205 @@ export default function Candidati() {
             </div>
           </div>
 
+          {/* Card Credenziali Azienda */}
+          {currentAziendaId && currentAziendaId !== 'all' && (
+            <Card className="border-accent/30 bg-accent/5">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Key className="h-5 w-5 text-accent" />
+                    <CardTitle className="text-lg">Credenziali Accesso Candidati</CardTitle>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => credentialsMutation.mutate(currentAziendaId)}
+                    disabled={credentialsMutation.isPending}
+                  >
+                    <RefreshCw className={`h-4 w-4 mr-2 ${credentialsMutation.isPending ? 'animate-spin' : ''}`} />
+                    {accessoAzienda ? 'Rigenera' : 'Genera'}
+                  </Button>
+                </div>
+                <CardDescription>
+                  Queste credenziali condivise permettono ai candidati di accedere al form anagrafico e al test
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {isLoadingAccesso ? (
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary" />
+                    Caricamento...
+                  </div>
+                ) : accessoAzienda ? (
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label className="text-xs text-muted-foreground">Username</Label>
+                      <div className="flex gap-2">
+                        <Input value={accessoAzienda.username} readOnly className="font-mono" />
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => copyToClipboard(accessoAzienda.username, 'az-username')}
+                        >
+                          {copiedId === 'az-username' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-xs text-muted-foreground">Password</Label>
+                      <div className="flex gap-2">
+                        <Input value={accessoAzienda.password_plain} readOnly className="font-mono" />
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => copyToClipboard(accessoAzienda.password_plain, 'az-password')}
+                        >
+                          {copiedId === 'az-password' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="sm:col-span-2">
+                      <Button
+                        variant="secondary"
+                        className="w-full"
+                        onClick={() => {
+                          const text = `Credenziali accesso test Talent Profile:\n\nUsername: ${accessoAzienda.username}\nPassword: ${accessoAzienda.password_plain}\nLink: ${window.location.origin}/auth`;
+                          copyToClipboard(text, 'az-all');
+                        }}
+                      >
+                        {copiedId === 'az-all' ? <Check className="h-4 w-4 mr-2" /> : <Copy className="h-4 w-4 mr-2" />}
+                        Copia tutte le credenziali
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground text-sm">
+                    Nessuna credenziale generata. Clicca "Genera" per creare le credenziali di accesso per i candidati.
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Filtri Avanzati */}
+          <div className="flex flex-wrap gap-3">
+            <Select value={filterStato} onValueChange={setFilterStato}>
+              <SelectTrigger className="w-[150px]">
+                <SelectValue placeholder="Stato test" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tutti gli stati</SelectItem>
+                <SelectItem value="completato">Completato</SelectItem>
+                <SelectItem value="da_fare">Da fare</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={filterRuolo} onValueChange={setFilterRuolo}>
+              <SelectTrigger className="w-[150px]">
+                <SelectValue placeholder="Ruolo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tutti i ruoli</SelectItem>
+                {RUOLI_AZIENDALI.map((ruolo) => (
+                  <SelectItem key={ruolo} value={ruolo}>{ruolo}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={filterFunzione} onValueChange={setFilterFunzione}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Funzione" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tutte le funzioni</SelectItem>
+                {FUNZIONI.map((funzione) => (
+                  <SelectItem key={funzione} value={funzione}>{funzione}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button variant="outline" onClick={exportCSV} disabled={!sortedCandidati || sortedCandidati.length === 0}>
+              <Download className="h-4 w-4 mr-2" />
+              Esporta CSV
+            </Button>
+          </div>
+
           <Card>
             <CardContent className="p-0">
               {isLoading ? (
                 <div className="p-8 text-center">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto" />
                 </div>
-              ) : candidati && candidati.length > 0 ? (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Candidato</TableHead>
-                      {isSuperadmin && <TableHead>Azienda</TableHead>}
-                      <TableHead>Email</TableHead>
-                      <TableHead>Ruolo</TableHead>
-                      <TableHead>Stato Test</TableHead>
-                      <TableHead className="text-right">Azioni</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {candidati.map((candidato) => (
-                      <TableRow key={candidato.id}>
-                        <TableCell className="font-medium">
-                          {candidato.cognome} {candidato.nome}
-                        </TableCell>
-                        {isSuperadmin && (
-                          <TableCell>{candidato.aziende?.nome || '-'}</TableCell>
-                        )}
-                        <TableCell>{candidato.email || '-'}</TableCell>
-                        <TableCell>{candidato.ruolo_attuale || '-'}</TableCell>
-                        <TableCell>
-                          <Badge variant={candidato.test_completato ? 'default' : 'secondary'}>
-                            {candidato.test_completato ? 'Completato' : 'Da fare'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            {!candidato.test_completato && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => copyToClipboard(
-                                  `Email: ${candidato.email}\nAccedi su: ${getTestLink(candidato.test_link_token || '')}`,
-                                  candidato.id
-                                )}
-                              >
-                                {copiedId === candidato.id ? (
-                                  <Check className="h-4 w-4" />
-                                ) : (
-                                  <Copy className="h-4 w-4" />
-                                )}
-                                <span className="ml-2 hidden sm:inline">Copia Link</span>
-                              </Button>
-                            )}
-                            {candidato.test_completato && (
-                              <Link to={`/risultati/${candidato.id}`}>
-                                <Button variant="outline" size="sm">
-                                  <Eye className="h-4 w-4" />
-                                  <span className="ml-2 hidden sm:inline">Risultati</span>
-                                </Button>
-                              </Link>
-                            )}
-                          </div>
-                        </TableCell>
+              ) : sortedCandidati && sortedCandidati.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <SortableHeader field="cognome">Candidato</SortableHeader>
+                        {isSuperadmin && <TableHead>Azienda</TableHead>}
+                        <TableHead>Sesso</TableHead>
+                        <SortableHeader field="eta">Età</SortableHeader>
+                        <SortableHeader field="ruolo_attuale">Ruolo</SortableHeader>
+                        <SortableHeader field="funzione">Funzione</SortableHeader>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Telefono</TableHead>
+                        <TableHead>Stato Test</TableHead>
+                        <SortableHeader field="created_at">Data</SortableHeader>
+                        <TableHead className="text-right">Azioni</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {sortedCandidati.map((candidato) => (
+                        <TableRow key={candidato.id}>
+                          <TableCell className="font-medium">
+                            {candidato.cognome} {candidato.nome}
+                          </TableCell>
+                          {isSuperadmin && (
+                            <TableCell>{candidato.aziende?.nome || '-'}</TableCell>
+                          )}
+                          <TableCell>{candidato.sesso || '-'}</TableCell>
+                          <TableCell>{candidato.eta || '-'}</TableCell>
+                          <TableCell>{candidato.ruolo_attuale || '-'}</TableCell>
+                          <TableCell className="max-w-[150px] truncate">{candidato.funzione || '-'}</TableCell>
+                          <TableCell className="max-w-[150px] truncate">{candidato.email || '-'}</TableCell>
+                          <TableCell>{candidato.telefono || '-'}</TableCell>
+                          <TableCell>
+                            <Badge variant={candidato.test_completato ? 'default' : 'secondary'}>
+                              {candidato.test_completato ? 'Completato' : 'Da fare'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-muted-foreground text-sm">
+                            {new Date(candidato.created_at).toLocaleDateString('it-IT')}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              {!candidato.test_completato && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => copyToClipboard(
+                                    `Accedi al test: ${window.location.origin}/auth`,
+                                    candidato.id
+                                  )}
+                                >
+                                  {copiedId === candidato.id ? (
+                                    <Check className="h-4 w-4" />
+                                  ) : (
+                                    <Copy className="h-4 w-4" />
+                                  )}
+                                </Button>
+                              )}
+                              {candidato.test_completato && (
+                                <Link to={`/risultati/${candidato.id}`}>
+                                  <Button variant="outline" size="sm">
+                                    <Eye className="h-4 w-4" />
+                                  </Button>
+                                </Link>
+                              )}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               ) : (
                 <div className="p-8 text-center text-muted-foreground">
                   <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
