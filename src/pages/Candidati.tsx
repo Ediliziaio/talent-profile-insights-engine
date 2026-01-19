@@ -12,6 +12,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Calendar } from '@/components/ui/calendar';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import {
   Table,
   TableBody,
@@ -63,12 +69,12 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { 
   Plus, Users, Copy, Check, Eye, Key, RefreshCw, Download, ArrowUpDown, 
-  TestTube2, Trash2, Calendar, Search, AlertTriangle, Filter, 
-  CheckCircle2, Clock, TrendingUp, UserCheck, Mail, Phone 
+  TestTube2, Trash2, CalendarIcon, Search, AlertTriangle, Filter, 
+  CheckCircle2, Clock, TrendingUp, UserCheck, Mail, Phone, X
 } from 'lucide-react';
 import { Candidato, Azienda, AccessoAzienda, ProfiloCandidato, RUOLI_AZIENDALI, FUNZIONI } from '@/types/database';
 import { getProfiloTipoLabel } from '@/lib/scoring';
-import { format } from 'date-fns';
+import { format, subDays, subMonths, startOfDay, endOfDay, isWithinInterval, parseISO } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -119,6 +125,13 @@ export default function Candidati() {
     nome: string;
     cognome: string;
   } | null>(null);
+
+  // Date filters
+  const [filterDateFrom, setFilterDateFrom] = useState<Date | undefined>(undefined);
+  const [filterDateTo, setFilterDateTo] = useState<Date | undefined>(undefined);
+  const [filterTestDateFrom, setFilterTestDateFrom] = useState<Date | undefined>(undefined);
+  const [filterTestDateTo, setFilterTestDateTo] = useState<Date | undefined>(undefined);
+  const [datePreset, setDatePreset] = useState<string>('all');
 
   // State per drawer dettaglio candidato
   const [selectedCandidato, setSelectedCandidato] = useState<CandidatoWithRelations | null>(null);
@@ -285,6 +298,28 @@ export default function Candidati() {
           c.ruolo_attuale?.toLowerCase().includes(search) ||
           c.funzione?.toLowerCase().includes(search)
         );
+      }
+      
+      // Date filter - created_at
+      if (filterDateFrom || filterDateTo) {
+        filteredData = filteredData.filter(c => {
+          if (!c.created_at) return false;
+          const createdDate = parseISO(c.created_at);
+          if (filterDateFrom && createdDate < startOfDay(filterDateFrom)) return false;
+          if (filterDateTo && createdDate > endOfDay(filterDateTo)) return false;
+          return true;
+        });
+      }
+      
+      // Date filter - data_test
+      if (filterTestDateFrom || filterTestDateTo) {
+        filteredData = filteredData.filter(c => {
+          if (!c.data_test) return false;
+          const testDate = parseISO(c.data_test);
+          if (filterTestDateFrom && testDate < startOfDay(filterTestDateFrom)) return false;
+          if (filterTestDateTo && testDate > endOfDay(filterTestDateTo)) return false;
+          return true;
+        });
       }
       
       return filteredData;
@@ -605,7 +640,9 @@ export default function Candidati() {
   }, [candidati]);
 
   const hasActiveFilters = filterStato !== 'all' || filterSesso !== 'all' || filterEta !== 'all' || 
-    filterRuolo !== 'all' || filterFunzione !== 'all' || filterFitVerdict !== 'all';
+    filterRuolo !== 'all' || filterFunzione !== 'all' || filterFitVerdict !== 'all' ||
+    filterDateFrom !== undefined || filterDateTo !== undefined || 
+    filterTestDateFrom !== undefined || filterTestDateTo !== undefined;
 
   const resetFilters = () => {
     setFilterStato('all');
@@ -615,11 +652,172 @@ export default function Candidati() {
     setFilterFunzione('all');
     setFilterFitVerdict('all');
     setSearchTerm('');
+    setFilterDateFrom(undefined);
+    setFilterDateTo(undefined);
+    setFilterTestDateFrom(undefined);
+    setFilterTestDateTo(undefined);
+    setDatePreset('all');
   };
+
+  // Date preset handler
+  const applyDatePreset = (preset: string) => {
+    setDatePreset(preset);
+    const today = new Date();
+    
+    switch (preset) {
+      case 'today':
+        setFilterDateFrom(today);
+        setFilterDateTo(today);
+        break;
+      case 'week':
+        setFilterDateFrom(subDays(today, 7));
+        setFilterDateTo(today);
+        break;
+      case 'month':
+        setFilterDateFrom(subMonths(today, 1));
+        setFilterDateTo(today);
+        break;
+      case '3months':
+        setFilterDateFrom(subMonths(today, 3));
+        setFilterDateTo(today);
+        break;
+      case 'all':
+      default:
+        setFilterDateFrom(undefined);
+        setFilterDateTo(undefined);
+        break;
+    }
+  };
+
+  // Date picker component
+  const DateRangePicker = ({ 
+    label, 
+    fromDate, 
+    toDate, 
+    onFromChange, 
+    onToChange,
+    className
+  }: { 
+    label: string;
+    fromDate: Date | undefined;
+    toDate: Date | undefined;
+    onFromChange: (date: Date | undefined) => void;
+    onToChange: (date: Date | undefined) => void;
+    className?: string;
+  }) => (
+    <div className={cn("space-y-2", className)}>
+      <Label className="text-xs font-medium">{label}</Label>
+      <div className="flex gap-2">
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className={cn(
+                "h-9 flex-1 justify-start text-left font-normal",
+                !fromDate && "text-muted-foreground"
+              )}
+            >
+              <CalendarIcon className="mr-2 h-3 w-3" />
+              {fromDate ? format(fromDate, "dd/MM/yy", { locale: it }) : "Da"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={fromDate}
+              onSelect={onFromChange}
+              initialFocus
+              className="p-3 pointer-events-auto"
+            />
+          </PopoverContent>
+        </Popover>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className={cn(
+                "h-9 flex-1 justify-start text-left font-normal",
+                !toDate && "text-muted-foreground"
+              )}
+            >
+              <CalendarIcon className="mr-2 h-3 w-3" />
+              {toDate ? format(toDate, "dd/MM/yy", { locale: it }) : "A"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={toDate}
+              onSelect={onToChange}
+              initialFocus
+              className="p-3 pointer-events-auto"
+            />
+          </PopoverContent>
+        </Popover>
+        {(fromDate || toDate) && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-9 w-9 shrink-0"
+            onClick={() => {
+              onFromChange(undefined);
+              onToChange(undefined);
+            }}
+          >
+            <X className="h-3 w-3" />
+          </Button>
+        )}
+      </div>
+    </div>
+  );
 
   // Filters content for mobile sheet
   const FiltersContent = () => (
     <div className="space-y-4">
+      {/* Date presets */}
+      <div className="space-y-2">
+        <Label className="text-xs font-medium">Periodo rapido</Label>
+        <div className="flex flex-wrap gap-1">
+          {[
+            { value: 'all', label: 'Tutti' },
+            { value: 'today', label: 'Oggi' },
+            { value: 'week', label: '7 giorni' },
+            { value: 'month', label: '30 giorni' },
+            { value: '3months', label: '3 mesi' },
+          ].map((preset) => (
+            <Button
+              key={preset.value}
+              variant={datePreset === preset.value ? 'default' : 'outline'}
+              size="sm"
+              className="h-7 text-xs"
+              onClick={() => applyDatePreset(preset.value)}
+            >
+              {preset.label}
+            </Button>
+          ))}
+        </div>
+      </div>
+      
+      {/* Date range - Registrazione */}
+      <DateRangePicker
+        label="Data Registrazione"
+        fromDate={filterDateFrom}
+        toDate={filterDateTo}
+        onFromChange={(d) => { setFilterDateFrom(d); setDatePreset('custom'); }}
+        onToChange={(d) => { setFilterDateTo(d); setDatePreset('custom'); }}
+      />
+      
+      {/* Date range - Test */}
+      <DateRangePicker
+        label="Data Test"
+        fromDate={filterTestDateFrom}
+        toDate={filterTestDateTo}
+        onFromChange={setFilterTestDateFrom}
+        onToChange={setFilterTestDateTo}
+      />
+      
       <div className="space-y-2">
         <Label className="text-xs font-medium">Stato Test</Label>
         <Select value={filterStato} onValueChange={setFilterStato}>
@@ -1047,6 +1245,67 @@ export default function Candidati() {
               ) : (
                 /* Desktop: Inline filters */
                 <div className="flex flex-wrap items-center gap-2">
+                  {/* Date preset buttons */}
+                  <div className="flex gap-1 mr-2">
+                    {[
+                      { value: 'all', label: 'Tutti' },
+                      { value: 'today', label: 'Oggi' },
+                      { value: 'week', label: '7g' },
+                      { value: 'month', label: '30g' },
+                    ].map((preset) => (
+                      <Button
+                        key={preset.value}
+                        variant={datePreset === preset.value ? 'default' : 'outline'}
+                        size="sm"
+                        className="h-9 px-2 text-xs"
+                        onClick={() => applyDatePreset(preset.value)}
+                      >
+                        {preset.label}
+                      </Button>
+                    ))}
+                  </div>
+                  
+                  {/* Date picker popover */}
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className={cn(
+                          "h-9 gap-1",
+                          (filterDateFrom || filterDateTo) && "border-primary text-primary"
+                        )}
+                      >
+                        <CalendarIcon className="h-3 w-3" />
+                        {filterDateFrom || filterDateTo ? (
+                          <span className="text-xs">
+                            {filterDateFrom ? format(filterDateFrom, "dd/MM", { locale: it }) : "..."} - {filterDateTo ? format(filterDateTo, "dd/MM", { locale: it }) : "..."}
+                          </span>
+                        ) : (
+                          <span className="text-xs">Data</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-4" align="start">
+                      <div className="space-y-4">
+                        <DateRangePicker
+                          label="Data Registrazione"
+                          fromDate={filterDateFrom}
+                          toDate={filterDateTo}
+                          onFromChange={(d) => { setFilterDateFrom(d); setDatePreset('custom'); }}
+                          onToChange={(d) => { setFilterDateTo(d); setDatePreset('custom'); }}
+                        />
+                        <DateRangePicker
+                          label="Data Test"
+                          fromDate={filterTestDateFrom}
+                          toDate={filterTestDateTo}
+                          onFromChange={setFilterTestDateFrom}
+                          onToChange={setFilterTestDateTo}
+                        />
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                  
                   <Select value={filterStato} onValueChange={setFilterStato}>
                     <SelectTrigger className="w-[120px] h-9">
                       <SelectValue placeholder="Stato" />
@@ -1058,7 +1317,7 @@ export default function Candidati() {
                     </SelectContent>
                   </Select>
                   <Select value={filterSesso} onValueChange={setFilterSesso}>
-                    <SelectTrigger className="w-[100px] h-9">
+                    <SelectTrigger className="w-[80px] h-9">
                       <SelectValue placeholder="Sesso" />
                     </SelectTrigger>
                     <SelectContent>
@@ -1068,7 +1327,7 @@ export default function Candidati() {
                     </SelectContent>
                   </Select>
                   <Select value={filterEta} onValueChange={setFilterEta}>
-                    <SelectTrigger className="w-[100px] h-9">
+                    <SelectTrigger className="w-[90px] h-9">
                       <SelectValue placeholder="Età" />
                     </SelectTrigger>
                     <SelectContent>
@@ -1080,7 +1339,7 @@ export default function Candidati() {
                     </SelectContent>
                   </Select>
                   <Select value={filterFitVerdict} onValueChange={setFilterFitVerdict}>
-                    <SelectTrigger className="w-[110px] h-9">
+                    <SelectTrigger className="w-[100px] h-9">
                       <SelectValue placeholder="Fit" />
                     </SelectTrigger>
                     <SelectContent>
