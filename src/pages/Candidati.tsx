@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { Layout } from '@/components/Layout';
+import { NotionLayout } from '@/components/NotionLayout';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
+import { CandidatoDrawer } from '@/components/CandidatoDrawer';
+import { FitIndicator } from '@/components/FitIndicator';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -48,12 +50,16 @@ import { useToast } from '@/hooks/use-toast';
 import { Plus, Users, Copy, Check, Eye, Key, RefreshCw, Download, ArrowUpDown, TestTube2, Trash2, Calendar, User } from 'lucide-react';
 import { Candidato, Azienda, AccessoAzienda, ProfiloCandidato, RUOLI_AZIENDALI, FUNZIONI } from '@/types/database';
 import { getProfiloTipoLabel } from '@/lib/scoring';
-import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 
 type SortField = 'cognome' | 'eta' | 'ruolo_attuale' | 'funzione' | 'created_at' | 'data_test';
 type SortOrder = 'asc' | 'desc';
+
+type CandidatoWithRelations = Candidato & { 
+  aziende: { nome: string } | null;
+  profili_candidato: ProfiloCandidato | null;
+};
 
 export default function Candidati() {
   const { profile } = useAuth();
