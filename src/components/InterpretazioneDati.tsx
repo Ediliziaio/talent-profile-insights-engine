@@ -171,10 +171,10 @@ export function InterpretazioneDati({
               description="Propensione commerciale e relazionale"
             />
             <IndiceSecondario
-              label="Resistenza Cambiamento"
-              value={indici.resistenzaCambiamento}
+              label="Flessibilità al Cambiamento"
+              value={indici.flessibilitaCambiamento}
               icon={RefreshCw}
-              description="Rigidità vs flessibilità (alto = rigido)"
+              description="Capacità di adattarsi (alto = flessibile)"
             />
           </div>
         </CardContent>

@@ -14,6 +14,10 @@ export interface ScalaPunteggio {
 
 export interface ProfiloCalcolato {
   scale_punteggi: Record<string, number>;
+  impatto_organizzativo_pct: number;  // Ex leadership_pct - QR+SP+PA
+  solidita_personale_pct: number;      // Ex maturita_pct - SV+MO+CF
+  capacita_produttiva_pct: number;     // Ex potenziale_pct - QN+EC+EF
+  // Manteniamo i nomi vecchi per compatibilità DB
   leadership_pct: number;
   maturita_pct: number;
   potenziale_pct: number;
@@ -60,15 +64,15 @@ export function calcolaProfilo(risposte: RispostaInput[]): ProfiloCalcolato {
     scale_punteggi[scala] = calcolaPunteggio(risposte, scala);
   }
   
-  // Calculate percentage indicators
-  // Leadership % (Area Risultati): Qualità Resp + Spazio Vitale + Partecipazione
-  const leadership_pct = ((scale_punteggi['QR'] + scale_punteggi['SP'] + scale_punteggi['PA']) / 600) * 100;
+  // Calculate percentage indicators (Manuale V2 - nuove denominazioni)
+  // IMPATTO ORGANIZZATIVO (ex Leadership): QR + SP + PA
+  const impatto_organizzativo_pct = ((scale_punteggi['QR'] + scale_punteggi['SP'] + scale_punteggi['PA']) / 600) * 100;
   
-  // Maturità % (Area Pianificazione): Stile Vita + Motivazione + Cap. Fronteggiare
-  const maturita_pct = ((scale_punteggi['SV'] + scale_punteggi['MO'] + scale_punteggi['CF']) / 600) * 100;
+  // SOLIDITÀ PERSONALE (ex Maturità): SV + MO + CF
+  const solidita_personale_pct = ((scale_punteggi['SV'] + scale_punteggi['MO'] + scale_punteggi['CF']) / 600) * 100;
   
-  // Potenziale % (Area Azione): Quantità Resp + Efficacia + Efficienza
-  const potenziale_pct = ((scale_punteggi['QN'] + scale_punteggi['EC'] + scale_punteggi['EF']) / 600) * 100;
+  // CAPACITÀ PRODUTTIVA (ex Potenziale): QN + EC + EF
+  const capacita_produttiva_pct = ((scale_punteggi['QN'] + scale_punteggi['EC'] + scale_punteggi['EF']) / 600) * 100;
   
   // Schematicità
   const schematicita = scale_punteggi['SC'];
@@ -92,14 +96,18 @@ export function calcolaProfilo(risposte: RispostaInput[]): ProfiloCalcolato {
     }
   }
   
-  // Determine profile type
+  // Determine profile type (nuova logica Manuale V2)
   const profilo_tipo = determinaProfiloTipo(scale_punteggi, stress_zone, out_points, strength_points);
   
   return {
     scale_punteggi,
-    leadership_pct: Math.round(leadership_pct * 10) / 10,
-    maturita_pct: Math.round(maturita_pct * 10) / 10,
-    potenziale_pct: Math.round(potenziale_pct * 10) / 10,
+    impatto_organizzativo_pct: Math.round(impatto_organizzativo_pct * 10) / 10,
+    solidita_personale_pct: Math.round(solidita_personale_pct * 10) / 10,
+    capacita_produttiva_pct: Math.round(capacita_produttiva_pct * 10) / 10,
+    // Manteniamo compatibilità con i nomi del DB
+    leadership_pct: Math.round(impatto_organizzativo_pct * 10) / 10,
+    maturita_pct: Math.round(solidita_personale_pct * 10) / 10,
+    potenziale_pct: Math.round(capacita_produttiva_pct * 10) / 10,
     schematicita,
     stress_zone,
     profilo_tipo,
@@ -109,8 +117,8 @@ export function calcolaProfilo(risposte: RispostaInput[]): ProfiloCalcolato {
 }
 
 /**
- * Determina il profilo psicologico in base ai DATI REALI del candidato.
- * La logica segue pattern psicologici coerenti con i punteggi.
+ * Determina il profilo psicologico secondo il Manuale di Elaborazione V2
+ * 10 Profili Professionali con logica deterministica
  */
 function determinaProfiloTipo(
   scale: Record<string, number>,
@@ -118,104 +126,78 @@ function determinaProfiloTipo(
   outPoints: string[],
   strengthPoints: string[]
 ): ProfiloTipo {
-  const schematicita = scale['SC'] || 100;
+  const sc = scale['SC'] || 100;
+  const sv = scale['SV'] || 100;
+  const mo = scale['MO'] || 100;
+  const cf = scale['CF'] || 100;
+  const ef = scale['EF'] || 100;
+  const ec = scale['EC'] || 100;
+  const qn = scale['QN'] || 100;
+  const qr = scale['QR'] || 100;
+  const sp = scale['SP'] || 100;
+  const pa = scale['PA'] || 100;
   
-  // PRIORITÀ 1: SICUREZZA - Zona stress attiva (vulnerabilità evidente)
-  // Persona con SV e CF bassi mostra segni di difficoltà, cerca protezione
-  if (stressZone) {
-    return 'SICUREZZA';
+  // PRIORITÀ 1: IN_TRANSIZIONE - Stress Zone attiva O >2 scale sotto 70
+  const scaleCritiche = Object.entries(scale)
+    .filter(([k, v]) => k !== 'SC' && v < 70)
+    .length;
+  
+  if (stressZone || scaleCritiche > 2) {
+    return 'IN_TRANSIZIONE';
   }
   
-  // PRIORITÀ 2: SICUREZZA - Molte aree critiche (OUT POINTS >= 3)
-  // Persona con molte fragilità cerca stabilità e rassicurazioni
-  if (outPoints.length >= 3) {
-    return 'SICUREZZA';
+  // PRIORITÀ 2: LEADER_NATURALE
+  // QR>140, PA>130, CF>120, SC 90-140 (equilibrato)
+  if (qr > 140 && pa > 130 && cf > 120 && sc >= 90 && sc <= 140) {
+    return 'LEADER_NATURALE';
   }
   
-  // PRIORITÀ 3: ANALITICO - Alta schematicità + Efficienza alta
-  // Persona rigida, metodica, razionale che procede per logica
-  if (schematicita >= 150 && scale['EF'] >= 140) {
-    return 'ANALITICO';
+  // PRIORITÀ 3: COMMERCIALE_NATURALE
+  // PA>150, SP>140, MO>130, CF>120, QR>100
+  if (pa > 150 && sp > 140 && mo > 130 && cf > 120 && qr > 100) {
+    return 'COMMERCIALE_NATURALE';
   }
   
-  // PRIORITÀ 4: PRESTIGIO - Leadership forte con alta partecipazione
-  // Persona che vuole emergere, essere riconosciuta come leader
-  if (scale['QR'] >= 150 && scale['PA'] >= 140 && scale['SP'] >= 130) {
-    return 'PRESTIGIO';
+  // PRIORITÀ 4: CREATIVO_DESTABILIZZANTE
+  // SC<80 (molto flessibile), SP>140, MO>130, PA>130, EF<100 (poco efficiente)
+  if (sc < 80 && sp > 140 && mo > 130 && pa > 130 && ef < 100) {
+    return 'CREATIVO_DESTABILIZZANTE';
   }
   
-  // PRIORITÀ 5: ORIGINALE - Alta efficacia con bassa schematicità (innovativo)
-  // Persona che cerca novità, non segue schemi, vuole essere il primo
-  if (scale['EC'] >= 150 && schematicita < 100 && scale['MO'] >= 130) {
-    return 'ORIGINALE';
+  // PRIORITÀ 5: TECNICO_SPECIALISTA
+  // SC>160 (molto rigido), EF>140, EC>130, PA<100 (poco relazionale)
+  if (sc > 160 && ef > 140 && ec > 130 && pa < 100) {
+    return 'TECNICO_SPECIALISTA';
   }
   
-  // PRIORITÀ 6: AFFETTO - Alta partecipazione e motivazione relazionale
-  // Persona orientata alle relazioni, cerca approvazione
-  if (scale['PA'] >= 160 && scale['MO'] >= 140 && scale['CF'] >= 120) {
-    return 'AFFETTO';
+  // PRIORITÀ 6: AMMINISTRATIVO_METODICO
+  // SC>130, EF>140, QN 90-120 (carico contenuto), EC>110
+  if (sc > 130 && ef > 140 && qn >= 90 && qn <= 120 && ec > 110) {
+    return 'AMMINISTRATIVO_METODICO';
   }
   
-  // PRIORITÀ 7: ESTETA - Alto spazio personale con attenzione all'immagine
-  // Persona attenta all'estetica e alla presentazione
-  if (scale['SP'] >= 150 && scale['PA'] >= 140 && scale['QR'] >= 120) {
-    return 'ESTETA';
+  // PRIORITÀ 7: ESECUTORE_AFFIDABILE
+  // EF>140, EC>130, SC 100-150, QR<120 (non cerca leadership)
+  if (ef > 140 && ec > 130 && sc >= 100 && sc <= 150 && qr < 120) {
+    return 'ESECUTORE_AFFIDABILE';
   }
   
-  // PRIORITÀ 8: CONSERVATORE - Efficienza alta con schematicità e prudenza
-  // Persona strategica che valuta il lungo termine
-  if (scale['EF'] >= 140 && schematicita >= 130 && scale['MO'] >= 120) {
-    return 'CONSERVATORE';
+  // PRIORITÀ 8: PROFESSIONISTA_AUTONOMO
+  // EC>140, EF>130, QN<100 (non vuole sovraccarico), SP>130
+  if (ec > 140 && ef > 130 && qn < 100 && sp > 130) {
+    return 'PROFESSIONISTA_AUTONOMO';
   }
   
-  // PRIORITÀ 9: COMODITÀ - Quantità responsabilità bassa, delega
-  // Persona che cerca soluzioni semplici, evita complicazioni
-  if (scale['QN'] < 100 && scale['QR'] < 110) {
-    return 'COMODITA';
+  // PRIORITÀ 9: COLLABORATORE_CRESCITA
+  // Punteggi medi (90-130) con almeno 1 strength point
+  const mediaScale = (sv + mo + cf + ef + ec + qn + qr + sp + pa) / 9;
+  if (mediaScale >= 90 && mediaScale <= 130 && strengthPoints.length >= 1) {
+    return 'COLLABORATORE_CRESCITA';
   }
   
-  // PRIORITÀ 10: SVAGO - Buon equilibrio vita-lavoro
-  // Persona che cerca flessibilità e work-life balance
-  if (scale['SP'] >= 130 && scale['SV'] >= 120 && scale['CF'] >= 110) {
-    return 'SVAGO';
-  }
-  
-  // PRIORITÀ 11: RISPARMIO - Punteggi generalmente bassi
-  // Persona orientata all'ottimizzazione e ai costi
-  const avgAllScales = Object.entries(scale)
-    .filter(([k]) => k !== 'SC')
-    .reduce((sum, [, v]) => sum + v, 0) / 9;
-  
-  if (avgAllScales < 105 && outPoints.length >= 2) {
-    return 'RISPARMIO';
-  }
-  
-  // DEFAULT: Determina in base al pattern dominante delle aree
-  const avgRisultati = (scale['QR'] + scale['SP'] + scale['PA']) / 3;
-  const avgPianificazione = (scale['SV'] + scale['MO'] + scale['CF']) / 3;
-  const avgAzione = (scale['QN'] + scale['EC'] + scale['EF']) / 3;
-  
-  // Se ha punti di forza, usa quelli per determinare il profilo
-  if (strengthPoints.length > 0) {
-    if (strengthPoints.some(p => p.includes('Qualità') || p.includes('Leadership'))) {
-      return 'PRESTIGIO';
-    }
-    if (strengthPoints.some(p => p.includes('Efficacia'))) {
-      return avgRisultati > avgPianificazione ? 'ORIGINALE' : 'CONSERVATORE';
-    }
-    if (strengthPoints.some(p => p.includes('Partecipazione'))) {
-      return 'AFFETTO';
-    }
-  }
-  
-  // Pattern finale basato sulle aree dominanti
-  if (avgRisultati > avgPianificazione && avgRisultati > avgAzione) {
-    return schematicita > 120 ? 'ESTETA' : 'PRESTIGIO';
-  } else if (avgPianificazione > avgAzione) {
-    return schematicita > 120 ? 'CONSERVATORE' : 'AFFETTO';
-  } else {
-    return schematicita < 100 ? 'ORIGINALE' : 'ANALITICO';
-  }
+  // DEFAULT: SUPPORTO_OPERATIVO
+  // Preferisce ruoli strutturati con supervisione
+  return 'SUPPORTO_OPERATIVO';
 }
 
 export function getScaleForRadarChart(punteggi: Record<string, number>): ScalaPunteggio[] {
@@ -229,47 +211,92 @@ export function getScaleForRadarChart(punteggi: Record<string, number>): ScalaPu
 }
 
 export function getScoreColor(score: number): string {
-  if (score < 80) return 'hsl(var(--chart-danger))';
+  if (score < 60) return 'hsl(var(--chart-danger))';
+  if (score < 80) return 'hsl(var(--chart-warning))';
   if (score > 160) return 'hsl(var(--chart-strength))';
-  if (score < 120) return 'hsl(var(--chart-warning))';
-  return 'hsl(var(--chart-normal))';
+  if (score > 140) return 'hsl(var(--chart-normal))';
+  return 'hsl(var(--muted-foreground))';
 }
 
 export function getScoreColorClass(score: number): string {
-  if (score < 80) return 'text-destructive';
-  if (score > 160) return 'text-success';
-  if (score < 120) return 'text-warning';
-  return 'text-primary';
+  if (score < 60) return 'text-destructive';
+  if (score < 80) return 'text-orange-500';
+  if (score > 160) return 'text-green-600';
+  if (score > 140) return 'text-blue-600';
+  return 'text-muted-foreground';
 }
 
 export function getProfiloTipoLabel(tipo: ProfiloTipo): string {
   const labels: Record<ProfiloTipo, string> = {
-    'PRESTIGIO': 'Prestigio',
-    'ORIGINALE': 'Originale',
-    'ANALITICO': 'Analitico',
-    'ESTETA': 'Esteta',
-    'CONSERVATORE': 'Conservatore',
-    'AFFETTO': 'Affetto',
-    'SICUREZZA': 'Sicurezza',
-    'COMODITA': 'Comodità',
-    'SVAGO': 'Svago',
-    'RISPARMIO': 'Risparmio'
+    'LEADER_NATURALE': 'Leader Naturale',
+    'ESECUTORE_AFFIDABILE': 'Esecutore Affidabile',
+    'CREATIVO_DESTABILIZZANTE': 'Creativo',
+    'TECNICO_SPECIALISTA': 'Tecnico Specialista',
+    'COMMERCIALE_NATURALE': 'Commerciale Naturale',
+    'AMMINISTRATIVO_METODICO': 'Amministrativo',
+    'COLLABORATORE_CRESCITA': 'Collaboratore in Crescita',
+    'PROFESSIONISTA_AUTONOMO': 'Professionista Autonomo',
+    'SUPPORTO_OPERATIVO': 'Supporto Operativo',
+    'IN_TRANSIZIONE': 'In Transizione'
   };
   return labels[tipo] || 'Non definito';
 }
 
 export function getProfiloTipoDescription(tipo: ProfiloTipo): string {
   const descriptions: Record<ProfiloTipo, string> = {
-    'PRESTIGIO': 'Cerca esclusività e status. Vuole sentirsi unico e privilegiato.',
-    'ORIGINALE': 'Innovativo e pioniere. Vuole essere il primo e anticipare le tendenze.',
-    'ANALITICO': 'Razionale e metodico. Basa tutto su dati e logica.',
-    'ESTETA': 'Attento all\'estetica e all\'immagine. Cerca armonia e design.',
-    'CONSERVATORE': 'Prudente e strategico. Cerca valore duraturo e sicurezza.',
-    'AFFETTO': 'Relazionale e empatico. Cerca armonia e approvazione.',
-    'SICUREZZA': 'Cerca stabilità e rassicurazioni. In un momento di vulnerabilità.',
-    'COMODITA': 'Cerca soluzioni semplici e immediate. Delega volentieri.',
-    'SVAGO': 'Cerca equilibrio vita-lavoro. Valorizza la flessibilità.',
-    'RISPARMIO': 'Orientato al costo e al budget. Cerca ottimizzazione.'
+    'LEADER_NATURALE': 'Elevata propensione alla guida. Assume responsabilità con naturalezza e influenza positivamente il team.',
+    'ESECUTORE_AFFIDABILE': 'Affidabile e metodico. Porta a termine i compiti con precisione e costanza.',
+    'CREATIVO_DESTABILIZZANTE': 'Innovativo e non convenzionale. Genera idee ma può destabilizzare processi consolidati.',
+    'TECNICO_SPECIALISTA': 'Competente e preciso. Eccelle in ambiti tecnici, meno nelle relazioni.',
+    'COMMERCIALE_NATURALE': 'Naturalmente orientato alla vendita. Persuasivo e resiliente ai rifiuti.',
+    'AMMINISTRATIVO_METODICO': 'Organizzato e procedurale. Ideale per ruoli di back-office e compliance.',
+    'COLLABORATORE_CRESCITA': 'Potenziale in sviluppo. Con formazione adeguata può crescere in diversi ruoli.',
+    'PROFESSIONISTA_AUTONOMO': 'Preferisce lavorare in autonomia. Efficace ma non adatto a team numerosi.',
+    'SUPPORTO_OPERATIVO': 'Adatto a ruoli esecutivi con supervisione. Affidabile nelle mansioni definite.',
+    'IN_TRANSIZIONE': 'Situazione di vulnerabilità. Richiede valutazione approfondita prima dell\'inserimento.'
   };
   return descriptions[tipo] || 'Profilo in valutazione';
+}
+
+/**
+ * Zone di interpretazione per ogni punteggio (Manuale V2)
+ */
+export type ZonaInterpretazione = 'critica' | 'attenzione' | 'norma' | 'sopra_media' | 'eccellenza';
+
+export function getZonaInterpretazione(score: number): {
+  zona: ZonaInterpretazione;
+  colore: string;
+  classe: string;
+  descrizione: string;
+} {
+  if (score < 60) return { 
+    zona: 'critica', 
+    colore: 'red', 
+    classe: 'text-destructive bg-destructive/10',
+    descrizione: 'Carenza grave' 
+  };
+  if (score < 80) return { 
+    zona: 'attenzione', 
+    colore: 'orange', 
+    classe: 'text-orange-600 bg-orange-50',
+    descrizione: 'Carenza moderata' 
+  };
+  if (score < 120) return { 
+    zona: 'norma', 
+    colore: 'gray', 
+    classe: 'text-muted-foreground bg-muted/30',
+    descrizione: 'Nella norma' 
+  };
+  if (score < 160) return { 
+    zona: 'sopra_media', 
+    colore: 'blue', 
+    classe: 'text-blue-600 bg-blue-50',
+    descrizione: 'Sopra la media' 
+  };
+  return { 
+    zona: 'eccellenza', 
+    colore: 'green', 
+    classe: 'text-green-600 bg-green-50',
+    descrizione: 'Eccellenza' 
+  };
 }

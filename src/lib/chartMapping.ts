@@ -1,11 +1,13 @@
 // Mappatura dalle scale del test alle macro-aree del grafico a candele
+// Aggiornato secondo il Manuale di Elaborazione V2
 import { ScalaCode, SCALE_LABELS } from '@/types/database';
+import { calculateSecondaryIndices } from './interpretazioneProfile';
 
 export interface MacroArea {
   id: string;
   label: string;
   description: string;
-  scaleSource: ScalaCode[];
+  calcola: (scale: Record<string, number>) => number;
   tooltipPositive: string;
   tooltipNegative: string;
 }
@@ -15,7 +17,13 @@ export const MACRO_AREAS: MacroArea[] = [
     id: 'organizzazione',
     label: 'Organizzazione',
     description: 'Capacità di strutturare il lavoro e mantenere ordine',
-    scaleSource: ['SV', 'SC'],
+    calcola: (s) => {
+      // Media di SC, EF, QR normalizzata
+      const sc = s['SC'] || 100;
+      const ef = s['EF'] || 100;
+      const qr = s['QR'] || 100;
+      return ((sc + ef + qr) / 3) - 100;
+    },
     tooltipPositive: 'Eccellente capacità organizzativa. Sa strutturare il lavoro efficacemente.',
     tooltipNegative: 'Difficoltà nella gestione organizzativa. Tende al disordine operativo.',
   },
@@ -23,39 +31,48 @@ export const MACRO_AREAS: MacroArea[] = [
     id: 'motivazione',
     label: 'Motivazione',
     description: 'Spinta interiore e determinazione nel raggiungere obiettivi',
-    scaleSource: ['MO'],
+    calcola: (s) => (s['MO'] || 100) - 100,
     tooltipPositive: 'Altamente motivato e determinato. Persegue gli obiettivi con costanza.',
     tooltipNegative: 'Bassa motivazione intrinseca. Fatica a mantenere la spinta nel tempo.',
   },
   {
-    id: 'stress',
+    id: 'gestione_stress',
     label: 'Gestione Stress',
     description: 'Capacità di gestire la pressione e le situazioni difficili',
-    scaleSource: ['CF'],
+    calcola: (s) => (s['CF'] || 100) - 100,
     tooltipPositive: 'Eccellente gestione dello stress. Rimane lucido sotto pressione.',
     tooltipNegative: 'Vulnerabilità allo stress. Rischio di calo prestazionale sotto pressione.',
   },
   {
     id: 'autodisciplina',
     label: 'Autodisciplina',
-    description: 'Controllo di sé e rispetto delle regole',
-    scaleSource: ['EF'],
+    description: 'Controllo di sé e rispetto delle regole e scadenze',
+    calcola: (s) => (s['EF'] || 100) - 100,
     tooltipPositive: 'Forte autodisciplina. Rispetta scadenze e procedure autonomamente.',
     tooltipNegative: 'Scarsa autodisciplina. Necessita supervisione costante.',
   },
   {
     id: 'determinazione',
     label: 'Determinazione',
-    description: 'Capacità di portare a termine gli obiettivi',
-    scaleSource: ['EC'],
+    description: 'Capacità di portare a termine gli obiettivi nonostante gli ostacoli',
+    calcola: (s) => {
+      // Media di EC e MO
+      const ec = s['EC'] || 100;
+      const mo = s['MO'] || 100;
+      return ((ec + mo) / 2) - 100;
+    },
     tooltipPositive: 'Altamente determinato. Non si arrende di fronte agli ostacoli.',
     tooltipNegative: 'Tendenza ad abbandonare quando le cose si complicano.',
   },
   {
     id: 'attitudine_vendita',
-    label: 'Attitudine Vendita',
+    label: 'Att. Vendita',
     description: 'Propensione alla persuasione e al contatto commerciale',
-    scaleSource: ['PA', 'SP'],
+    calcola: (s) => {
+      // Usa l'indice secondario
+      const indici = calculateSecondaryIndices(s);
+      return indici.attitudineVendita - 100;
+    },
     tooltipPositive: 'Naturale predisposizione commerciale. Ottimo nel convincere e negoziare.',
     tooltipNegative: 'Scarsa attitudine commerciale. Difficoltà nella persuasione.',
   },
@@ -63,7 +80,11 @@ export const MACRO_AREAS: MacroArea[] = [
     id: 'leadership',
     label: 'Leadership',
     description: 'Capacità di guidare e influenzare gli altri',
-    scaleSource: ['QR', 'PA'],
+    calcola: (s) => {
+      // Usa l'indice secondario Leadership Naturale
+      const indici = calculateSecondaryIndices(s);
+      return indici.leadershipNaturale - 100;
+    },
     tooltipPositive: 'Forte leadership naturale. Sa guidare e ispirare il team.',
     tooltipNegative: 'Tendenza a seguire piuttosto che guidare.',
   },
@@ -71,7 +92,11 @@ export const MACRO_AREAS: MacroArea[] = [
     id: 'produttivita',
     label: 'Produttività',
     description: 'Efficienza nel completare le attività',
-    scaleSource: ['QN', 'EF'],
+    calcola: (s) => {
+      // Usa l'indice secondario Worker Index
+      const indici = calculateSecondaryIndices(s);
+      return indici.workerIndex - 100;
+    },
     tooltipPositive: 'Altamente produttivo. Ottimizza tempo e risorse.',
     tooltipNegative: 'Produttività sotto la media. Rischio di rallentamenti operativi.',
   },
@@ -79,17 +104,27 @@ export const MACRO_AREAS: MacroArea[] = [
     id: 'empatia',
     label: 'Empatia',
     description: 'Capacità di comprendere e connettersi con gli altri',
-    scaleSource: ['SP'],
+    calcola: (s) => {
+      // Media di SP e PA
+      const sp = s['SP'] || 100;
+      const pa = s['PA'] || 100;
+      return ((sp + pa) / 2) - 100;
+    },
     tooltipPositive: 'Elevata empatia. Costruisce relazioni autentiche.',
     tooltipNegative: 'Difficoltà nella connessione emotiva con colleghi e clienti.',
   },
   {
-    id: 'espansivita',
-    label: 'Espansività',
-    description: 'Apertura verso nuove esperienze e persone',
-    scaleSource: ['PA'],
-    tooltipPositive: 'Persona aperta e socievole. Si integra facilmente nei team.',
-    tooltipNegative: 'Tendenza all\'introversione. Può faticare nei ruoli di contatto.',
+    id: 'flessibilita',
+    label: 'Flessibilità',
+    description: 'Adattabilità ai cambiamenti e nuove situazioni',
+    calcola: (s) => {
+      // Flessibilità = 200 - SC, poi normalizzata
+      const sc = s['SC'] || 100;
+      const flessibilita = 200 - sc;
+      return flessibilita - 100;
+    },
+    tooltipPositive: 'Alta flessibilità. Si adatta facilmente ai cambiamenti.',
+    tooltipNegative: 'Rigido e resistente ai cambiamenti. Preferisce procedure stabili.',
   },
 ];
 
@@ -98,15 +133,7 @@ export function calculateMacroAreaValue(
   macroArea: MacroArea,
   scalePunteggi: Record<string, number>
 ): number {
-  const values = macroArea.scaleSource
-    .map(scale => scalePunteggi[scale])
-    .filter(v => v !== undefined);
-  
-  if (values.length === 0) return 100; // Default neutro
-  
-  // Media delle scale coinvolte, normalizzata a -100/+100
-  const avg = values.reduce((a, b) => a + b, 0) / values.length;
-  return avg - 100; // Converte da 0-200 a -100/+100
+  return macroArea.calcola(scalePunteggi);
 }
 
 // Genera i dati per il grafico a candele
@@ -129,7 +156,7 @@ export function generateCandleChartData(
     return {
       id: area.id,
       label: area.label,
-      value,
+      value: Math.max(-100, Math.min(100, value)), // Clamp tra -100 e +100
       isPositive,
       tooltipText: isPositive ? area.tooltipPositive : area.tooltipNegative,
       description: area.description,
