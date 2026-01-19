@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -46,13 +46,31 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Users, Copy, Check, Eye, Key, RefreshCw, Download, ArrowUpDown, TestTube2, Trash2, Calendar, User, Search } from 'lucide-react';
+import { 
+  Plus, Users, Copy, Check, Eye, Key, RefreshCw, Download, ArrowUpDown, 
+  TestTube2, Trash2, Calendar, Search, AlertTriangle, Filter, 
+  CheckCircle2, Clock, TrendingUp, UserCheck, Mail, Phone 
+} from 'lucide-react';
 import { Candidato, Azienda, AccessoAzienda, ProfiloCandidato, RUOLI_AZIENDALI, FUNZIONI } from '@/types/database';
 import { getProfiloTipoLabel } from '@/lib/scoring';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 type SortField = 'cognome' | 'eta' | 'ruolo_attuale' | 'funzione' | 'created_at' | 'data_test' | 'fit_score';
 type SortOrder = 'asc' | 'desc';
@@ -68,10 +86,18 @@ type CandidatoWithRelations = Candidato & {
   analisi_candidato: AnalisiCandidato[] | null;
 };
 
+// Tipo per duplicati
+type DuplicateInfo = {
+  candidatoId: string;
+  aziendaNome: string;
+  matchType: 'email' | 'telefono';
+};
+
 export default function Candidati() {
   const { profile } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const isMobile = useIsMobile();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [filterAzienda, setFilterAzienda] = useState<string>('all');
@@ -86,6 +112,7 @@ export default function Candidati() {
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [generatedCredentials, setGeneratedCredentials] = useState<{
     username: string;
     password: string;
@@ -124,6 +151,58 @@ export default function Candidati() {
     },
     enabled: isSuperadmin,
   });
+
+  // Query per rilevare duplicati cross-azienda
+  const { data: allCandidatiForDuplicates } = useQuery({
+    queryKey: ['candidati-duplicati'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('candidati')
+        .select('id, email, telefono, azienda_id, nome, cognome, aziende(nome)');
+      if (error) throw error;
+      return data as Array<{
+        id: string;
+        email: string | null;
+        telefono: string | null;
+        azienda_id: string;
+        nome: string;
+        cognome: string;
+        aziende: { nome: string } | null;
+      }>;
+    },
+  });
+
+  // Funzione per trovare duplicati
+  const getDuplicateInfo = (candidato: CandidatoWithRelations): DuplicateInfo[] => {
+    if (!allCandidatiForDuplicates) return [];
+    
+    const duplicates: DuplicateInfo[] = [];
+    
+    allCandidatiForDuplicates.forEach(c => {
+      if (c.id === candidato.id || c.azienda_id === candidato.azienda_id) return;
+      
+      if (candidato.email && c.email && candidato.email.toLowerCase() === c.email.toLowerCase()) {
+        duplicates.push({
+          candidatoId: c.id,
+          aziendaNome: c.aziende?.nome || 'Azienda sconosciuta',
+          matchType: 'email',
+        });
+      }
+      
+      if (candidato.telefono && c.telefono && candidato.telefono === c.telefono) {
+        // Evita duplicati se già presente per email
+        if (!duplicates.some(d => d.candidatoId === c.id)) {
+          duplicates.push({
+            candidatoId: c.id,
+            aziendaNome: c.aziende?.nome || 'Azienda sconosciuta',
+            matchType: 'telefono',
+          });
+        }
+      }
+    });
+    
+    return duplicates;
+  };
 
   // Query credenziali azienda
   const { data: accessoAzienda, isLoading: isLoadingAccesso } = useQuery({
@@ -508,661 +587,944 @@ export default function Candidati() {
     </TableHead>
   );
 
-  // Statistiche rapide
-  const statsTotal = sortedCandidati?.length ?? 0;
-  const statsCompletati = sortedCandidati?.filter(c => c.test_completato).length ?? 0;
-  const statsInAttesa = statsTotal - statsCompletati;
+  // KPI Statistics
+  const stats = useMemo(() => {
+    if (!candidati) return { total: 0, completati: 0, inAttesa: 0, idonei: 0, avgFit: 0 };
+    const completati = candidati.filter(c => c.test_completato).length;
+    const inAttesa = candidati.length - completati;
+    const idonei = candidati.filter(c => {
+      const verdict = Array.isArray(c.analisi_candidato) ? c.analisi_candidato[0]?.fit_verdict : null;
+      return verdict === 'IDONEO';
+    }).length;
+    const fitScores = candidati
+      .map(c => Array.isArray(c.analisi_candidato) ? c.analisi_candidato[0]?.fit_score : null)
+      .filter((s): s is number => s !== null);
+    const avgFit = fitScores.length > 0 ? Math.round(fitScores.reduce((a, b) => a + b, 0) / fitScores.length) : 0;
+    
+    return { total: candidati.length, completati, inAttesa, idonei, avgFit };
+  }, [candidati]);
+
+  const hasActiveFilters = filterStato !== 'all' || filterSesso !== 'all' || filterEta !== 'all' || 
+    filterRuolo !== 'all' || filterFunzione !== 'all' || filterFitVerdict !== 'all';
+
+  const resetFilters = () => {
+    setFilterStato('all');
+    setFilterSesso('all');
+    setFilterEta('all');
+    setFilterRuolo('all');
+    setFilterFunzione('all');
+    setFilterFitVerdict('all');
+    setSearchTerm('');
+  };
+
+  // Filters content for mobile sheet
+  const FiltersContent = () => (
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Label className="text-xs font-medium">Stato Test</Label>
+        <Select value={filterStato} onValueChange={setFilterStato}>
+          <SelectTrigger className="h-9">
+            <SelectValue placeholder="Stato" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Tutti</SelectItem>
+            <SelectItem value="completato">Completato</SelectItem>
+            <SelectItem value="da_fare">Da fare</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="space-y-2">
+        <Label className="text-xs font-medium">Sesso</Label>
+        <Select value={filterSesso} onValueChange={setFilterSesso}>
+          <SelectTrigger className="h-9">
+            <SelectValue placeholder="Sesso" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Tutti</SelectItem>
+            <SelectItem value="M">Maschio</SelectItem>
+            <SelectItem value="F">Femmina</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="space-y-2">
+        <Label className="text-xs font-medium">Età</Label>
+        <Select value={filterEta} onValueChange={setFilterEta}>
+          <SelectTrigger className="h-9">
+            <SelectValue placeholder="Età" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Tutte</SelectItem>
+            <SelectItem value="18-30">18-30</SelectItem>
+            <SelectItem value="31-45">31-45</SelectItem>
+            <SelectItem value="46-60">46-60</SelectItem>
+            <SelectItem value="60+">60+</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="space-y-2">
+        <Label className="text-xs font-medium">Ruolo</Label>
+        <Select value={filterRuolo} onValueChange={setFilterRuolo}>
+          <SelectTrigger className="h-9">
+            <SelectValue placeholder="Ruolo" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Tutti</SelectItem>
+            {RUOLI_AZIENDALI.map((ruolo) => (
+              <SelectItem key={ruolo} value={ruolo}>{ruolo}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="space-y-2">
+        <Label className="text-xs font-medium">Funzione</Label>
+        <Select value={filterFunzione} onValueChange={setFilterFunzione}>
+          <SelectTrigger className="h-9">
+            <SelectValue placeholder="Funzione" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Tutte</SelectItem>
+            {FUNZIONI.map((funzione) => (
+              <SelectItem key={funzione} value={funzione}>{funzione}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="space-y-2">
+        <Label className="text-xs font-medium">Fit Score</Label>
+        <Select value={filterFitVerdict} onValueChange={setFilterFitVerdict}>
+          <SelectTrigger className="h-9">
+            <SelectValue placeholder="Fit" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Tutti</SelectItem>
+            <SelectItem value="IDONEO">Idoneo</SelectItem>
+            <SelectItem value="VALUTARE">Valutare</SelectItem>
+            <SelectItem value="NON_IDONEO">Non Idoneo</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      {hasActiveFilters && (
+        <Button variant="outline" size="sm" onClick={resetFilters} className="w-full">
+          Resetta filtri
+        </Button>
+      )}
+    </div>
+  );
 
   return (
     <ProtectedRoute allowedRoles={['superadmin', 'azienda']}>
       <NotionLayout>
-        <div className="space-y-6">
-          {/* Header con statistiche rapide */}
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-            <div className="space-y-1">
-              <h1 className="text-3xl font-bold tracking-tight">Gestione Candidati</h1>
-              <div className="flex flex-wrap items-center gap-4 text-sm">
-                <span className="text-muted-foreground">{statsTotal} totali</span>
-                <span className="flex items-center gap-1 text-green-600">
-                  <span className="h-2 w-2 rounded-full bg-green-500" />
-                  {statsCompletati} completati
-                </span>
-                <span className="flex items-center gap-1 text-yellow-600">
-                  <span className="h-2 w-2 rounded-full bg-yellow-500" />
-                  {statsInAttesa} in attesa
-                </span>
+        <TooltipProvider>
+          <div className="space-y-4 md:space-y-6">
+            {/* Header */}
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Candidati</h1>
+                <div className="flex flex-wrap items-center gap-2">
+                  {selectedIds.size > 0 && (
+                    <Button 
+                      variant="destructive" 
+                      size="sm"
+                      onClick={() => setIsDeleteDialogOpen(true)}
+                      disabled={deleteMutation.isPending}
+                    >
+                      <Trash2 className="h-4 w-4 mr-1" />
+                      Elimina ({selectedIds.size})
+                    </Button>
+                  )}
+                  
+                  {isSuperadmin && aziende && (
+                    <Select value={filterAzienda} onValueChange={setFilterAzienda}>
+                      <SelectTrigger className="w-[160px] h-9">
+                        <SelectValue placeholder="Azienda" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Tutte</SelectItem>
+                        {aziende.map((az) => (
+                          <SelectItem key={az.id} value={az.id}>{az.nome}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                  <Dialog open={isDialogOpen} onOpenChange={(open) => {
+                    setIsDialogOpen(open);
+                    if (!open) resetForm();
+                  }}>
+                    <DialogTrigger asChild>
+                      <Button size="sm">
+                        <Plus className="h-4 w-4 mr-1" />
+                        <span className="hidden sm:inline">Nuovo</span>
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+                      <form onSubmit={handleSubmit}>
+                        <DialogHeader>
+                          <DialogTitle>Nuovo Candidato</DialogTitle>
+                          <DialogDescription>
+                            Verranno generate automaticamente le credenziali di accesso.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4 py-4">
+                          {isSuperadmin && (
+                            <div className="space-y-2">
+                              <Label>Azienda *</Label>
+                              <Select
+                                value={formData.azienda_id}
+                                onValueChange={(value) => setFormData({ ...formData, azienda_id: value })}
+                                required
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Seleziona azienda" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {aziende?.map((az) => (
+                                    <SelectItem key={az.id} value={az.id}>{az.nome}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          )}
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="nome">Nome *</Label>
+                              <Input
+                                id="nome"
+                                value={formData.nome}
+                                onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
+                                required
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="cognome">Cognome *</Label>
+                              <Input
+                                id="cognome"
+                                value={formData.cognome}
+                                onChange={(e) => setFormData({ ...formData, cognome: e.target.value })}
+                                required
+                              />
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="email">Email</Label>
+                            <Input
+                              id="email"
+                              type="email"
+                              value={formData.email}
+                              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                            />
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="eta">Età</Label>
+                              <Input
+                                id="eta"
+                                type="number"
+                                min="18"
+                                max="99"
+                                value={formData.eta}
+                                onChange={(e) => setFormData({ ...formData, eta: e.target.value })}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="telefono">Telefono</Label>
+                              <Input
+                                id="telefono"
+                                value={formData.telefono}
+                                onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
+                              />
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Ruolo</Label>
+                            <Select
+                              value={formData.ruolo_attuale}
+                              onValueChange={(value) => setFormData({ ...formData, ruolo_attuale: value })}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Seleziona" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {RUOLI_AZIENDALI.map((ruolo) => (
+                                  <SelectItem key={ruolo} value={ruolo}>{ruolo}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Funzione</Label>
+                            <Select
+                              value={formData.funzione}
+                              onValueChange={(value) => setFormData({ ...formData, funzione: value })}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Seleziona" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {FUNZIONI.map((funzione) => (
+                                  <SelectItem key={funzione} value={funzione}>{funzione}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <DialogFooter>
+                          <Button type="submit" disabled={createMutation.isPending}>
+                            {createMutation.isPending ? 'Creazione...' : 'Crea'}
+                          </Button>
+                        </DialogFooter>
+                      </form>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              </div>
+
+              {/* KPI Cards */}
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+                  <CardContent className="p-3 md:p-4">
+                    <div className="flex items-center gap-2">
+                      <Users className="h-4 w-4 text-primary" />
+                      <span className="text-xs text-muted-foreground">Totale</span>
+                    </div>
+                    <p className="text-xl md:text-2xl font-bold mt-1">{stats.total}</p>
+                  </CardContent>
+                </Card>
+                <Card className="bg-gradient-to-br from-green-500/5 to-green-500/10 border-green-500/20">
+                  <CardContent className="p-3 md:p-4">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-green-600" />
+                      <span className="text-xs text-muted-foreground">Completati</span>
+                    </div>
+                    <p className="text-xl md:text-2xl font-bold mt-1">{stats.completati}</p>
+                  </CardContent>
+                </Card>
+                <Card className="bg-gradient-to-br from-yellow-500/5 to-yellow-500/10 border-yellow-500/20">
+                  <CardContent className="p-3 md:p-4">
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-4 w-4 text-yellow-600" />
+                      <span className="text-xs text-muted-foreground">In Attesa</span>
+                    </div>
+                    <p className="text-xl md:text-2xl font-bold mt-1">{stats.inAttesa}</p>
+                  </CardContent>
+                </Card>
+                <Card className="bg-gradient-to-br from-accent/5 to-accent/10 border-accent/20">
+                  <CardContent className="p-3 md:p-4">
+                    <div className="flex items-center gap-2">
+                      <UserCheck className="h-4 w-4 text-accent" />
+                      <span className="text-xs text-muted-foreground">Idonei</span>
+                    </div>
+                    <p className="text-xl md:text-2xl font-bold mt-1">{stats.idonei}</p>
+                  </CardContent>
+                </Card>
+                <Card className="bg-gradient-to-br from-blue-500/5 to-blue-500/10 border-blue-500/20 col-span-2 md:col-span-1">
+                  <CardContent className="p-3 md:p-4">
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="h-4 w-4 text-blue-600" />
+                      <span className="text-xs text-muted-foreground">Fit Medio</span>
+                    </div>
+                    <p className="text-xl md:text-2xl font-bold mt-1">{stats.avgFit}%</p>
+                  </CardContent>
+                </Card>
               </div>
             </div>
-            <div className="flex flex-wrap items-center gap-2">
-              {selectedIds.size > 0 && (
-                <Button 
-                  variant="destructive" 
-                  onClick={() => setIsDeleteDialogOpen(true)}
-                  disabled={deleteMutation.isPending}
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Elimina ({selectedIds.size})
-                </Button>
-              )}
-              
-              {isSuperadmin && aziende && (
-                <Select value={filterAzienda} onValueChange={setFilterAzienda}>
-                  <SelectTrigger className="w-[200px]">
-                    <SelectValue placeholder="Filtra per azienda" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Tutte le aziende</SelectItem>
-                    {aziende.map((az) => (
-                      <SelectItem key={az.id} value={az.id}>{az.nome}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-              <Dialog open={isDialogOpen} onOpenChange={(open) => {
-                setIsDialogOpen(open);
-                if (!open) resetForm();
-              }}>
-                <DialogTrigger asChild>
-                  <Button>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Nuovo Candidato
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-md">
-                  <form onSubmit={handleSubmit}>
-                    <DialogHeader>
-                      <DialogTitle>Nuovo Candidato</DialogTitle>
-                      <DialogDescription>
-                        Inserisci i dati del candidato. Verranno generate automaticamente le credenziali di accesso.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
-                      {isSuperadmin && (
-                        <div className="space-y-2">
-                          <Label>Azienda *</Label>
-                          <Select
-                            value={formData.azienda_id}
-                            onValueChange={(value) => setFormData({ ...formData, azienda_id: value })}
-                            required
+
+            {/* Credenziali Card */}
+            {currentAziendaId && currentAziendaId !== 'all' && (
+              <Card className="border-accent/30 bg-accent/5">
+                <CardHeader className="pb-2 pt-3 px-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Key className="h-4 w-4 text-accent" />
+                      <CardTitle className="text-sm md:text-base">Credenziali Candidati</CardTitle>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => credentialsMutation.mutate({ aziendaId: currentAziendaId, regenerate: !!accessoAzienda })}
+                      disabled={credentialsMutation.isPending}
+                    >
+                      <RefreshCw className={`h-3 w-3 mr-1 ${credentialsMutation.isPending ? 'animate-spin' : ''}`} />
+                      {accessoAzienda ? 'Rigenera' : 'Genera'}
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="px-4 pb-3">
+                  {isLoadingAccesso ? (
+                    <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-primary" />
+                      Caricamento...
+                    </div>
+                  ) : accessoAzienda ? (
+                    <div className="grid sm:grid-cols-3 gap-3">
+                      <div className="space-y-1">
+                        <Label className="text-xs text-muted-foreground">Username</Label>
+                        <div className="flex gap-1">
+                          <Input value={accessoAzienda.username} readOnly className="font-mono text-sm h-8" />
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-8 w-8 shrink-0"
+                            onClick={() => copyToClipboard(accessoAzienda.username, 'az-username')}
                           >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Seleziona azienda" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {aziende?.map((az) => (
-                                <SelectItem key={az.id} value={az.id}>{az.nome}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      )}
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="nome">Nome *</Label>
-                          <Input
-                            id="nome"
-                            value={formData.nome}
-                            onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
-                            required
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="cognome">Cognome *</Label>
-                          <Input
-                            id="cognome"
-                            value={formData.cognome}
-                            onChange={(e) => setFormData({ ...formData, cognome: e.target.value })}
-                            required
-                          />
+                            {copiedId === 'az-username' ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                          </Button>
                         </div>
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="email">Email (opzionale)</Label>
-                        <Input
-                          id="email"
-                          type="email"
-                          value={formData.email}
-                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                          placeholder="email@esempio.it"
-                        />
-                        <p className="text-xs text-muted-foreground">
-                          Se lasciata vuota, verrà generato un username
-                        </p>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="eta">Età</Label>
-                          <Input
-                            id="eta"
-                            type="number"
-                            min="18"
-                            max="99"
-                            value={formData.eta}
-                            onChange={(e) => setFormData({ ...formData, eta: e.target.value })}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="telefono">Telefono</Label>
-                          <Input
-                            id="telefono"
-                            value={formData.telefono}
-                            onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
-                          />
+                      <div className="space-y-1">
+                        <Label className="text-xs text-muted-foreground">Password</Label>
+                        <div className="flex gap-1">
+                          <Input value={accessoAzienda.password_plain} readOnly className="font-mono text-sm h-8" />
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-8 w-8 shrink-0"
+                            onClick={() => copyToClipboard(accessoAzienda.password_plain, 'az-password')}
+                          >
+                            {copiedId === 'az-password' ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                          </Button>
                         </div>
                       </div>
-                      <div className="space-y-2">
-                        <Label>Ruolo Attuale</Label>
-                        <Select
-                          value={formData.ruolo_attuale}
-                          onValueChange={(value) => setFormData({ ...formData, ruolo_attuale: value })}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Seleziona ruolo" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {RUOLI_AZIENDALI.map((ruolo) => (
-                              <SelectItem key={ruolo} value={ruolo}>{ruolo}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Funzione</Label>
-                        <Select
-                          value={formData.funzione}
-                          onValueChange={(value) => setFormData({ ...formData, funzione: value })}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Seleziona funzione" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {FUNZIONI.map((funzione) => (
-                              <SelectItem key={funzione} value={funzione}>{funzione}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                    <DialogFooter>
-                      <Button type="submit" disabled={createMutation.isPending}>
-                        {createMutation.isPending ? 'Creazione...' : 'Crea Candidato'}
-                      </Button>
-                    </DialogFooter>
-                  </form>
-                </DialogContent>
-              </Dialog>
-            </div>
-          </div>
-
-          {/* Card Credenziali Azienda */}
-          {currentAziendaId && currentAziendaId !== 'all' && (
-            <Card className="border-accent/30 bg-accent/5">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Key className="h-5 w-5 text-accent" />
-                    <CardTitle className="text-lg">Credenziali Accesso Candidati</CardTitle>
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => credentialsMutation.mutate({ aziendaId: currentAziendaId, regenerate: !!accessoAzienda })}
-                    disabled={credentialsMutation.isPending}
-                  >
-                    <RefreshCw className={`h-4 w-4 mr-2 ${credentialsMutation.isPending ? 'animate-spin' : ''}`} />
-                    {accessoAzienda ? 'Rigenera' : 'Genera'}
-                  </Button>
-                </div>
-                <CardDescription>
-                  Queste credenziali condivise permettono ai candidati di accedere al form anagrafico e al test
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {isLoadingAccesso ? (
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary" />
-                    Caricamento...
-                  </div>
-                ) : accessoAzienda ? (
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label className="text-xs text-muted-foreground">Username</Label>
-                      <div className="flex gap-2">
-                        <Input value={accessoAzienda.username} readOnly className="font-mono" />
+                      <div className="flex items-end">
                         <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={() => copyToClipboard(accessoAzienda.username, 'az-username')}
+                          variant="secondary"
+                          size="sm"
+                          className="w-full h-8"
+                          onClick={() => {
+                            const text = `Credenziali:\nUsername: ${accessoAzienda.username}\nPassword: ${accessoAzienda.password_plain}\nLink: ${window.location.origin}/auth`;
+                            copyToClipboard(text, 'az-all');
+                          }}
                         >
-                          {copiedId === 'az-username' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                          {copiedId === 'az-all' ? <Check className="h-3 w-3 mr-1" /> : <Copy className="h-3 w-3 mr-1" />}
+                          Copia tutto
                         </Button>
                       </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label className="text-xs text-muted-foreground">Password</Label>
-                      <div className="flex gap-2">
-                        <Input value={accessoAzienda.password_plain} readOnly className="font-mono" />
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={() => copyToClipboard(accessoAzienda.password_plain, 'az-password')}
-                        >
-                          {copiedId === 'az-password' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                        </Button>
-                      </div>
-                    </div>
-                    <div className="sm:col-span-2">
-                      <Button
-                        variant="secondary"
-                        className="w-full"
-                        onClick={() => {
-                          const text = `Credenziali accesso test Talent Profile:\n\nUsername: ${accessoAzienda.username}\nPassword: ${accessoAzienda.password_plain}\nLink: ${window.location.origin}/auth`;
-                          copyToClipboard(text, 'az-all');
-                        }}
-                      >
-                        {copiedId === 'az-all' ? <Check className="h-4 w-4 mr-2" /> : <Copy className="h-4 w-4 mr-2" />}
-                        Copia tutte le credenziali
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-muted-foreground text-sm">
-                    Nessuna credenziale generata. Clicca "Genera" per creare le credenziali di accesso per i candidati.
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-          )}
+                  ) : (
+                    <p className="text-muted-foreground text-sm">
+                      Clicca "Genera" per creare le credenziali di accesso.
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            )}
 
-          {/* Ricerca e Filtri Avanzati */}
-          <Card className="border-dashed">
-            <CardContent className="py-4 space-y-4">
-              {/* Search bar */}
-              <div className="relative">
+            {/* Search & Filters */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Cerca per nome, cognome, email, ruolo..."
+                  placeholder="Cerca candidato..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-9"
+                  className="pl-9 h-9"
                 />
               </div>
               
-              {/* Filters row */}
-              <div className="flex flex-wrap items-center gap-3">
-                <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-                  Filtri:
-                </div>
-                <Select value={filterStato} onValueChange={setFilterStato}>
-                  <SelectTrigger className="w-[140px] h-9">
-                    <SelectValue placeholder="Stato" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Tutti gli stati</SelectItem>
-                    <SelectItem value="completato">Completato</SelectItem>
-                    <SelectItem value="da_fare">Da fare</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Select value={filterSesso} onValueChange={setFilterSesso}>
-                  <SelectTrigger className="w-[100px] h-9">
-                    <SelectValue placeholder="Sesso" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Tutti</SelectItem>
-                    <SelectItem value="M">Maschio</SelectItem>
-                    <SelectItem value="F">Femmina</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Select value={filterEta} onValueChange={setFilterEta}>
-                  <SelectTrigger className="w-[120px] h-9">
-                    <SelectValue placeholder="Età" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Tutte le età</SelectItem>
-                    <SelectItem value="18-30">18-30 anni</SelectItem>
-                    <SelectItem value="31-45">31-45 anni</SelectItem>
-                    <SelectItem value="46-60">46-60 anni</SelectItem>
-                    <SelectItem value="60+">60+ anni</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Select value={filterRuolo} onValueChange={setFilterRuolo}>
-                  <SelectTrigger className="w-[140px] h-9">
-                    <SelectValue placeholder="Ruolo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Tutti i ruoli</SelectItem>
-                    {RUOLI_AZIENDALI.map((ruolo) => (
-                      <SelectItem key={ruolo} value={ruolo}>{ruolo}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Select value={filterFunzione} onValueChange={setFilterFunzione}>
-                  <SelectTrigger className="w-[160px] h-9">
-                    <SelectValue placeholder="Funzione" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Tutte le funzioni</SelectItem>
-                    {FUNZIONI.map((funzione) => (
-                      <SelectItem key={funzione} value={funzione}>{funzione}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Select value={filterFitVerdict} onValueChange={setFilterFitVerdict}>
-                  <SelectTrigger className="w-[140px] h-9">
-                    <SelectValue placeholder="Fit" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Tutti i Fit</SelectItem>
-                    <SelectItem value="IDONEO">Idoneo</SelectItem>
-                    <SelectItem value="VALUTARE">Valutare</SelectItem>
-                    <SelectItem value="NON_IDONEO">Non Idoneo</SelectItem>
-                  </SelectContent>
-                </Select>
-                
-                <div className="flex-1" />
-                
-                <Button variant="outline" size="sm" onClick={exportCSV} disabled={!sortedCandidati || sortedCandidati.length === 0}>
-                  <Download className="h-4 w-4 mr-2" />
-                  CSV
-                </Button>
-                {isSuperadmin && (
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => seedMutation.mutate()}
-                    disabled={seedMutation.isPending}
-                    className="border-accent/50 hover:bg-accent/10"
-                  >
-                    <TestTube2 className={`h-4 w-4 mr-2 ${seedMutation.isPending ? 'animate-pulse' : ''}`} />
-                    Demo
+              {/* Mobile: Filter button */}
+              {isMobile ? (
+                <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
+                  <SheetTrigger asChild>
+                    <Button variant="outline" size="sm" className="h-9 gap-2">
+                      <Filter className="h-4 w-4" />
+                      Filtri
+                      {hasActiveFilters && (
+                        <Badge variant="secondary" className="h-5 px-1.5 text-xs">
+                          {[filterStato, filterSesso, filterEta, filterRuolo, filterFunzione, filterFitVerdict]
+                            .filter(f => f !== 'all').length}
+                        </Badge>
+                      )}
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side="right" className="w-80">
+                    <SheetHeader>
+                      <SheetTitle>Filtri</SheetTitle>
+                    </SheetHeader>
+                    <div className="mt-4">
+                      <FiltersContent />
+                    </div>
+                  </SheetContent>
+                </Sheet>
+              ) : (
+                /* Desktop: Inline filters */
+                <div className="flex flex-wrap items-center gap-2">
+                  <Select value={filterStato} onValueChange={setFilterStato}>
+                    <SelectTrigger className="w-[120px] h-9">
+                      <SelectValue placeholder="Stato" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Tutti</SelectItem>
+                      <SelectItem value="completato">Completato</SelectItem>
+                      <SelectItem value="da_fare">Da fare</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select value={filterSesso} onValueChange={setFilterSesso}>
+                    <SelectTrigger className="w-[100px] h-9">
+                      <SelectValue placeholder="Sesso" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Tutti</SelectItem>
+                      <SelectItem value="M">M</SelectItem>
+                      <SelectItem value="F">F</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select value={filterEta} onValueChange={setFilterEta}>
+                    <SelectTrigger className="w-[100px] h-9">
+                      <SelectValue placeholder="Età" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Tutte</SelectItem>
+                      <SelectItem value="18-30">18-30</SelectItem>
+                      <SelectItem value="31-45">31-45</SelectItem>
+                      <SelectItem value="46-60">46-60</SelectItem>
+                      <SelectItem value="60+">60+</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select value={filterFitVerdict} onValueChange={setFilterFitVerdict}>
+                    <SelectTrigger className="w-[110px] h-9">
+                      <SelectValue placeholder="Fit" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Tutti</SelectItem>
+                      <SelectItem value="IDONEO">Idoneo</SelectItem>
+                      <SelectItem value="VALUTARE">Valutare</SelectItem>
+                      <SelectItem value="NON_IDONEO">Non Idoneo</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button variant="outline" size="sm" onClick={exportCSV} disabled={!sortedCandidati || sortedCandidati.length === 0} className="h-9">
+                    <Download className="h-4 w-4" />
                   </Button>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-0">
-              {isLoading ? (
-                <div className="p-8 text-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto" />
+                  {isSuperadmin && (
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => seedMutation.mutate()}
+                      disabled={seedMutation.isPending}
+                      className="h-9 border-accent/50 hover:bg-accent/10"
+                    >
+                      <TestTube2 className={`h-4 w-4 ${seedMutation.isPending ? 'animate-pulse' : ''}`} />
+                    </Button>
+                  )}
                 </div>
-              ) : sortedCandidati && sortedCandidati.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-12">
-                          <Checkbox 
-                            checked={sortedCandidati.length > 0 && selectedIds.size === sortedCandidati.length}
-                            onCheckedChange={toggleSelectAll}
-                          />
-                        </TableHead>
-                        <SortableHeader field="cognome">Candidato</SortableHeader>
-                        {isSuperadmin && <TableHead>Azienda</TableHead>}
-                        <TableHead>Sesso</TableHead>
-                        <SortableHeader field="eta">Età</SortableHeader>
-                        <SortableHeader field="ruolo_attuale">Ruolo</SortableHeader>
-                        <SortableHeader field="funzione">Funzione</SortableHeader>
-                        <TableHead>Stato</TableHead>
-                        <TableHead>Profilo</TableHead>
-                        <SortableHeader field="fit_score">Fit Score</SortableHeader>
-                        <TableHead>Leadership</TableHead>
-                        <TableHead>Maturità</TableHead>
-                        <TableHead>Potenziale</TableHead>
-                        <SortableHeader field="created_at">Data</SortableHeader>
-                        <TableHead className="text-right">Azioni</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {sortedCandidati.map((candidato, index) => (
-                        <TableRow 
-                          key={candidato.id}
-                          className={cn(
-                            "transition-colors",
-                            selectedIds.has(candidato.id) ? 'bg-primary/10' : index % 2 === 0 ? 'bg-muted/20' : '',
-                            "hover:bg-muted/50"
-                          )}
-                        >
-                          <TableCell>
-                            <Checkbox 
-                              checked={selectedIds.has(candidato.id)}
-                              onCheckedChange={() => toggleSelect(candidato.id)}
-                            />
-                          </TableCell>
-                          <TableCell className="font-medium">
-                            <div className="flex items-center gap-3">
-                              <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-sm">
-                                {candidato.nome?.[0]}{candidato.cognome?.[0]}
+              )}
+            </div>
+
+            {/* Active filters chips (mobile) */}
+            {isMobile && hasActiveFilters && (
+              <div className="flex flex-wrap gap-2">
+                {filterStato !== 'all' && (
+                  <Badge variant="secondary" className="gap-1">
+                    Stato: {filterStato === 'completato' ? 'Completato' : 'Da fare'}
+                  </Badge>
+                )}
+                {filterSesso !== 'all' && (
+                  <Badge variant="secondary" className="gap-1">
+                    Sesso: {filterSesso}
+                  </Badge>
+                )}
+                {filterEta !== 'all' && (
+                  <Badge variant="secondary" className="gap-1">
+                    Età: {filterEta}
+                  </Badge>
+                )}
+                {filterFitVerdict !== 'all' && (
+                  <Badge variant="secondary" className="gap-1">
+                    Fit: {filterFitVerdict}
+                  </Badge>
+                )}
+                <Button variant="ghost" size="sm" onClick={resetFilters} className="h-6 px-2 text-xs">
+                  Resetta
+                </Button>
+              </div>
+            )}
+
+            {/* Results count */}
+            {(searchTerm || hasActiveFilters) && sortedCandidati && (
+              <p className="text-sm text-muted-foreground">
+                {sortedCandidati.length} risultati trovati
+              </p>
+            )}
+
+            {/* Table / Card View */}
+            <Card>
+              <CardContent className="p-0">
+                {isLoading ? (
+                  <div className="p-8 text-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto" />
+                  </div>
+                ) : sortedCandidati && sortedCandidati.length > 0 ? (
+                  isMobile ? (
+                    // Mobile Card View
+                    <div className="divide-y">
+                      {sortedCandidati.map((candidato) => {
+                        const duplicates = getDuplicateInfo(candidato);
+                        const hasDuplicates = duplicates.length > 0;
+                        const fitScore = Array.isArray(candidato.analisi_candidato) 
+                          ? candidato.analisi_candidato[0]?.fit_score 
+                          : null;
+                        
+                        return (
+                          <div 
+                            key={candidato.id} 
+                            className={cn(
+                              "p-4 space-y-3",
+                              selectedIds.has(candidato.id) && "bg-primary/5"
+                            )}
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="flex items-center gap-3">
+                                <Checkbox 
+                                  checked={selectedIds.has(candidato.id)}
+                                  onCheckedChange={() => toggleSelect(candidato.id)}
+                                />
+                                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-sm shrink-0">
+                                  {candidato.nome?.[0]}{candidato.cognome?.[0]}
+                                </div>
+                                <div className="min-w-0">
+                                  <div className="flex items-center gap-2">
+                                    <p className="font-medium truncate">{candidato.cognome} {candidato.nome}</p>
+                                    {hasDuplicates && (
+                                      <AlertTriangle className="h-4 w-4 text-yellow-500 shrink-0" />
+                                    )}
+                                  </div>
+                                  {candidato.email && (
+                                    <p className="text-xs text-muted-foreground truncate">{candidato.email}</p>
+                                  )}
+                                </div>
                               </div>
-                              <div>
-                                <p className="font-medium">{candidato.cognome} {candidato.nome}</p>
-                                {candidato.email && (
-                                  <p className="text-xs text-muted-foreground">{candidato.email}</p>
+                              <div className="flex items-center gap-1">
+                                {candidato.test_completato ? (
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon"
+                                    className="h-8 w-8"
+                                    onClick={() => {
+                                      setSelectedCandidato(candidato);
+                                      setIsDrawerOpen(true);
+                                    }}
+                                  >
+                                    <Eye className="h-4 w-4" />
+                                  </Button>
+                                ) : (
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8"
+                                    onClick={() => copyToClipboard(
+                                      `${window.location.origin}/auth`,
+                                      candidato.id
+                                    )}
+                                  >
+                                    {copiedId === candidato.id ? (
+                                      <Check className="h-4 w-4 text-green-600" />
+                                    ) : (
+                                      <Copy className="h-4 w-4" />
+                                    )}
+                                  </Button>
                                 )}
                               </div>
                             </div>
-                          </TableCell>
-                          {isSuperadmin && (
-                            <TableCell className="text-sm">{candidato.aziende?.nome || '-'}</TableCell>
-                          )}
-                          <TableCell className="text-center">{candidato.sesso || '-'}</TableCell>
-                          <TableCell className="text-center">{candidato.eta || '-'}</TableCell>
-                          <TableCell>{candidato.ruolo_attuale || '-'}</TableCell>
-                          <TableCell className="max-w-[150px] truncate">{candidato.funzione || '-'}</TableCell>
-                          <TableCell>
-                            <Badge 
-                              variant={candidato.test_completato ? 'default' : 'secondary'}
-                              className={candidato.test_completato ? 'bg-green-100 text-green-700 hover:bg-green-100' : ''}
-                            >
-                              {candidato.test_completato ? 'Completato' : 'Da fare'}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            {candidato.test_completato && candidato.profili_candidato?.profilo_tipo ? (
-                              <Badge variant={getBadgeVariant(candidato.profili_candidato.profilo_tipo)}>
-                                {getProfiloTipoLabel(candidato.profili_candidato.profilo_tipo as any)}
+                            
+                            <div className="flex flex-wrap items-center gap-2 text-sm">
+                              <Badge 
+                                variant={candidato.test_completato ? 'default' : 'secondary'}
+                                className={cn(
+                                  "text-xs",
+                                  candidato.test_completato && 'bg-green-100 text-green-700 hover:bg-green-100'
+                                )}
+                              >
+                                {candidato.test_completato ? 'Completato' : 'Da fare'}
                               </Badge>
-                            ) : (
-                              <span className="text-muted-foreground">-</span>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            {Array.isArray(candidato.analisi_candidato) && candidato.analisi_candidato[0]?.fit_score != null ? (
-                              <div className={cn(
-                                "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-sm font-bold",
-                                candidato.analisi_candidato[0].fit_score >= 65 ? "bg-green-100 text-green-700" :
-                                candidato.analisi_candidato[0].fit_score >= 40 ? "bg-yellow-100 text-yellow-700" :
-                                "bg-red-100 text-red-700"
-                              )}>
-                                {candidato.analisi_candidato[0].fit_score}%
+                              
+                              {fitScore != null && (
+                                <span className={cn(
+                                  "px-2 py-0.5 rounded-full text-xs font-bold",
+                                  fitScore >= 65 ? "bg-green-100 text-green-700" :
+                                  fitScore >= 40 ? "bg-yellow-100 text-yellow-700" :
+                                  "bg-red-100 text-red-700"
+                                )}>
+                                  Fit {fitScore}%
+                                </span>
+                              )}
+                              
+                              {candidato.eta && (
+                                <span className="text-muted-foreground">{candidato.eta} anni</span>
+                              )}
+                              {candidato.ruolo_attuale && (
+                                <span className="text-muted-foreground">{candidato.ruolo_attuale}</span>
+                              )}
+                            </div>
+                            
+                            {hasDuplicates && (
+                              <div className="flex items-center gap-2 text-xs text-yellow-600 bg-yellow-50 rounded px-2 py-1">
+                                <AlertTriangle className="h-3 w-3" />
+                                Presente in: {duplicates.map(d => d.aziendaNome).join(', ')}
                               </div>
-                            ) : (
-                              <span className="text-muted-foreground">-</span>
                             )}
-                          </TableCell>
-                          <TableCell className="text-center">
-                            {candidato.profili_candidato?.leadership_pct != null ? (
-                              <span className="font-medium">{candidato.profili_candidato.leadership_pct.toFixed(0)}%</span>
-                            ) : (
-                              <span className="text-muted-foreground">-</span>
-                            )}
-                          </TableCell>
-                          <TableCell className="text-center">
-                            {candidato.profili_candidato?.maturita_pct != null ? (
-                              <span className="font-medium">{candidato.profili_candidato.maturita_pct.toFixed(0)}%</span>
-                            ) : (
-                              <span className="text-muted-foreground">-</span>
-                            )}
-                          </TableCell>
-                          <TableCell className="text-center">
-                            {candidato.profili_candidato?.potenziale_pct != null ? (
-                              <span className="font-medium">{candidato.profili_candidato.potenziale_pct.toFixed(0)}%</span>
-                            ) : (
-                              <span className="text-muted-foreground">-</span>
-                            )}
-                          </TableCell>
-                          <TableCell className="text-muted-foreground text-sm">
-                            <div className="flex items-center gap-1">
-                              <Calendar className="h-3 w-3" />
-                              {candidato.data_test 
-                                ? format(new Date(candidato.data_test), 'dd MMM yy', { locale: it })
-                                : format(new Date(candidato.created_at), 'dd MMM yy', { locale: it })
-                              }
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end gap-1">
-                              {!candidato.test_completato && (
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8"
-                                  onClick={() => copyToClipboard(
-                                    `Accedi al test: ${window.location.origin}/auth`,
-                                    candidato.id
-                                  )}
-                                  title="Copia link test"
-                                >
-                                  {copiedId === candidato.id ? (
-                                    <Check className="h-4 w-4 text-green-600" />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    // Desktop Table View
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="w-10">
+                              <Checkbox 
+                                checked={sortedCandidati.length > 0 && selectedIds.size === sortedCandidati.length}
+                                onCheckedChange={toggleSelectAll}
+                              />
+                            </TableHead>
+                            <SortableHeader field="cognome">Candidato</SortableHeader>
+                            {isSuperadmin && <TableHead>Azienda</TableHead>}
+                            <SortableHeader field="eta">Età</SortableHeader>
+                            <SortableHeader field="ruolo_attuale">Ruolo</SortableHeader>
+                            <TableHead>Stato</TableHead>
+                            <SortableHeader field="fit_score">Fit</SortableHeader>
+                            <TableHead>Profilo</TableHead>
+                            <SortableHeader field="created_at">Data</SortableHeader>
+                            <TableHead className="text-right w-24">Azioni</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {sortedCandidati.map((candidato, index) => {
+                            const duplicates = getDuplicateInfo(candidato);
+                            const hasDuplicates = duplicates.length > 0;
+                            const fitScore = Array.isArray(candidato.analisi_candidato) 
+                              ? candidato.analisi_candidato[0]?.fit_score 
+                              : null;
+                            
+                            return (
+                              <TableRow 
+                                key={candidato.id}
+                                className={cn(
+                                  "transition-colors",
+                                  selectedIds.has(candidato.id) ? 'bg-primary/10' : index % 2 === 0 ? 'bg-muted/20' : '',
+                                  "hover:bg-muted/50"
+                                )}
+                              >
+                                <TableCell>
+                                  <Checkbox 
+                                    checked={selectedIds.has(candidato.id)}
+                                    onCheckedChange={() => toggleSelect(candidato.id)}
+                                  />
+                                </TableCell>
+                                <TableCell className="font-medium">
+                                  <div className="flex items-center gap-3">
+                                    <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-xs">
+                                      {candidato.nome?.[0]}{candidato.cognome?.[0]}
+                                    </div>
+                                    <div className="min-w-0">
+                                      <div className="flex items-center gap-2">
+                                        <p className="font-medium">{candidato.cognome} {candidato.nome}</p>
+                                        {hasDuplicates && (
+                                          <Tooltip>
+                                            <TooltipTrigger>
+                                              <AlertTriangle className="h-4 w-4 text-yellow-500" />
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                              <p className="font-medium">Multi-azienda</p>
+                                              {duplicates.map((d, i) => (
+                                                <p key={i} className="text-xs">
+                                                  {d.aziendaNome} (via {d.matchType})
+                                                </p>
+                                              ))}
+                                            </TooltipContent>
+                                          </Tooltip>
+                                        )}
+                                      </div>
+                                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                        {candidato.email && (
+                                          <span className="flex items-center gap-1">
+                                            <Mail className="h-3 w-3" />
+                                            {candidato.email}
+                                          </span>
+                                        )}
+                                        {candidato.telefono && (
+                                          <span className="flex items-center gap-1">
+                                            <Phone className="h-3 w-3" />
+                                            {candidato.telefono}
+                                          </span>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </TableCell>
+                                {isSuperadmin && (
+                                  <TableCell className="text-sm">{candidato.aziende?.nome || '-'}</TableCell>
+                                )}
+                                <TableCell className="text-center">
+                                  {candidato.eta ? `${candidato.eta}` : '-'}
+                                  {candidato.sesso && <span className="text-muted-foreground ml-1">({candidato.sesso})</span>}
+                                </TableCell>
+                                <TableCell className="max-w-[120px] truncate">{candidato.ruolo_attuale || '-'}</TableCell>
+                                <TableCell>
+                                  <Badge 
+                                    variant={candidato.test_completato ? 'default' : 'secondary'}
+                                    className={cn(
+                                      "text-xs",
+                                      candidato.test_completato && 'bg-green-100 text-green-700 hover:bg-green-100'
+                                    )}
+                                  >
+                                    {candidato.test_completato ? 'OK' : 'Attesa'}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell>
+                                  {fitScore != null ? (
+                                    <span className={cn(
+                                      "px-2 py-0.5 rounded-full text-xs font-bold",
+                                      fitScore >= 65 ? "bg-green-100 text-green-700" :
+                                      fitScore >= 40 ? "bg-yellow-100 text-yellow-700" :
+                                      "bg-red-100 text-red-700"
+                                    )}>
+                                      {fitScore}%
+                                    </span>
                                   ) : (
-                                    <Copy className="h-4 w-4" />
+                                    <span className="text-muted-foreground text-xs">-</span>
                                   )}
-                                </Button>
-                              )}
-                              {candidato.test_completato && (
-                                <Button 
-                                  variant="ghost" 
-                                  size="icon"
-                                  className="h-8 w-8"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setSelectedCandidato(candidato);
-                                    setIsDrawerOpen(true);
-                                  }}
-                                  title="Vedi dettaglio"
-                                >
-                                  <Eye className="h-4 w-4" />
-                                </Button>
-                              )}
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              ) : (
-                <div className="p-8 text-center text-muted-foreground">
-                  <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>Nessun candidato presente</p>
-                  <p className="text-sm">Crea il primo candidato per iniziare</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+                                </TableCell>
+                                <TableCell>
+                                  {candidato.test_completato && candidato.profili_candidato?.profilo_tipo ? (
+                                    <Badge variant={getBadgeVariant(candidato.profili_candidato.profilo_tipo)} className="text-xs">
+                                      {getProfiloTipoLabel(candidato.profili_candidato.profilo_tipo as any)}
+                                    </Badge>
+                                  ) : (
+                                    <span className="text-muted-foreground text-xs">-</span>
+                                  )}
+                                </TableCell>
+                                <TableCell className="text-muted-foreground text-xs">
+                                  <div className="flex items-center gap-1">
+                                    <Calendar className="h-3 w-3" />
+                                    {format(new Date(candidato.created_at), 'dd/MM/yy', { locale: it })}
+                                  </div>
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <div className="flex justify-end gap-1">
+                                    {!candidato.test_completato ? (
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-7 w-7"
+                                        onClick={() => copyToClipboard(
+                                          `${window.location.origin}/auth`,
+                                          candidato.id
+                                        )}
+                                      >
+                                        {copiedId === candidato.id ? (
+                                          <Check className="h-3 w-3 text-green-600" />
+                                        ) : (
+                                          <Copy className="h-3 w-3" />
+                                        )}
+                                      </Button>
+                                    ) : (
+                                      <Button 
+                                        variant="default" 
+                                        size="sm"
+                                        className="h-7 px-2 text-xs"
+                                        onClick={() => {
+                                          setSelectedCandidato(candidato);
+                                          setIsDrawerOpen(true);
+                                        }}
+                                      >
+                                        <Eye className="h-3 w-3 mr-1" />
+                                        Vedi
+                                      </Button>
+                                    )}
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  )
+                ) : (
+                  <div className="p-8 text-center text-muted-foreground">
+                    <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>Nessun candidato trovato</p>
+                    <p className="text-sm">
+                      {searchTerm || hasActiveFilters ? 'Modifica i filtri' : 'Crea il primo candidato'}
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
 
-        {/* Delete Confirmation Dialog */}
-        <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Conferma eliminazione</AlertDialogTitle>
-              <AlertDialogDescription>
-                Stai per eliminare {selectedIds.size} candidati e tutti i loro dati 
-                (risposte, risultati, profili). Questa azione non può essere annullata.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Annulla</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={() => deleteMutation.mutate(Array.from(selectedIds))}
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              >
-                {deleteMutation.isPending ? 'Eliminazione...' : 'Elimina definitivamente'}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+          {/* Delete Confirmation Dialog */}
+          <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Conferma eliminazione</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Stai per eliminare {selectedIds.size} candidati e tutti i loro dati. 
+                  Questa azione non può essere annullata.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Annulla</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => deleteMutation.mutate(Array.from(selectedIds))}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  {deleteMutation.isPending ? 'Eliminazione...' : 'Elimina'}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
 
-        {/* Credentials Dialog */}
-        <Dialog open={!!generatedCredentials} onOpenChange={() => setGeneratedCredentials(null)}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Credenziali Candidato Create</DialogTitle>
-              <DialogDescription>
-                Copia e invia queste credenziali al candidato "{generatedCredentials?.nome} {generatedCredentials?.cognome}".
-                La password non potrà essere visualizzata nuovamente.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label>Username</Label>
-                <div className="flex gap-2">
-                  <Input value={generatedCredentials?.username || ''} readOnly />
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => copyToClipboard(generatedCredentials?.username || '', 'cred-username')}
-                  >
-                    {copiedId === 'cred-username' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                  </Button>
+          {/* Credentials Dialog */}
+          <Dialog open={!!generatedCredentials} onOpenChange={() => setGeneratedCredentials(null)}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Credenziali Create</DialogTitle>
+                <DialogDescription>
+                  Credenziali per "{generatedCredentials?.nome} {generatedCredentials?.cognome}"
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label>Username</Label>
+                  <div className="flex gap-2">
+                    <Input value={generatedCredentials?.username || ''} readOnly className="font-mono" />
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => copyToClipboard(generatedCredentials?.username || '', 'cred-username')}
+                    >
+                      {copiedId === 'cred-username' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Password</Label>
+                  <div className="flex gap-2">
+                    <Input value={generatedCredentials?.password || ''} readOnly className="font-mono" />
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => copyToClipboard(generatedCredentials?.password || '', 'cred-password')}
+                    >
+                      {copiedId === 'cred-password' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                    </Button>
+                  </div>
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label>Password</Label>
-                <div className="flex gap-2">
-                  <Input value={generatedCredentials?.password || ''} readOnly />
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => copyToClipboard(generatedCredentials?.password || '', 'cred-password')}
-                  >
-                    {copiedId === 'cred-password' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                  </Button>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label>Link di Accesso</Label>
-                <div className="flex gap-2">
-                  <Input value={`${window.location.origin}/auth`} readOnly />
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => copyToClipboard(`${window.location.origin}/auth`, 'cred-link')}
-                  >
-                    {copiedId === 'cred-link' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                  </Button>
-                </div>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button 
-                variant="outline"
-                onClick={() => {
-                  const text = `Credenziali per il test Talent Profile:\n\nUsername: ${generatedCredentials?.username}\nPassword: ${generatedCredentials?.password}\nLink: ${window.location.origin}/auth`;
-                  copyToClipboard(text, 'cred-all');
-                }}
-              >
-                <Copy className="h-4 w-4 mr-2" />
-                Copia Tutto
-              </Button>
-              <Button onClick={() => setGeneratedCredentials(null)}>Chiudi</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+              <DialogFooter>
+                <Button onClick={() => setGeneratedCredentials(null)}>Chiudi</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
 
-        {/* Drawer Dettaglio Candidato */}
-        <CandidatoDrawer
-          candidato={selectedCandidato}
-          open={isDrawerOpen}
-          onOpenChange={(open) => {
-            setIsDrawerOpen(open);
-            if (!open) setSelectedCandidato(null);
-          }}
-        />
+          {/* Candidato Detail Drawer */}
+          <CandidatoDrawer
+            candidato={selectedCandidato}
+            open={isDrawerOpen}
+            onOpenChange={setIsDrawerOpen}
+          />
+        </TooltipProvider>
       </NotionLayout>
     </ProtectedRoute>
   );
