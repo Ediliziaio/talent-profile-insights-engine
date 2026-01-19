@@ -24,11 +24,6 @@ export default function Questionario() {
   const [risposte, setRisposte] = useState<Record<number, 'A' | 'B' | 'C'>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Only candidato role can access this page
-  if (!authLoading && profile?.ruolo !== 'candidato') {
-    return <Navigate to="/" replace />;
-  }
-
   const totalPages = Math.ceil(DOMANDE.length / QUESTIONS_PER_PAGE);
   const startIndex = currentPage * QUESTIONS_PER_PAGE;
   const currentQuestions = DOMANDE.slice(startIndex, startIndex + QUESTIONS_PER_PAGE);
@@ -95,6 +90,11 @@ export default function Questionario() {
   const progress = (Object.keys(risposte).length / DOMANDE.length) * 100;
   const isLastPage = currentPage === totalPages - 1;
   const allAnswered = Object.keys(risposte).length === DOMANDE.length;
+
+  // Only candidato role can access this page - check AFTER all hooks
+  if (!authLoading && profile?.ruolo !== 'candidato') {
+    return <Navigate to="/" replace />;
+  }
 
   const handleSubmit = async () => {
     if (!candidato || !allAnswered) return;
