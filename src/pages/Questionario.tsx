@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -17,12 +17,17 @@ import { Candidato } from '@/types/database';
 const QUESTIONS_PER_PAGE = 5;
 
 export default function Questionario() {
-  const { user, profile } = useAuth();
+  const { user, profile, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [currentPage, setCurrentPage] = useState(0);
   const [risposte, setRisposte] = useState<Record<number, 'A' | 'B' | 'C'>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Only candidato role can access this page
+  if (!authLoading && profile?.ruolo !== 'candidato') {
+    return <Navigate to="/" replace />;
+  }
 
   const totalPages = Math.ceil(DOMANDE.length / QUESTIONS_PER_PAGE);
   const startIndex = currentPage * QUESTIONS_PER_PAGE;
