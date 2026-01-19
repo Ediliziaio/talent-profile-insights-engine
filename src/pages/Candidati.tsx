@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Table,
   TableBody,
@@ -32,13 +33,26 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Users, Copy, Check, Eye, Key, RefreshCw, Download, ArrowUpDown, TestTube2 } from 'lucide-react';
-import { Candidato, Azienda, AccessoAzienda, RUOLI_AZIENDALI, FUNZIONI } from '@/types/database';
+import { Plus, Users, Copy, Check, Eye, Key, RefreshCw, Download, ArrowUpDown, TestTube2, Trash2, Calendar, User } from 'lucide-react';
+import { Candidato, Azienda, AccessoAzienda, ProfiloCandidato, RUOLI_AZIENDALI, FUNZIONI } from '@/types/database';
+import { getProfiloTipoLabel } from '@/lib/scoring';
 import { Link } from 'react-router-dom';
+import { format } from 'date-fns';
+import { it } from 'date-fns/locale';
 
-type SortField = 'cognome' | 'eta' | 'ruolo_attuale' | 'funzione' | 'created_at';
+type SortField = 'cognome' | 'eta' | 'ruolo_attuale' | 'funzione' | 'created_at' | 'data_test';
 type SortOrder = 'asc' | 'desc';
 
 export default function Candidati() {
@@ -53,6 +67,8 @@ export default function Candidati() {
   const [filterFunzione, setFilterFunzione] = useState<string>('all');
   const [sortField, setSortField] = useState<SortField>('created_at');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [generatedCredentials, setGeneratedCredentials] = useState<{
     username: string;
     password: string;
@@ -110,7 +126,7 @@ export default function Candidati() {
     queryFn: async () => {
       let query = supabase
         .from('candidati')
-        .select('*, aziende(nome)')
+        .select('*, aziende(nome), profili_candidato(*)')
         .order('created_at', { ascending: false });
 
       if (filterAzienda && filterAzienda !== 'all') {
@@ -130,7 +146,10 @@ export default function Candidati() {
 
       const { data, error } = await query;
       if (error) throw error;
-      return data as (Candidato & { aziende: { nome: string } })[];
+      return data as (Candidato & { 
+        aziende: { nome: string } | null;
+        profili_candidato: ProfiloCandidato | null;
+      })[];
     },
   });
 
@@ -209,6 +228,29 @@ export default function Candidati() {
         description: error.message,
         variant: 'destructive',
       });
+    },
+  });
+
+  // Mutation per eliminare candidati
+  const deleteMutation = useMutation({
+    mutationFn: async (ids: string[]) => {
+      for (const id of ids) {
+        await supabase.from('profili_candidato').delete().eq('candidato_id', id);
+        await supabase.from('risultati').delete().eq('candidato_id', id);
+        await supabase.from('risposte').delete().eq('candidato_id', id);
+        const { error } = await supabase.from('candidati').delete().eq('id', id);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['candidati'] });
+      const count = selectedIds.size;
+      setSelectedIds(new Set());
+      setIsDeleteDialogOpen(false);
+      toast({ title: 'Candidati eliminati', description: `${count} candidati rimossi` });
+    },
+    onError: (error: Error) => {
+      toast({ title: 'Errore', description: error.message, variant: 'destructive' });
     },
   });
 
@@ -308,6 +350,24 @@ export default function Candidati() {
     }
   };
 
+  const toggleSelect = (id: string) => {
+    const newSet = new Set(selectedIds);
+    if (newSet.has(id)) {
+      newSet.delete(id);
+    } else {
+      newSet.add(id);
+    }
+    setSelectedIds(newSet);
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === sortedCandidati?.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(sortedCandidati?.map(c => c.id) || []));
+    }
+  };
+
   const sortedCandidati = candidati ? [...candidati].sort((a, b) => {
     let aVal: any = a[sortField];
     let bVal: any = b[sortField];
@@ -326,7 +386,7 @@ export default function Candidati() {
   const exportCSV = () => {
     if (!sortedCandidati || sortedCandidati.length === 0) return;
 
-    const headers = ['Cognome', 'Nome', 'Sesso', 'Età', 'Ruolo', 'Funzione', 'Email', 'Telefono', 'Stato Test', 'Data Creazione', 'Azienda'];
+    const headers = ['Cognome', 'Nome', 'Sesso', 'Età', 'Ruolo', 'Funzione', 'Email', 'Telefono', 'Stato Test', 'Data Creazione', 'Azienda', 'Profilo', 'Leadership%', 'Maturità%', 'Potenziale%'];
     const rows = sortedCandidati.map(c => [
       c.cognome,
       c.nome,
@@ -338,7 +398,11 @@ export default function Candidati() {
       c.telefono || '',
       c.test_completato ? 'Completato' : 'Da fare',
       new Date(c.created_at).toLocaleDateString('it-IT'),
-      c.aziende?.nome || ''
+      c.aziende?.nome || '',
+      c.profili_candidato?.profilo_tipo || '',
+      c.profili_candidato?.leadership_pct?.toFixed(0) || '',
+      c.profili_candidato?.maturita_pct?.toFixed(0) || '',
+      c.profili_candidato?.potenziale_pct?.toFixed(0) || ''
     ]);
 
     const csvContent = [headers, ...rows]
@@ -353,6 +417,16 @@ export default function Candidati() {
     URL.revokeObjectURL(link.href);
 
     toast({ title: 'Esportazione completata', description: `${sortedCandidati.length} candidati esportati` });
+  };
+
+  const getBadgeVariant = (tipo: string | null) => {
+    switch (tipo) {
+      case 'LEADER': return 'default';
+      case 'STRATEGIST': return 'secondary';
+      case 'EXECUTOR': return 'outline';
+      case 'IN_TRANSIZIONE': return 'destructive';
+      default: return 'secondary';
+    }
   };
 
   const SortableHeader = ({ field, children }: { field: SortField; children: React.ReactNode }) => (
@@ -374,9 +448,20 @@ export default function Candidati() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h1 className="text-2xl font-bold">Gestione Candidati</h1>
-              <p className="text-muted-foreground">Crea candidati e genera link per il test</p>
+              <p className="text-muted-foreground">Gestisci candidati, visualizza profili e risultati dei test</p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              {selectedIds.size > 0 && (
+                <Button 
+                  variant="destructive" 
+                  onClick={() => setIsDeleteDialogOpen(true)}
+                  disabled={deleteMutation.isPending}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Elimina ({selectedIds.size})
+                </Button>
+              )}
+              
               {isSuperadmin && aziende && (
                 <Select value={filterAzienda} onValueChange={setFilterAzienda}>
                   <SelectTrigger className="w-[200px]">
@@ -652,7 +737,7 @@ export default function Candidati() {
                 className="border-accent/50 hover:bg-accent/10"
               >
                 <TestTube2 className={`h-4 w-4 mr-2 ${seedMutation.isPending ? 'animate-pulse' : ''}`} />
-                {seedMutation.isPending ? 'Generazione...' : 'Genera Demo'}
+                {seedMutation.isPending ? 'Generazione...' : 'Rigenera Demo'}
               </Button>
             )}
           </div>
@@ -668,24 +753,44 @@ export default function Candidati() {
                   <Table>
                     <TableHeader>
                       <TableRow>
+                        <TableHead className="w-12">
+                          <Checkbox 
+                            checked={sortedCandidati.length > 0 && selectedIds.size === sortedCandidati.length}
+                            onCheckedChange={toggleSelectAll}
+                          />
+                        </TableHead>
                         <SortableHeader field="cognome">Candidato</SortableHeader>
                         {isSuperadmin && <TableHead>Azienda</TableHead>}
                         <TableHead>Sesso</TableHead>
                         <SortableHeader field="eta">Età</SortableHeader>
                         <SortableHeader field="ruolo_attuale">Ruolo</SortableHeader>
                         <SortableHeader field="funzione">Funzione</SortableHeader>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Telefono</TableHead>
-                        <TableHead>Stato Test</TableHead>
+                        <TableHead>Stato</TableHead>
+                        <TableHead>Profilo</TableHead>
+                        <TableHead>Leadership</TableHead>
+                        <TableHead>Maturità</TableHead>
+                        <TableHead>Potenziale</TableHead>
                         <SortableHeader field="created_at">Data</SortableHeader>
                         <TableHead className="text-right">Azioni</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {sortedCandidati.map((candidato) => (
-                        <TableRow key={candidato.id}>
+                        <TableRow 
+                          key={candidato.id}
+                          className={selectedIds.has(candidato.id) ? 'bg-muted/50' : ''}
+                        >
+                          <TableCell>
+                            <Checkbox 
+                              checked={selectedIds.has(candidato.id)}
+                              onCheckedChange={() => toggleSelect(candidato.id)}
+                            />
+                          </TableCell>
                           <TableCell className="font-medium">
-                            {candidato.cognome} {candidato.nome}
+                            <div className="flex items-center gap-2">
+                              <User className="h-4 w-4 text-muted-foreground" />
+                              {candidato.cognome} {candidato.nome}
+                            </div>
                           </TableCell>
                           {isSuperadmin && (
                             <TableCell>{candidato.aziende?.nome || '-'}</TableCell>
@@ -694,15 +799,46 @@ export default function Candidati() {
                           <TableCell>{candidato.eta || '-'}</TableCell>
                           <TableCell>{candidato.ruolo_attuale || '-'}</TableCell>
                           <TableCell className="max-w-[150px] truncate">{candidato.funzione || '-'}</TableCell>
-                          <TableCell className="max-w-[150px] truncate">{candidato.email || '-'}</TableCell>
-                          <TableCell>{candidato.telefono || '-'}</TableCell>
                           <TableCell>
                             <Badge variant={candidato.test_completato ? 'default' : 'secondary'}>
                               {candidato.test_completato ? 'Completato' : 'Da fare'}
                             </Badge>
                           </TableCell>
+                          <TableCell>
+                            {candidato.test_completato && candidato.profili_candidato?.profilo_tipo ? (
+                              <Badge variant={getBadgeVariant(candidato.profili_candidato.profilo_tipo)}>
+                                {getProfiloTipoLabel(candidato.profili_candidato.profilo_tipo as any)}
+                              </Badge>
+                            ) : (
+                              <span className="text-muted-foreground">-</span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {candidato.profili_candidato?.leadership_pct != null ? (
+                              <span className="font-medium">{candidato.profili_candidato.leadership_pct.toFixed(0)}%</span>
+                            ) : (
+                              <span className="text-muted-foreground">-</span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {candidato.profili_candidato?.maturita_pct != null ? (
+                              <span className="font-medium">{candidato.profili_candidato.maturita_pct.toFixed(0)}%</span>
+                            ) : (
+                              <span className="text-muted-foreground">-</span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {candidato.profili_candidato?.potenziale_pct != null ? (
+                              <span className="font-medium">{candidato.profili_candidato.potenziale_pct.toFixed(0)}%</span>
+                            ) : (
+                              <span className="text-muted-foreground">-</span>
+                            )}
+                          </TableCell>
                           <TableCell className="text-muted-foreground text-sm">
-                            {new Date(candidato.created_at).toLocaleDateString('it-IT')}
+                            {candidato.data_test 
+                              ? format(new Date(candidato.data_test), 'dd MMM yyyy', { locale: it })
+                              : format(new Date(candidato.created_at), 'dd MMM yyyy', { locale: it })
+                            }
                           </TableCell>
                           <TableCell className="text-right">
                             <div className="flex justify-end gap-2">
@@ -725,7 +861,8 @@ export default function Candidati() {
                               {candidato.test_completato && (
                                 <Link to={`/risultati/${candidato.id}`}>
                                   <Button variant="outline" size="sm">
-                                    <Eye className="h-4 w-4" />
+                                    <Eye className="h-4 w-4 mr-1" />
+                                    Dettaglio
                                   </Button>
                                 </Link>
                               )}
@@ -746,6 +883,28 @@ export default function Candidati() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Conferma eliminazione</AlertDialogTitle>
+              <AlertDialogDescription>
+                Stai per eliminare {selectedIds.size} candidati e tutti i loro dati 
+                (risposte, risultati, profili). Questa azione non può essere annullata.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Annulla</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => deleteMutation.mutate(Array.from(selectedIds))}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {deleteMutation.isPending ? 'Eliminazione...' : 'Elimina definitivamente'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
         {/* Credentials Dialog */}
         <Dialog open={!!generatedCredentials} onOpenChange={() => setGeneratedCredentials(null)}>
