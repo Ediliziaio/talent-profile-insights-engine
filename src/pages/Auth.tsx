@@ -22,7 +22,14 @@ export default function Auth() {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await signIn(email, password);
+    
+    // If input doesn't contain @, treat as username and construct internal email
+    let loginEmail = email;
+    if (!email.includes('@')) {
+      loginEmail = `${email}@candidati.talentprofile.local`;
+    }
+    
+    const { error } = await signIn(loginEmail, password);
     setLoading(false);
     
     if (error) {
@@ -68,8 +75,15 @@ export default function Auth() {
             <TabsContent value="login">
               <form onSubmit={handleSignIn} className="space-y-4 mt-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} required />
+                  <Label htmlFor="email">Email o Username</Label>
+                  <Input 
+                    id="email" 
+                    type="text" 
+                    value={email} 
+                    onChange={e => setEmail(e.target.value)} 
+                    required 
+                    placeholder="email@esempio.it o username"
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="password">Password</Label>
