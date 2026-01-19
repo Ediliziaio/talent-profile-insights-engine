@@ -18,11 +18,10 @@ export const MACRO_AREAS: MacroArea[] = [
     label: 'Organizzazione',
     description: 'Capacità di strutturare il lavoro e mantenere ordine',
     calcola: (s) => {
-      // Media di SC, EF, QR normalizzata
-      const sc = s['SC'] || 100;
+      // Formula Manuale V3: (EF + 120 - |SC - 120|) / 2 - 100
       const ef = s['EF'] || 100;
-      const qr = s['QR'] || 100;
-      return ((sc + ef + qr) / 3) - 100;
+      const sc = s['SC'] || 100;
+      return ((ef + 120 - Math.abs(sc - 120)) / 2) - 100;
     },
     tooltipPositive: 'Eccellente capacità organizzativa. Sa strutturare il lavoro efficacemente.',
     tooltipNegative: 'Difficoltà nella gestione organizzativa. Tende al disordine operativo.',
@@ -47,7 +46,13 @@ export const MACRO_AREAS: MacroArea[] = [
     id: 'autodisciplina',
     label: 'Autodisciplina',
     description: 'Controllo di sé e rispetto delle regole e scadenze',
-    calcola: (s) => (s['EF'] || 100) - 100,
+    calcola: (s) => {
+      // Formula Manuale V3: (EF + QR + min(SC, 140)) / 3 - 100
+      const ef = s['EF'] || 100;
+      const qr = s['QR'] || 100;
+      const sc = Math.min(s['SC'] || 100, 140);
+      return ((ef + qr + sc) / 3) - 100;
+    },
     tooltipPositive: 'Forte autodisciplina. Rispetta scadenze e procedure autonomamente.',
     tooltipNegative: 'Scarsa autodisciplina. Necessita supervisione costante.',
   },
