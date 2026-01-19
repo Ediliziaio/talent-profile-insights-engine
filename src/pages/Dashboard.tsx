@@ -205,7 +205,7 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-accent">
-                {stats?.avgFitScore !== null ? `${stats.avgFitScore}%` : '-'}
+                {stats?.avgFitScore != null ? `${stats.avgFitScore}%` : '-'}
               </div>
               <p className="text-xs text-muted-foreground mt-1">Media analisi AI</p>
             </CardContent>
