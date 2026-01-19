@@ -1,22 +1,25 @@
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { NotionLayout } from '@/components/NotionLayout';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { ProfileCircles } from '@/components/ProfileCircles';
 import { CandleChart } from '@/components/CandleChart';
+import { InterpretazioneDati } from '@/components/InterpretazioneDati';
 import { AnalisiPsicologica, AnalisiPsicologicaPlaceholder, AnalisiAI } from '@/components/AnalisiPsicologica';
 import { FitIndicator } from '@/components/FitIndicator';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useToast } from '@/hooks/use-toast';
 import { 
   ArrowLeft, Mail, Phone, Briefcase, Building2, Calendar, 
   Brain, Loader2, AlertTriangle, TrendingUp, TrendingDown, 
   Activity, Target, Shield, Lightbulb, XCircle, CheckCircle2,
-  User
+  User, HelpCircle
 } from 'lucide-react';
 import { Candidato, ProfiloCandidato, ProfiloTipo } from '@/types/database';
 import { getProfiloTipoLabel } from '@/lib/scoring';
@@ -136,7 +139,11 @@ export default function CandidatoDettaglio() {
   const scalePunteggi = (profilo?.scale_punteggi as Record<string, number>) || {};
   const outPoints = (profilo?.out_points as string[]) || [];
   const strengthPoints = (profilo?.strength_points as string[]) || [];
-  const profiloTipo = (profilo?.profilo_tipo as ProfiloTipo) || 'CONSERVATORE';
+  const stressZone = profilo?.stress_zone || false;
+  const schematicita = profilo?.schematicita || 100;
+  
+  // Usa il profilo dal DB, non ricalcolarlo
+  const profiloTipo = (profilo?.profilo_tipo as ProfiloTipo) || null;
   const profiloInfo = getProfiloDescription(profiloTipo);
   const macrocategoria = getMacrocategoria(profiloTipo);
   const macroInfo = MACROCATEGORIA_INFO[macrocategoria];
@@ -232,9 +239,34 @@ export default function CandidatoDettaglio() {
 
           {profilo ? (
             <>
-              {/* I 3 Cerchi */}
+              {/* Alert HR se presente */}
+              {profiloInfo.alert_hr && (
+                <Alert variant={stressZone || outPoints.length >= 3 ? "destructive" : "default"}>
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertTitle>Nota HR</AlertTitle>
+                  <AlertDescription>{profiloInfo.alert_hr}</AlertDescription>
+                </Alert>
+              )}
+
+              {/* I 3 Cerchi con tooltip esplicativo */}
               <div>
-                <h2 className="text-lg font-semibold mb-4">Indicatori Principali</h2>
+                <div className="flex items-center gap-2 mb-4">
+                  <h2 className="text-lg font-semibold">Indicatori Principali</h2>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-sm">
+                        <p>
+                          Le percentuali rappresentano il rapporto tra i punteggi ottenuti 
+                          e il massimo potenziale (600 punti per area). Sono indipendenti 
+                          dal grafico a candele che mostra lo scostamento dalla media (100).
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
                 <ProfileCircles
                   leadership_pct={profilo.leadership_pct || 0}
                   maturita_pct={profilo.maturita_pct || 0}
@@ -251,25 +283,25 @@ export default function CandidatoDettaglio() {
                       <Activity className="h-4 w-4" />
                       <span className="text-xs font-medium">Schematicità</span>
                     </div>
-                    <p className="text-2xl font-bold">{profilo.schematicita || 100}</p>
+                    <p className="text-2xl font-bold">{schematicita}</p>
                     <p className="text-xs text-muted-foreground">
-                      {(profilo.schematicita || 100) < 100 ? 'Flessibile' : 
-                       (profilo.schematicita || 100) > 140 ? 'Rigido' : 'Equilibrato'}
+                      {schematicita < 100 ? 'Flessibile' : 
+                       schematicita > 140 ? 'Rigido' : 'Equilibrato'}
                     </p>
                   </CardContent>
                 </Card>
 
-                <Card className={profilo.stress_zone ? 'border-destructive' : ''}>
+                <Card className={stressZone ? 'border-destructive' : ''}>
                   <CardContent className="pt-4">
                     <div className="flex items-center gap-2 text-muted-foreground mb-1">
-                      <AlertTriangle className={cn("h-4 w-4", profilo.stress_zone && "text-destructive")} />
+                      <AlertTriangle className={cn("h-4 w-4", stressZone && "text-destructive")} />
                       <span className="text-xs font-medium">Stress Zone</span>
                     </div>
-                    <p className={cn("text-2xl font-bold", profilo.stress_zone ? "text-destructive" : "text-green-600")}>
-                      {profilo.stress_zone ? 'Attiva' : 'No'}
+                    <p className={cn("text-2xl font-bold", stressZone ? "text-destructive" : "text-green-600")}>
+                      {stressZone ? 'Attiva' : 'No'}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {profilo.stress_zone ? 'Richiede attenzione' : 'Nella norma'}
+                      {stressZone ? 'Richiede attenzione' : 'Nella norma'}
                     </p>
                   </CardContent>
                 </Card>
@@ -300,6 +332,15 @@ export default function CandidatoDettaglio() {
                   </CardContent>
                 </Card>
               </div>
+
+              {/* Interpretazione Dati Dinamica */}
+              <InterpretazioneDati
+                scalePunteggi={scalePunteggi}
+                schematicita={schematicita}
+                stressZone={stressZone}
+                outPoints={outPoints}
+                strengthPoints={strengthPoints}
+              />
 
               {/* Profilo Psicologico */}
               <Card className={cn("border-2", profiloInfo.colorBg)}>
@@ -396,10 +437,25 @@ export default function CandidatoDettaglio() {
 
               <Separator />
 
-              {/* Candle Chart */}
+              {/* Candle Chart con spiegazione */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Profilo Competenze</CardTitle>
+                  <div className="flex items-center gap-2">
+                    <CardTitle>Profilo Competenze</CardTitle>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-sm">
+                          <p>
+                            Questo grafico mostra lo scostamento dalla media (100) per ogni macro-area.
+                            Valori positivi (blu) indicano punti di forza, negativi (arancione) aree di miglioramento.
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <CandleChart scalePunteggi={scalePunteggi} />
@@ -417,15 +473,15 @@ export default function CandidatoDettaglio() {
                       Analisi AI
                     </CardTitle>
                     <Button
+                      variant="outline"
+                      size="sm"
                       onClick={() => generateMutation.mutate()}
                       disabled={generateMutation.isPending}
-                      variant={analisi ? 'outline' : 'default'}
-                      size="sm"
                     >
                       {generateMutation.isPending ? (
                         <>
                           <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          Generazione...
+                          Generando...
                         </>
                       ) : analisi ? (
                         'Rigenera Analisi'
@@ -438,13 +494,10 @@ export default function CandidatoDettaglio() {
                 <CardContent>
                   {isLoadingAnalisi ? (
                     <div className="flex items-center justify-center py-8">
-                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                     </div>
                   ) : analisiFormatted ? (
-                    <AnalisiPsicologica 
-                      analisi={analisiFormatted} 
-                      candidatoNome={`${candidato.nome} ${candidato.cognome}`}
-                    />
+                    <AnalisiPsicologica analisi={analisiFormatted} candidatoNome={`${candidato.nome} ${candidato.cognome}`} />
                   ) : (
                     <AnalisiPsicologicaPlaceholder />
                   )}
@@ -454,11 +507,10 @@ export default function CandidatoDettaglio() {
           ) : (
             <Card>
               <CardContent className="py-12 text-center">
+                <Brain className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="text-lg font-semibold mb-2">Test non completato</h3>
                 <p className="text-muted-foreground">
-                  Il candidato non ha ancora completato il test.
-                </p>
-                <p className="text-sm mt-2 text-muted-foreground">
-                  L'analisi sarà disponibile dopo il completamento.
+                  Il candidato non ha ancora completato il questionario psicologico.
                 </p>
               </CardContent>
             </Card>
