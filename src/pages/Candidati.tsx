@@ -34,7 +34,7 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Users, Copy, Check, Eye, Key, RefreshCw, Download, ArrowUpDown } from 'lucide-react';
+import { Plus, Users, Copy, Check, Eye, Key, RefreshCw, Download, ArrowUpDown, TestTube2 } from 'lucide-react';
 import { Candidato, Azienda, AccessoAzienda, RUOLI_AZIENDALI, FUNZIONI } from '@/types/database';
 import { Link } from 'react-router-dom';
 
@@ -167,6 +167,43 @@ export default function Candidati() {
       });
     },
     onError: (error: any) => {
+      toast({
+        title: 'Errore',
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
+  });
+
+  // Mutation per seed candidati demo
+  const seedMutation = useMutation({
+    mutationFn: async () => {
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData.session) throw new Error('Non autenticato');
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/seed-demo-candidates`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${sessionData.session.access_token}`,
+          },
+        }
+      );
+
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Errore nella generazione candidati demo');
+      return result;
+    },
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: ['candidati'] });
+      toast({
+        title: 'Candidati demo creati',
+        description: result.message,
+      });
+    },
+    onError: (error: Error) => {
       toast({
         title: 'Errore',
         description: error.message,
@@ -607,6 +644,17 @@ export default function Candidati() {
               <Download className="h-4 w-4 mr-2" />
               Esporta CSV
             </Button>
+            {isSuperadmin && (
+              <Button 
+                variant="outline" 
+                onClick={() => seedMutation.mutate()}
+                disabled={seedMutation.isPending}
+                className="border-accent/50 hover:bg-accent/10"
+              >
+                <TestTube2 className={`h-4 w-4 mr-2 ${seedMutation.isPending ? 'animate-pulse' : ''}`} />
+                {seedMutation.isPending ? 'Generazione...' : 'Genera Demo'}
+              </Button>
+            )}
           </div>
 
           <Card>
