@@ -120,10 +120,10 @@ export function ProfileCircles({
 }: ProfileCirclesProps) {
   const circles: CircleProps[] = [
     {
-      title: 'Risultati',
-      subtitle: 'Leadership',
+      title: 'Impatto Organizzativo',
+      subtitle: 'QR + SP + PA',
       percentage: leadership_pct,
-      color: 'text-primary',
+      color: 'text-[#1e3a5f]',
       scales: [
         { code: 'QR', label: SCALE_LABELS['QR'], value: scale_punteggi['QR'] || 100 },
         { code: 'SP', label: SCALE_LABELS['SP'], value: scale_punteggi['SP'] || 100 },
@@ -131,8 +131,8 @@ export function ProfileCircles({
       ]
     },
     {
-      title: 'Pianificazione',
-      subtitle: 'Maturità',
+      title: 'Solidità Personale',
+      subtitle: 'SV + MO + CF',
       percentage: maturita_pct,
       color: 'text-green-600',
       scales: [
@@ -142,10 +142,10 @@ export function ProfileCircles({
       ]
     },
     {
-      title: 'Azione',
-      subtitle: 'Potenziale',
+      title: 'Capacità Produttiva',
+      subtitle: 'QN + EC + EF',
       percentage: potenziale_pct,
-      color: 'text-accent',
+      color: 'text-[#f09133]',
       scales: [
         { code: 'QN', label: SCALE_LABELS['QN'], value: scale_punteggi['QN'] || 100 },
         { code: 'EC', label: SCALE_LABELS['EC'], value: scale_punteggi['EC'] || 100 },
