@@ -18,6 +18,7 @@ import {
 } from '@/lib/stressZone';
 import { getScaleRangeText } from '@/lib/scaleTexts';
 import { generateColloquioQuestions, ColloquioArea } from '@/lib/colloquioQuestions';
+import { StressZoneHero } from '@/components/StressZoneHero';
 import { cn } from '@/lib/utils';
 import { ScalaCode, SCALE_LABELS } from '@/types/database';
 
@@ -259,18 +260,12 @@ export function InterpretazioneDati({
 
   return (
     <div className="space-y-6">
-      {/* Stress Zone Graduata - Priorità massima */}
-      {stressZoneSeverity !== 'nessuna' && (
-        <Alert className={cn("border-l-4", getStressZoneSeverityColor(stressZoneSeverity))}>
-          <AlertTriangle className="h-5 w-5" />
-          <AlertTitle className="text-lg font-bold">
-            Stress Zone {getStressZoneSeverityLabel(stressZoneSeverity).toUpperCase()}
-          </AlertTitle>
-          <AlertDescription className="mt-2 whitespace-pre-line text-sm">
-            {getStressZoneText(stressZoneSeverity, scalePunteggi['SV'] || 100, scalePunteggi['CF'] || 100)}
-          </AlertDescription>
-        </Alert>
-      )}
+      {/* Stress Zone Hero - Nuovo componente prominente */}
+      <StressZoneHero
+        sv={scalePunteggi['SV'] || 100}
+        cf={scalePunteggi['CF'] || 100}
+        severity={stressZoneSeverity}
+      />
 
       {/* Indici Secondari */}
       <Card>
