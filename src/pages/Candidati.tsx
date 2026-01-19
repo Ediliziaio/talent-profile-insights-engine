@@ -82,6 +82,10 @@ export default function Candidati() {
     cognome: string;
   } | null>(null);
 
+  // State per drawer dettaglio candidato
+  const [selectedCandidato, setSelectedCandidato] = useState<CandidatoWithRelations | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
   const isSuperadmin = profile?.ruolo === 'superadmin';
   const currentAziendaId = isSuperadmin ? filterAzienda : profile?.azienda_id;
 
@@ -449,7 +453,7 @@ export default function Candidati() {
 
   return (
     <ProtectedRoute allowedRoles={['superadmin', 'azienda']}>
-      <Layout>
+      <NotionLayout>
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
@@ -865,12 +869,18 @@ export default function Candidati() {
                                 </Button>
                               )}
                               {candidato.test_completato && (
-                                <Link to={`/risultati/${candidato.id}`}>
-                                  <Button variant="outline" size="sm">
-                                    <Eye className="h-4 w-4 mr-1" />
-                                    Dettaglio
-                                  </Button>
-                                </Link>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedCandidato(candidato);
+                                    setIsDrawerOpen(true);
+                                  }}
+                                >
+                                  <Eye className="h-4 w-4 mr-1" />
+                                  Dettaglio
+                                </Button>
                               )}
                             </div>
                           </TableCell>
@@ -978,7 +988,17 @@ export default function Candidati() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </Layout>
+
+        {/* Drawer Dettaglio Candidato */}
+        <CandidatoDrawer
+          candidato={selectedCandidato}
+          open={isDrawerOpen}
+          onOpenChange={(open) => {
+            setIsDrawerOpen(open);
+            if (!open) setSelectedCandidato(null);
+          }}
+        />
+      </NotionLayout>
     </ProtectedRoute>
   );
 }
