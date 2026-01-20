@@ -2,7 +2,7 @@ import { cn } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { CheckCircle2, AlertTriangle, AlertCircle, Brain, MessageSquare, ChevronDown } from 'lucide-react';
+import { CheckCircle2, AlertTriangle, AlertCircle, Brain, MessageSquare, ChevronDown, User, TrendingUp, XCircle, Sparkles } from 'lucide-react';
 import { FitScoreDisplay } from './FitScoreDisplay';
 import { RaccomandazioneCard, Raccomandazione } from './RaccomandazioneCard';
 
@@ -57,7 +57,7 @@ export function AnalisiPsicologica({
       )}
 
       {/* Analisi Stress Zone AI */}
-      {analisi.stress_zone_analysis && (
+      {analisi.stress_zone_analisi && (
         <Card className="border-amber-200 bg-amber-50/30">
           <CardHeader className="pb-2 pt-3 sm:pt-4">
             <CardTitle className="flex items-center gap-2 text-amber-700 text-sm sm:text-base">
@@ -67,7 +67,7 @@ export function AnalisiPsicologica({
           </CardHeader>
           <CardContent className="pb-3 sm:pb-4">
             <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-              {analisi.stress_zone_analysis}
+              {analisi.stress_zone_analisi}
             </p>
           </CardContent>
         </Card>
@@ -171,10 +171,9 @@ export function AnalisiPsicologica({
 
       {/* Fit Score Display */}
       <FitScoreDisplay 
-        fitScore={analisi.fit_score}
-        fitVerdict={analisi.fit_verdict}
-        fitMotivo={analisi.fit_motivo}
-        probabilitySuccess={analisi.probability_success}
+        score={analisi.fit_score}
+        verdict={analisi.fit_verdict}
+        motivo={analisi.fit_motivo}
       />
 
       {/* Raccomandazione Finale */}
@@ -184,17 +183,19 @@ export function AnalisiPsicologica({
     </div>
   );
 }
+
 // Placeholder per quando l'analisi non è ancora disponibile
 export function AnalisiPsicologicaPlaceholder() {
   return (
     <Card className="border-dashed">
-      <CardContent className="py-12 text-center">
-        <Brain className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-        <h3 className="text-lg font-medium text-muted-foreground mb-2">
-          Analisi AI non ancora generata
+      <CardContent className="flex flex-col items-center justify-center py-8 sm:py-12 text-center">
+        <Sparkles className="h-8 w-8 sm:h-12 sm:w-12 text-muted-foreground/50 mb-3 sm:mb-4" />
+        <h3 className="text-base sm:text-lg font-semibold text-muted-foreground mb-1.5 sm:mb-2">
+          Analisi AI Non Generata
         </h3>
-        <p className="text-sm text-muted-foreground">
-          Clicca "Genera Analisi" per ottenere una valutazione dettagliata del candidato basata sul Manuale V3.
+        <p className="text-xs sm:text-sm text-muted-foreground max-w-md px-4">
+          Clicca sul pulsante "Genera Analisi AI" per ottenere un'analisi psicologica 
+          approfondita basata sui dati del test.
         </p>
       </CardContent>
     </Card>

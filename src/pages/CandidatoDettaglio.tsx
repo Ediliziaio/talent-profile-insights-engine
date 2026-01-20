@@ -24,7 +24,7 @@ import {
   Brain, Loader2, AlertTriangle, TrendingUp, TrendingDown, 
   Activity, Target, Shield, Lightbulb, XCircle, CheckCircle2,
   User, HelpCircle, BarChart3, FileText, MessageSquare, Sparkles,
-  Award, Clock, Percent
+  Award, Clock, Percent, AlertCircle
 } from 'lucide-react';
 import { Candidato, ProfiloCandidato, ProfiloTipo } from '@/types/database';
 import { getProfiloTipoLabel } from '@/lib/scoring';
@@ -34,7 +34,7 @@ import {
   MACROCATEGORIA_INFO,
   ProfiloDescription 
 } from '@/lib/profiloDescriptions';
-import { calculateStressZoneSeverity } from '@/lib/stressZone';
+import { calculateStressZoneSeverity, StressZoneSeverity, getStressZoneSeverityLabel } from '@/lib/stressZone';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -142,6 +142,18 @@ function ExecutiveSummaryCard({
     </Card>
   );
 }
+
+// Helper function to map fit verdict to executive verdict
+function mapFitVerdictToExecutive(fitVerdict?: string | null): 'ASSUMERE' | 'VALUTARE' | 'SCARTARE' | null {
+  if (!fitVerdict) return null;
+  switch (fitVerdict) {
+    case 'IDONEO': return 'ASSUMERE';
+    case 'NON_IDONEO': return 'SCARTARE';
+    case 'VALUTARE': return 'VALUTARE';
+    default: return null;
+  }
+}
+
 export default function CandidatoDettaglio() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -370,12 +382,11 @@ export default function CandidatoDettaglio() {
             <div ref={reportRef} className="space-y-6 bg-background">
               {/* Executive Summary - NUOVO */}
               <ExecutiveSummaryCard
+                verdict={mapFitVerdictToExecutive(analisi?.fit_verdict)}
                 fitScore={analisi?.fit_score || 0}
-                fitVerdict={(analisi?.fit_verdict as 'NON_IDONEO' | 'VALUTARE' | 'IDONEO') || 'VALUTARE'}
-                fitMotivo={analisi?.fit_motivo || 'Genera l\'analisi AI per ottenere il verdetto'}
+                probabilitySuccess={probabilitaSuccesso}
                 profiloSintetico={analisi?.profilo_sintetico || ''}
-                probabilitaSuccesso={probabilitaSuccesso}
-                stressZoneSeverity={stressZoneSeverity}
+                stressSeverity={stressZoneSeverity}
               />
 
               {/* Alert HR se presente */}
@@ -391,7 +402,7 @@ export default function CandidatoDettaglio() {
         <Tabs defaultValue="analisi" className="w-full">
           <TabsList className="flex overflow-x-auto scrollbar-hide mb-4 sm:mb-6 w-full">
             <TabsTrigger value="analisi" className="flex-1 min-w-[60px] text-xs sm:text-sm px-2 sm:px-4">
-              <BarChart2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 sm:mr-1" />
+              <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 sm:mr-1" />
               <span className="hidden sm:inline">Analisi</span>
             </TabsTrigger>
             <TabsTrigger value="interpretazione" className="flex-1 min-w-[60px] text-xs sm:text-sm px-2 sm:px-4">

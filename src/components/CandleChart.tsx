@@ -1,66 +1,65 @@
 import { useMemo } from 'react';
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
+import { 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  Tooltip, 
   ResponsiveContainer,
   Cell,
   ReferenceLine,
-  ReferenceArea,
-  LabelList,
+  ReferenceArea
 } from 'recharts';
-import { generateCandleChartData, CandleData } from '@/lib/chartMapping';
+import { generateCandleChartData } from '@/lib/chartMapping';
 import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface CandleChartProps {
   scalePunteggi: Record<string, number>;
   className?: string;
-  layout?: 'horizontal' | 'vertical';
+  layout?: 'vertical' | 'horizontal';
 }
 
-interface CustomTooltipProps {
-  active?: boolean;
-  payload?: Array<{ payload: CandleData }>;
-}
-
-function CustomTooltip({ active, payload }: CustomTooltipProps) {
-  if (!active || !payload || !payload.length) return null;
-
-  const data = payload[0].payload;
-  
-  return (
-    <div className="bg-card border border-border rounded-lg shadow-lg p-3 max-w-xs z-50">
-      <p className="font-semibold text-foreground mb-1">{data.label}</p>
-      <p className="text-xs text-muted-foreground mb-2">{data.description}</p>
-      <div className={`text-lg font-bold ${data.isPositive ? 'text-primary' : 'text-accent'}`}>
-        {data.value > 0 ? '+' : ''}{data.value.toFixed(0)}
+const CustomTooltip = ({ active, payload }: any) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <div className="bg-background border rounded-lg shadow-lg p-3">
+        <p className="font-semibold text-sm">{data.fullName}</p>
+        <p className={cn(
+          "text-lg font-bold",
+          data.value >= 0 ? "text-green-600" : "text-red-600"
+        )}>
+          {data.value > 0 ? '+' : ''}{data.value}
+        </p>
+        <p className="text-xs text-muted-foreground">
+          Valore grezzo: {data.rawValue}/200
+        </p>
       </div>
-      <p className="text-xs mt-2 text-foreground/80">{data.tooltipText}</p>
-    </div>
-  );
-}
+    );
+  }
+  return null;
+};
 
-// Custom label for values on bars
-function renderValueLabel(props: any) {
+const renderValueLabel = (props: any) => {
   const { x, y, width, height, value } = props;
-  const isPositive = value >= 0;
+  if (value === 0) return null;
+  
+  const xPos = width >= 0 ? x + width + 5 : x + width - 25;
+  const yPos = y + height / 2 + 4;
   
   return (
     <text
-      x={x + width + 8}
-      y={y + height / 2}
-      fill={isPositive ? 'hsl(var(--primary))' : 'hsl(var(--accent))'}
-      textAnchor="start"
-      dominantBaseline="middle"
-      fontSize={12}
-      fontWeight={600}
+      x={xPos}
+      y={yPos}
+      fill={value >= 0 ? '#16a34a' : '#dc2626'}
+      fontSize={11}
+      fontWeight="bold"
     >
-      {value > 0 ? '+' : ''}{value.toFixed(0)}
+      {value > 0 ? '+' : ''}{value}
     </text>
   );
-}
+};
 
 export function CandleChart({ scalePunteggi, className, layout = 'vertical' }: CandleChartProps) {
   const isMobile = useIsMobile();
@@ -117,9 +116,11 @@ export function CandleChart({ scalePunteggi, className, layout = 'vertical' }: C
           
           <XAxis 
             dataKey="name" 
-            tick={{ fontSize, angle: isMobile ? -45 : 0, textAnchor: isMobile ? 'end' : 'middle' }}
+            tick={{ fontSize }}
             height={isMobile ? 60 : 40}
             interval={0}
+            angle={isMobile ? -45 : 0}
+            textAnchor={isMobile ? 'end' : 'middle'}
           />
           <YAxis 
             domain={[-40, 40]} 
@@ -158,52 +159,3 @@ export function CandleChart({ scalePunteggi, className, layout = 'vertical' }: C
     </div>
   );
 }
-  // Layout orizzontale originale
-  return (
-    <div className={className}>
-      <ResponsiveContainer width="100%" height={400}>
-        <BarChart
-          data={data}
-          layout="horizontal"
-          margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
-        >
-          {/* Zone di sfondo */}
-          <ReferenceArea y1={-100} y2={-30} fill="hsl(var(--destructive))" fillOpacity={0.05} />
-          <ReferenceArea y1={-30} y2={30} fill="hsl(var(--muted))" fillOpacity={0.1} />
-          <ReferenceArea y1={30} y2={100} fill="hsl(var(--success))" fillOpacity={0.05} />
-          
-          <XAxis 
-            dataKey="label" 
-            axisLine={false}
-            tickLine={false}
-            tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
-            angle={-45}
-            textAnchor="end"
-            height={80}
-            interval={0}
-          />
-          <YAxis 
-            domain={[-100, 100]}
-            axisLine={false}
-            tickLine={false}
-            tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
-            tickFormatter={(value) => `${value > 0 ? '+' : ''}${value}`}
-          />
-          <Tooltip content={<CustomTooltip />} cursor={{ fill: 'hsl(var(--muted))', opacity: 0.3 }} />
-          <ReferenceLine y={-30} stroke="hsl(var(--destructive))" strokeDasharray="3 3" strokeOpacity={0.4} />
-          <ReferenceLine y={0} stroke="hsl(var(--border))" strokeWidth={2} />
-          <ReferenceLine y={30} stroke="hsl(var(--success))" strokeDasharray="3 3" strokeOpacity={0.4} />
-          <Bar 
-            dataKey="value" 
-            radius={[4, 4, 4, 4]}
-            maxBarSize={40}
-          >
-            {data.map((entry) => (
-              <Cell 
-                key={entry.id}
-                fill={entry.isPositive ? 'hsl(var(--primary))' : 'hsl(var(--accent))'}
-              />
-            ))}
-          </Bar>
-        </BarChart>
-      </ResponsiveContainer>
