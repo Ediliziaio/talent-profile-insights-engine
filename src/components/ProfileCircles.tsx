@@ -189,7 +189,7 @@ export function ProfileCircles({
   ];
 
   return (
-    <div className={`grid grid-cols-3 ${isMobile ? 'gap-2' : 'gap-6'}`}>
+    <div className={`grid ${isMobile ? 'grid-cols-1 gap-4' : 'grid-cols-3 gap-6'}`}>
       {circles.map((circle) => (
         <Circle key={circle.title} {...circle} isMobile={isMobile} />
       ))}
