@@ -1,13 +1,31 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { createRoot } from 'react-dom/client';
 import { Button } from '@/components/ui/button';
-import { Download, Loader2 } from 'lucide-react';
+import { Download, Loader2, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import { PDFReportLayout } from './PDFReportLayout';
+import { ProfiloTipo } from '@/types/database';
 
 interface PDFExportButtonProps {
   targetRef: React.RefObject<HTMLDivElement>;
   fileName: string;
+  className?: string;
+}
+
+interface PDFReportButtonProps {
+  candidatoNome: string;
+  candidatoCognome: string;
+  eta?: number | null;
+  email?: string | null;
+  telefono?: string | null;
+  azienda?: string | null;
+  ruoloRichiesto: string;
+  profiloTipo: ProfiloTipo | null;
+  scalePunteggi: Record<string, number>;
+  stressZone?: boolean;
+  dataTest?: string | null;
   className?: string;
 }
 
@@ -160,6 +178,165 @@ export function PDFExportButton({ targetRef, fileName, className }: PDFExportBut
         <>
           <Download className="h-4 w-4 mr-2" />
           Scarica PDF
+        </>
+      )}
+    </Button>
+  );
+}
+
+/**
+ * PDFReportButton - Genera PDF ottimizzato per colloqui
+ * 
+ * Utilizza il layout PDFReportLayout specifico per stampa
+ */
+export function PDFReportButton({
+  candidatoNome,
+  candidatoCognome,
+  eta,
+  email,
+  telefono,
+  azienda,
+  ruoloRichiesto,
+  profiloTipo,
+  scalePunteggi,
+  stressZone,
+  dataTest,
+  className
+}: PDFReportButtonProps) {
+  const [isExporting, setIsExporting] = useState(false);
+  const { toast } = useToast();
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  const handleExport = async () => {
+    setIsExporting(true);
+    
+    try {
+      // Create a temporary container
+      const container = document.createElement('div');
+      container.style.position = 'absolute';
+      container.style.left = '-9999px';
+      container.style.top = '0';
+      container.style.width = '210mm';
+      document.body.appendChild(container);
+      
+      // Render the PDF layout component
+      const root = createRoot(container);
+      
+      await new Promise<void>((resolve) => {
+        root.render(
+          <PDFReportLayout
+            candidatoNome={candidatoNome}
+            candidatoCognome={candidatoCognome}
+            eta={eta}
+            email={email}
+            telefono={telefono}
+            azienda={azienda}
+            ruoloRichiesto={ruoloRichiesto}
+            profiloTipo={profiloTipo}
+            scalePunteggi={scalePunteggi}
+            stressZone={stressZone}
+            dataTest={dataTest}
+          />
+        );
+        // Wait for render
+        setTimeout(resolve, 500);
+      });
+      
+      // Load logo
+      const logoData = await loadLogoAsBase64();
+      
+      // Capture the rendered layout
+      const canvas = await html2canvas(container, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+        width: container.scrollWidth,
+        height: container.scrollHeight,
+      });
+      
+      // Cleanup React root
+      root.unmount();
+      document.body.removeChild(container);
+
+      const imgData = canvas.toDataURL('image/jpeg', 0.95);
+      
+      // Create PDF
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+      });
+
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+      
+      // Calculate the ratio to fit width with margins
+      const margin = 5; // 5mm margins
+      const contentWidth = pdfWidth - (margin * 2);
+      const ratio = contentWidth / imgWidth;
+      const scaledHeight = imgHeight * ratio;
+      
+      // Add pages if content is taller than one page
+      let heightLeft = scaledHeight;
+      let position = margin;
+      const pageContentHeight = pdfHeight - (margin * 2);
+      
+      // First page
+      pdf.addImage(imgData, 'JPEG', margin, position, contentWidth, scaledHeight);
+      addWatermarkToPage(pdf, logoData, pdfWidth, pdfHeight);
+      heightLeft -= pageContentHeight;
+      
+      // Additional pages
+      while (heightLeft > 0) {
+        position = margin - (scaledHeight - heightLeft);
+        pdf.addPage();
+        pdf.addImage(imgData, 'JPEG', margin, position, contentWidth, scaledHeight);
+        addWatermarkToPage(pdf, logoData, pdfWidth, pdfHeight);
+        heightLeft -= pageContentHeight;
+      }
+
+      // Generate filename
+      const date = new Date().toISOString().split('T')[0];
+      const safeFileName = `${candidatoCognome}_${candidatoNome}`.replace(/[^a-zA-Z0-9_-]/g, '_');
+      pdf.save(`Report_Colloquio_${safeFileName}_${date}.pdf`);
+
+      toast({
+        title: 'Report Colloquio Generato',
+        description: 'Il PDF è pronto per la stampa',
+      });
+    } catch (error) {
+      console.error('PDF generation error:', error);
+      toast({
+        title: 'Errore',
+        description: 'Errore nella generazione del PDF',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  return (
+    <Button 
+      variant="default" 
+      size="sm" 
+      onClick={handleExport} 
+      disabled={isExporting}
+      className={className}
+    >
+      {isExporting ? (
+        <>
+          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+          Generando...
+        </>
+      ) : (
+        <>
+          <FileText className="h-4 w-4 mr-2" />
+          Report Colloquio
         </>
       )}
     </Button>

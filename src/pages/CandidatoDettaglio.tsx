@@ -10,7 +10,7 @@ import { InterpretazioneDati } from '@/components/InterpretazioneDati';
 import { AnalisiPsicologica, AnalisiPsicologicaPlaceholder, AnalisiAI } from '@/components/AnalisiPsicologica';
 import { RisposteDettagliate } from '@/components/RisposteDettagliate';
 import { FitIndicator } from '@/components/FitIndicator';
-import { PDFExportButton } from '@/components/PDFExportButton';
+import { PDFExportButton, PDFReportButton } from '@/components/PDFExportButton';
 import { StressZoneHero } from '@/components/StressZoneHero';
 import { RoleMatchingCard } from '@/components/RoleMatchingCard';
 import { ExecutiveSummaryCardV5 } from '@/components/ExecutiveSummaryCardV5';
@@ -326,12 +326,28 @@ export default function CandidatoDettaglio() {
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               {profilo && (
-                <PDFExportButton 
-                  targetRef={reportRef} 
-                  fileName={`${candidato.cognome}_${candidato.nome}`}
-                />
+                <>
+                  <PDFReportButton
+                    candidatoNome={candidato.nome}
+                    candidatoCognome={candidato.cognome}
+                    eta={candidato.eta}
+                    email={candidato.email}
+                    telefono={candidato.telefono}
+                    azienda={candidato.aziende?.nome}
+                    ruoloRichiesto={candidato.funzione || 'Ufficio vendite'}
+                    profiloTipo={profiloTipo}
+                    scalePunteggi={scalePunteggi}
+                    stressZone={stressZone}
+                    dataTest={candidato.data_test}
+                  />
+                  <PDFExportButton 
+                    targetRef={reportRef} 
+                    fileName={`${candidato.cognome}_${candidato.nome}`}
+                    className="hidden sm:flex"
+                  />
+                </>
               )}
               {analisi?.fit_verdict && (
                 <FitIndicator verdict={analisi.fit_verdict as any} size="lg" showLabel />
