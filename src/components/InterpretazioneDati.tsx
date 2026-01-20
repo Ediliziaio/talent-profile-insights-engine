@@ -61,23 +61,23 @@ function InterpretazioneCard({ item }: { item: InterpretazioneItem }) {
   };
 
   return (
-    <div className={cn("border-l-4 p-4 rounded-r-lg", colors[item.tipo])}>
-      <div className="flex items-start gap-3">
-        <span className={cn("mt-0.5", textColors[item.tipo])}>
+    <div className={cn("border-l-4 p-3 sm:p-4 rounded-r-lg", colors[item.tipo])}>
+      <div className="flex items-start gap-2 sm:gap-3">
+        <span className={cn("mt-0.5 shrink-0", textColors[item.tipo])}>
           {icons[item.tipo]}
         </span>
-        <div className="flex-1">
-          <div className="flex items-center gap-2 mb-1">
-            <h4 className={cn("font-semibold", textColors[item.tipo])}>
+        <div className="flex-1 min-w-0">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1">
+            <h4 className={cn("font-semibold text-sm sm:text-base", textColors[item.tipo])}>
               {item.titolo}
             </h4>
             {item.valore > 0 && (
-              <Badge variant="outline" className="text-xs">
+              <Badge variant="outline" className="text-[10px] sm:text-xs">
                 {item.valore}/200
               </Badge>
             )}
           </div>
-          <p className="text-sm text-muted-foreground whitespace-pre-line">
+          <p className="text-xs sm:text-sm text-muted-foreground whitespace-pre-line">
             {item.descrizione}
           </p>
         </div>
@@ -85,7 +85,6 @@ function InterpretazioneCard({ item }: { item: InterpretazioneItem }) {
     </div>
   );
 }
-
 function IndiceSecondario({ 
   label, 
   value, 
@@ -102,33 +101,32 @@ function IndiceSecondario({
   const isHigh = value > 140;
 
   return (
-    <div className="space-y-2 p-3 rounded-lg bg-muted/30">
-      <div className="flex items-center gap-2">
-        <Icon className="h-4 w-4 text-muted-foreground" />
-        <span className="text-sm font-medium">{label}</span>
+    <div className="space-y-1.5 sm:space-y-2 p-2.5 sm:p-3 rounded-lg bg-muted/30">
+      <div className="flex items-center gap-1.5 sm:gap-2">
+        <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground shrink-0" />
+        <span className="text-xs sm:text-sm font-medium truncate">{label}</span>
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3">
         <Progress 
           value={normalizedValue} 
           className={cn(
-            "h-2 flex-1",
+            "h-1.5 sm:h-2 flex-1",
             isLow && "[&>div]:bg-destructive",
             isHigh && "[&>div]:bg-green-500"
           )} 
         />
         <span className={cn(
-          "text-lg font-bold w-12 text-right",
+          "text-base sm:text-lg font-bold w-10 sm:w-12 text-right",
           isLow && "text-destructive",
           isHigh && "text-green-600"
         )}>
           {value}
         </span>
       </div>
-      <p className="text-xs text-muted-foreground">{description}</p>
+      <p className="text-[10px] sm:text-xs text-muted-foreground">{description}</p>
     </div>
   );
 }
-
 function ColloquioQuestionCard({ area, onQuestionComplete, completedQuestions }: { 
   area: ColloquioArea;
   onQuestionComplete: (areaId: string, questionIdx: number) => void;
@@ -175,32 +173,32 @@ function ColloquioQuestionCard({ area, onQuestionComplete, completedQuestions }:
     <Collapsible defaultOpen={area.priorita === 'alta'}>
       <CollapsibleTrigger className="w-full">
         <div className={cn(
-          "border-l-4 p-4 rounded-r-lg flex items-center justify-between hover:bg-muted/50 transition-colors",
+          "border-l-4 p-3 sm:p-4 rounded-r-lg flex items-center justify-between hover:bg-muted/50 transition-colors gap-2",
           area.priorita === 'alta' ? "border-destructive bg-destructive/5" : 
           area.priorita === 'media' ? "border-amber-500 bg-amber-50" : 
           "border-blue-500 bg-blue-50"
         )}>
-          <div className="flex items-center gap-3 text-left">
-            <Badge variant={area.priorita === 'alta' ? 'destructive' : 'secondary'} className="text-xs">
+          <div className="flex items-center gap-2 sm:gap-3 text-left min-w-0">
+            <Badge variant={area.priorita === 'alta' ? 'destructive' : 'secondary'} className="text-[10px] sm:text-xs shrink-0">
               {area.priorita.toUpperCase()}
             </Badge>
-            <span className="font-semibold text-sm">{area.area}</span>
+            <span className="font-semibold text-xs sm:text-sm truncate">{area.area}</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             {completedCount > 0 && (
-              <Badge variant="outline" className="bg-green-100 text-green-700 border-green-300 text-xs">
+              <Badge variant="outline" className="bg-green-100 text-green-700 border-green-300 text-[10px] sm:text-xs">
                 {completedCount}/{area.domande.length}
               </Badge>
             )}
-            <span className="text-xs text-muted-foreground">{area.domande.length} domande</span>
-            <ChevronDown className="h-4 w-4 text-muted-foreground" />
+            <span className="text-[10px] sm:text-xs text-muted-foreground hidden sm:inline">{area.domande.length} domande</span>
+            <ChevronDown className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
           </div>
         </div>
       </CollapsibleTrigger>
       <CollapsibleContent>
-        <div className="p-4 bg-muted/20 rounded-b-lg space-y-3">
-          <div className="flex items-center justify-between">
-            <p className="text-xs text-muted-foreground italic flex-1">{area.motivazione}</p>
+        <div className="p-3 sm:p-4 bg-muted/20 rounded-b-lg space-y-2 sm:space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <p className="text-[10px] sm:text-xs text-muted-foreground italic flex-1">{area.motivazione}</p>
             <Button 
               variant="outline" 
               size="sm" 
@@ -208,20 +206,20 @@ function ColloquioQuestionCard({ area, onQuestionComplete, completedQuestions }:
                 e.stopPropagation();
                 copyAllQuestions();
               }}
-              className="ml-2 shrink-0"
+              className="shrink-0 text-xs h-7 sm:h-8"
             >
               <ClipboardCheck className="h-3 w-3 mr-1" />
               Copia tutte
             </Button>
           </div>
-          <ul className="space-y-2">
+          <ul className="space-y-1.5 sm:space-y-2">
             {area.domande.map((domanda, idx) => {
               const isCompleted = areaCompletedQuestions.includes(idx);
               return (
                 <li 
                   key={idx} 
                   className={cn(
-                    "text-sm flex items-start gap-3 bg-background p-3 rounded border transition-all",
+                    "text-xs sm:text-sm flex items-start gap-2 sm:gap-3 bg-background p-2.5 sm:p-3 rounded border transition-all",
                     isCompleted && "opacity-60 bg-muted"
                   )}
                 >
@@ -231,7 +229,7 @@ function ColloquioQuestionCard({ area, onQuestionComplete, completedQuestions }:
                     className="mt-0.5 shrink-0"
                   />
                   <span className={cn(
-                    "flex-1",
+                    "flex-1 min-w-0",
                     isCompleted && "line-through"
                   )}>
                     <span className="text-primary font-bold mr-1">{idx + 1}.</span>
@@ -240,13 +238,13 @@ function ColloquioQuestionCard({ area, onQuestionComplete, completedQuestions }:
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-7 w-7 shrink-0"
+                    className="h-6 w-6 sm:h-7 sm:w-7 shrink-0"
                     onClick={(e) => {
                       e.stopPropagation();
                       copyToClipboard(domanda);
                     }}
                   >
-                    <Copy className="h-3.5 w-3.5" />
+                    <Copy className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                   </Button>
                 </li>
               );
@@ -257,7 +255,6 @@ function ColloquioQuestionCard({ area, onQuestionComplete, completedQuestions }:
     </Collapsible>
   );
 }
-
 function ScaleInterpretationCard({ scala, valore }: { scala: ScalaCode; valore: number }) {
   const info = getScaleRangeText(scala, valore);
   
@@ -275,14 +272,14 @@ function ScaleInterpretationCard({ scala, valore }: { scala: ScalaCode; valore: 
   
   return (
     <Collapsible>
-      <CollapsibleTrigger className="flex items-center justify-between w-full p-3 hover:bg-muted/50 rounded transition-colors">
-        <div className="flex items-center gap-3">
-          <Badge className={cn("text-xs", getZonaColor(info.livello))}>{info.livello}</Badge>
-          <span className="font-medium text-sm">{SCALE_LABELS[scala]}</span>
+      <CollapsibleTrigger className="flex items-center justify-between w-full p-2.5 sm:p-3 hover:bg-muted/50 rounded transition-colors">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          <Badge className={cn("text-[10px] sm:text-xs shrink-0", getZonaColor(info.livello))}>{info.livello}</Badge>
+          <span className="font-medium text-xs sm:text-sm truncate">{SCALE_LABELS[scala]}</span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           <span className={cn(
-            "font-bold",
+            "font-bold text-xs sm:text-sm",
             valore < 60 ? "text-destructive" :
             valore < 80 ? "text-amber-600" :
             valore > 160 ? "text-green-600" :
@@ -290,20 +287,20 @@ function ScaleInterpretationCard({ scala, valore }: { scala: ScalaCode; valore: 
           )}>
             {valore}/200
           </span>
-          <ChevronDown className="h-4 w-4 text-muted-foreground" />
+          <ChevronDown className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
         </div>
       </CollapsibleTrigger>
-      <CollapsibleContent className="p-4 bg-muted/30 rounded mt-1 space-y-2">
-        <p className="text-sm">{info.testo}</p>
+      <CollapsibleContent className="p-3 sm:p-4 bg-muted/30 rounded mt-1 space-y-1.5 sm:space-y-2">
+        <p className="text-xs sm:text-sm">{info.testo}</p>
         {info.implicazioni && (
-          <p className="text-xs text-muted-foreground italic">{info.implicazioni}</p>
+          <p className="text-[10px] sm:text-xs text-muted-foreground italic">{info.implicazioni}</p>
         )}
         {info.domande_colloquio.length > 0 && (
-          <div className="pt-2 border-t">
-            <p className="text-xs font-semibold text-muted-foreground mb-1">Domande suggerite:</p>
-            <ul className="space-y-1">
+          <div className="pt-1.5 sm:pt-2 border-t">
+            <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground mb-1">Domande suggerite:</p>
+            <ul className="space-y-0.5 sm:space-y-1">
               {info.domande_colloquio.slice(0, 2).map((d, i) => (
-                <li key={i} className="text-xs text-muted-foreground">• {d}</li>
+                <li key={i} className="text-[10px] sm:text-xs text-muted-foreground">• {d}</li>
               ))}
             </ul>
           </div>
@@ -312,7 +309,6 @@ function ScaleInterpretationCard({ scala, valore }: { scala: ScalaCode; valore: 
     </Collapsible>
   );
 }
-
 export function InterpretazioneDati({
   scalePunteggi,
   schematicita,
@@ -439,113 +435,98 @@ export function InterpretazioneDati({
 
       {/* Indici Secondari */}
       <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">Indici Sintetici</CardTitle>
+        <CardHeader className="pb-2 pt-3 sm:pt-4">
+          <CardTitle className="text-sm sm:text-base">Indici Sintetici</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <CardContent className="pb-3 sm:pb-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
             <IndiceSecondario
               label="Leadership Naturale"
               value={indici.leadershipNaturale}
               icon={TrendingUp}
-              description="Capacità di guidare e influenzare"
+              description="Capacità di guidare"
             />
             <IndiceSecondario
               label="Worker Index"
               value={indici.workerIndex}
               icon={Target}
-              description="Produttività e orientamento al risultato"
+              description="Orientamento al risultato"
             />
             <IndiceSecondario
               label="Attitudine Vendita"
               value={indici.attitudineVendita}
               icon={Users}
-              description="Propensione commerciale e relazionale"
+              description="Propensione commerciale"
             />
             <IndiceSecondario
-              label="Flessibilità al Cambiamento"
+              label="Flessibilità Cambiamento"
               value={indici.flessibilitaCambiamento}
               icon={RefreshCw}
-              description="Capacità di adattarsi (alto = flessibile)"
+              description="Capacità di adattarsi"
             />
           </div>
         </CardContent>
       </Card>
-
-      {/* Interpretazione Dettagliata per Scala */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">Interpretazione Dettagliata Scale</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-1">
-          {scaleToShow.map((scala) => (
-            <ScaleInterpretationCard 
-              key={scala} 
-              scala={scala} 
-              valore={scalePunteggi[scala] || 100} 
-            />
-          ))}
-        </CardContent>
-      </Card>
-
       {/* Pattern e Interpretazioni per categoria */}
       <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">Pattern e Segnali Identificati</CardTitle>
+        <CardHeader className="pb-2 pt-3 sm:pt-4">
+          <CardTitle className="text-sm sm:text-base">Pattern e Segnali Identificati</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-3 sm:space-y-4 pb-3 sm:pb-4">
           {critici.length > 0 && (
-            <div className="space-y-3">
-              <h4 className="text-sm font-semibold text-destructive flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4" />
+            <div className="space-y-2">
+              <h4 className="text-xs sm:text-sm font-semibold text-destructive flex items-center gap-1.5">
+                <AlertTriangle className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 Aree Critiche ({critici.length})
               </h4>
-              {critici.map((item, idx) => (
-                <InterpretazioneCard key={idx} item={item} />
-              ))}
+              <div className="space-y-1.5 sm:space-y-2">
+                {critici.map((item, idx) => (
+                  <InterpretazioneCard key={idx} item={item} />
+                ))}
+              </div>
             </div>
           )}
 
           {attenzione.length > 0 && (
-            <div className="space-y-3">
-              <h4 className="text-sm font-semibold text-amber-600 flex items-center gap-2">
-                <AlertCircle className="h-4 w-4" />
-                Punti di Attenzione ({attenzione.length})
+            <div className="space-y-2">
+              <h4 className="text-xs sm:text-sm font-semibold text-amber-600 flex items-center gap-1.5">
+                <AlertCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                Aree di Attenzione ({attenzione.length})
               </h4>
-              {attenzione.map((item, idx) => (
-                <InterpretazioneCard key={idx} item={item} />
-              ))}
+              <div className="space-y-1.5 sm:space-y-2">
+                {attenzione.map((item, idx) => (
+                  <InterpretazioneCard key={idx} item={item} />
+                ))}
+              </div>
             </div>
           )}
 
           {forze.length > 0 && (
-            <div className="space-y-3">
-              <h4 className="text-sm font-semibold text-green-600 flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4" />
+            <div className="space-y-2">
+              <h4 className="text-xs sm:text-sm font-semibold text-green-600 flex items-center gap-1.5">
+                <CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 Punti di Forza ({forze.length})
               </h4>
-              {forze.map((item, idx) => (
-                <InterpretazioneCard key={idx} item={item} />
-              ))}
+              <div className="space-y-1.5 sm:space-y-2">
+                {forze.map((item, idx) => (
+                  <InterpretazioneCard key={idx} item={item} />
+                ))}
+              </div>
             </div>
           )}
 
           {info.length > 0 && (
-            <div className="space-y-3">
-              <h4 className="text-sm font-semibold text-blue-600 flex items-center gap-2">
-                <Info className="h-4 w-4" />
-                Note ({info.length})
+            <div className="space-y-2">
+              <h4 className="text-xs sm:text-sm font-semibold text-blue-600 flex items-center gap-1.5">
+                <Info className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                Informazioni Aggiuntive ({info.length})
               </h4>
-              {info.map((item, idx) => (
-                <InterpretazioneCard key={idx} item={item} />
-              ))}
+              <div className="space-y-1.5 sm:space-y-2">
+                {info.map((item, idx) => (
+                  <InterpretazioneCard key={idx} item={item} />
+                ))}
+              </div>
             </div>
-          )}
-
-          {interpretazioni.length === 0 && (
-            <p className="text-muted-foreground text-center py-4">
-              Il profilo rientra nella norma senza particolari pattern o segnali da evidenziare.
-            </p>
           )}
         </CardContent>
       </Card>

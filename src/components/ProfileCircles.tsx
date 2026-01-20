@@ -19,11 +19,10 @@ interface CircleProps {
   scales: { code: ScalaCode; label: string; value: number }[];
 }
 
-function CircularProgress({ percentage, color, size = 140 }: { percentage: number; color: string; size?: number }) {
-  const radius = (size - 14) / 2;
+function CircularProgress({ percentage, color, size = 140, isMobile = false }: { percentage: number; color: string; size?: number; isMobile?: boolean }) {
+  const radius = (size - 16) / 2;
   const circumference = 2 * Math.PI * radius;
-  const progress = Math.min(100, Math.max(0, percentage));
-  const offset = circumference - (progress / 100) * circumference;
+  const strokeDashoffset = circumference - (percentage / 100) * circumference;
 
   return (
     <div className="relative" style={{ width: size, height: size }}>
@@ -38,62 +37,65 @@ function CircularProgress({ percentage, color, size = 140 }: { percentage: numbe
           cy={size / 2}
           r={radius}
           stroke="currentColor"
-          strokeWidth="12"
+          strokeWidth="8"
           fill="transparent"
-          className="text-muted/20"
+          className="text-muted"
         />
-        {/* Progress circle with animation */}
+        {/* Progress circle */}
         <circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke="currentColor"
-          strokeWidth="12"
+          stroke={color}
+          strokeWidth="8"
           fill="transparent"
           strokeLinecap="round"
-          className={cn(color, "drop-shadow-sm")}
-          style={{
-            strokeDasharray: circumference,
-            strokeDashoffset: offset,
-            transition: 'stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1)'
-          }}
+          strokeDasharray={circumference}
+          strokeDashoffset={strokeDashoffset}
+          className="transition-all duration-500 ease-out"
         />
       </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-3xl font-bold">{Math.round(percentage)}%</span>
+      <div className="absolute inset-0 flex items-center justify-center">
+        <span className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold`} style={{ color }}>
+          {percentage}%
+        </span>
       </div>
     </div>
   );
 }
-
-function ScaleBar({ label, value }: { label: string; value: number }) {
-  const normalizedValue = ((value - 0) / 200) * 100;
+function ScaleBar({ label, value, isMobile = false }: { label: string; value: number; isMobile?: boolean }) {
+  const percentage = (value / 200) * 100;
   const isLow = value < 80;
-  const isHigh = value > 160;
+  const isHigh = value > 140;
   
+  const barColor = isLow 
+    ? 'bg-destructive' 
+    : isHigh 
+      ? 'bg-green-500' 
+      : 'bg-primary/60';
+
   return (
-    <div className="space-y-1">
-      <div className="flex justify-between text-xs">
-        <span className="text-muted-foreground">{label}</span>
-        <span className={cn(
-          "font-medium",
-          isLow && "text-destructive",
-          isHigh && "text-green-600"
-        )}>{value}</span>
-      </div>
-      <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-        <div 
-          className={cn(
-            "h-full rounded-full transition-all",
-            isLow ? "bg-destructive" : isHigh ? "bg-green-500" : "bg-primary"
-          )}
-          style={{ width: `${Math.min(100, normalizedValue)}%` }}
-        />
-      </div>
-    </div>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <div className="w-full cursor-help">
+          <div className="flex justify-between items-center mb-0.5">
+            <span className={`font-medium ${isMobile ? 'text-[9px]' : 'text-[10px]'}`}>{label}</span>
+            <span className={`font-semibold ${isMobile ? 'text-[9px]' : 'text-[10px]'}`}>{value}</span>
+          </div>
+          <div className={`w-full bg-muted rounded-full overflow-hidden ${isMobile ? 'h-1' : 'h-1.5'}`}>
+            <div 
+              className={`h-full rounded-full transition-all duration-300 ${barColor}`}
+              style={{ width: `${percentage}%` }}
+            />
+          </div>
+        </div>
+      </TooltipTrigger>
+      <TooltipContent>
+        <p className="text-xs">{label}: {value}/200</p>
+      </TooltipContent>
+    </Tooltip>
   );
 }
-
 function Circle({ title, subtitle, tooltip, percentage, color, scales, abbreviation }: CircleProps & { abbreviation?: string }) {
   return (
     <div className="flex flex-col items-center p-5 bg-card rounded-xl border shadow-sm hover:shadow-md transition-shadow">
@@ -134,58 +136,56 @@ function Circle({ title, subtitle, tooltip, percentage, color, scales, abbreviat
 }
 
 export function ProfileCircles({ 
-  leadership_pct, 
-  maturita_pct, 
-  potenziale_pct, 
-  scale_punteggi 
+  leadershipPct, 
+  maturitaPct, 
+  potenzialePct, 
+  scalePunteggi 
 }: ProfileCirclesProps) {
-  // Configurazione secondo Manuale V3 Cap. 8.2
-  const circlesConfig = [
+  const isMobile = useIsMobile();
+  
+  const circles: CircleProps[] = [
     {
-      title: 'Impatto Organizzativo',
-      abbreviation: 'IIO',
-      subtitle: 'Relazioni e Qualità',
-      tooltip: 'Indice di Impatto Organizzativo: misura la capacità di influenzare l\'organizzazione attraverso Qualità Relazionale (QR), Sensibilità Personale (SP) e Propensione all\'Azione (PA). Formula: (QR + SP + PA) / 600 × 100',
-      percentage: leadership_pct,
-      color: 'text-[#1e3a5f]',
+      title: "Impatto Organizzativo",
+      subtitle: "IIO - Leadership",
+      tooltip: "Misura la capacità di influenzare, guidare e lasciare un'impronta nell'organizzazione. Basato su Motivazione (MO), Qualità Negoziali (QN) e Spinta alla Performance (SP).",
+      percentage: leadershipPct,
+      color: "#1e3a5f",
       scales: [
-        { code: 'QR' as ScalaCode, label: SCALE_LABELS['QR'], value: scale_punteggi['QR'] || 100 },
-        { code: 'SP' as ScalaCode, label: SCALE_LABELS['SP'], value: scale_punteggi['SP'] || 100 },
-        { code: 'PA' as ScalaCode, label: SCALE_LABELS['PA'], value: scale_punteggi['PA'] || 100 },
+        { key: 'MO', label: 'Motivazione', value: scalePunteggi['MO'] || 100 },
+        { key: 'QN', label: 'Qualità Negoziali', value: scalePunteggi['QN'] || 100 },
+        { key: 'SP', label: 'Spinta Performance', value: scalePunteggi['SP'] || 100 },
       ]
     },
     {
-      title: 'Solidità Personale',
-      abbreviation: 'ISP',
-      subtitle: 'Stabilità e Motivazione',
-      tooltip: 'Indice di Solidità Personale: valuta la stabilità interiore attraverso Stile di Vita (SV), Motivazione (MO) e Capacità di Fronteggiare (CF). Formula: (SV + MO + CF) / 600 × 100',
-      percentage: maturita_pct,
-      color: 'text-green-600',
+      title: "Solidità Personale",
+      subtitle: "ISP - Maturità",
+      tooltip: "Indica la stabilità emotiva, la capacità di gestire lo stress e la maturità personale. Basato su Stile di Vita (SV), Capacità di Fronteggiare (CF) e Pensiero Autonomo (PA).",
+      percentage: maturitaPct,
+      color: "#22c55e",
       scales: [
-        { code: 'SV' as ScalaCode, label: SCALE_LABELS['SV'], value: scale_punteggi['SV'] || 100 },
-        { code: 'MO' as ScalaCode, label: SCALE_LABELS['MO'], value: scale_punteggi['MO'] || 100 },
-        { code: 'CF' as ScalaCode, label: SCALE_LABELS['CF'], value: scale_punteggi['CF'] || 100 },
+        { key: 'SV', label: 'Stile di Vita', value: scalePunteggi['SV'] || 100 },
+        { key: 'CF', label: 'Fronteggiamento', value: scalePunteggi['CF'] || 100 },
+        { key: 'PA', label: 'Pensiero Autonomo', value: scalePunteggi['PA'] || 100 },
       ]
     },
     {
-      title: 'Capacità Produttiva',
-      abbreviation: 'ICP',
-      subtitle: 'Esecuzione e Risultati',
-      tooltip: 'Indice di Capacità Produttiva: indica l\'efficacia operativa attraverso Quantità (QN), Efficacia (EC) ed Efficienza (EF). Formula: (QN + EC + EF) / 600 × 100',
-      percentage: potenziale_pct,
-      color: 'text-[#f09133]',
+      title: "Capacità Produttiva",
+      subtitle: "ICP - Potenziale",
+      tooltip: "Valuta l'orientamento al risultato, l'efficienza operativa e la capacità di produrre valore. Basato su Efficienza (EF), Qualità Realizzativa (QR) e Schematicità (SC).",
+      percentage: potenzialePct,
+      color: "#f09133",
       scales: [
-        { code: 'QN' as ScalaCode, label: SCALE_LABELS['QN'], value: scale_punteggi['QN'] || 100 },
-        { code: 'EC' as ScalaCode, label: SCALE_LABELS['EC'], value: scale_punteggi['EC'] || 100 },
-        { code: 'EF' as ScalaCode, label: SCALE_LABELS['EF'], value: scale_punteggi['EF'] || 100 },
+        { key: 'EF', label: 'Efficienza', value: scalePunteggi['EF'] || 100 },
+        { key: 'QR', label: 'Qualità Realizz.', value: scalePunteggi['QR'] || 100 },
+        { key: 'SC', label: 'Schematicità', value: scalePunteggi['SC'] || 100 },
       ]
-    }
+    },
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-      {circlesConfig.map((circle) => (
-        <Circle key={circle.title} {...circle} />
+    <div className={`grid grid-cols-3 ${isMobile ? 'gap-2' : 'gap-6'}`}>
+      {circles.map((circle) => (
+        <Circle key={circle.title} {...circle} isMobile={isMobile} />
       ))}
     </div>
   );
