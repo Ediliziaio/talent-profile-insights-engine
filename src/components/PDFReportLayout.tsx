@@ -1,19 +1,16 @@
 /**
- * PDFReportLayout - Layout ottimizzato per stampa PDF
+ * PDFReportLayout - Layout PDF ottimizzato a 5 pagine
  * 
- * Componente specifico per generazione PDF professionale:
- * - Header brandizzato
- * - Executive Summary
- * - Sintesi profilo
- * - Tabella 9 ruoli
- * - Raccomandazioni condizionali
- * - Domande colloquio con checkbox
- * - Spazio note
- * - Prossimi passi
+ * Struttura:
+ * - PAGINA 1: MATCH (Executive Summary + 9 Ruoli + Raccomandazioni)
+ * - PAGINA 2: DATI (IIO/ISP/ICP + Stress Zone + Grafico Scale)
+ * - PAGINA 3: INTERPRETAZIONE (Pattern + Dettaglio Scale)
+ * - PAGINA 4: PROFILO (Chi è + Motivazioni + Gestione)
+ * - PAGINA 5: COLLOQUIO (Domande + Note + Prossimi Passi)
  */
 
 import { forwardRef } from 'react';
-import { ProfiloTipo, SCALE_LABELS } from '@/types/database';
+import { ProfiloTipo, SCALE_LABELS, ScalaCode } from '@/types/database';
 import { getProfiloDetailedDescription } from '@/lib/profiloDetailedDescriptions';
 import { 
   calculateAllRolesCompatibility, 
@@ -22,7 +19,8 @@ import {
   FitVerdict 
 } from '@/lib/roleMatching';
 import { calculateStressZoneSeverity, getStressZoneSeverityLabel } from '@/lib/stressZone';
-import { generateInterpretazione } from '@/lib/interpretazioneProfile';
+import { generateInterpretazione, getZonaInterpretazione } from '@/lib/interpretazioneProfile';
+import { getScaleRangeText } from '@/lib/scaleTexts';
 
 interface PDFReportLayoutProps {
   candidatoNome: string;
@@ -36,11 +34,13 @@ interface PDFReportLayoutProps {
   scalePunteggi: Record<string, number>;
   stressZone?: boolean;
   dataTest?: string | null;
+  schematicita?: number;
 }
 
-/**
- * Calcola probabilità successo 12 mesi
- */
+// ============================================
+// FUNZIONI HELPER
+// ============================================
+
 function calculateSuccessProbability(
   scalePunteggi: Record<string, number>,
   stressZone: boolean,
@@ -50,7 +50,6 @@ function calculateSuccessProbability(
   const matching = calculateAllRolesCompatibility(ruolo, scalePunteggi);
   let base = matching.ruoloRichiesto.compatibilitaPct;
   
-  // Bonus/Malus
   if (stressZone) base -= 15;
   if (matching.ruoloRichiesto.verdict === 'IDONEO') base += 10;
   if (matching.ruoloRichiesto.verdict === 'NON_IDONEO') base -= 15;
@@ -63,9 +62,6 @@ function calculateSuccessProbability(
   return Math.max(20, Math.min(95, base));
 }
 
-/**
- * Genera domande colloquio basate su pattern e criticità
- */
 function generateInterviewQuestions(
   scalePunteggi: Record<string, number>,
   matching: ReturnType<typeof calculateAllRolesCompatibility>
@@ -80,19 +76,18 @@ function generateInterviewQuestions(
   const mo = scalePunteggi['MO'] || 100;
   const pa = scalePunteggi['PA'] || 100;
   
-  // Domande basate su aree critiche
   if (qr < 100) {
     questions.push('Mi racconti di una situazione in cui ha dovuto assumersi una responsabilità importante. Come l\'ha gestita?');
-    questions.push('Quando le cose vanno male in un progetto, qual è la sua prima reazione? Chi considera responsabile?');
+    questions.push('Quando le cose vanno male in un progetto, qual è la sua prima reazione?');
   }
   
   if (cf < 100) {
     questions.push('Come reagisce quando i piani cambiano improvvisamente e senza preavviso?');
-    questions.push('Mi descriva un momento in cui ha dovuto gestire più pressioni contemporaneamente. Come ne è uscito?');
+    questions.push('Mi descriva un momento in cui ha dovuto gestire più pressioni contemporaneamente.');
   }
   
   if (sc > 160) {
-    questions.push('Mi racconti di quando ha dovuto cambiare completamente approccio a un problema. Come si è sentito?');
+    questions.push('Mi racconti di quando ha dovuto cambiare completamente approccio a un problema.');
     questions.push('In un ambiente dove le regole cambiano spesso, come si troverebbe?');
   }
   
@@ -103,7 +98,6 @@ function generateInterviewQuestions(
   
   if (sp < 100 && mo > 130) {
     questions.push('Quali sono i suoi obiettivi economici e di carriera per i prossimi 3 anni?');
-    questions.push('Cosa la spinge a lavorare con intensità? Quali risultati concreti si aspetta?');
   }
   
   if (pa < 100) {
@@ -111,23 +105,18 @@ function generateInterviewQuestions(
     questions.push('Mi racconti di un conflitto con un collega. Come lo ha risolto?');
   }
   
-  // Domande standard sempre utili
   questions.push('Cosa l\'ha attratta di questa posizione specifica?');
   questions.push('Dove si vede tra un anno in questa azienda?');
   
-  // Aggiungi domande dai pattern rilevati
   matching.ruoloRichiesto.domandeColloquio.forEach(d => {
     if (!questions.includes(d) && questions.length < 10) {
       questions.push(d);
     }
   });
   
-  return questions.slice(0, 8); // Max 8 domande
+  return questions.slice(0, 8);
 }
 
-/**
- * Genera raccomandazioni condizionali
- */
 function generateConditionalRecommendations(
   scalePunteggi: Record<string, number>,
   verdict: FitVerdict,
@@ -144,58 +133,43 @@ function generateConditionalRecommendations(
   
   if (sc > 160 && cf < 100) {
     raccomandazioni.push({
-      condizione: "l'azienda ha bisogno di STABILITÀ e CONTINUITÀ",
-      azione: "PROCEDERE con colloquio approfondito su capacità di adattamento"
+      condizione: "l'azienda ha bisogno di STABILITÀ",
+      azione: "PROCEDERE con colloquio su adattamento"
     });
     raccomandazioni.push({
-      condizione: "l'azienda ha bisogno di TRASFORMAZIONE RADICALE",
-      azione: "VALUTARE CON CAUTELA - profilo più esecutivo che trasformativo"
+      condizione: "l'azienda ha bisogno di TRASFORMAZIONE",
+      azione: "VALUTARE CON CAUTELA"
     });
   } else if (ec > 160 && pa > 160) {
     raccomandazioni.push({
-      condizione: "l'azienda cerca LEADERSHIP e RISULTATI",
-      azione: "PROCEDERE con fast-track - profilo ad alto potenziale"
-    });
-    raccomandazioni.push({
-      condizione: "l'azienda ha struttura rigida con poca autonomia",
-      azione: "VALUTARE rischio frustrazione - profilo richiede spazio decisionale"
+      condizione: "l'azienda cerca LEADERSHIP",
+      azione: "PROCEDERE con fast-track"
     });
   } else if (mo > 140 && sp < 100) {
     raccomandazioni.push({
-      condizione: "il ruolo richiede VENDITA o OBIETTIVI ECONOMICI",
-      azione: "NON PROCEDERE - pattern 'Motore a vuoto', manca direzione"
-    });
-    raccomandazioni.push({
-      condizione: "il ruolo è OPERATIVO/ESECUTIVO",
-      azione: "VALUTARE - buona motivazione se guidato da obiettivi chiari"
+      condizione: "il ruolo richiede VENDITA",
+      azione: "NON PROCEDERE - pattern Motore a vuoto"
     });
   } else if (verdict === 'IDONEO') {
     raccomandazioni.push({
-      condizione: "il ruolo corrisponde alle aspettative del candidato",
-      azione: "PROCEDERE con proposta - match positivo su tutti i requisiti"
+      condizione: "il ruolo corrisponde alle aspettative",
+      azione: "PROCEDERE con proposta"
     });
   } else if (verdict === 'IDONEO_CON_RISERVA') {
     raccomandazioni.push({
       condizione: "le aree di attenzione sono gestibili",
-      azione: "PROCEDERE con piano di onboarding strutturato"
-    });
-    raccomandazioni.push({
-      condizione: "le aree di attenzione sono critiche per il ruolo",
-      azione: "VALUTARE alternative o piano di sviluppo intensivo"
+      azione: "PROCEDERE con onboarding strutturato"
     });
   } else {
     raccomandazioni.push({
-      condizione: "esistono ruoli alternativi in azienda",
-      azione: "CONSIDERARE ricollocazione su ruoli più compatibili"
+      condizione: "esistono ruoli alternativi",
+      azione: "CONSIDERARE ricollocazione"
     });
   }
   
   return raccomandazioni.slice(0, 3);
 }
 
-/**
- * Genera prossimi passi
- */
 function generateNextSteps(
   scalePunteggi: Record<string, number>,
   verdict: FitVerdict
@@ -206,25 +180,52 @@ function generateNextSteps(
   const cf = scalePunteggi['CF'] || 100;
   const sv = scalePunteggi['SV'] || 100;
   
-  if (qr < 100) steps.push('Colloquio su esempi di assunzione responsabilità');
-  if (cf < 100) steps.push('Verifica gestione stress e imprevisti');
+  if (qr < 100) steps.push('Colloquio su assunzione responsabilità');
+  if (cf < 100) steps.push('Verifica gestione stress');
   if (sv < 90) steps.push('Assessment situazione personale');
   
   if (verdict === 'IDONEO') {
     steps.push('Verifica aspettative economiche');
     steps.push('Proposta e negoziazione');
   } else if (verdict === 'IDONEO_CON_RISERVA') {
-    steps.push('Secondo colloquio con responsabile diretto');
+    steps.push('Secondo colloquio con responsabile');
     steps.push('Piano onboarding con milestones');
   } else if (verdict === 'DA_VALUTARE') {
-    steps.push('Assessment approfondito criticità');
+    steps.push('Assessment criticità');
     steps.push('Valutazione ruoli alternativi');
   } else {
-    steps.push('Comunicazione trasparente motivazioni');
+    steps.push('Comunicazione trasparente');
   }
   
   return steps.slice(0, 4);
 }
+
+// Calcolo indici IIO, ISP, ICP
+function calculateMainIndicators(scalePunteggi: Record<string, number>) {
+  const qr = scalePunteggi['QR'] || 100;
+  const sp = scalePunteggi['SP'] || 100;
+  const pa = scalePunteggi['PA'] || 100;
+  const sv = scalePunteggi['SV'] || 100;
+  const mo = scalePunteggi['MO'] || 100;
+  const cf = scalePunteggi['CF'] || 100;
+  const qn = scalePunteggi['QN'] || 100;
+  const ec = scalePunteggi['EC'] || 100;
+  const ef = scalePunteggi['EF'] || 100;
+  
+  const iio = Math.round((qr + sp + pa) / 3); // Impatto Organizzativo
+  const isp = Math.round((sv + mo + cf) / 3); // Solidità Personale
+  const icp = Math.round((qn + ec + ef) / 3); // Capacità Produttiva
+  
+  return {
+    iio: Math.round((iio / 200) * 100),
+    isp: Math.round((isp / 200) * 100),
+    icp: Math.round((icp / 200) * 100)
+  };
+}
+
+// ============================================
+// COMPONENTE PRINCIPALE
+// ============================================
 
 export const PDFReportLayout = forwardRef<HTMLDivElement, PDFReportLayoutProps>(
   function PDFReportLayout(props, ref) {
@@ -239,17 +240,25 @@ export const PDFReportLayout = forwardRef<HTMLDivElement, PDFReportLayoutProps>(
       profiloTipo,
       scalePunteggi,
       stressZone = false,
-      dataTest
+      dataTest,
+      schematicita = 100
     } = props;
     
     const profiloInfo = profiloTipo ? getProfiloDetailedDescription(profiloTipo) : null;
     const matching = calculateAllRolesCompatibility(ruoloRichiesto, scalePunteggi);
     const verdict = matching.ruoloRichiesto.verdict;
     const successProb = calculateSuccessProbability(scalePunteggi, stressZone, profiloTipo, ruoloRichiesto);
+    const indicators = calculateMainIndicators(scalePunteggi);
+    
+    // Stress zone severity
+    const sv = scalePunteggi['SV'] || 100;
+    const cf = scalePunteggi['CF'] || 100;
+    const stressZoneSeverity = calculateStressZoneSeverity(sv, cf);
     
     // Eccellenze e criticità
     const eccellenze = Object.entries(scalePunteggi)
-      .filter(([_, v]) => v >= 160)
+      .filter(([k, v]) => v >= 160 && k !== 'SC')
+      .sort((a, b) => b[1] - a[1])
       .map(([scala, valore]) => ({
         scala,
         label: SCALE_LABELS[scala as keyof typeof SCALE_LABELS] || scala,
@@ -257,7 +266,8 @@ export const PDFReportLayout = forwardRef<HTMLDivElement, PDFReportLayoutProps>(
       }));
       
     const criticita = Object.entries(scalePunteggi)
-      .filter(([_, v]) => v < 80)
+      .filter(([k, v]) => v < 80 && k !== 'SC')
+      .sort((a, b) => a[1] - b[1])
       .map(([scala, valore]) => ({
         scala,
         label: SCALE_LABELS[scala as keyof typeof SCALE_LABELS] || scala,
@@ -269,7 +279,17 @@ export const PDFReportLayout = forwardRef<HTMLDivElement, PDFReportLayoutProps>(
     const recommendations = generateConditionalRecommendations(scalePunteggi, verdict, profiloTipo);
     const nextSteps = generateNextSteps(scalePunteggi, verdict);
     
-    // Tutti i ruoli ordinati per compatibilità
+    // Interpretazioni
+    const interpretazioni = generateInterpretazione(
+      scalePunteggi,
+      schematicita,
+      stressZone,
+      criticita.map(c => c.scala),
+      eccellenze.map(e => e.scala),
+      stressZoneSeverity
+    );
+    
+    // Tutti i ruoli ordinati
     const allRoles = Object.keys(ROLE_PROFILES).map(ruolo => {
       const roleMatching = calculateAllRolesCompatibility(ruolo, scalePunteggi);
       return {
@@ -291,273 +311,568 @@ export const PDFReportLayout = forwardRef<HTMLDivElement, PDFReportLayoutProps>(
       ? new Date(dataTest).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' })
       : today;
 
+    // Scale per il grafico
+    const scaleOrdered: ScalaCode[] = ['EC', 'EF', 'QN', 'QR', 'PA', 'SP', 'MO', 'CF', 'SV'];
+    
+    // Stili comuni
+    const pageStyle = {
+      pageBreakBefore: 'always' as const,
+      pageBreakInside: 'avoid' as const,
+      minHeight: '270mm',
+      padding: '15mm 20mm'
+    };
+    
+    const firstPageStyle = {
+      pageBreakInside: 'avoid' as const,
+      minHeight: '270mm',
+      padding: '15mm 20mm'
+    };
+
     return (
       <div 
         ref={ref} 
-        className="pdf-report bg-white text-black p-8 w-[210mm] min-h-[297mm]"
+        className="pdf-report bg-white text-black"
         style={{ 
           fontFamily: 'Arial, Helvetica, sans-serif',
-          fontSize: '11pt',
-          lineHeight: '1.5',
-          color: '#000'
+          fontSize: '10pt',
+          lineHeight: '1.4',
+          color: '#000',
+          width: '210mm'
         }}
       >
-        {/* ========== HEADER ========== */}
-        <div className="flex items-center justify-between border-b-2 border-black pb-4 mb-6">
-          <div className="flex items-center gap-4">
-            <img 
-              src="/talentprofile_logo_v3.png" 
-              alt="TalentProfile" 
-              className="h-10 object-contain"
-              crossOrigin="anonymous"
-            />
-            <div>
-              <h1 className="text-xl font-bold tracking-tight">REPORT CANDIDATO</h1>
-              <p className="text-xs text-gray-600">Analisi Psicometrica V5</p>
+        {/* ==================== PAGINA 1: MATCH ==================== */}
+        <div style={firstPageStyle}>
+          {/* Header */}
+          <div className="flex items-center justify-between border-b-2 border-black pb-3 mb-4">
+            <div className="flex items-center gap-3">
+              <img 
+                src="/talentprofile_logo_v3.png" 
+                alt="TalentProfile" 
+                className="h-8 object-contain"
+                crossOrigin="anonymous"
+              />
+              <div>
+                <h1 className="text-lg font-bold tracking-tight">REPORT CANDIDATO</h1>
+                <p className="text-[9pt] text-gray-600">Analisi Psicometrica V5</p>
+              </div>
+            </div>
+            <div className="text-right text-[9pt] text-gray-600">
+              <p>Report: {today}</p>
+              <p>Test: {testDate}</p>
             </div>
           </div>
-          <div className="text-right text-xs text-gray-600">
-            <p>Data Report: {today}</p>
-            <p>Data Test: {testDate}</p>
-          </div>
-        </div>
 
-        {/* ========== ANAGRAFICA ========== */}
-        <div className="bg-gray-100 rounded-lg p-4 mb-6">
-          <h2 className="text-2xl font-bold mb-1">
-            {candidatoCognome.toUpperCase()} {candidatoNome}
-          </h2>
-          <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-gray-700">
-            {eta && <span>Età: {eta} anni</span>}
-            <span>Posizione: <strong>{ruoloRichiesto}</strong></span>
-            {azienda && <span>Azienda: {azienda}</span>}
-            {email && <span>Email: {email}</span>}
-            {telefono && <span>Tel: {telefono}</span>}
+          {/* Anagrafica */}
+          <div className="bg-gray-100 rounded p-3 mb-4">
+            <h2 className="text-xl font-bold">
+              {candidatoCognome.toUpperCase()} {candidatoNome}
+              {eta && <span className="font-normal text-base ml-2">({eta} anni)</span>}
+            </h2>
+            <div className="flex flex-wrap gap-x-4 text-[9pt] text-gray-700 mt-1">
+              <span>Posizione: <strong>{ruoloRichiesto}</strong></span>
+              {azienda && <span>Azienda: {azienda}</span>}
+              {email && <span>{email}</span>}
+            </div>
           </div>
-        </div>
 
-        {/* ========== EXECUTIVE SUMMARY ========== */}
-        <div className="border-2 border-black rounded-lg p-4 mb-6">
-          <div className="flex items-center gap-6">
-            {/* Verdict Box */}
-            <div 
-              className="w-40 h-24 flex flex-col items-center justify-center rounded-lg text-white font-bold"
-              style={{ 
-                backgroundColor: 
-                  verdict === 'IDONEO' ? '#16a34a' :
-                  verdict === 'IDONEO_CON_RISERVA' ? '#2563eb' :
-                  verdict === 'DA_VALUTARE' ? '#d97706' : '#dc2626'
-              }}
-            >
-              <span className="text-lg leading-tight text-center">
-                {getVerdictLabel(verdict)}
-              </span>
+          {/* Executive Summary */}
+          <div className="border-2 border-black rounded p-4 mb-4">
+            <div className="flex items-center gap-4">
+              <div 
+                className="w-32 h-20 flex flex-col items-center justify-center rounded text-white font-bold text-center"
+                style={{ 
+                  backgroundColor: 
+                    verdict === 'IDONEO' ? '#16a34a' :
+                    verdict === 'IDONEO_CON_RISERVA' ? '#2563eb' :
+                    verdict === 'DA_VALUTARE' ? '#d97706' : '#dc2626'
+                }}
+              >
+                <span className="text-sm leading-tight px-2">
+                  {getVerdictLabel(verdict)}
+                </span>
+              </div>
+              
+              <div className="flex-1 grid grid-cols-3 gap-3 text-center">
+                <div>
+                  <p className="text-2xl font-bold">{matching.ruoloRichiesto.compatibilitaPct}%</p>
+                  <p className="text-[8pt] text-gray-600">Compatibilità</p>
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{successProb}%</p>
+                  <p className="text-[8pt] text-gray-600">Prob. Successo 12m</p>
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">
+                    {matching.ruoloRichiesto.requisitiSoddisfatti.length}/
+                    {matching.ruoloRichiesto.requisitiSoddisfatti.length + matching.ruoloRichiesto.requisitiMancanti.length}
+                  </p>
+                  <p className="text-[8pt] text-gray-600">Requisiti OK</p>
+                </div>
+              </div>
             </div>
             
-            {/* KPIs */}
-            <div className="flex-1 grid grid-cols-3 gap-4">
-              <div className="text-center">
-                <p className="text-3xl font-bold">{matching.ruoloRichiesto.compatibilitaPct}%</p>
-                <p className="text-xs text-gray-600">Compatibilità Ruolo</p>
-              </div>
-              <div className="text-center">
-                <p className="text-3xl font-bold">{successProb}%</p>
-                <p className="text-xs text-gray-600">Prob. Successo 12m</p>
-              </div>
-              <div className="text-center">
-                <p className="text-3xl font-bold">
-                  {matching.ruoloRichiesto.requisitiSoddisfatti.length}/
-                  {matching.ruoloRichiesto.requisitiSoddisfatti.length + matching.ruoloRichiesto.requisitiMancanti.length}
-                </p>
-                <p className="text-xs text-gray-600">Requisiti OK</p>
-              </div>
+            <div className="mt-3 pt-3 border-t border-gray-300 text-[9pt]">
+              <strong>Profilo:</strong> {profiloInfo?.titolo || 'In valutazione'}
+              {stressZone && <span className="ml-2 text-red-600 font-bold">⚠ STRESS ZONE</span>}
             </div>
           </div>
-          
-          {/* Profilo */}
-          <div className="mt-4 pt-4 border-t border-gray-300">
-            <p className="text-sm">
-              <strong>Profilo:</strong> {profiloInfo?.titolo || 'In valutazione'}
-              {stressZone && <span className="ml-2 text-red-600 font-bold">⚠ STRESS ZONE ATTIVA</span>}
-            </p>
-          </div>
-        </div>
 
-        {/* ========== SINTESI PROFILO ========== */}
-        <div className="mb-6">
-          <h3 className="text-lg font-bold border-b border-gray-400 pb-1 mb-3">
-            📊 SINTESI DEL PROFILO
-          </h3>
-          
-          <div className="bg-gray-50 rounded p-3 mb-4">
-            <p className="text-sm leading-relaxed">
-              {candidatoCognome} {candidatoNome}
-              {eta ? `, ${eta} anni` : ''}, candidato/a per {ruoloRichiesto}.
-              {profiloInfo && (
-                <> Profilo: <strong>{profiloInfo.titolo.toUpperCase()}</strong>
-                  {eccellenze.length > 0 && (
-                    <> con eccellente {eccellenze.slice(0, 2).map(e => e.label.toLowerCase()).join(' e ')}</>
-                  )}
-                  {criticita.length > 0 && (
-                    <>. Limiti: {criticita.slice(0, 2).map(c => c.label.toLowerCase()).join(', ')}</>
-                  )}
-                  .
-                </>
-              )}
-            </p>
+          {/* Tabella 9 Ruoli */}
+          <div className="mb-4">
+            <h3 className="text-sm font-bold border-b border-gray-400 pb-1 mb-2">
+              📋 COMPATIBILITÀ 9 RUOLI
+            </h3>
+            <table className="w-full text-[9pt] border-collapse">
+              <thead>
+                <tr className="bg-gray-200">
+                  <th className="text-left p-1.5 border border-gray-300">Ruolo</th>
+                  <th className="text-center p-1.5 border border-gray-300 w-16">%</th>
+                  <th className="text-center p-1.5 border border-gray-300 w-32">Verdetto</th>
+                  <th className="text-center p-1.5 border border-gray-300 w-16">Note</th>
+                </tr>
+              </thead>
+              <tbody>
+                {allRoles.map((role, idx) => (
+                  <tr 
+                    key={idx} 
+                    className={role.isRequested ? 'bg-blue-50 font-bold' : role.isIdeal ? 'bg-green-50' : ''}
+                  >
+                    <td className="p-1.5 border border-gray-300">{role.ruolo}</td>
+                    <td className="text-center p-1.5 border border-gray-300">{role.compatibilita}%</td>
+                    <td className="text-center p-1.5 border border-gray-300">{getVerdictLabel(role.verdict)}</td>
+                    <td className="text-center p-1.5 border border-gray-300">
+                      {role.isRequested && '◀'}
+                      {role.isIdeal && '★'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <p className="text-[8pt] text-gray-500 mt-1">◀ Ruolo richiesto | ★ Ruolo ideale</p>
           </div>
-          
-          {/* Punti di forza e debolezze */}
+
+          {/* Sintesi + Raccomandazioni */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <h4 className="text-sm font-bold text-green-700 mb-2">✓ PUNTI DI FORZA</h4>
-              {eccellenze.length > 0 ? (
-                <ul className="text-sm space-y-1">
-                  {eccellenze.map((e, i) => (
-                    <li key={i} className="flex justify-between">
-                      <span>✓ {e.label}</span>
-                      <span className="font-bold">{e.valore}</span>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-sm text-gray-500">Nessuna eccellenza rilevata</p>
-              )}
+              <h4 className="text-sm font-bold mb-2">SINTESI</h4>
+              <div className="text-[9pt] space-y-1">
+                <div className="flex justify-between">
+                  <span className="text-green-700">✓ Punti Forza:</span>
+                  <span>{eccellenze.length > 0 ? eccellenze.map(e => e.scala).join(', ') : 'Nessuno'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-amber-700">⚠ Attenzione:</span>
+                  <span>{criticita.length > 0 ? criticita.map(c => c.scala).join(', ') : 'Nessuna'}</span>
+                </div>
+              </div>
             </div>
             <div>
-              <h4 className="text-sm font-bold text-amber-700 mb-2">⚠ AREE DI ATTENZIONE</h4>
-              {criticita.length > 0 ? (
-                <ul className="text-sm space-y-1">
-                  {criticita.map((c, i) => (
-                    <li key={i} className="flex justify-between">
-                      <span>⚠ {c.label}</span>
-                      <span className="font-bold text-amber-700">{c.valore}</span>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-sm text-gray-500">Nessuna criticità rilevata</p>
+              <h4 className="text-sm font-bold mb-2">RACCOMANDAZIONE</h4>
+              <div className="text-[9pt] space-y-1">
+                {recommendations.map((r, i) => (
+                  <div key={i}>
+                    <span className="text-gray-600">SE {r.condizione}:</span>
+                    <br/>
+                    <span className="font-semibold">→ {r.azione}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          
+          {/* Footer pagina 1 */}
+          <div className="absolute bottom-4 right-6 text-[8pt] text-gray-400">
+            Pagina 1/5 - Match
+          </div>
+        </div>
+
+        {/* ==================== PAGINA 2: DATI ==================== */}
+        <div style={pageStyle}>
+          <div className="flex items-center justify-between border-b border-gray-300 pb-2 mb-4">
+            <h2 className="text-lg font-bold">2. ANALISI DATI</h2>
+            <span className="text-[9pt] text-gray-600">{candidatoCognome} {candidatoNome}</span>
+          </div>
+
+          {/* Indicatori Principali */}
+          <div className="mb-6">
+            <h3 className="text-sm font-bold mb-3">INDICATORI PRINCIPALI</h3>
+            <div className="flex justify-around">
+              <div className="text-center border-2 border-gray-300 rounded-lg p-4 w-36">
+                <p className="text-3xl font-bold text-blue-700">{indicators.iio}%</p>
+                <p className="text-[9pt] font-semibold">IIO</p>
+                <p className="text-[8pt] text-gray-600">Impatto Organizzativo</p>
+                <p className="text-[7pt] text-gray-500 mt-1">(QR+SP+PA)</p>
+              </div>
+              <div className="text-center border-2 border-gray-300 rounded-lg p-4 w-36">
+                <p className="text-3xl font-bold text-orange-600">{indicators.isp}%</p>
+                <p className="text-[9pt] font-semibold">ISP</p>
+                <p className="text-[8pt] text-gray-600">Solidità Personale</p>
+                <p className="text-[7pt] text-gray-500 mt-1">(SV+MO+CF)</p>
+              </div>
+              <div className="text-center border-2 border-gray-300 rounded-lg p-4 w-36">
+                <p className="text-3xl font-bold text-green-700">{indicators.icp}%</p>
+                <p className="text-[9pt] font-semibold">ICP</p>
+                <p className="text-[8pt] text-gray-600">Capacità Produttiva</p>
+                <p className="text-[7pt] text-gray-500 mt-1">(QN+EC+EF)</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Stress Zone */}
+          <div className="mb-6">
+            <h3 className="text-sm font-bold mb-2">STRESS ZONE</h3>
+            <div className={`p-3 rounded border-2 ${
+              stressZoneSeverity === 'critica' ? 'border-red-500 bg-red-50' :
+              stressZoneSeverity === 'severa' ? 'border-red-400 bg-red-50' :
+              stressZoneSeverity === 'moderata' ? 'border-amber-400 bg-amber-50' :
+              stressZoneSeverity === 'lieve' ? 'border-yellow-400 bg-yellow-50' :
+              'border-green-400 bg-green-50'
+            }`}>
+              <div className="flex justify-between items-center">
+                <div>
+                  <span className="font-bold text-sm">
+                    {stressZoneSeverity === 'nessuna' ? 'NON ATTIVA' : getStressZoneSeverityLabel(stressZoneSeverity).toUpperCase()}
+                  </span>
+                  <div className="text-[9pt] text-gray-600 mt-1">
+                    Stile di Vita (SV): {sv} | Resilienza (CF): {cf}
+                  </div>
+                </div>
+                <div className="text-right text-[9pt]">
+                  {stressZone ? (
+                    <span className="text-red-600 font-bold">⚠ Attenzione richiesta</span>
+                  ) : (
+                    <span className="text-green-600">✓ Situazione stabile</span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Grafico Scale (Barre testuali) */}
+          <div className="mb-4">
+            <h3 className="text-sm font-bold mb-3">PROFILO COMPETENZE</h3>
+            <div className="space-y-2">
+              {scaleOrdered.map(scala => {
+                const valore = scalePunteggi[scala] || 100;
+                const delta = valore - 100;
+                const barWidth = Math.min(Math.abs(delta) / 100 * 50, 50);
+                const zona = getZonaInterpretazione(valore);
+                
+                return (
+                  <div key={scala} className="flex items-center gap-2 text-[9pt]">
+                    <div className="w-28 text-right font-medium">
+                      {SCALE_LABELS[scala] || scala}
+                    </div>
+                    <div className="flex-1 h-5 bg-gray-100 relative rounded overflow-hidden">
+                      {/* Linea centrale */}
+                      <div className="absolute left-1/2 top-0 bottom-0 w-px bg-gray-400"></div>
+                      {/* Barra */}
+                      <div 
+                        className={`absolute top-0 bottom-0 ${delta >= 0 ? 'left-1/2' : 'right-1/2'}`}
+                        style={{ 
+                          width: `${barWidth}%`,
+                          backgroundColor: zona.zona === 'eccellenza' ? '#16a34a' :
+                                          zona.zona === 'sopra_media' ? '#22c55e' :
+                                          zona.zona === 'norma' ? '#9ca3af' :
+                                          zona.zona === 'attenzione' ? '#f59e0b' : '#dc2626'
+                        }}
+                      ></div>
+                    </div>
+                    <div className="w-12 text-right font-bold">
+                      {valore}
+                    </div>
+                    <div className="w-10 text-center text-[8pt]">
+                      ({delta >= 0 ? '+' : ''}{delta})
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="flex justify-center gap-4 mt-3 text-[8pt]">
+              <span><span className="inline-block w-3 h-3 bg-red-500 rounded mr-1"></span>Critico (&lt;60)</span>
+              <span><span className="inline-block w-3 h-3 bg-amber-500 rounded mr-1"></span>Attenzione (60-79)</span>
+              <span><span className="inline-block w-3 h-3 bg-gray-400 rounded mr-1"></span>Norma (80-119)</span>
+              <span><span className="inline-block w-3 h-3 bg-green-400 rounded mr-1"></span>Sopra Media (120-159)</span>
+              <span><span className="inline-block w-3 h-3 bg-green-600 rounded mr-1"></span>Eccellenza (≥160)</span>
+            </div>
+          </div>
+
+          {/* Schematicità */}
+          <div className="mt-4 p-3 bg-gray-50 rounded border border-gray-200">
+            <div className="flex justify-between items-center">
+              <div>
+                <span className="font-bold text-sm">SCHEMATICITÀ (SC):</span>
+                <span className="ml-2 text-lg font-bold">{schematicita}</span>
+                <span className="text-[9pt] text-gray-600 ml-2">→ Flessibilità: {200 - schematicita}</span>
+              </div>
+              <div className="text-[9pt]">
+                {schematicita > 160 ? 'Molto Rigido' :
+                 schematicita > 130 ? 'Rigido' :
+                 schematicita > 100 ? 'Moderato' :
+                 schematicita > 70 ? 'Flessibile' : 'Molto Flessibile'}
+              </div>
+            </div>
+          </div>
+          
+          <div className="absolute bottom-4 right-6 text-[8pt] text-gray-400">
+            Pagina 2/5 - Dati
+          </div>
+        </div>
+
+        {/* ==================== PAGINA 3: INTERPRETAZIONE ==================== */}
+        <div style={pageStyle}>
+          <div className="flex items-center justify-between border-b border-gray-300 pb-2 mb-4">
+            <h2 className="text-lg font-bold">3. INTERPRETAZIONE</h2>
+            <span className="text-[9pt] text-gray-600">{candidatoCognome} {candidatoNome}</span>
+          </div>
+
+          {/* Pattern Rilevati */}
+          <div className="mb-6">
+            <h3 className="text-sm font-bold mb-3">PATTERN RILEVATI</h3>
+            <div className="space-y-3">
+              {interpretazioni.filter(i => i.tipo === 'critico' || i.tipo === 'attenzione').slice(0, 4).map((item, idx) => (
+                <div 
+                  key={idx} 
+                  className={`p-3 rounded border-l-4 ${
+                    item.tipo === 'critico' ? 'border-l-red-500 bg-red-50' : 'border-l-amber-500 bg-amber-50'
+                  }`}
+                >
+                  <div className="flex items-start gap-2">
+                    <span className="text-lg">{item.tipo === 'critico' ? '🔴' : '🟡'}</span>
+                    <div>
+                      <p className="font-bold text-sm">{item.titolo}</p>
+                      <p className="text-[9pt] text-gray-700 mt-1">{item.descrizione}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              
+              {interpretazioni.filter(i => i.tipo === 'forza').slice(0, 2).map((item, idx) => (
+                <div 
+                  key={idx} 
+                  className="p-3 rounded border-l-4 border-l-green-500 bg-green-50"
+                >
+                  <div className="flex items-start gap-2">
+                    <span className="text-lg">🟢</span>
+                    <div>
+                      <p className="font-bold text-sm">{item.titolo}</p>
+                      <p className="text-[9pt] text-gray-700 mt-1">{item.descrizione}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              
+              {interpretazioni.filter(i => i.tipo === 'critico' || i.tipo === 'attenzione' || i.tipo === 'forza').length === 0 && (
+                <p className="text-[9pt] text-gray-500 italic">Nessun pattern significativo rilevato.</p>
               )}
             </div>
           </div>
+
+          {/* Dettaglio Scale Critiche */}
+          <div className="mb-4">
+            <h3 className="text-sm font-bold mb-3">DETTAGLIO SCALE</h3>
+            <div className="space-y-3">
+              {[...criticita.slice(0, 3), ...eccellenze.slice(0, 2)].map((item, idx) => {
+                const scaleText = getScaleRangeText(item.scala as ScalaCode, item.valore);
+                const isCritico = item.valore < 80;
+                
+                return (
+                  <div key={idx} className="border-b border-gray-200 pb-2">
+                    <div className="flex justify-between items-baseline">
+                      <span className={`font-bold ${isCritico ? 'text-amber-700' : 'text-green-700'}`}>
+                        {item.label} ({item.scala})
+                      </span>
+                      <span className="font-bold">{item.valore}</span>
+                    </div>
+                    {scaleText && (
+                      <p className="text-[9pt] text-gray-600 mt-1">{scaleText.testo}</p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          
+          <div className="absolute bottom-4 right-6 text-[8pt] text-gray-400">
+            Pagina 3/5 - Interpretazione
+          </div>
         </div>
 
-        {/* ========== TABELLA 9 RUOLI ========== */}
-        <div className="mb-6">
-          <h3 className="text-lg font-bold border-b border-gray-400 pb-1 mb-3">
-            📋 COMPATIBILITÀ PER RUOLO
-          </h3>
+        {/* ==================== PAGINA 4: PROFILO ==================== */}
+        <div style={pageStyle}>
+          <div className="flex items-center justify-between border-b border-gray-300 pb-2 mb-4">
+            <h2 className="text-lg font-bold">4. PROFILO PSICOLOGICO</h2>
+            <span className="text-[9pt] text-gray-600">{candidatoCognome} {candidatoNome}</span>
+          </div>
+
+          {profiloInfo ? (
+            <>
+              {/* Titolo Profilo */}
+              <div className="bg-gray-100 rounded p-4 mb-4">
+                <h3 className="text-xl font-bold">{profiloInfo.titolo.toUpperCase()}</h3>
+                <p className="text-[9pt] text-gray-600 italic mt-1">{profiloInfo.motto}</p>
+              </div>
+
+              {/* Chi è */}
+              <div className="mb-4">
+                <h4 className="text-sm font-bold mb-2">CHI È QUESTA PERSONA</h4>
+                <p className="text-[9pt] leading-relaxed">{profiloInfo.chiE}</p>
+              </div>
+
+              {/* Motivazioni e Blocchi */}
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <h4 className="text-sm font-bold mb-2 text-green-700">✓ COSA LA MOTIVA</h4>
+                  <ul className="text-[9pt] space-y-1">
+                    {profiloInfo.cosaMotiva.slice(0, 4).map((item, i) => (
+                      <li key={i}>• {item}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold mb-2 text-red-700">✗ COSA LA BLOCCA</h4>
+                  <ul className="text-[9pt] space-y-1">
+                    {profiloInfo.cosaBlocca.slice(0, 4).map((item, i) => (
+                      <li key={i}>• {item}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              {/* Gestione */}
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <h4 className="text-sm font-bold mb-2">COME GESTIRLO</h4>
+                  <ul className="text-[9pt] space-y-1">
+                    {profiloInfo.comeGestirlo.slice(0, 4).map((item, i) => (
+                      <li key={i}>→ {item}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold mb-2 text-amber-700">⚠ ERRORI DA EVITARE</h4>
+                  <ul className="text-[9pt] space-y-1">
+                    {profiloInfo.erroriEvitare.slice(0, 4).map((item, i) => (
+                      <li key={i}>• {item}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              {/* Ruoli Ideali */}
+              <div className="mb-4 p-3 bg-blue-50 rounded border border-blue-200">
+                <h4 className="text-sm font-bold mb-2">RUOLI IDEALI</h4>
+                <div className="flex flex-wrap gap-2">
+                  {profiloInfo.ruoliIdeali.map((ruolo, i) => (
+                    <span key={i} className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-[9pt]">
+                      {ruolo}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Aspettative Temporali */}
+              <div className="mb-4">
+                <h4 className="text-sm font-bold mb-2">COSA ASPETTARSI NEL TEMPO</h4>
+                <div className="space-y-2 text-[9pt]">
+                  <div className="border-l-2 border-blue-400 pl-3">
+                    <span className="font-bold">0-3 mesi:</span> {profiloInfo.aspettativeTemporali.breveTermine}
+                  </div>
+                  <div className="border-l-2 border-green-400 pl-3">
+                    <span className="font-bold">3-12 mesi:</span> {profiloInfo.aspettativeTemporali.medioTermine}
+                  </div>
+                  <div className="border-l-2 border-purple-400 pl-3">
+                    <span className="font-bold">12+ mesi:</span> {profiloInfo.aspettativeTemporali.lungoTermine}
+                  </div>
+                </div>
+              </div>
+
+              {/* Alert HR */}
+              <div className="p-3 bg-gray-100 rounded border border-gray-300">
+                <p className="text-[9pt]">
+                  <span className="font-bold">⚡ ALERT HR:</span> {profiloInfo.alertHR}
+                </p>
+              </div>
+            </>
+          ) : (
+            <p className="text-gray-500 italic">Profilo non ancora determinato. Completare l'analisi.</p>
+          )}
           
-          <table className="w-full text-sm border-collapse">
-            <thead>
-              <tr className="bg-gray-200">
-                <th className="text-left p-2 border border-gray-300">Ruolo</th>
-                <th className="text-center p-2 border border-gray-300 w-24">%</th>
-                <th className="text-center p-2 border border-gray-300 w-36">Verdetto</th>
-                <th className="text-center p-2 border border-gray-300 w-20">Note</th>
-              </tr>
-            </thead>
-            <tbody>
-              {allRoles.map((role, idx) => (
-                <tr 
-                  key={idx} 
-                  className={role.isRequested ? 'bg-blue-50 font-bold' : role.isIdeal ? 'bg-green-50' : ''}
-                >
-                  <td className="p-2 border border-gray-300">{role.ruolo}</td>
-                  <td className="text-center p-2 border border-gray-300">{role.compatibilita}%</td>
-                  <td className="text-center p-2 border border-gray-300">
-                    {getVerdictLabel(role.verdict)}
-                  </td>
-                  <td className="text-center p-2 border border-gray-300 text-xs">
-                    {role.isRequested && '◀ RICHIESTO'}
-                    {role.isIdeal && !role.isRequested && '★ IDEALE'}
-                  </td>
-                </tr>
+          <div className="absolute bottom-4 right-6 text-[8pt] text-gray-400">
+            Pagina 4/5 - Profilo
+          </div>
+        </div>
+
+        {/* ==================== PAGINA 5: COLLOQUIO ==================== */}
+        <div style={pageStyle}>
+          <div className="flex items-center justify-between border-b border-gray-300 pb-2 mb-4">
+            <h2 className="text-lg font-bold">5. COLLOQUIO</h2>
+            <span className="text-[9pt] text-gray-600">{candidatoCognome} {candidatoNome}</span>
+          </div>
+
+          {/* Domande Suggerite */}
+          <div className="mb-6">
+            <h3 className="text-sm font-bold mb-3">DOMANDE SUGGERITE</h3>
+            <div className="space-y-2">
+              {interviewQuestions.map((q, i) => (
+                <div key={i} className="flex items-start gap-2">
+                  <div className="w-5 h-5 border-2 border-gray-400 rounded flex-shrink-0 mt-0.5"></div>
+                  <p className="text-[9pt]">{i + 1}. {q}</p>
+                </div>
               ))}
-            </tbody>
-          </table>
-        </div>
+            </div>
+          </div>
 
-        {/* PAGE BREAK */}
-        <div style={{ pageBreakBefore: 'always' }} />
+          {/* Spazio Note */}
+          <div className="mb-6">
+            <h3 className="text-sm font-bold mb-3">SPAZIO NOTE</h3>
+            <div className="border border-gray-300 rounded p-2">
+              {[...Array(10)].map((_, i) => (
+                <div 
+                  key={i} 
+                  className="border-b border-dashed border-gray-300 h-6"
+                  style={{ marginBottom: '2px' }}
+                ></div>
+              ))}
+            </div>
+          </div>
 
-        {/* ========== RACCOMANDAZIONE OPERATIVA ========== */}
-        <div className="mb-6 mt-8">
-          <h3 className="text-lg font-bold border-b border-gray-400 pb-1 mb-3">
-            📋 RACCOMANDAZIONE OPERATIVA
-          </h3>
-          
-          <div className="space-y-3">
-            {recommendations.map((r, idx) => (
-              <div key={idx} className="bg-gray-50 rounded p-3">
-                <p className="text-xs font-bold text-gray-600 uppercase mb-1">
-                  SE {r.condizione}:
-                </p>
-                <p className="text-sm font-medium">
-                  → {r.azione}
-                </p>
+          {/* Prossimi Passi */}
+          <div className="mb-6">
+            <h3 className="text-sm font-bold mb-3">PROSSIMI PASSI</h3>
+            <div className="space-y-2">
+              {nextSteps.map((step, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-gray-400 rounded flex-shrink-0"></div>
+                  <p className="text-[9pt]">{step}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Footer Finale */}
+          <div className="mt-auto pt-6 border-t border-gray-300">
+            <div className="flex justify-between items-center">
+              <div className="text-[8pt] text-gray-500">
+                <p>Report generato da TalentProfile V5</p>
+                <p>© {new Date().getFullYear()} - Uso interno riservato</p>
               </div>
-            ))}
+              <img 
+                src="/talentprofile_logo_v3.png" 
+                alt="TalentProfile" 
+                className="h-6 object-contain opacity-50"
+                crossOrigin="anonymous"
+              />
+            </div>
           </div>
-        </div>
-
-        {/* ========== DOMANDE COLLOQUIO ========== */}
-        <div className="mb-6">
-          <h3 className="text-lg font-bold border-b border-gray-400 pb-1 mb-3">
-            💬 DOMANDE SUGGERITE PER IL COLLOQUIO
-          </h3>
           
-          <div className="space-y-2">
-            {interviewQuestions.map((q, idx) => (
-              <div key={idx} className="flex items-start gap-3 text-sm">
-                <span className="flex-shrink-0 w-5 h-5 border-2 border-gray-400 rounded inline-block mt-0.5" />
-                <span>{idx + 1}. {q}</span>
-              </div>
-            ))}
+          <div className="absolute bottom-4 right-6 text-[8pt] text-gray-400">
+            Pagina 5/5 - Colloquio
           </div>
-        </div>
-
-        {/* ========== SPAZIO NOTE ========== */}
-        <div className="mb-6">
-          <h3 className="text-lg font-bold border-b border-gray-400 pb-1 mb-3">
-            📝 NOTE COLLOQUIO
-          </h3>
-          
-          <div 
-            className="border-2 border-gray-300 rounded-lg p-4 min-h-[120px]"
-            style={{ background: 'linear-gradient(#fff 0px, #fff 24px, #e5e7eb 24px, #e5e7eb 25px)', backgroundSize: '100% 25px' }}
-          >
-            {/* Spazio vuoto per note manuali */}
-          </div>
-        </div>
-
-        {/* ========== PROSSIMI PASSI ========== */}
-        <div className="mb-6">
-          <h3 className="text-lg font-bold border-b border-gray-400 pb-1 mb-3">
-            ✅ PROSSIMI PASSI
-          </h3>
-          
-          <div className="space-y-2">
-            {nextSteps.map((step, idx) => (
-              <div key={idx} className="flex items-start gap-3 text-sm">
-                <span className="flex-shrink-0 w-5 h-5 border-2 border-gray-400 rounded inline-block mt-0.5" />
-                <span>{step}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* ========== FOOTER ========== */}
-        <div className="mt-8 pt-4 border-t border-gray-300 flex items-center justify-between text-xs text-gray-500">
-          <p>Report generato automaticamente - TalentProfile V5</p>
-          <img 
-            src="/talentprofile_logo_v3.png" 
-            alt="TalentProfile" 
-            className="h-6 opacity-50"
-            crossOrigin="anonymous"
-          />
         </div>
       </div>
     );
   }
 );
+
+export default PDFReportLayout;

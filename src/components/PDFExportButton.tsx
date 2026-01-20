@@ -26,6 +26,7 @@ interface PDFReportButtonProps {
   scalePunteggi: Record<string, number>;
   stressZone?: boolean;
   dataTest?: string | null;
+  schematicita?: number;
   className?: string;
 }
 
@@ -201,6 +202,7 @@ export function PDFReportButton({
   scalePunteggi,
   stressZone,
   dataTest,
+  schematicita,
   className
 }: PDFReportButtonProps) {
   const [isExporting, setIsExporting] = useState(false);
@@ -236,6 +238,7 @@ export function PDFReportButton({
             scalePunteggi={scalePunteggi}
             stressZone={stressZone}
             dataTest={dataTest}
+            schematicita={schematicita}
           />
         );
         // Wait for render
