@@ -168,3 +168,66 @@
     background: linear-gradient(90deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
   }
 }
+
+/* PDF Report Print Styles */
+@media print {
+  .pdf-report {
+    font-size: 11pt !important;
+    line-height: 1.5 !important;
+    color: #000 !important;
+    background: #fff !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  
+  .pdf-report * {
+    color-adjust: exact !important;
+    -webkit-print-color-adjust: exact !important;
+  }
+  
+  .no-print {
+    display: none !important;
+  }
+  
+  .page-break {
+    page-break-before: always;
+  }
+  
+  .page-break-avoid {
+    page-break-inside: avoid;
+  }
+}
+
+/* PDF Layout specific styles */
+.pdf-report {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 11pt;
+  line-height: 1.5;
+  color: #000;
+  background: #fff;
+}
+
+.pdf-report h1,
+.pdf-report h2,
+.pdf-report h3,
+.pdf-report h4 {
+  color: #000;
+  font-weight: bold;
+}
+
+.pdf-report table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.pdf-report th,
+.pdf-report td {
+  border: 1px solid #d1d5db;
+  padding: 8px;
+  text-align: left;
+}
+
+.pdf-report th {
+  background-color: #e5e7eb;
+  font-weight: bold;
+}
