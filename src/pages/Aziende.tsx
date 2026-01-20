@@ -249,56 +249,22 @@ export default function Aziende() {
 
   const createMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
-      // 1. Create azienda
-      const { data: azienda, error: aziendaError } = await supabase
-        .from('aziende')
-        .insert({
+      // Use edge function to create company without auto-login
+      const { data: result, error } = await supabase.functions.invoke('create-company', {
+        body: {
           nome: data.nome,
           settore: data.settore || null,
           email_contatto: data.email_contatto || null,
           telefono: data.telefono || null,
           indirizzo: data.indirizzo || null,
           attiva: data.attiva,
-        })
-        .select()
-        .single();
-
-      if (aziendaError) throw aziendaError;
-
-      // 2. Create user for azienda
-      const password = generatePassword();
-      const email = data.email_contatto || `azienda_${azienda.id}@talentprofile.local`;
-
-      const { data: authData, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/`,
-          data: {
-            nome: data.nome,
-            ruolo: 'azienda',
-          }
         }
       });
 
-      if (signUpError) throw signUpError;
-
-      // 3. Update profile with azienda_id
-      if (authData.user) {
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .update({
-            ruolo: 'azienda',
-            azienda_id: azienda.id,
-            nome: data.nome,
-            email: email,
-          })
-          .eq('user_id', authData.user.id);
-
-        if (profileError) throw profileError;
-      }
-
-      return { azienda, email, password };
+      if (error) throw error;
+      if (result?.error) throw new Error(result.error);
+      
+      return result;
     },
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['aziende-with-stats'] });
