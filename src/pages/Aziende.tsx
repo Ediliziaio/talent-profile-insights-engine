@@ -103,6 +103,11 @@ export default function Aziende() {
     password: string;
   } | null>(null);
   const [loadingCredentials, setLoadingCredentials] = useState<string | null>(null);
+  const [regeneratingPassword, setRegeneratingPassword] = useState(false);
+  const [regeneratedCredentials, setRegeneratedCredentials] = useState<{
+    email: string;
+    password: string;
+  } | null>(null);
 
   // Filters
   const [searchTerm, setSearchTerm] = useState('');
@@ -466,6 +471,61 @@ export default function Aziende() {
     }
   };
 
+  const regeneratePassword = async () => {
+    if (!editingAzienda) return;
+    
+    setRegeneratingPassword(true);
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData?.session?.access_token;
+      
+      if (!token) {
+        throw new Error('Sessione non valida');
+      }
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/manage-company-access`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            action: 'regenerate',
+            azienda_id: editingAzienda.id,
+          }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Errore nella rigenerazione');
+      }
+
+      const email = `${result.accesso.username}@azienda.talentprofile.local`;
+      
+      setRegeneratedCredentials({
+        email,
+        password: result.accesso.password_plain,
+      });
+
+      toast({
+        title: 'Password rigenerata',
+        description: 'Le nuove credenziali sono state generate',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Errore',
+        description: error.message || 'Impossibile rigenerare la password',
+        variant: 'destructive',
+      });
+    } finally {
+      setRegeneratingPassword(false);
+    }
+  };
+
   const getSettoreBadgeColor = (settore: string | null) => {
     if (!settore) return 'secondary';
     const hash = settore.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
@@ -564,6 +624,7 @@ export default function Aziende() {
                   if (!open) {
                     setEditingAzienda(null);
                     resetForm();
+                    setRegeneratedCredentials(null);
                   }
                 }}>
                   <DialogTrigger asChild>
@@ -636,6 +697,75 @@ export default function Aziende() {
                           />
                           <Label htmlFor="attiva">Azienda attiva</Label>
                         </div>
+
+                        {/* Password Regeneration Section - only for existing companies */}
+                        {editingAzienda && (
+                          <div className="border-t pt-4 mt-2 space-y-3">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <Label className="text-sm font-medium">Credenziali Accesso HR</Label>
+                                <p className="text-xs text-muted-foreground mt-0.5">
+                                  Rigenera le credenziali di accesso per l'azienda
+                                </p>
+                              </div>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={regeneratePassword}
+                                disabled={regeneratingPassword}
+                                className="gap-2"
+                              >
+                                {regeneratingPassword ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  <Key className="h-4 w-4" />
+                                )}
+                                Rigenera
+                              </Button>
+                            </div>
+                            
+                            {regeneratedCredentials && (
+                              <div className="p-3 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg space-y-2">
+                                <p className="text-xs font-medium text-green-800 dark:text-green-200">
+                                  Nuove credenziali generate:
+                                </p>
+                                <div className="flex items-center gap-2">
+                                  <Input 
+                                    value={regeneratedCredentials.email} 
+                                    readOnly 
+                                    className="text-xs font-mono h-8 flex-1" 
+                                  />
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8"
+                                    onClick={() => copyToClipboard(regeneratedCredentials.email, 'regen-email')}
+                                  >
+                                    {copiedId === 'regen-email' ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                                  </Button>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Input 
+                                    value={regeneratedCredentials.password} 
+                                    readOnly 
+                                    className="text-xs font-mono h-8 flex-1" 
+                                  />
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8"
+                                    onClick={() => copyToClipboard(regeneratedCredentials.password, 'regen-pass')}
+                                  >
+                                    {copiedId === 'regen-pass' ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                                  </Button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                       <DialogFooter>
                         <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
