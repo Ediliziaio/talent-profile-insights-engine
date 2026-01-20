@@ -8,6 +8,7 @@ import { ProfileCircles } from '@/components/ProfileCircles';
 import { CandleChart } from '@/components/CandleChart';
 import { InterpretazioneDati } from '@/components/InterpretazioneDati';
 import { AnalisiPsicologica, AnalisiPsicologicaPlaceholder, AnalisiAI } from '@/components/AnalisiPsicologica';
+import { RisposteDettagliate } from '@/components/RisposteDettagliate';
 import { FitIndicator } from '@/components/FitIndicator';
 import { PDFExportButton } from '@/components/PDFExportButton';
 import { StressZoneHero } from '@/components/StressZoneHero';
@@ -421,6 +422,10 @@ export default function CandidatoDettaglio() {
               <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               <span className="text-[10px] sm:text-sm">AI</span>
             </TabsTrigger>
+            <TabsTrigger value="risposte" className="flex-1 min-w-[60px] text-xs sm:text-sm px-2 sm:px-4 gap-1">
+              <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <span className="text-[10px] sm:text-sm">Risp</span>
+            </TabsTrigger>
           </TabsList>
                 {/* TAB: Analisi Dati */}
                 <TabsContent value="analisi" className="space-y-6 mt-6">
@@ -690,6 +695,11 @@ export default function CandidatoDettaglio() {
                       )}
                     </CardContent>
                   </Card>
+                </TabsContent>
+
+                {/* TAB: Risposte Dettagliate */}
+                <TabsContent value="risposte" className="space-y-6 mt-6">
+                  <RisposteDettagliate candidatoId={id!} />
                 </TabsContent>
               </Tabs>
             </div>
