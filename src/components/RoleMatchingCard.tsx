@@ -83,6 +83,53 @@ export function RoleMatchingCard({
       </CardHeader>
 
       <CardContent className="space-y-4">
+        {/* ALERT PROMINENTE: Motore a Vuoto */}
+        {result.patternRilevati.some(p => p.includes('MOTORE A VUOTO')) && (
+          <Alert variant="destructive" className="border-2 border-red-600 bg-red-100 dark:bg-red-950 shadow-lg animate-pulse">
+            <AlertTriangle className="h-6 w-6 text-red-600" />
+            <AlertTitle className="text-red-700 dark:text-red-400 font-bold text-lg flex items-center gap-2">
+              ⚠️ ALERT CRITICO: Motore a Vuoto
+            </AlertTitle>
+            <AlertDescription className="text-red-600 dark:text-red-300 font-medium">
+              <strong>Alta Motivazione + Bassa Ambizione = PERICOLOSO per ruoli commerciali.</strong>
+              <br />
+              Questo candidato sembra molto motivato (lavora tanto) ma non ha obiettivi personali concreti.
+              Come un motore acceso in folle: consuma carburante senza andare da nessuna parte.
+              <br />
+              <strong>Per la vendita è FATALE:</strong> produce sforzo ma non risultati. 
+              Approfondire in colloquio le aspettative economiche e di carriera.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* ALERT PROMINENTE: Stress Zone Critica */}
+        {result.patternRilevati.some(p => p.includes('STRESS ZONE CRITICA')) && (
+          <Alert variant="destructive" className="border-2 border-red-600 bg-red-100 dark:bg-red-950 shadow-lg">
+            <AlertTriangle className="h-6 w-6 text-red-600" />
+            <AlertTitle className="text-red-700 dark:text-red-400 font-bold text-lg">
+              🚨 ALERT: Stress Zone Critica
+            </AlertTitle>
+            <AlertDescription className="text-red-600 dark:text-red-300 font-medium">
+              Situazione personale grave + Risorse minime. 
+              <strong>Supportare prima come persona, poi come lavoratore.</strong>
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* ALERT: Rigidità Fragile */}
+        {result.patternRilevati.some(p => p.includes('RIGIDITÀ FRAGILE')) && (
+          <Alert className="border-2 border-orange-500 bg-orange-50 dark:bg-orange-950 shadow-md">
+            <AlertTriangle className="h-5 w-5 text-orange-600" />
+            <AlertTitle className="text-orange-700 dark:text-orange-400 font-bold">
+              ⚡ ALERT: Rigidità Fragile
+            </AlertTitle>
+            <AlertDescription className="text-orange-600 dark:text-orange-300">
+              Schematicità estrema + Bassa resilienza = Rischio blocco su imprevisti.
+              Verificare capacità di adattamento in colloquio.
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Motivazione principale */}
         <Alert className={cn({
           'border-green-500/50 bg-green-50/50': result.verdict === 'IDONEO',
