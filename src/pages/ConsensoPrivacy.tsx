@@ -32,18 +32,18 @@ export default function ConsensoPrivacy() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background flex items-center justify-center p-3 sm:p-4 safe-area-bottom">
       <Card className="w-full max-w-2xl">
-        <CardHeader className="text-center">
-          <div className="mx-auto p-3 bg-primary/10 rounded-full w-fit mb-4">
-            <Brain className="h-8 w-8 text-primary" />
+        <CardHeader className="text-center px-4 sm:px-6">
+          <div className="mx-auto p-2.5 sm:p-3 bg-primary/10 rounded-full w-fit mb-3 sm:mb-4">
+            <Brain className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
           </div>
-          <CardTitle className="text-2xl">Talent Profile Assessment</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-xl sm:text-2xl">Talent Profile Assessment</CardTitle>
+          <CardDescription className="text-xs sm:text-sm">
             Benvenuto/a, {profile?.nome || 'Candidato'}! Prima di iniziare, leggi attentamente le linee guida e l'informativa sulla privacy.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-4 sm:space-y-6 px-4 sm:px-6">
           {/* Psychological Guidelines */}
           <Card className="border-accent/30 bg-accent/5">
             <CardHeader className="pb-3">
@@ -98,24 +98,24 @@ export default function ConsensoPrivacy() {
           </Card>
 
           {/* Security badges */}
-          <div className="flex gap-4 text-sm text-muted-foreground justify-center">
-            <div className="flex items-center gap-2">
-              <Shield className="h-4 w-4" />
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground items-center justify-center">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <Shield className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               <span>Dati protetti</span>
             </div>
-            <div className="flex items-center gap-2">
-              <Lock className="h-4 w-4" />
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <Lock className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               <span>Crittografia SSL</span>
             </div>
-            <div className="flex items-center gap-2">
-              <FileText className="h-4 w-4" />
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               <span>GDPR Compliant</span>
             </div>
           </div>
 
-          <ScrollArea className="h-48 rounded-md border p-4">
-            <div className="space-y-4 text-sm">
-              <h3 className="font-semibold text-base">Informativa sul Trattamento dei Dati Personali</h3>
+          <ScrollArea className="h-40 sm:h-48 rounded-md border p-3 sm:p-4">
+            <div className="space-y-3 sm:space-y-4 text-xs sm:text-sm">
+              <h3 className="font-semibold text-sm sm:text-base">Informativa sul Trattamento dei Dati Personali</h3>
               
               <p>
                 Ai sensi dell'art. 13 del Regolamento UE 2016/679 (GDPR), La informiamo che i dati personali 
@@ -170,27 +170,28 @@ export default function ConsensoPrivacy() {
             </div>
           </ScrollArea>
 
-          <div className="flex items-start space-x-3 pt-4">
+          <div className="flex items-start space-x-3 pt-3 sm:pt-4">
             <Checkbox
               id="privacy"
               checked={accepted}
               onCheckedChange={(checked) => setAccepted(checked === true)}
+              className="mt-0.5 h-5 w-5"
             />
             <label
               htmlFor="privacy"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+              className="text-xs sm:text-sm font-medium leading-relaxed peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
             >
               Dichiaro di aver letto e compreso le linee guida e l'informativa sulla privacy, e acconsento al trattamento 
               dei miei dati personali per le finalità indicate.
             </label>
           </div>
         </CardContent>
-        <CardFooter className="flex justify-end">
+        <CardFooter className="flex justify-end px-4 sm:px-6 pb-4 sm:pb-6">
           <Button 
             size="lg" 
             onClick={handleContinue} 
             disabled={!accepted}
-            className="bg-accent hover:bg-accent/90"
+            className="w-full sm:w-auto h-12 text-base bg-accent hover:bg-accent/90"
           >
             Accetto e Proseguo
           </Button>

@@ -136,6 +136,28 @@
   .text-balance {
     text-wrap: balance;
   }
+  
+  /* Mobile scrollbar utilities */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Touch-friendly utilities */
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+  
+  /* Safe area for notch devices */
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 1rem);
+  }
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top, 0);
+  }
 }
 
 /* Custom keyframes for Stress Zone animations */
