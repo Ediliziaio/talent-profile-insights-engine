@@ -133,7 +133,7 @@ export function NotionLayout({ children }: NotionLayoutProps) {
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-64 p-0 bg-sidebar-background">
+            <SheetContent side="left" className="w-64 p-0 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 border-r border-slate-200 dark:border-slate-700">
               <div className="flex flex-col h-full">
                 <div className="flex items-center justify-between p-3">
                   <Link to="/" onClick={() => setMobileOpen(false)}>
