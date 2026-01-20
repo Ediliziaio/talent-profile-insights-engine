@@ -15,6 +15,12 @@
 
 import { ProfiloTipo } from '@/types/database';
 
+export interface AspettativeTemporali {
+  breveTermine: string;  // Primi 3 mesi
+  medioTermine: string;  // 3-12 mesi
+  lungoTermine: string;  // Oltre 12 mesi
+}
+
 export interface ProfiloDetailedDescription {
   tipo: ProfiloTipo;
   titolo: string;
@@ -31,6 +37,7 @@ export interface ProfiloDetailedDescription {
   alertHR: string;
   livelloRischio: 'basso' | 'medio' | 'alto';
   potenzialeCrescita: 'limitato' | 'moderato' | 'elevato';
+  aspettativeTemporali: AspettativeTemporali;
 }
 
 export const PROFILI_DETAILED: Record<ProfiloTipo, ProfiloDetailedDescription> = {
@@ -92,6 +99,11 @@ export const PROFILI_DETAILED: Record<ProfiloTipo, ProfiloDetailedDescription> =
     alertHR: 'Risorsa strategica. Alto potenziale di impatto ma richiede gestione attenta dell\'ego e spazio per esprimersi.',
     livelloRischio: 'basso',
     potenzialeCrescita: 'elevato',
+    aspettativeTemporali: {
+      breveTermine: 'Valutazione rapida dell\'ambiente e del team. Testerà i confini della sua autonomia e identificherà alleati e ostacoli. Aspettatevi proposte di cambiamento precoci.',
+      medioTermine: 'Costruzione progressiva di influenza e risultati misurabili. Richiederà sempre più spazio decisionale. Performance eccellente se supportato.',
+      lungoTermine: 'Se valorizzato e promosso, loyalty altissima. Se frustrato o bloccato, alto rischio di uscita verso posizioni di maggior responsabilità altrove.',
+    },
   },
 
   'COMMERCIALE_NATURALE': {
@@ -152,6 +164,11 @@ export const PROFILI_DETAILED: Record<ProfiloTipo, ProfiloDetailedDescription> =
     alertHR: 'Ottima risorsa commerciale se gli incentivi sono chiari. Rischio: può perdere interesse se non vede risultati economici.',
     livelloRischio: 'basso',
     potenzialeCrescita: 'elevato',
+    aspettativeTemporali: {
+      breveTermine: 'Entusiasmo iniziale e rapida costruzione di relazioni. Potrebbe sottovalutare procedure aziendali per concentrarsi subito sui clienti.',
+      medioTermine: 'Picco di performance se gli incentivi sono chiari e raggiungibili. Rischio calo motivazionale se non vede risultati economici concreti.',
+      lungoTermine: 'Fedeltà condizionata ai guadagni. Potrebbe cercare alternative se si sente sottopagato o se il piano provvigionale diventa meno attraente.',
+    },
   },
 
   'ESECUTORE_AFFIDABILE': {
@@ -212,6 +229,11 @@ export const PROFILI_DETAILED: Record<ProfiloTipo, ProfiloDetailedDescription> =
     alertHR: 'Risorsa stabile e affidabile. Non cercate in lui iniziativa o creatività, ma precisione e costanza.',
     livelloRischio: 'basso',
     potenzialeCrescita: 'moderato',
+    aspettativeTemporali: {
+      breveTermine: 'Curva di apprendimento sulle procedure aziendali. Richiede guida iniziale e documentazione chiara. Non aspettatevi iniziativa spontanea.',
+      medioTermine: 'Performance costante e affidabile una volta inserito. Affidabilità crescente con la familiarità delle procedure.',
+      lungoTermine: 'Risorsa stabile e prevedibile. Non aspettatevi che cerchi promozioni attivamente, ma loyalty alta se trattato bene.',
+    },
   },
 
   'CREATIVO_DESTABILIZZANTE': {
@@ -272,6 +294,11 @@ export const PROFILI_DETAILED: Record<ProfiloTipo, ProfiloDetailedDescription> =
     alertHR: 'Potenziale innovativo alto ma rischio operativo. Necessita environment giusto e supervisione.',
     livelloRischio: 'medio',
     potenzialeCrescita: 'elevato',
+    aspettativeTemporali: {
+      breveTermine: 'Luna di miele creativa con idee fresche. Rischio disorganizzazione e scontro con procedure esistenti. Monitorare l\'integrazione.',
+      medioTermine: 'Possibile scontro con la struttura se non gestito. Potenziale conflitto con profili metodici. O porta valore innovativo o crea tensioni.',
+      lungoTermine: 'O si integra nel contesto (raro) o cerca ambienti più liberi e creativi. Turnover medio-alto se frustrato.',
+    },
   },
 
   'TECNICO_SPECIALISTA': {
@@ -332,6 +359,11 @@ export const PROFILI_DETAILED: Record<ProfiloTipo, ProfiloDetailedDescription> =
     alertHR: 'Expert prezioso. Non forzatelo in ruoli gestionali. La sua competenza è il valore.',
     livelloRischio: 'basso',
     potenzialeCrescita: 'moderato',
+    aspettativeTemporali: {
+      breveTermine: 'Valutazione rapida delle sfide tecniche e degli strumenti disponibili. Richiede tempo per concentrarsi, non interrompete.',
+      medioTermine: 'Approfondimento expertise e contributo tecnico crescente. Performance eccellente se lasciato lavorare sui problemi.',
+      lungoTermine: 'Se valorizzato tecnicamente, loyalty alta. Se forzato in ruoli gestionali, rischio frustrazione e uscita.',
+    },
   },
 
   'AMMINISTRATIVO_METODICO': {
@@ -392,6 +424,11 @@ export const PROFILI_DETAILED: Record<ProfiloTipo, ProfiloDetailedDescription> =
     alertHR: 'Risorsa affidabile per ruoli procedurali. Eccellente in ambienti stabili e ordinati.',
     livelloRischio: 'basso',
     potenzialeCrescita: 'moderato',
+    aspettativeTemporali: {
+      breveTermine: 'Apprendimento delle procedure aziendali specifiche. Richiede documentazione chiara e tempo per assimilare.',
+      medioTermine: 'Affidabilità crescente e precisione costante. Diventa riferimento per le procedure una volta inserito.',
+      lungoTermine: 'Risorsa stabile e fedele. Non cercherà cambiamenti, ma garantisce continuità operativa eccellente.',
+    },
   },
 
   'COLLABORATORE_CRESCITA': {
@@ -452,6 +489,11 @@ export const PROFILI_DETAILED: Record<ProfiloTipo, ProfiloDetailedDescription> =
     alertHR: 'Investimento formativo necessario. Potenziale da sviluppare con pazienza e metodo.',
     livelloRischio: 'basso',
     potenzialeCrescita: 'elevato',
+    aspettativeTemporali: {
+      breveTermine: 'Fase di apprendimento intensivo. Richiede mentoring strutturato e feedback frequente. Non lasciarlo solo.',
+      medioTermine: 'Crescita progressiva delle competenze se ben guidato. Inizia a contribuire autonomamente.',
+      lungoTermine: 'Potenziale trasformazione in profilo più definito. L\'investimento formativo determina la direzione.',
+    },
   },
 
   'PROFESSIONISTA_AUTONOMO': {
@@ -512,6 +554,11 @@ export const PROFILI_DETAILED: Record<ProfiloTipo, ProfiloDetailedDescription> =
     alertHR: 'Eccellente per risultati individuali. Non forzare la collaborazione di team.',
     livelloRischio: 'basso',
     potenzialeCrescita: 'moderato',
+    aspettativeTemporali: {
+      breveTermine: 'Definizione chiara degli obiettivi e del perimetro di autonomia. Non forzate il team-working iniziale.',
+      medioTermine: 'Risultati eccellenti sui progetti assegnati. Minima interazione con il team ma output di qualità.',
+      lungoTermine: 'Risorsa stabile finché rispettata l\'autonomia. Se forzato a collaborare troppo, rischio uscita.',
+    },
   },
 
   'SUPPORTO_OPERATIVO': {
@@ -572,6 +619,11 @@ export const PROFILI_DETAILED: Record<ProfiloTipo, ProfiloDetailedDescription> =
     alertHR: 'Esecutore affidabile per compiti definiti. Non aspettatevi iniziativa o autonomia.',
     livelloRischio: 'basso',
     potenzialeCrescita: 'limitato',
+    aspettativeTemporali: {
+      breveTermine: 'Istruzioni chiare e supervisione attenta iniziale. Verificate la comprensione dei compiti assegnati.',
+      medioTermine: 'Affidabilità sui compiti ripetitivi una volta appresi. Non aspettatevi iniziativa o miglioramenti spontanei.',
+      lungoTermine: 'Risorsa stabile per compiti operativi. Fedeltà alta se trattato bene, ma crescita limitata.',
+    },
   },
 
   'IN_TRANSIZIONE': {
@@ -632,6 +684,11 @@ export const PROFILI_DETAILED: Record<ProfiloTipo, ProfiloDetailedDescription> =
     alertHR: '⚠️ ATTENZIONE: Profilo con segnali di difficoltà significativa. Colloquio approfondito OBBLIGATORIO prima di qualsiasi decisione. Supportare la persona prima di valutare il candidato.',
     livelloRischio: 'alto',
     potenzialeCrescita: 'limitato',
+    aspettativeTemporali: {
+      breveTermine: 'Fase di stabilizzazione necessaria. Evitare pressioni e aspettative elevate. Colloquio di supporto prioritario.',
+      medioTermine: 'Rivalutazione del profilo dopo periodo di stabilizzazione. Possibile emersione di un profilo più definito.',
+      lungoTermine: 'Se supportato adeguatamente, possibile recupero completo. Altrimenti rischio di deterioramento ulteriore.',
+    },
   },
 };
 

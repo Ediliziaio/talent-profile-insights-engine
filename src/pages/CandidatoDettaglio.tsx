@@ -393,15 +393,6 @@ export default function CandidatoDettaglio() {
                 stressZone={stressZone}
               />
 
-              {/* Alert HR se presente */}
-              {profiloInfo.alert_hr && (
-                <Alert variant={stressZone || outPoints.length >= 3 ? "destructive" : "default"}>
-                  <AlertTriangle className="h-4 w-4" />
-                  <AlertTitle>Nota HR</AlertTitle>
-                  <AlertDescription>{profiloInfo.alert_hr}</AlertDescription>
-                </Alert>
-              )}
-
               {/* TABS per organizzare i contenuti */}
         <Tabs defaultValue="matching" className="w-full">
           <TabsList className="flex overflow-x-auto scrollbar-hide mb-4 sm:mb-6 w-full">
