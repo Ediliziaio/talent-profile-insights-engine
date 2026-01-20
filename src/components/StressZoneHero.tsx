@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import { AlertTriangle, Activity, Shield, TrendingDown } from 'lucide-react';
+import { AlertTriangle, Activity, Shield, TrendingDown, HelpCircle } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { StressZoneSeverity, getStressZoneSeverityLabel } from '@/lib/stressZone';
@@ -63,16 +63,42 @@ export function StressZoneHero({ sv, cf, severity, className }: StressZoneHeroPr
   const config = SEVERITY_CONFIG[severity];
   const isActive = severity !== 'nessuna';
   
+  // Controllo dati non disponibili (entrambi 0 indica dati mancanti)
+  const hasInvalidData = sv === 0 && cf === 0;
+  
+  // Se i dati non sono disponibili, mostra un messaggio apposito
+  if (hasInvalidData) {
+    return (
+      <div className={cn(
+        "relative overflow-hidden rounded-xl border-2 border-dashed border-muted p-5",
+        className
+      )}>
+        <div className="flex items-center gap-4">
+          <div className="p-3 rounded-full bg-muted/50">
+            <HelpCircle className="h-6 w-6 text-muted-foreground" />
+          </div>
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-1">
+              <h3 className="text-lg font-bold text-muted-foreground">
+                Dati Stress Zone Non Disponibili
+              </h3>
+              <Badge variant="outline" className="bg-muted text-muted-foreground">
+                N/D
+              </Badge>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              I valori SV (Stile di Vita) e CF (Capacità di Fronteggiare) non sono stati calcolati per questo candidato.
+              Verificare che il test sia stato completato correttamente.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
   // Calcola la percentuale per i progress (0-100 da 0-200)
   const svPercent = Math.min(100, Math.max(0, sv / 2));
   const cfPercent = Math.min(100, Math.max(0, cf / 2));
-  
-  // Progress inverso per stress zone (più basso = peggiore)
-  const severityLevel = 
-    severity === 'nessuna' ? 100 :
-    severity === 'lieve' ? 75 :
-    severity === 'moderata' ? 50 :
-    severity === 'severa' ? 25 : 10;
 
   if (!isActive) {
     return (
@@ -121,37 +147,58 @@ export function StressZoneHero({ sv, cf, severity, className }: StressZoneHeroPr
     );
   }
 
+  // Animazioni per livelli critici
+  const isCriticalLevel = severity === 'critica' || severity === 'severa';
+  const pulseAnimation = isCriticalLevel ? 'animate-pulse' : '';
+  const shakeAnimation = severity === 'critica' ? 'animate-[shake_0.5s_ease-in-out_infinite]' : '';
+  
   return (
     <div className={cn(
       "relative overflow-hidden rounded-xl border-2 p-5",
       config.borderClass, config.bgClass,
+      isCriticalLevel && "shadow-lg",
+      severity === 'critica' && "ring-2 ring-destructive ring-offset-2",
       className
     )}>
       {/* Animated background gradient for critical levels */}
-      {(severity === 'critica' || severity === 'severa') && (
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-pulse" />
+      {isCriticalLevel && (
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-[shimmer_2s_ease-in-out_infinite]" />
+      )}
+      
+      {/* Pulsing border effect for critical */}
+      {severity === 'critica' && (
+        <div className="absolute inset-0 rounded-xl border-4 border-destructive animate-ping opacity-20" />
       )}
       
       {/* Header with icon and severity */}
       <div className="relative flex items-start gap-4 mb-4">
         <div className={cn(
-          "p-3 rounded-full shrink-0",
+          "p-3 rounded-full shrink-0 transition-all duration-300",
           config.iconBgClass,
-          (severity === 'critica' || severity === 'severa') && "animate-pulse"
+          pulseAnimation,
+          severity === 'critica' && "ring-4 ring-destructive/30"
         )}>
-          <AlertTriangle className={cn("h-7 w-7", config.textClass)} />
+          <AlertTriangle className={cn(
+            "h-7 w-7 transition-transform",
+            config.textClass,
+            severity === 'critica' && "animate-bounce"
+          )} />
         </div>
         
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2 mb-2">
-            <h3 className={cn("text-xl font-bold", config.textClass)}>
-              STRESS ZONE
+            <h3 className={cn(
+              "text-xl font-bold",
+              config.textClass,
+              severity === 'critica' && "animate-pulse"
+            )}>
+              ⚠️ STRESS ZONE
             </h3>
             <Badge 
               variant="outline" 
               className={cn(
-                "font-bold uppercase text-xs",
-                severity === 'critica' && "bg-destructive text-destructive-foreground border-destructive",
+                "font-bold uppercase text-xs transition-all",
+                severity === 'critica' && "bg-destructive text-destructive-foreground border-destructive animate-pulse",
                 severity === 'severa' && "bg-red-500 text-white border-red-500",
                 severity === 'moderata' && "bg-orange-500 text-white border-orange-500",
                 severity === 'lieve' && "bg-amber-500 text-white border-amber-500"
@@ -159,6 +206,11 @@ export function StressZoneHero({ sv, cf, severity, className }: StressZoneHeroPr
             >
               {config.label}
             </Badge>
+            {severity === 'critica' && (
+              <Badge variant="destructive" className="animate-pulse text-xs">
+                ⚡ ATTENZIONE HR
+              </Badge>
+            )}
           </div>
           <p className={cn("text-sm", config.textClass, "opacity-90")}>
             {config.description}
@@ -171,7 +223,11 @@ export function StressZoneHero({ sv, cf, severity, className }: StressZoneHeroPr
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Activity className={cn("h-4 w-4", sv < 100 ? "text-destructive" : "text-muted-foreground")} />
+              <Activity className={cn(
+                "h-4 w-4 transition-all",
+                sv < 100 ? "text-destructive" : "text-muted-foreground",
+                sv < 60 && "animate-pulse"
+              )} />
               <span className="text-sm font-medium">Stile di Vita (SV)</span>
             </div>
             <span className={cn(
@@ -185,7 +241,8 @@ export function StressZoneHero({ sv, cf, severity, className }: StressZoneHeroPr
             <div 
               className={cn(
                 "absolute inset-y-0 left-0 rounded-full transition-all duration-500",
-                sv < 60 ? "bg-destructive" : sv < 80 ? "bg-orange-500" : sv < 100 ? "bg-amber-500" : "bg-green-500"
+                sv < 60 ? "bg-destructive" : sv < 80 ? "bg-orange-500" : sv < 100 ? "bg-amber-500" : "bg-green-500",
+                sv < 60 && isCriticalLevel && "animate-pulse"
               )}
               style={{ width: `${svPercent}%` }}
             />
@@ -193,16 +250,20 @@ export function StressZoneHero({ sv, cf, severity, className }: StressZoneHeroPr
             <div className="absolute top-0 bottom-0 left-1/2 w-0.5 bg-muted-foreground/30" />
           </div>
           <p className="text-xs text-muted-foreground">
-            {sv < 80 ? 'Problemi significativi nella sfera personale' : 
-             sv < 100 ? 'Leggere difficoltà personali' : 
-             'Sfera personale equilibrata'}
+            {sv < 80 ? '⚠️ Problemi significativi nella sfera personale' : 
+             sv < 100 ? '⚡ Leggere difficoltà personali' : 
+             '✓ Sfera personale equilibrata'}
           </p>
         </div>
         
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <TrendingDown className={cn("h-4 w-4", cf < 100 ? "text-destructive" : "text-muted-foreground")} />
+              <TrendingDown className={cn(
+                "h-4 w-4 transition-all",
+                cf < 100 ? "text-destructive" : "text-muted-foreground",
+                cf < 60 && "animate-pulse"
+              )} />
               <span className="text-sm font-medium">Capacità Fronteggiare (CF)</span>
             </div>
             <span className={cn(
@@ -216,7 +277,8 @@ export function StressZoneHero({ sv, cf, severity, className }: StressZoneHeroPr
             <div 
               className={cn(
                 "absolute inset-y-0 left-0 rounded-full transition-all duration-500",
-                cf < 60 ? "bg-destructive" : cf < 80 ? "bg-orange-500" : cf < 100 ? "bg-amber-500" : "bg-green-500"
+                cf < 60 ? "bg-destructive" : cf < 80 ? "bg-orange-500" : cf < 100 ? "bg-amber-500" : "bg-green-500",
+                cf < 60 && isCriticalLevel && "animate-pulse"
               )}
               style={{ width: `${cfPercent}%` }}
             />
@@ -224,22 +286,26 @@ export function StressZoneHero({ sv, cf, severity, className }: StressZoneHeroPr
             <div className="absolute top-0 bottom-0 left-1/2 w-0.5 bg-muted-foreground/30" />
           </div>
           <p className="text-xs text-muted-foreground">
-            {cf < 80 ? 'Bassa resilienza allo stress' : 
-             cf < 100 ? 'Resilienza moderata' : 
-             'Buona capacità di fronteggiare'}
+            {cf < 80 ? '⚠️ Bassa resilienza allo stress' : 
+             cf < 100 ? '⚡ Resilienza moderata' : 
+             '✓ Buona capacità di fronteggiare'}
           </p>
         </div>
       </div>
       
       {/* Recommendation box */}
       <div className={cn(
-        "relative p-4 rounded-lg border",
-        severity === 'critica' ? "bg-destructive/10 border-destructive/30" :
+        "relative p-4 rounded-lg border transition-all",
+        severity === 'critica' ? "bg-destructive/10 border-destructive/30 ring-1 ring-destructive/20" :
         severity === 'severa' ? "bg-red-100/50 border-red-300 dark:bg-red-900/20 dark:border-red-700" :
         "bg-white/50 border-current/20 dark:bg-black/20"
       )}>
-        <h4 className={cn("font-semibold text-sm mb-1", config.textClass)}>
-          Raccomandazione HR
+        <h4 className={cn(
+          "font-semibold text-sm mb-1",
+          config.textClass,
+          severity === 'critica' && "animate-pulse"
+        )}>
+          {severity === 'critica' ? '🚨 Raccomandazione HR URGENTE' : 'Raccomandazione HR'}
         </h4>
         <p className="text-sm text-muted-foreground">
           {severity === 'critica' && 
