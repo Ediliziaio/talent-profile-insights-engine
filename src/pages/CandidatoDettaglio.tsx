@@ -12,6 +12,7 @@ import { RisposteDettagliate } from '@/components/RisposteDettagliate';
 import { FitIndicator } from '@/components/FitIndicator';
 import { PDFExportButton } from '@/components/PDFExportButton';
 import { StressZoneHero } from '@/components/StressZoneHero';
+import { RoleMatchingCard } from '@/components/RoleMatchingCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -25,7 +26,7 @@ import {
   Brain, Loader2, AlertTriangle, TrendingUp, TrendingDown, 
   Activity, Target, Shield, Lightbulb, XCircle, CheckCircle2,
   User, HelpCircle, BarChart3, FileText, MessageSquare, Sparkles,
-  Award, Clock, Percent, AlertCircle
+  Award, Clock, Percent, AlertCircle, ClipboardCheck
 } from 'lucide-react';
 import { Candidato, ProfiloCandidato, ProfiloTipo } from '@/types/database';
 import { getProfiloTipoLabel } from '@/lib/scoring';
@@ -36,6 +37,7 @@ import {
   ProfiloDescription 
 } from '@/lib/profiloDescriptions';
 import { calculateStressZoneSeverity, StressZoneSeverity, getStressZoneSeverityLabel } from '@/lib/stressZone';
+import { calculateRoleMatching, calculateAllRolesCompatibility, ROLE_PROFILES } from '@/lib/roleMatching';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -400,8 +402,12 @@ export default function CandidatoDettaglio() {
               )}
 
               {/* TABS per organizzare i contenuti */}
-        <Tabs defaultValue="analisi" className="w-full">
+        <Tabs defaultValue="matching" className="w-full">
           <TabsList className="flex overflow-x-auto scrollbar-hide mb-4 sm:mb-6 w-full">
+            <TabsTrigger value="matching" className="flex-1 min-w-[60px] text-xs sm:text-sm px-2 sm:px-4 gap-1">
+              <ClipboardCheck className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <span className="text-[10px] sm:text-sm">Match</span>
+            </TabsTrigger>
             <TabsTrigger value="analisi" className="flex-1 min-w-[60px] text-xs sm:text-sm px-2 sm:px-4 gap-1">
               <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               <span className="text-[10px] sm:text-sm">Dati</span>
@@ -427,6 +433,15 @@ export default function CandidatoDettaglio() {
               <span className="text-[10px] sm:text-sm">Risp</span>
             </TabsTrigger>
           </TabsList>
+          
+                {/* TAB: Matching Ruolo (NUOVO V5) */}
+                <TabsContent value="matching" className="mt-6">
+                  <RoleMatchingCard
+                    ruoloRichiesto={candidato.funzione || 'Ufficio vendite'}
+                    scalePunteggi={scalePunteggi}
+                    showFullDetails={true}
+                  />
+                </TabsContent>
                 {/* TAB: Analisi Dati */}
                 <TabsContent value="analisi" className="space-y-6 mt-6">
                   {/* I 3 Cerchi con tooltip esplicativo */}
