@@ -70,7 +70,7 @@ export const DOMANDE: Domanda[] = [
   { id: 62, testo: "Ti definiresti una persona generalmente allegra?", scala_primaria: 'SV', scala_secondaria: null, polarita: '+', blocco_tematico: 3, ordine: 62 },
   { id: 63, testo: "Vivi frequentemente situazioni che ti mettono sotto pressione?", scala_primaria: 'ST', scala_secondaria: null, polarita: '-', blocco_tematico: 3, ordine: 63 },
   { id: 64, testo: "Ti capita di trovarti nei guai perché agisci senza riflettere?", scala_primaria: 'CF', scala_secondaria: null, polarita: '-', blocco_tematico: 3, ordine: 64 },
-  { id: 65, testo: "Quando puoi, preferisci muoverti a piedi o in bicicletta?", scala_primaria: 'SV', scala_secondaria: null, polarita: '+', blocco_tematico: 3, ordine: 65 },
+  { id: 65, testo: "Quando possibile, scegli di muoverti a piedi o in bicicletta invece di usare l'auto?", scala_primaria: 'SV', scala_secondaria: null, polarita: '+', blocco_tematico: 3, ordine: 65 },
   { id: 66, testo: "Il giudizio degli altri su di te è molto importante?", scala_primaria: 'CF', scala_secondaria: null, polarita: '-', blocco_tematico: 3, ordine: 66 },
   { id: 67, testo: "Quando discuti con qualcuno, accetti mal volentieri di avere torto?", scala_primaria: 'LE', scala_secondaria: null, polarita: '+', blocco_tematico: 3, ordine: 67 },
   { id: 68, testo: "Hai idee molto precise su come le cose dovrebbero essere fatte?", scala_primaria: 'SC', scala_secondaria: null, polarita: '+', blocco_tematico: 3, ordine: 68 },
