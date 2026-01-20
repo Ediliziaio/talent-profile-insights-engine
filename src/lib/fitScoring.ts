@@ -330,5 +330,91 @@ export function getVerdictIcon(verdict: FitVerdict): 'XCircle' | 'AlertCircle' |
   return icons[verdict];
 }
 
+/**
+ * Calcola la probabilità di successo a 12 mesi - DETERMINISTICO
+ * 
+ * Formula:
+ * - Base = compatibilità ruolo %
+ * - +5% se nessuna criticità
+ * - +10% se profilo ideale per il ruolo
+ * - -10% per ogni pattern critico
+ * - -15% se stress zone attiva
+ * - -10% se età > 55 + alta rigidità in vendite
+ */
+export function calculateSuccessProbability(context: {
+  scalePunteggi: Record<string, number>;
+  ruolo: string;
+  eta?: number;
+  stressZone?: boolean;
+  profiloTipo?: ProfiloTipo;
+}): number {
+  const { scalePunteggi, ruolo, eta, stressZone, profiloTipo } = context;
+  
+  // Importa il matching
+  const matching = calculateRoleMatching(ruolo, scalePunteggi);
+  
+  // Base = compatibilità
+  let probability = matching.compatibilitaPct;
+  
+  // Bonus per assenza di criticità
+  if (matching.criticita === 0) {
+    probability += 5;
+  }
+  
+  // Penalità per pattern critici
+  const patternCritici = matching.patternRilevati.filter(p => 
+    p.includes('🔴') || 
+    p.includes('MOTORE A VUOTO') || 
+    p.includes('STRESS ZONE CRITICA')
+  );
+  probability -= patternCritici.length * 10;
+  
+  // Penalità stress zone
+  if (stressZone) {
+    probability -= 15;
+  }
+  
+  // Penalità età + rigidità in vendite
+  if (eta && eta > 55 && ruolo === 'Ufficio vendite') {
+    const sc = scalePunteggi['SC'] || 100;
+    if (sc > 150) {
+      probability -= 10;
+    }
+  }
+  
+  // Bonus per profili ideali nel ruolo (usa import dinamico per evitare circular)
+  if (profiloTipo) {
+    const idealRoles: Record<string, string[]> = {
+      'LEADER_NATURALE': ['Direzione generale'],
+      'COMMERCIALE_NATURALE': ['Ufficio vendite'],
+      'ESECUTORE_AFFIDABILE': ['Amministrazione', 'Produzione'],
+      'TECNICO_SPECIALISTA': ['Ufficio tecnico'],
+      'AMMINISTRATIVO_METODICO': ['Amministrazione'],
+      'CREATIVO_DESTABILIZZANTE': ['Ufficio marketing'],
+      'PROFESSIONISTA_AUTONOMO': ['Ufficio tecnico', 'Ufficio acquisti'],
+      'COLLABORATORE_CRESCITA': [],
+      'SUPPORTO_OPERATIVO': ['Logistica', 'Produzione'],
+      'IN_TRANSIZIONE': [],
+    };
+    
+    if (idealRoles[profiloTipo]?.includes(ruolo)) {
+      probability += 10;
+    }
+  }
+  
+  // Bonus/Malus per requisiti
+  if (matching.requisitiMancanti.length === 0) {
+    probability += 5;
+  } else if (matching.requisitiMancanti.length >= 2) {
+    probability -= 5;
+  }
+  
+  // Cap tra 10 e 95
+  return Math.max(10, Math.min(95, Math.round(probability)));
+}
+
 // Re-export FitVerdict per compatibilità
 export type { FitVerdict } from './roleMatching';
+
+// Import per TypeScript
+import type { ProfiloTipo } from '@/types/database';
