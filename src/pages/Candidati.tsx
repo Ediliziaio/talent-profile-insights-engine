@@ -1455,15 +1455,13 @@ export default function Candidati() {
                               <div className="flex items-center gap-1">
                                 {candidato.test_completato ? (
                                   <Button 
-                                    variant="ghost" 
-                                    size="icon"
-                                    className="h-8 w-8"
-                                    onClick={() => {
-                                      setSelectedCandidato(candidato);
-                                      setIsDrawerOpen(true);
-                                    }}
+                                    variant="default" 
+                                    size="sm"
+                                    className="h-8 px-3 text-xs"
+                                    onClick={() => navigate(`/candidati/${candidato.id}`)}
                                   >
-                                    <Eye className="h-4 w-4" />
+                                    <Eye className="h-4 w-4 mr-1" />
+                                    Vedi
                                   </Button>
                                 ) : (
                                   <Button
