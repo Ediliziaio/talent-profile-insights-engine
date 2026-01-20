@@ -353,17 +353,17 @@ export default function Dashboard() {
 
   return (
     <NotionLayout>
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6 pb-4">
         {/* Header with period filter */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-foreground">Dashboard</h1>
-            <p className="text-muted-foreground mt-1 text-sm">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">Dashboard</h1>
+            <p className="text-muted-foreground mt-0.5 sm:mt-1 text-xs sm:text-sm">
               {isSuperadmin ? 'Panoramica globale del sistema' : 'Panoramica candidati della tua azienda'}
             </p>
           </div>
           <Select value={period} onValueChange={setPeriod}>
-            <SelectTrigger className="w-[160px]">
+            <SelectTrigger className="w-full sm:w-[160px] h-10 sm:h-9 text-sm">
               <SelectValue placeholder="Periodo" />
             </SelectTrigger>
             <SelectContent>
@@ -377,89 +377,89 @@ export default function Dashboard() {
         </div>
 
         {/* KPI Cards - Row 1 */}
-        <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
+        <div className="grid gap-2 sm:gap-3 grid-cols-2 md:grid-cols-4">
           <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
-            <CardContent className="p-3 md:p-4">
-              <div className="flex items-center gap-2">
-                <Users className="h-4 w-4 text-primary" />
-                <span className="text-xs text-muted-foreground">Totale Candidati</span>
+            <CardContent className="p-2.5 sm:p-3 md:p-4">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary shrink-0" />
+                <span className="text-[10px] sm:text-xs text-muted-foreground truncate">Tot. Candidati</span>
               </div>
-              <div className="text-2xl md:text-3xl font-bold mt-1">{stats?.totale ?? '-'}</div>
+              <div className="text-xl sm:text-2xl md:text-3xl font-bold mt-0.5 sm:mt-1">{stats?.totale ?? '-'}</div>
             </CardContent>
           </Card>
 
           <Card className="bg-gradient-to-br from-green-500/5 to-green-500/10 border-green-500/20">
-            <CardContent className="p-3 md:p-4">
-              <div className="flex items-center gap-2">
-                <ClipboardCheck className="h-4 w-4 text-green-600" />
-                <span className="text-xs text-muted-foreground">Test Completati</span>
+            <CardContent className="p-2.5 sm:p-3 md:p-4">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <ClipboardCheck className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-600 shrink-0" />
+                <span className="text-[10px] sm:text-xs text-muted-foreground truncate">Completati</span>
               </div>
-              <div className="text-2xl md:text-3xl font-bold text-green-600 mt-1">{stats?.completati ?? '-'}</div>
+              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-green-600 mt-0.5 sm:mt-1">{stats?.completati ?? '-'}</div>
             </CardContent>
           </Card>
 
           <Card className="bg-gradient-to-br from-yellow-500/5 to-yellow-500/10 border-yellow-500/20">
-            <CardContent className="p-3 md:p-4">
-              <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-yellow-600" />
-                <span className="text-xs text-muted-foreground">In Attesa</span>
+            <CardContent className="p-2.5 sm:p-3 md:p-4">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-yellow-600 shrink-0" />
+                <span className="text-[10px] sm:text-xs text-muted-foreground truncate">In Attesa</span>
               </div>
-              <div className="text-2xl md:text-3xl font-bold text-yellow-600 mt-1">{stats?.inAttesa ?? '-'}</div>
+              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-yellow-600 mt-0.5 sm:mt-1">{stats?.inAttesa ?? '-'}</div>
             </CardContent>
           </Card>
 
           <Card className="bg-gradient-to-br from-blue-500/5 to-blue-500/10 border-blue-500/20">
-            <CardContent className="p-3 md:p-4">
-              <div className="flex items-center gap-2">
-                <Percent className="h-4 w-4 text-blue-600" />
-                <span className="text-xs text-muted-foreground">Tasso Completamento</span>
+            <CardContent className="p-2.5 sm:p-3 md:p-4">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <Percent className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-600 shrink-0" />
+                <span className="text-[10px] sm:text-xs text-muted-foreground truncate">Completamento</span>
               </div>
-              <div className="text-2xl md:text-3xl font-bold text-blue-600 mt-1">{stats?.tassoCompletamento ?? 0}%</div>
+              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-blue-600 mt-0.5 sm:mt-1">{stats?.tassoCompletamento ?? 0}%</div>
             </CardContent>
           </Card>
         </div>
 
         {/* KPI Cards - Row 2 */}
-        <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
+        <div className="grid gap-2 sm:gap-3 grid-cols-2 md:grid-cols-4">
           <Card className="bg-gradient-to-br from-accent/5 to-accent/10 border-accent/20">
-            <CardContent className="p-3 md:p-4">
-              <div className="flex items-center gap-2">
-                <Target className="h-4 w-4 text-accent" />
-                <span className="text-xs text-muted-foreground">Fit Score Medio</span>
+            <CardContent className="p-2.5 sm:p-3 md:p-4">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <Target className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-accent shrink-0" />
+                <span className="text-[10px] sm:text-xs text-muted-foreground truncate">Fit Medio</span>
               </div>
-              <div className="text-2xl md:text-3xl font-bold text-accent mt-1">
+              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-accent mt-0.5 sm:mt-1">
                 {stats?.avgFitScore != null ? `${stats.avgFitScore}%` : '-'}
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-gradient-to-br from-green-500/5 to-green-500/10 border-green-500/20">
-            <CardContent className="p-3 md:p-4">
-              <div className="flex items-center gap-2">
-                <UserCheck className="h-4 w-4 text-green-600" />
-                <span className="text-xs text-muted-foreground">Idonei</span>
+            <CardContent className="p-2.5 sm:p-3 md:p-4">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <UserCheck className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-600 shrink-0" />
+                <span className="text-[10px] sm:text-xs text-muted-foreground truncate">Idonei</span>
               </div>
-              <div className="text-2xl md:text-3xl font-bold text-green-600 mt-1">{stats?.idonei ?? 0}</div>
+              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-green-600 mt-0.5 sm:mt-1">{stats?.idonei ?? 0}</div>
             </CardContent>
           </Card>
 
           <Card className="bg-gradient-to-br from-yellow-500/5 to-yellow-500/10 border-yellow-500/20">
-            <CardContent className="p-3 md:p-4">
-              <div className="flex items-center gap-2">
-                <Activity className="h-4 w-4 text-yellow-600" />
-                <span className="text-xs text-muted-foreground">Da Valutare</span>
+            <CardContent className="p-2.5 sm:p-3 md:p-4">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <Activity className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-yellow-600 shrink-0" />
+                <span className="text-[10px] sm:text-xs text-muted-foreground truncate">Da Valutare</span>
               </div>
-              <div className="text-2xl md:text-3xl font-bold text-yellow-600 mt-1">{stats?.valutare ?? 0}</div>
+              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-yellow-600 mt-0.5 sm:mt-1">{stats?.valutare ?? 0}</div>
             </CardContent>
           </Card>
 
           <Card className="bg-gradient-to-br from-red-500/5 to-red-500/10 border-red-500/20">
-            <CardContent className="p-3 md:p-4">
-              <div className="flex items-center gap-2">
-                <UserX className="h-4 w-4 text-red-600" />
-                <span className="text-xs text-muted-foreground">Non Idonei</span>
+            <CardContent className="p-2.5 sm:p-3 md:p-4">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <UserX className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-red-600 shrink-0" />
+                <span className="text-[10px] sm:text-xs text-muted-foreground truncate">Non Idonei</span>
               </div>
-              <div className="text-2xl md:text-3xl font-bold text-red-600 mt-1">{stats?.nonIdonei ?? 0}</div>
+              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-red-600 mt-0.5 sm:mt-1">{stats?.nonIdonei ?? 0}</div>
             </CardContent>
           </Card>
         </div>
@@ -556,22 +556,22 @@ export default function Dashboard() {
         )}
 
         {/* Charts Grid */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {/* Status distribution */}
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base">Stato Test</CardTitle>
+            <CardHeader className="pb-1 sm:pb-2 px-3 sm:px-6 pt-3 sm:pt-6">
+              <CardTitle className="text-sm sm:text-base">Stato Test</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="h-[180px]">
+            <CardContent className="px-2 sm:px-6 pb-3 sm:pb-6">
+              <div className="h-[140px] sm:h-[180px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
                       data={statusData}
                       cx="50%"
                       cy="50%"
-                      innerRadius={40}
-                      outerRadius={70}
+                      innerRadius={isMobile ? 30 : 40}
+                      outerRadius={isMobile ? 50 : 70}
                       paddingAngle={5}
                       dataKey="value"
                     >
@@ -580,7 +580,7 @@ export default function Dashboard() {
                       ))}
                     </Pie>
                     <Tooltip />
-                    <Legend />
+                    <Legend wrapperStyle={{ fontSize: isMobile ? '10px' : '12px' }} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
@@ -589,15 +589,15 @@ export default function Dashboard() {
 
           {/* Verdict distribution */}
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base">Verdetti Fit</CardTitle>
+            <CardHeader className="pb-1 sm:pb-2 px-3 sm:px-6 pt-3 sm:pt-6">
+              <CardTitle className="text-sm sm:text-base">Verdetti Fit</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="h-[180px]">
+            <CardContent className="px-2 sm:px-6 pb-3 sm:pb-6">
+              <div className="h-[140px] sm:h-[180px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={verdictData} layout="vertical">
-                    <XAxis type="number" tick={{ fontSize: 10 }} />
-                    <YAxis type="category" dataKey="name" width={70} tick={{ fontSize: 10 }} />
+                    <XAxis type="number" tick={{ fontSize: isMobile ? 9 : 10 }} />
+                    <YAxis type="category" dataKey="name" width={isMobile ? 55 : 70} tick={{ fontSize: isMobile ? 9 : 10 }} />
                     <Tooltip />
                     <Bar dataKey="value" radius={[0, 4, 4, 0]} />
                   </BarChart>
@@ -608,15 +608,15 @@ export default function Dashboard() {
 
           {/* Funzione distribution */}
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base">Per Funzione</CardTitle>
+            <CardHeader className="pb-1 sm:pb-2 px-3 sm:px-6 pt-3 sm:pt-6">
+              <CardTitle className="text-sm sm:text-base">Per Funzione</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="h-[180px]">
+            <CardContent className="px-2 sm:px-6 pb-3 sm:pb-6">
+              <div className="h-[140px] sm:h-[180px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={funzioneData} layout="vertical">
-                    <XAxis type="number" tick={{ fontSize: 10 }} />
-                    <YAxis type="category" dataKey="name" width={90} tick={{ fontSize: 9 }} />
+                    <XAxis type="number" tick={{ fontSize: isMobile ? 9 : 10 }} hide={isMobile} />
+                    <YAxis type="category" dataKey="name" width={isMobile ? 70 : 90} tick={{ fontSize: isMobile ? 8 : 9 }} />
                     <Tooltip />
                     <Bar dataKey="value" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
                   </BarChart>
@@ -714,42 +714,43 @@ export default function Dashboard() {
         </div>
 
         {/* Recent Candidates & Top Performers */}
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-3">
           {/* Recent Candidates */}
           <Card className="lg:col-span-2">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardHeader className="flex flex-row items-center justify-between pb-2 px-3 sm:px-6 pt-3 sm:pt-6">
               <div>
-                <CardTitle className="text-lg">Candidati Recenti</CardTitle>
-                <CardDescription>Ultimi test completati</CardDescription>
+                <CardTitle className="text-base sm:text-lg">Candidati Recenti</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">Ultimi test completati</CardDescription>
               </div>
               <Link to="/candidati">
-                <Button variant="ghost" size="sm">
-                  Vedi tutti <ArrowRight className="ml-2 h-4 w-4" />
+                <Button variant="ghost" size="sm" className="h-8 sm:h-9 px-2 sm:px-3 text-xs sm:text-sm">
+                  <span className="hidden sm:inline">Vedi tutti</span>
+                  <ArrowRight className="ml-0 sm:ml-2 h-4 w-4" />
                 </Button>
               </Link>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
               <div className="space-y-2">
                 {recentCandidati && recentCandidati.length > 0 ? (
                   recentCandidati.map((candidato: any) => (
-                    <div key={candidato.id} className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors">
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                          <span className="text-primary font-bold text-sm">
+                    <div key={candidato.id} className="flex items-center justify-between p-2 sm:p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors gap-2">
+                      <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                        <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                          <span className="text-primary font-bold text-xs sm:text-sm">
                             {candidato.nome?.[0]}{candidato.cognome?.[0]}
                           </span>
                         </div>
-                        <div className="min-w-0">
-                          <p className="font-semibold text-sm truncate">{candidato.cognome} {candidato.nome}</p>
-                          <p className="text-xs text-muted-foreground truncate">
-                            {candidato.aziende?.nome} • {candidato.funzione || 'N/D'}
+                        <div className="min-w-0 flex-1">
+                          <p className="font-semibold text-xs sm:text-sm truncate">{candidato.cognome} {candidato.nome}</p>
+                          <p className="text-[10px] sm:text-xs text-muted-foreground truncate">
+                            {candidato.aziende?.nome}
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2 sm:gap-3 shrink-0">
                         {candidato.analisi?.fit_score && (
                           <div className="text-right">
-                            <p className="text-lg font-bold text-primary">{candidato.analisi.fit_score}%</p>
+                            <p className="text-sm sm:text-lg font-bold text-primary">{candidato.analisi.fit_score}%</p>
                           </div>
                         )}
                         {getVerdictBadge(candidato.analisi?.fit_verdict)}

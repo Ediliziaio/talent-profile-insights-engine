@@ -195,26 +195,26 @@ export default function Questionario() {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-24">
-      <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
+    <div className="min-h-screen bg-background pb-28 sm:pb-24 safe-area-bottom">
+      <div className="max-w-6xl mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex items-center gap-3 bg-primary text-primary-foreground rounded-lg p-4">
-          <div className="p-2 bg-white/20 rounded-lg">
-            <Brain className="h-6 w-6" />
+        <div className="flex items-center gap-2 sm:gap-3 bg-primary text-primary-foreground rounded-lg p-3 sm:p-4">
+          <div className="p-1.5 sm:p-2 bg-white/20 rounded-lg shrink-0">
+            <Brain className="h-5 w-5 sm:h-6 sm:w-6" />
           </div>
-          <div className="flex-1">
-            <h1 className="font-bold text-lg">Talent Profile Assessment</h1>
-            <p className="text-sm opacity-90">
-              Pagina {currentPage + 1} di {totalPages} • Domanda {startIndex + 1}-{endIndex} di {DOMANDE.length}
+          <div className="flex-1 min-w-0">
+            <h1 className="font-bold text-base sm:text-lg">Talent Profile</h1>
+            <p className="text-xs sm:text-sm opacity-90 truncate">
+              Pag. {currentPage + 1}/{totalPages} • Dom. {startIndex + 1}-{endIndex} di {DOMANDE.length}
             </p>
           </div>
-          <div className="text-right">
-            <span className="text-2xl font-bold">{Math.round(progress)}%</span>
+          <div className="text-right shrink-0">
+            <span className="text-xl sm:text-2xl font-bold">{Math.round(progress)}%</span>
           </div>
         </div>
 
         {/* Progress */}
-        <div className="h-3 bg-muted rounded-full overflow-hidden">
+        <div className="h-3 sm:h-4 bg-muted rounded-full overflow-hidden">
           <div 
             className="h-full progress-gradient transition-all duration-300" 
             style={{ width: `${progress}%` }}
@@ -312,84 +312,84 @@ export default function Questionario() {
                 </div>
 
                 {/* Mobile: Stack layout */}
-                <div className="lg:hidden space-y-3">
+                <div className="lg:hidden space-y-2.5">
                   {/* Question */}
                   <div className="flex gap-2 items-start">
-                    <span className="text-muted-foreground font-medium min-w-[2rem]">
+                    <span className="text-muted-foreground font-medium min-w-[1.75rem] text-sm">
                       {startIndex + idx + 1}.
                     </span>
                     <p className="font-medium text-sm leading-relaxed">{domanda.testo}</p>
                   </div>
 
-                  {/* Answer buttons - horizontal on mobile */}
+                  {/* Answer buttons - horizontal on mobile with min-height for touch */}
                   <div className="grid grid-cols-3 gap-2">
                     {/* Answer A */}
                     <button
                       onClick={() => handleAnswer(domanda.id, 'A')}
                       className={cn(
-                        "p-3 rounded-lg border-2 text-center transition-all",
-                        "hover:border-accent/50 hover:bg-accent/5",
-                        "flex flex-col items-center gap-1",
+                        "min-h-[56px] p-2 rounded-lg border-2 text-center transition-all touch-manipulation",
+                        "active:scale-[0.98]",
+                        "flex flex-col items-center justify-center gap-0.5",
                         risposte[domanda.id] === 'A'
-                          ? "border-accent bg-accent text-accent-foreground"
+                          ? "border-accent bg-accent text-accent-foreground shadow-md"
                           : "border-border bg-card"
                       )}
                     >
                       <div className={cn(
-                        "w-8 h-8 rounded-full flex items-center justify-center shrink-0 font-bold text-sm",
+                        "w-7 h-7 rounded-full flex items-center justify-center shrink-0 font-bold text-xs",
                         risposte[domanda.id] === 'A' 
                           ? "bg-white/20" 
                           : "bg-primary/10 text-primary"
                       )}>
-                        {risposte[domanda.id] === 'A' ? <Check className="h-4 w-4" /> : 'A'}
+                        {risposte[domanda.id] === 'A' ? <Check className="h-3.5 w-3.5" /> : 'A'}
                       </div>
-                      <span className="text-xs font-medium">Sì, sempre</span>
+                      <span className="text-[10px] font-medium leading-tight">Sì, sempre</span>
                     </button>
 
                     {/* Answer B */}
                     <button
                       onClick={() => handleAnswer(domanda.id, 'B')}
                       className={cn(
-                        "p-3 rounded-lg border-2 text-center transition-all",
-                        "hover:border-accent/50 hover:bg-accent/5",
-                        "flex flex-col items-center gap-1",
+                        "min-h-[56px] p-2 rounded-lg border-2 text-center transition-all touch-manipulation",
+                        "active:scale-[0.98]",
+                        "flex flex-col items-center justify-center gap-0.5",
                         risposte[domanda.id] === 'B'
-                          ? "border-accent bg-accent text-accent-foreground"
+                          ? "border-accent bg-accent text-accent-foreground shadow-md"
                           : "border-border bg-card"
                       )}
                     >
                       <div className={cn(
-                        "w-8 h-8 rounded-full flex items-center justify-center shrink-0 font-bold text-sm",
+                        "w-7 h-7 rounded-full flex items-center justify-center shrink-0 font-bold text-xs",
                         risposte[domanda.id] === 'B' 
                           ? "bg-white/20" 
                           : "bg-primary/10 text-primary"
                       )}>
-                        {risposte[domanda.id] === 'B' ? <Check className="h-4 w-4" /> : 'B'}
+                        {risposte[domanda.id] === 'B' ? <Check className="h-3.5 w-3.5" /> : 'B'}
                       </div>
-                      <span className="text-xs font-medium">A volte</span>
+                      <span className="text-[10px] font-medium leading-tight">A volte</span>
                     </button>
 
                     {/* Answer C */}
                     <button
                       onClick={() => handleAnswer(domanda.id, 'C')}
                       className={cn(
-                        "p-3 rounded-lg border-2 text-center transition-all",
-                        "hover:border-accent/50 hover:bg-accent/5",
-                        "flex flex-col items-center gap-1",
+                        "min-h-[56px] p-2 rounded-lg border-2 text-center transition-all touch-manipulation",
+                        "active:scale-[0.98]",
+                        "flex flex-col items-center justify-center gap-0.5",
                         risposte[domanda.id] === 'C'
-                          ? "border-accent bg-accent text-accent-foreground"
+                          ? "border-accent bg-accent text-accent-foreground shadow-md"
                           : "border-border bg-card"
                       )}
                     >
                       <div className={cn(
-                        "w-8 h-8 rounded-full flex items-center justify-center shrink-0 font-bold text-sm",
+                        "w-7 h-7 rounded-full flex items-center justify-center shrink-0 font-bold text-xs",
                         risposte[domanda.id] === 'C' 
                           ? "bg-white/20" 
                           : "bg-primary/10 text-primary"
                       )}>
-                        {risposte[domanda.id] === 'C' ? <Check className="h-4 w-4" /> : 'C'}
+                        {risposte[domanda.id] === 'C' ? <Check className="h-3.5 w-3.5" /> : 'C'}
                       </div>
-                      <span className="text-xs font-medium">No, mai</span>
+                      <span className="text-[10px] font-medium leading-tight">No, mai</span>
                     </button>
                   </div>
                 </div>
@@ -400,39 +400,41 @@ export default function Questionario() {
       </div>
 
       {/* Sticky Navigation Footer */}
-      <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur border-t py-4 px-4 z-50">
-        <div className="max-w-6xl mx-auto flex justify-between items-center gap-4">
+      <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur border-t py-3 sm:py-4 px-3 sm:px-4 z-50 safe-area-bottom">
+        <div className="max-w-6xl mx-auto flex justify-between items-center gap-2 sm:gap-4">
           <Button
             variant="outline"
-            size="lg"
             onClick={() => setCurrentPage((p) => p - 1)}
             disabled={currentPage === 0}
+            className="h-12 px-3 sm:px-4 text-sm sm:text-base"
           >
-            <ChevronLeft className="h-4 w-4 mr-2" />
-            Indietro
+            <ChevronLeft className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Indietro</span>
           </Button>
 
-          <div className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground">
-            <span>{Object.keys(risposte).length} / {DOMANDE.length} risposte</span>
+          <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
+            <span className="font-medium">{Object.keys(risposte).length}/{DOMANDE.length}</span>
           </div>
 
           {isLastPage && allAnswered ? (
-            <Button size="lg" onClick={handleSubmit} disabled={isSubmitting} className="bg-accent hover:bg-accent/90">
+            <Button onClick={handleSubmit} disabled={isSubmitting} className="h-12 px-4 sm:px-6 text-sm sm:text-base bg-accent hover:bg-accent/90">
               {isSubmitting ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                <Loader2 className="h-4 w-4 sm:mr-2 animate-spin" />
               ) : (
-                <Send className="h-4 w-4 mr-2" />
+                <Send className="h-4 w-4 sm:mr-2" />
               )}
-              Invia Risposte
+              <span className="hidden sm:inline">Invia Risposte</span>
+              <span className="sm:hidden">Invia</span>
             </Button>
           ) : (
             <Button
-              size="lg"
               onClick={() => setCurrentPage((p) => p + 1)}
               disabled={!canGoNext}
+              className="h-12 px-4 sm:px-6 text-sm sm:text-base"
             >
-              Avanti
-              <ChevronRight className="h-4 w-4 ml-2" />
+              <span className="hidden sm:inline">Avanti</span>
+              <span className="sm:hidden">Avanti</span>
+              <ChevronRight className="h-4 w-4 sm:ml-2" />
             </Button>
           )}
         </div>

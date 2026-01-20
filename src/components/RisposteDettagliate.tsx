@@ -208,35 +208,35 @@ export function RisposteDettagliate({ candidatoId }: RisposteDettagliateProps) {
     </div>
   );
 
-  // Componente Card Mobile
+  // Componente Card Mobile - più compatto
   const MobileCard = ({ risposta }: { risposta: RispostaConDomanda }) => (
-    <Card className="mb-3">
-      <CardContent className="py-3 px-4">
-        <div className="flex items-start justify-between gap-2 mb-2">
-          <Badge variant="outline" className="text-xs shrink-0">
+    <Card className="mb-2">
+      <CardContent className="py-2.5 px-3">
+        <div className="flex items-start justify-between gap-2 mb-1.5">
+          <Badge variant="outline" className="text-[10px] shrink-0 h-5">
             #{risposta.domanda_id}
           </Badge>
           <div className="flex gap-1">
-            <Badge variant="secondary" className="text-xs">
+            <Badge variant="secondary" className="text-[10px] h-5 px-1.5">
               {risposta.scala_primaria}
             </Badge>
             <Badge 
               variant="outline" 
               className={cn(
-                "text-xs",
+                "text-[10px] h-5 px-1.5",
                 risposta.polarita === '+' ? 'text-green-600' : 'text-red-600'
               )}
             >
               {risposta.polarita}
             </Badge>
             <Badge 
-              className={cn("text-xs border", getValoreStyle(risposta.valore, risposta.polarita))}
+              className={cn("text-[10px] h-5 px-1.5 border", getValoreStyle(risposta.valore, risposta.polarita))}
             >
               {risposta.valore}
             </Badge>
           </div>
         </div>
-        <p className="text-sm text-muted-foreground leading-relaxed">
+        <p className="text-xs text-muted-foreground leading-relaxed">
           {risposta.testo}
         </p>
       </CardContent>
@@ -247,84 +247,84 @@ export function RisposteDettagliate({ candidatoId }: RisposteDettagliateProps) {
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
       <Card>
         <CollapsibleTrigger asChild>
-          <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+          <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors px-3 sm:px-6 py-3 sm:py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <FileText className="h-5 w-5 text-primary" />
-                <CardTitle className="text-base sm:text-lg">
+                <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-primary shrink-0" />
+                <CardTitle className="text-sm sm:text-base md:text-lg">
                   Risposte Questionario
                 </CardTitle>
                 {stats.totale > 0 && (
-                  <Badge variant="secondary" className="ml-2">
-                    {stats.totale} risposte
+                  <Badge variant="secondary" className="ml-1 sm:ml-2 text-[10px] sm:text-xs">
+                    {stats.totale}
                   </Badge>
                 )}
               </div>
               {isOpen ? (
-                <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                <ChevronUp className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground shrink-0" />
               ) : (
-                <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                <ChevronDown className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground shrink-0" />
               )}
             </div>
           </CardHeader>
         </CollapsibleTrigger>
         
         <CollapsibleContent>
-          <CardContent className="pt-0">
+          <CardContent className="pt-0 px-3 sm:px-6 pb-3 sm:pb-6">
             {isLoading ? (
-              <div className="space-y-3">
-                <Skeleton className="h-10 w-full" />
-                <Skeleton className="h-10 w-full" />
-                <Skeleton className="h-32 w-full" />
+              <div className="space-y-2 sm:space-y-3">
+                <Skeleton className="h-8 sm:h-10 w-full" />
+                <Skeleton className="h-8 sm:h-10 w-full" />
+                <Skeleton className="h-24 sm:h-32 w-full" />
               </div>
             ) : error ? (
-              <div className="text-center py-8 text-destructive">
-                <AlertCircle className="h-8 w-8 mx-auto mb-2" />
-                <p>Errore nel caricamento delle risposte</p>
+              <div className="text-center py-6 sm:py-8 text-destructive">
+                <AlertCircle className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2" />
+                <p className="text-sm">Errore nel caricamento</p>
               </div>
             ) : (
               <>
                 {/* Statistiche rapide */}
-                <div className="grid grid-cols-4 gap-2 sm:gap-4 mb-4">
-                  <div className="text-center p-2 sm:p-3 rounded-lg bg-muted/50">
-                    <p className="text-lg sm:text-2xl font-bold">{stats.totale}</p>
-                    <p className="text-[10px] sm:text-xs text-muted-foreground">Totale</p>
+                <div className="grid grid-cols-4 gap-1.5 sm:gap-2 md:gap-4 mb-3 sm:mb-4">
+                  <div className="text-center p-1.5 sm:p-2 md:p-3 rounded-lg bg-muted/50">
+                    <p className="text-base sm:text-lg md:text-2xl font-bold">{stats.totale}</p>
+                    <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground">Tot</p>
                   </div>
-                  <div className="text-center p-2 sm:p-3 rounded-lg bg-red-50">
-                    <p className="text-lg sm:text-2xl font-bold text-red-600">{stats.a}</p>
-                    <p className="text-[10px] sm:text-xs text-muted-foreground">A</p>
+                  <div className="text-center p-1.5 sm:p-2 md:p-3 rounded-lg bg-red-50">
+                    <p className="text-base sm:text-lg md:text-2xl font-bold text-red-600">{stats.a}</p>
+                    <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground">A</p>
                   </div>
-                  <div className="text-center p-2 sm:p-3 rounded-lg bg-amber-50">
-                    <p className="text-lg sm:text-2xl font-bold text-amber-600">{stats.b}</p>
-                    <p className="text-[10px] sm:text-xs text-muted-foreground">B</p>
+                  <div className="text-center p-1.5 sm:p-2 md:p-3 rounded-lg bg-amber-50">
+                    <p className="text-base sm:text-lg md:text-2xl font-bold text-amber-600">{stats.b}</p>
+                    <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground">B</p>
                   </div>
-                  <div className="text-center p-2 sm:p-3 rounded-lg bg-green-50">
-                    <p className="text-lg sm:text-2xl font-bold text-green-600">{stats.c}</p>
-                    <p className="text-[10px] sm:text-xs text-muted-foreground">C</p>
+                  <div className="text-center p-1.5 sm:p-2 md:p-3 rounded-lg bg-green-50">
+                    <p className="text-base sm:text-lg md:text-2xl font-bold text-green-600">{stats.c}</p>
+                    <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground">C</p>
                   </div>
                 </div>
 
                 {/* Filtri */}
                 {isMobile ? (
-                  <div className="flex items-center gap-2 mb-4">
+                  <div className="flex items-center gap-2 mb-3">
                     <Sheet>
                       <SheetTrigger asChild>
-                        <Button variant="outline" size="sm" className="flex-1">
-                          <Filter className="h-4 w-4 mr-2" />
+                        <Button variant="outline" size="sm" className="flex-1 h-9 text-xs">
+                          <Filter className="h-3.5 w-3.5 mr-1.5" />
                           Filtri
                         </Button>
                       </SheetTrigger>
-                      <SheetContent side="bottom" className="h-[80vh]">
+                      <SheetContent side="bottom" className="h-[70vh] rounded-t-xl">
                         <SheetHeader>
-                          <SheetTitle>Filtra risposte</SheetTitle>
+                          <SheetTitle className="text-base">Filtra risposte</SheetTitle>
                         </SheetHeader>
                         <div className="mt-4">
                           <FiltersContent />
                         </div>
                       </SheetContent>
                     </Sheet>
-                    <Button variant="outline" size="sm" onClick={exportCSV}>
-                      <Download className="h-4 w-4" />
+                    <Button variant="outline" size="sm" onClick={exportCSV} className="h-9 px-3">
+                      <Download className="h-3.5 w-3.5" />
                     </Button>
                   </div>
                 ) : (
@@ -340,14 +340,14 @@ export function RisposteDettagliate({ candidatoId }: RisposteDettagliateProps) {
                 )}
 
                 {/* Risultati filtrati */}
-                <div className="text-sm text-muted-foreground mb-3">
+                <div className="text-xs sm:text-sm text-muted-foreground mb-2 sm:mb-3">
                   {risposteFiltrate.length} risultati
                   {risposteFiltrate.length !== stats.totale && ` su ${stats.totale}`}
                 </div>
 
                 {/* Tabella/Cards */}
                 {isMobile ? (
-                  <ScrollArea className="h-[400px]">
+                  <ScrollArea className="h-[300px] sm:h-[400px]">
                     {risposteFiltrate.map(r => (
                       <MobileCard key={r.domanda_id} risposta={r} />
                     ))}

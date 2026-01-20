@@ -111,41 +111,41 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+    <div className="min-h-screen flex items-center justify-center bg-background p-4 safe-area-bottom">
       <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
+        <CardHeader className="text-center px-4 sm:px-6">
+          <div className="flex justify-center mb-3 sm:mb-4">
             <img 
               src="/talentprofile_logo_v3.png?v=20260119" 
               alt="Talent Profile" 
-              className="h-20 w-auto object-contain"
+              className="h-16 sm:h-20 w-auto object-contain"
             />
           </div>
-          <CardTitle className="text-2xl font-bold">Talent Profile</CardTitle>
-          <CardDescription>Sistema di Assessment HR</CardDescription>
+          <CardTitle className="text-xl sm:text-2xl font-bold">Talent Profile</CardTitle>
+          <CardDescription className="text-sm">Sistema di Assessment HR</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-4 sm:px-6">
           <Tabs defaultValue="candidate" className="space-y-4">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="candidate" className="flex items-center gap-1">
-                <User className="h-4 w-4" />
-                <span className="hidden sm:inline">Candidato</span>
+            <TabsList className="grid w-full grid-cols-3 h-11">
+              <TabsTrigger value="candidate" className="flex items-center justify-center gap-1.5 h-full text-xs sm:text-sm">
+                <User className="h-4 w-4 shrink-0" />
+                <span className="hidden xs:inline sm:inline">Candidato</span>
               </TabsTrigger>
-              <TabsTrigger value="azienda" className="flex items-center gap-1">
-                <Building2 className="h-4 w-4" />
-                <span className="hidden sm:inline">Azienda</span>
+              <TabsTrigger value="azienda" className="flex items-center justify-center gap-1.5 h-full text-xs sm:text-sm">
+                <Building2 className="h-4 w-4 shrink-0" />
+                <span className="hidden xs:inline sm:inline">Azienda</span>
               </TabsTrigger>
-              <TabsTrigger value="register">Registrati</TabsTrigger>
+              <TabsTrigger value="register" className="h-full text-xs sm:text-sm">Registra</TabsTrigger>
             </TabsList>
 
             {/* Candidate Login Tab */}
             <TabsContent value="candidate">
               <form onSubmit={handleCandidateLogin} className="space-y-4 mt-4">
-                <div className="text-center text-sm text-muted-foreground mb-4">
+                <div className="text-center text-xs sm:text-sm text-muted-foreground mb-4">
                   Accedi con le credenziali fornite dalla tua azienda
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="candidate-username">Username</Label>
+                  <Label htmlFor="candidate-username" className="text-sm">Username</Label>
                   <Input 
                     id="candidate-username" 
                     type="text" 
@@ -153,19 +153,21 @@ export default function Auth() {
                     onChange={e => setCandidateUsername(e.target.value)} 
                     required 
                     placeholder="es. teknofinestre-a1b2"
+                    className="h-11 text-base"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="candidate-password">Password</Label>
+                  <Label htmlFor="candidate-password" className="text-sm">Password</Label>
                   <Input 
                     id="candidate-password" 
                     type="password" 
                     value={candidatePassword} 
                     onChange={e => setCandidatePassword(e.target.value)} 
                     required 
+                    className="h-11 text-base"
                   />
                 </div>
-                <Button type="submit" className="w-full bg-accent hover:bg-accent/90" disabled={candidateLoading}>
+                <Button type="submit" className="w-full h-12 text-base bg-accent hover:bg-accent/90" disabled={candidateLoading}>
                   {candidateLoading ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -181,11 +183,11 @@ export default function Auth() {
             {/* Company/Admin Login Tab */}
             <TabsContent value="azienda">
               <form onSubmit={handleSignIn} className="space-y-4 mt-4">
-                <div className="text-center text-sm text-muted-foreground mb-4">
+                <div className="text-center text-xs sm:text-sm text-muted-foreground mb-4">
                   Accesso per aziende e amministratori
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email" className="text-sm">Email</Label>
                   <Input 
                     id="email" 
                     type="email" 
@@ -193,13 +195,14 @@ export default function Auth() {
                     onChange={e => setEmail(e.target.value)} 
                     required 
                     placeholder="email@azienda.it"
+                    className="h-11 text-base"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <Input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} required />
+                  <Label htmlFor="password" className="text-sm">Password</Label>
+                  <Input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} required className="h-11 text-base" />
                 </div>
-                <Button type="submit" className="w-full" disabled={loading}>
+                <Button type="submit" className="w-full h-12 text-base" disabled={loading}>
                   {loading ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -215,25 +218,25 @@ export default function Auth() {
             {/* Registration Tab */}
             <TabsContent value="register">
               <form onSubmit={handleSignUp} className="space-y-4 mt-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="nome">Nome</Label>
-                    <Input id="nome" value={nome} onChange={e => setNome(e.target.value)} required />
+                    <Label htmlFor="nome" className="text-sm">Nome</Label>
+                    <Input id="nome" value={nome} onChange={e => setNome(e.target.value)} required className="h-11 text-base" />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="cognome">Cognome</Label>
-                    <Input id="cognome" value={cognome} onChange={e => setCognome(e.target.value)} required />
+                    <Label htmlFor="cognome" className="text-sm">Cognome</Label>
+                    <Input id="cognome" value={cognome} onChange={e => setCognome(e.target.value)} required className="h-11 text-base" />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="reg-email">Email</Label>
-                  <Input id="reg-email" type="email" value={email} onChange={e => setEmail(e.target.value)} required />
+                  <Label htmlFor="reg-email" className="text-sm">Email</Label>
+                  <Input id="reg-email" type="email" value={email} onChange={e => setEmail(e.target.value)} required className="h-11 text-base" />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="reg-password">Password</Label>
-                  <Input id="reg-password" type="password" value={password} onChange={e => setPassword(e.target.value)} required minLength={6} />
+                  <Label htmlFor="reg-password" className="text-sm">Password</Label>
+                  <Input id="reg-password" type="password" value={password} onChange={e => setPassword(e.target.value)} required minLength={6} className="h-11 text-base" />
                 </div>
-                <Button type="submit" className="w-full" disabled={loading}>
+                <Button type="submit" className="w-full h-12 text-base" disabled={loading}>
                   {loading ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
