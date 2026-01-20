@@ -326,9 +326,9 @@ function identifyPatterns(scalePunteggi: Record<string, number>): string[] {
     patterns.push('🟠 STRESS ZONE ATTIVA: Difficoltà personale (SV ' + sv + ') + Resilienza ridotta (CF ' + cf + '). Inserimento graduale necessario.');
   }
 
-  // Visionario Disorganizzato
-  if (ec - ef > 40) {
-    patterns.push('🟠 VISIONARIO DISORGANIZZATO: Gap EC-EF di ' + (ec - ef) + ' punti. Sa cosa fare ma fatica a organizzarsi.');
+  // Visionario Disorganizzato - CORREZIONE: scatta solo se EF è effettivamente basso
+  if (ec - ef > 40 && ef < 100) {
+    patterns.push('🟠 VISIONARIO DISORGANIZZATO: Gap EC-EF di ' + (ec - ef) + ' punti con EF basso (' + ef + '). Sa cosa fare ma fatica a organizzarsi.');
   }
 
   // Rigidità Fragile

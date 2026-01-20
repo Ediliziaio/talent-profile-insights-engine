@@ -61,21 +61,30 @@ const PATTERN_CRITICI: PatternCritico[] = [
   },
   
   // PATTERN GAP EFFICACIA-EFFICIENZA
+  // CORREZIONE: Il pattern scatta solo se EF è EFFETTIVAMENTE basso, non solo per gap alto
   {
     id: 'visionario_disorganizzato_forte',
     nome: 'Visionario Fortemente Disorganizzato',
-    condizione: (s) => ((s['EC'] || 100) - (s['EF'] || 100)) > 40,
-    descrizione: 'Gap SIGNIFICATIVO tra Efficacia ed Efficienza (>40 punti). Il candidato sa identificare cosa fare ma fatica enormemente ad organizzarsi. Raggiunge gli obiettivi solo a costo di grande dispendio energetico. NECESSITA formazione su metodi di lavoro e affiancamento con figure metodiche.',
+    condizione: (s) => {
+      const ec = s['EC'] || 100;
+      const ef = s['EF'] || 100;
+      // Gap > 40 E efficienza effettivamente bassa (< 100)
+      return (ec - ef) > 40 && ef < 100;
+    },
+    descrizione: 'Gap SIGNIFICATIVO tra Efficacia ed Efficienza (>40 punti) CON Efficienza bassa. Il candidato sa identificare cosa fare ma fatica enormemente ad organizzarsi. Raggiunge gli obiettivi solo a costo di grande dispendio energetico. NECESSITA formazione su metodi di lavoro e affiancamento con figure metodiche.',
     tipo: 'critico'
   },
   {
     id: 'visionario_disorganizzato',
     nome: 'Visionario Disorganizzato',
     condizione: (s) => {
-      const gap = (s['EC'] || 100) - (s['EF'] || 100);
-      return gap > 20 && gap <= 40;
+      const ec = s['EC'] || 100;
+      const ef = s['EF'] || 100;
+      const gap = ec - ef;
+      // Gap 20-40 E efficienza sotto media (< 110)
+      return gap > 20 && gap <= 40 && ef < 110;
     },
-    descrizione: 'Gap tra Efficacia ed Efficienza (20-40 punti). Alta determinazione (EC) ma scarsa autodisciplina (EF). Grandi idee, difficoltà nell\'esecuzione ordinata. Richiede supporto organizzativo e procedure chiare.',
+    descrizione: 'Gap tra Efficacia ed Efficienza (20-40 punti) con Efficienza sotto media. Alta determinazione (EC) ma scarsa autodisciplina (EF). Grandi idee, difficoltà nell\'esecuzione ordinata. Richiede supporto organizzativo e procedure chiare.',
     tipo: 'attenzione'
   },
   {
