@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
+
 import { useToast } from '@/hooks/use-toast';
 import { DOMANDE } from '@/data/questionario';
 import { calcolaProfilo, RispostaInput } from '@/lib/scoring';
@@ -235,7 +235,7 @@ export default function Questionario() {
             )}>
               <CardContent className="p-3 lg:p-4">
                 {/* Desktop: 4 column grid [50% | 16% | 17% | 17%] */}
-                <div className="hidden lg:grid lg:grid-cols-[50%_16%_17%_17%] gap-3 items-center">
+                <div className="hidden lg:grid lg:grid-cols-[1fr_auto_auto_auto] gap-3 items-center">
                   {/* Column 1: Question - takes ~50% width */}
                   <div className="flex gap-2 items-start">
                     <span className="text-muted-foreground font-medium min-w-[2.5rem] text-sm">
@@ -434,8 +434,7 @@ export default function Questionario() {
               disabled={!canGoNext}
               className="h-12 px-4 sm:px-6 text-sm sm:text-base"
             >
-              <span className="hidden sm:inline">Avanti</span>
-              <span className="sm:hidden">Avanti</span>
+              Avanti
               <ChevronRight className="h-4 w-4 sm:ml-2" />
             </Button>
           )}
