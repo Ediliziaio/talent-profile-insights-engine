@@ -53,7 +53,7 @@ import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { 
   Plus, Pencil, Trash2, Building2, Copy, Check, Download, Search, Users, 
-  ArrowUpDown, Filter, CheckCircle2, XCircle, TrendingUp, Eye
+  ArrowUpDown, Filter, CheckCircle2, XCircle, TrendingUp, Eye, Key, Loader2
 } from 'lucide-react';
 import { Azienda } from '@/types/database';
 import { format } from 'date-fns';
@@ -95,6 +95,14 @@ export default function Aziende() {
     password: string;
     aziendaNome: string;
   } | null>(null);
+  const [viewingCredentials, setViewingCredentials] = useState<{
+    aziendaId: string;
+    aziendaNome: string;
+    email: string;
+    username: string;
+    password: string;
+  } | null>(null);
+  const [loadingCredentials, setLoadingCredentials] = useState<string | null>(null);
 
   // Filters
   const [searchTerm, setSearchTerm] = useState('');
@@ -415,6 +423,47 @@ export default function Aziende() {
     URL.revokeObjectURL(link.href);
 
     toast({ title: 'Esportazione completata', description: `${filteredAziende.length} aziende esportate` });
+  };
+
+  const fetchCredentials = async (azienda: Azienda) => {
+    setLoadingCredentials(azienda.id);
+    try {
+      const { data, error } = await supabase
+        .from('accessi_azienda')
+        .select('username, password_plain')
+        .eq('azienda_id', azienda.id)
+        .eq('attivo', true)
+        .maybeSingle();
+
+      if (error) throw error;
+      
+      if (!data) {
+        toast({
+          title: 'Credenziali non trovate',
+          description: 'Nessuna credenziale attiva per questa azienda',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      const email = `${data.username}@azienda.talentprofile.local`;
+
+      setViewingCredentials({
+        aziendaId: azienda.id,
+        aziendaNome: azienda.nome,
+        email,
+        username: data.username,
+        password: data.password_plain,
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Errore',
+        description: error.message || 'Impossibile recuperare le credenziali',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoadingCredentials(null);
+    }
   };
 
   const getSettoreBadgeColor = (settore: string | null) => {
@@ -785,6 +834,7 @@ export default function Aziende() {
                               size="icon"
                               className="h-8 w-8"
                               onClick={() => navigate(`/candidati?azienda=${azienda.id}`)}
+                              title="Vedi candidati"
                             >
                               <Eye className="h-4 w-4" />
                             </Button>
@@ -792,7 +842,22 @@ export default function Aziende() {
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8"
+                              onClick={() => fetchCredentials(azienda)}
+                              title="Visualizza credenziali"
+                              disabled={loadingCredentials === azienda.id}
+                            >
+                              {loadingCredentials === azienda.id ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Key className="h-4 w-4" />
+                              )}
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
                               onClick={() => openEditDialog(azienda)}
+                              title="Modifica"
                             >
                               <Pencil className="h-4 w-4" />
                             </Button>
@@ -917,7 +982,22 @@ export default function Aziende() {
                                 variant="ghost"
                                 size="icon"
                                 className="h-7 w-7"
+                                onClick={() => fetchCredentials(azienda)}
+                                title="Visualizza credenziali"
+                                disabled={loadingCredentials === azienda.id}
+                              >
+                                {loadingCredentials === azienda.id ? (
+                                  <Loader2 className="h-3 w-3 animate-spin" />
+                                ) : (
+                                  <Key className="h-3 w-3" />
+                                )}
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7"
                                 onClick={() => openEditDialog(azienda)}
+                                title="Modifica"
                               >
                                 <Pencil className="h-3 w-3" />
                               </Button>
@@ -926,6 +1006,7 @@ export default function Aziende() {
                                 size="icon"
                                 className="h-7 w-7"
                                 onClick={() => setDeleteAzienda(azienda)}
+                                title="Elimina"
                               >
                                 <Trash2 className="h-3 w-3 text-destructive" />
                               </Button>
@@ -1012,6 +1093,56 @@ export default function Aziende() {
             </div>
             <DialogFooter>
               <Button onClick={() => setGeneratedCredentials(null)}>Chiudi</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* View Existing Credentials Dialog */}
+        <Dialog open={!!viewingCredentials} onOpenChange={() => setViewingCredentials(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Key className="h-5 w-5" />
+                Credenziali Accesso
+              </DialogTitle>
+              <DialogDescription>
+                Credenziali HR per "{viewingCredentials?.aziendaNome}"
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Email</Label>
+                <div className="flex gap-2">
+                  <Input value={viewingCredentials?.email || ''} readOnly className="font-mono text-sm" />
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => copyToClipboard(viewingCredentials?.email || '', 'view-email')}
+                  >
+                    {copiedId === 'view-email' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                  </Button>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Password</Label>
+                <div className="flex gap-2">
+                  <Input value={viewingCredentials?.password || ''} readOnly className="font-mono text-sm" />
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => copyToClipboard(viewingCredentials?.password || '', 'view-password')}
+                  >
+                    {copiedId === 'view-password' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                  </Button>
+                </div>
+              </div>
+              <div className="p-3 bg-muted rounded-lg text-sm text-muted-foreground">
+                <p>Queste sono le credenziali per l'accesso HR dell'azienda.</p>
+                <p className="mt-1">Le credenziali dei candidati sono separate e visibili nella pagina Candidati.</p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button onClick={() => setViewingCredentials(null)}>Chiudi</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
