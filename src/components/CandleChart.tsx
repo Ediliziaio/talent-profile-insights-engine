@@ -8,9 +8,10 @@ import {
   ResponsiveContainer,
   Cell,
   ReferenceLine,
-  ReferenceArea
+  ReferenceArea,
+  LabelList
 } from 'recharts';
-import { generateCandleChartData } from '@/lib/chartMapping';
+import { generateCandleChartData, CandleData } from '@/lib/chartMapping';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -18,22 +19,24 @@ interface CandleChartProps {
   scalePunteggi: Record<string, number>;
   className?: string;
   layout?: 'vertical' | 'horizontal';
+  showLabels?: boolean;
 }
 
 const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
-    const data = payload[0].payload;
+    const data = payload[0].payload as CandleData;
     return (
-      <div className="bg-background border rounded-lg shadow-lg p-3">
-        <p className="font-semibold text-sm">{data.fullName}</p>
+      <div className="bg-background border rounded-lg shadow-lg p-3 max-w-[280px]">
+        <p className="font-semibold text-sm mb-1">{data.label}</p>
+        <p className="text-xs text-muted-foreground mb-2">{data.description}</p>
         <p className={cn(
           "text-lg font-bold",
           data.value >= 0 ? "text-green-600" : "text-red-600"
         )}>
-          {data.value > 0 ? '+' : ''}{data.value}
+          {data.value > 0 ? '+' : ''}{data.value.toFixed(0)}
         </p>
-        <p className="text-xs text-muted-foreground">
-          Valore grezzo: {data.rawValue}/200
+        <p className="text-xs text-muted-foreground mt-1 italic">
+          {data.tooltipText}
         </p>
       </div>
     );
@@ -41,11 +44,13 @@ const CustomTooltip = ({ active, payload }: any) => {
   return null;
 };
 
-const renderValueLabel = (props: any) => {
+// Custom label per mostrare i valori sulle barre
+const renderBarLabel = (props: any) => {
   const { x, y, width, height, value } = props;
-  if (value === 0) return null;
+  if (value === 0 || Math.abs(value) < 3) return null;
   
-  const xPos = width >= 0 ? x + width + 5 : x + width - 25;
+  // Posizione: alla fine della barra
+  const xPos = width >= 0 ? x + width + 4 : x + width - 28;
   const yPos = y + height / 2 + 4;
   
   return (
@@ -53,27 +58,61 @@ const renderValueLabel = (props: any) => {
       x={xPos}
       y={yPos}
       fill={value >= 0 ? '#16a34a' : '#dc2626'}
-      fontSize={11}
+      fontSize={10}
       fontWeight="bold"
     >
-      {value > 0 ? '+' : ''}{value}
+      {value > 0 ? '+' : ''}{Math.round(value)}
     </text>
   );
 };
 
-export function CandleChart({ scalePunteggi, className, layout = 'vertical' }: CandleChartProps) {
+// Etichetta nome completo per layout verticale
+const FullNameLabel = ({ x, y, width, height, value, data }: any) => {
+  if (!data) return null;
+  const xPos = width >= 0 ? x + 4 : x + width - 4;
+  const yPos = y + height / 2;
+  
+  return (
+    <text
+      x={xPos}
+      y={yPos}
+      fill="hsl(var(--foreground))"
+      fontSize={9}
+      fontWeight="500"
+      dominantBaseline="middle"
+      textAnchor={width >= 0 ? "start" : "end"}
+      className="opacity-80"
+    >
+      {data.label}
+    </text>
+  );
+};
+
+export function CandleChart({ 
+  scalePunteggi, 
+  className, 
+  layout = 'vertical',
+  showLabels = true 
+}: CandleChartProps) {
   const isMobile = useIsMobile();
   const chartData = useMemo(() => generateCandleChartData(scalePunteggi), [scalePunteggi]);
   
-  const chartHeight = isMobile ? 360 : 480;
-  const yAxisWidth = isMobile ? 85 : 130;
-  const fontSize = isMobile ? 10 : 12;
+  // Altezza dinamica basata su numero di barre
+  const barHeight = isMobile ? 32 : 40;
+  const chartHeight = chartData.length * barHeight + 60;
+  const yAxisWidth = isMobile ? 90 : 120;
+  const fontSize = isMobile ? 10 : 11;
 
   if (layout === 'horizontal') {
     return (
       <div className={cn("w-full", className)}>
         <ResponsiveContainer width="100%" height={chartHeight}>
-          <BarChart data={chartData} layout="vertical" margin={{ top: 10, right: 20, left: 10, bottom: 10 }}>
+          <BarChart 
+            data={chartData} 
+            layout="vertical" 
+            margin={{ top: 10, right: 45, left: 10, bottom: 10 }}
+          >
+            {/* Zone colorate di sfondo */}
             <ReferenceArea x1={-40} x2={-15} fill="#fee2e2" fillOpacity={0.5} />
             <ReferenceArea x1={-15} x2={15} fill="#fef9c3" fillOpacity={0.5} />
             <ReferenceArea x1={15} x2={40} fill="#dcfce7" fillOpacity={0.5} />
@@ -83,16 +122,22 @@ export function CandleChart({ scalePunteggi, className, layout = 'vertical' }: C
               domain={[-40, 40]} 
               tickFormatter={(v) => `${v > 0 ? '+' : ''}${v}`}
               tick={{ fontSize }}
+              axisLine={{ stroke: 'hsl(var(--border))' }}
             />
             <YAxis 
-              dataKey="name" 
+              dataKey="label" 
               type="category" 
               width={yAxisWidth}
-              tick={{ fontSize }}
+              tick={{ fontSize, fill: 'hsl(var(--foreground))' }}
+              axisLine={{ stroke: 'hsl(var(--border))' }}
             />
             <Tooltip content={<CustomTooltip />} />
-            <ReferenceLine x={0} stroke="#666" strokeDasharray="3 3" />
-            <Bar dataKey="value" label={renderValueLabel}>
+            <ReferenceLine x={0} stroke="hsl(var(--muted-foreground))" strokeDasharray="3 3" />
+            <Bar 
+              dataKey="value" 
+              radius={[0, 4, 4, 0]}
+              label={showLabels ? renderBarLabel : undefined}
+            >
               {chartData.map((entry, index) => (
                 <Cell 
                   key={`cell-${index}`} 
@@ -106,53 +151,83 @@ export function CandleChart({ scalePunteggi, className, layout = 'vertical' }: C
     );
   }
 
+  // Layout verticale (default) - mostra come barre orizzontali per migliore leggibilità nomi
   return (
     <div className={cn("w-full", className)}>
       <ResponsiveContainer width="100%" height={chartHeight}>
-        <BarChart data={chartData} margin={{ top: 20, right: isMobile ? 10 : 30, left: isMobile ? 0 : 20, bottom: 20 }}>
-          <ReferenceArea y1={-40} y2={-15} fill="#fee2e2" fillOpacity={0.5} />
-          <ReferenceArea y1={-15} y2={15} fill="#fef9c3" fillOpacity={0.5} />
-          <ReferenceArea y1={15} y2={40} fill="#dcfce7" fillOpacity={0.5} />
+        <BarChart 
+          data={chartData} 
+          layout="vertical"
+          margin={{ top: 10, right: 45, left: 5, bottom: 10 }}
+        >
+          {/* Zone colorate di sfondo */}
+          <ReferenceArea x1={-50} x2={-15} fill="#fee2e2" fillOpacity={0.4} />
+          <ReferenceArea x1={-15} x2={15} fill="#fef9c3" fillOpacity={0.4} />
+          <ReferenceArea x1={15} x2={50} fill="#dcfce7" fillOpacity={0.4} />
           
           <XAxis 
-            dataKey="name" 
-            tick={{ fontSize }}
-            height={isMobile ? 60 : 40}
-            interval={0}
-            angle={isMobile ? -45 : 0}
-            textAnchor={isMobile ? 'end' : 'middle'}
-          />
-          <YAxis 
-            domain={[-40, 40]} 
+            type="number"
+            domain={[-50, 50]} 
             tickFormatter={(v) => `${v > 0 ? '+' : ''}${v}`}
             tick={{ fontSize }}
-            width={isMobile ? 35 : 45}
+            axisLine={{ stroke: 'hsl(var(--border))' }}
+            tickLine={{ stroke: 'hsl(var(--border))' }}
+          />
+          <YAxis 
+            dataKey="label"
+            type="category"
+            width={yAxisWidth}
+            tick={{ 
+              fontSize: isMobile ? 9 : 11, 
+              fill: 'hsl(var(--foreground))',
+              fontWeight: 500
+            }}
+            axisLine={{ stroke: 'hsl(var(--border))' }}
+            tickLine={false}
           />
           <Tooltip content={<CustomTooltip />} />
-          <ReferenceLine y={0} stroke="#666" strokeDasharray="3 3" />
-          <Bar dataKey="value" label={renderValueLabel}>
+          <ReferenceLine x={0} stroke="hsl(var(--muted-foreground))" strokeWidth={1.5} />
+          
+          <Bar 
+            dataKey="value"
+            radius={[0, 4, 4, 0]}
+            maxBarSize={28}
+          >
             {chartData.map((entry, index) => (
               <Cell 
                 key={`cell-${index}`} 
                 fill={entry.value >= 0 ? '#22c55e' : '#ef4444'}
+                fillOpacity={0.85}
               />
             ))}
+            {showLabels && (
+              <LabelList 
+                dataKey="value" 
+                position="right"
+                formatter={(value: number) => value !== 0 ? `${value > 0 ? '+' : ''}${Math.round(value)}` : ''}
+                style={{ 
+                  fontSize: 10, 
+                  fontWeight: 'bold',
+                  fill: 'hsl(var(--foreground))'
+                }}
+              />
+            )}
           </Bar>
         </BarChart>
       </ResponsiveContainer>
 
-      {/* Legend */}
-      <div className={`flex ${isMobile ? 'flex-wrap gap-2' : 'gap-4'} justify-center mt-2 ${isMobile ? 'text-[10px]' : 'text-xs'} text-muted-foreground`}>
-        <div className="flex items-center gap-1">
-          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded bg-red-100 border border-red-300" />
+      {/* Legenda */}
+      <div className={`flex ${isMobile ? 'flex-wrap gap-2' : 'gap-4'} justify-center mt-3 ${isMobile ? 'text-[10px]' : 'text-xs'} text-muted-foreground`}>
+        <div className="flex items-center gap-1.5">
+          <div className="w-3 h-3 rounded bg-red-200 border border-red-400" />
           <span>Critico (&lt;-15)</span>
         </div>
-        <div className="flex items-center gap-1">
-          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded bg-yellow-100 border border-yellow-300" />
+        <div className="flex items-center gap-1.5">
+          <div className="w-3 h-3 rounded bg-yellow-200 border border-yellow-400" />
           <span>Attenzione (±15)</span>
         </div>
-        <div className="flex items-center gap-1">
-          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded bg-green-100 border border-green-300" />
+        <div className="flex items-center gap-1.5">
+          <div className="w-3 h-3 rounded bg-green-200 border border-green-400" />
           <span>Ottimale (&gt;15)</span>
         </div>
       </div>
