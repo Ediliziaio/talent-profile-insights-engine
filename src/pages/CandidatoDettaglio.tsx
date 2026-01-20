@@ -401,25 +401,25 @@ export default function CandidatoDettaglio() {
               {/* TABS per organizzare i contenuti */}
         <Tabs defaultValue="analisi" className="w-full">
           <TabsList className="flex overflow-x-auto scrollbar-hide mb-4 sm:mb-6 w-full">
-            <TabsTrigger value="analisi" className="flex-1 min-w-[60px] text-xs sm:text-sm px-2 sm:px-4">
-              <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 sm:mr-1" />
-              <span className="hidden sm:inline">Analisi</span>
+            <TabsTrigger value="analisi" className="flex-1 min-w-[60px] text-xs sm:text-sm px-2 sm:px-4 gap-1">
+              <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <span className="text-[10px] sm:text-sm">Dati</span>
             </TabsTrigger>
-            <TabsTrigger value="interpretazione" className="flex-1 min-w-[60px] text-xs sm:text-sm px-2 sm:px-4">
-              <Brain className="h-3.5 w-3.5 sm:h-4 sm:w-4 sm:mr-1" />
-              <span className="hidden sm:inline">Interpr.</span>
+            <TabsTrigger value="interpretazione" className="flex-1 min-w-[60px] text-xs sm:text-sm px-2 sm:px-4 gap-1">
+              <Brain className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <span className="text-[10px] sm:text-sm">Interp</span>
             </TabsTrigger>
-            <TabsTrigger value="profilo" className="flex-1 min-w-[60px] text-xs sm:text-sm px-2 sm:px-4">
-              <User className="h-3.5 w-3.5 sm:h-4 sm:w-4 sm:mr-1" />
-              <span className="hidden sm:inline">Profilo</span>
+            <TabsTrigger value="profilo" className="flex-1 min-w-[60px] text-xs sm:text-sm px-2 sm:px-4 gap-1">
+              <User className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <span className="text-[10px] sm:text-sm">Profilo</span>
             </TabsTrigger>
-            <TabsTrigger value="colloquio" className="flex-1 min-w-[60px] text-xs sm:text-sm px-2 sm:px-4">
-              <MessageSquare className="h-3.5 w-3.5 sm:h-4 sm:w-4 sm:mr-1" />
-              <span className="hidden sm:inline">Colloq.</span>
+            <TabsTrigger value="colloquio" className="flex-1 min-w-[60px] text-xs sm:text-sm px-2 sm:px-4 gap-1">
+              <MessageSquare className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <span className="text-[10px] sm:text-sm">Coll</span>
             </TabsTrigger>
-            <TabsTrigger value="ai" className="flex-1 min-w-[60px] text-xs sm:text-sm px-2 sm:px-4">
-              <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 sm:mr-1" />
-              <span className="hidden sm:inline">AI</span>
+            <TabsTrigger value="ai" className="flex-1 min-w-[60px] text-xs sm:text-sm px-2 sm:px-4 gap-1">
+              <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <span className="text-[10px] sm:text-sm">AI</span>
             </TabsTrigger>
           </TabsList>
                 {/* TAB: Analisi Dati */}
