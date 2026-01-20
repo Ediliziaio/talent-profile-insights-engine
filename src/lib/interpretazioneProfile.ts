@@ -87,6 +87,19 @@ const PATTERN_CRITICI: PatternCritico[] = [
     descrizione: 'Gap tra Efficacia ed Efficienza (20-40 punti) con Efficienza sotto media. Alta determinazione (EC) ma scarsa autodisciplina (EF). Grandi idee, difficoltà nell\'esecuzione ordinata. Richiede supporto organizzativo e procedure chiare.',
     tipo: 'attenzione'
   },
+  // PATTERN POSITIVO: Determinazione Superiore (Alto EC + Alto EF)
+  {
+    id: 'determinazione_superiore',
+    nome: 'Determinazione Superiore',
+    condizione: (s) => {
+      const ec = s['EC'] || 100;
+      const ef = s['EF'] || 100;
+      // EC molto alta E EF comunque alta = combinazione positiva
+      return ec >= 160 && ef >= 130;
+    },
+    descrizione: 'Eccellente determinazione (EC eccellente) abbinata a buona organizzazione (EF alto). Profilo che sa identificare gli obiettivi giusti E li persegue con metodo. Combinazione rara e preziosa: vede cosa fare e sa come farlo.',
+    tipo: 'forza' as 'attenzione' // Type workaround - sarà gestito in modo speciale
+  },
   {
     id: 'esecutore_cieco_forte',
     nome: 'Esecutore senza Visione Strategica',

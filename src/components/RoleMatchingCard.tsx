@@ -401,65 +401,90 @@ export function RoleMatchingCard({
           <>
             <Separator />
 
-            {/* Compatibilità Altri Ruoli */}
-            <Accordion type="single" collapsible className="w-full">
-              <AccordionItem value="ruoli">
-                <AccordionTrigger className="text-sm font-semibold">
-                  <div className="flex items-center gap-2">
-                    <Briefcase className="h-4 w-4" />
-                    Compatibilità con Altri Ruoli
-                    {matching.ruoloIdeale && (
-                      <Badge variant="secondary" className="ml-2">
-                        Ruolo ideale: {matching.ruoloIdeale.ruolo}
-                      </Badge>
-                    )}
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent>
-                  <div className="space-y-2 pt-2">
-                    {matching.tuttiRuoli.map((r) => (
-                      <div key={r.ruolo} className="flex items-center gap-3">
-                        <span className="text-sm w-40 truncate">{r.ruolo}</span>
-                        <Progress value={r.compatibilita} className="flex-1 h-2" />
-                        <span className="text-sm font-medium w-12 text-right">
-                          {r.compatibilita}%
-                        </span>
-                        <Badge 
-                          variant={getVerdictBadgeVariant(r.verdict)} 
-                          className="text-[10px] w-20 justify-center"
-                        >
-                          {getVerdictLabel(r.verdict).split(' ')[0]}
-                        </Badge>
-                      </div>
+            {/* TABELLA COMPLETA 9 RUOLI - Sempre visibile */}
+            <div className="space-y-3">
+              <h4 className="text-sm font-semibold flex items-center gap-2">
+                <Briefcase className="h-4 w-4" />
+                Compatibilità con Tutti i Ruoli
+                {matching.ruoloIdeale && (
+                  <Badge variant="secondary" className="ml-2 text-xs">
+                    🎯 Ideale: {matching.ruoloIdeale.ruolo}
+                  </Badge>
+                )}
+              </h4>
+              
+              <div className="rounded-lg border overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead className="bg-muted/50">
+                    <tr>
+                      <th className="text-left p-2 font-medium">Ruolo</th>
+                      <th className="text-center p-2 font-medium w-24">Compat.</th>
+                      <th className="text-center p-2 font-medium w-32">Verdetto</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {matching.tuttiRuoli.map((r, idx) => (
+                      <tr 
+                        key={r.ruolo} 
+                        className={cn(
+                          "border-t",
+                          r.ruolo === ruoloRichiesto && "bg-primary/5 font-medium",
+                          matching.ruoloIdeale?.ruolo === r.ruolo && "bg-amber-50 dark:bg-amber-950/30"
+                        )}
+                      >
+                        <td className="p-2 flex items-center gap-2">
+                          {r.ruolo === ruoloRichiesto && <Target className="h-3.5 w-3.5 text-primary" />}
+                          {matching.ruoloIdeale?.ruolo === r.ruolo && <Lightbulb className="h-3.5 w-3.5 text-amber-600" />}
+                          <span className={cn(r.ruolo === ruoloRichiesto && "text-primary")}>
+                            {r.ruolo}
+                          </span>
+                        </td>
+                        <td className="p-2 text-center">
+                          <span className={cn(
+                            "font-bold",
+                            r.compatibilita >= 80 && "text-green-600",
+                            r.compatibilita >= 60 && r.compatibilita < 80 && "text-amber-600",
+                            r.compatibilita < 60 && "text-red-600"
+                          )}>
+                            {r.compatibilita}%
+                          </span>
+                        </td>
+                        <td className="p-2 text-center">
+                          <Badge 
+                            variant={getVerdictBadgeVariant(r.verdict)} 
+                            className="text-[10px]"
+                          >
+                            {getVerdictLabel(r.verdict)}
+                          </Badge>
+                        </td>
+                      </tr>
                     ))}
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
+                  </tbody>
+                </table>
+              </div>
+            </div>
 
-              {/* Ruolo Ideale Suggerito */}
-              {matching.ruoloIdeale && (
-                <AccordionItem value="ideale">
-                  <AccordionTrigger className="text-sm font-semibold">
-                    <div className="flex items-center gap-2">
-                      <Lightbulb className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                      Ruolo Ideale Suggerito
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <Alert className="border-amber-500/50 bg-amber-50/50 dark:bg-amber-950/30">
-                      <Lightbulb className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                      <AlertTitle>Considerare: {matching.ruoloIdeale.ruolo}</AlertTitle>
-                      <AlertDescription className="text-sm">
-                        Questo candidato mostra una compatibilità del {matching.ruoloIdeale.compatibilita}% 
-                        per il ruolo di <strong>{matching.ruoloIdeale.ruolo}</strong>, superiore al 
-                        {result.compatibilitaPct}% per {ruoloRichiesto}. Valutare una eventuale 
-                        ricollocazione o doppia considerazione.
-                      </AlertDescription>
-                    </Alert>
-                  </AccordionContent>
-                </AccordionItem>
-              )}
+            {/* Ruolo Ideale Suggerito - Alert prominente */}
+            {matching.ruoloIdeale && (
+              <Alert className="border-2 border-amber-500/50 bg-amber-50/50 dark:bg-amber-950/30">
+                <Lightbulb className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                <AlertTitle className="text-amber-800 dark:text-amber-300 font-bold">
+                  💡 Ruolo Ideale: {matching.ruoloIdeale.ruolo}
+                </AlertTitle>
+                <AlertDescription className="text-sm text-amber-700 dark:text-amber-400">
+                  Questo candidato mostra una compatibilità del <strong>{matching.ruoloIdeale.compatibilita}%</strong> 
+                  per il ruolo di <strong>{matching.ruoloIdeale.ruolo}</strong>, superiore al 
+                  <strong> {result.compatibilitaPct}%</strong> per {ruoloRichiesto}. 
+                  <br />
+                  <em>Valutare eventuale ricollocazione o doppia considerazione.</em>
+                </AlertDescription>
+              </Alert>
+            )}
 
+            <Separator />
+
+            {/* Accordion per dettagli aggiuntivi */}
+            <Accordion type="single" collapsible className="w-full">
               {/* Domande Colloquio */}
               {result.domandeColloquio.length > 0 && (
                 <AccordionItem value="domande">
