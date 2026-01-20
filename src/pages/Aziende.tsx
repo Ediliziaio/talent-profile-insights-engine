@@ -108,6 +108,13 @@ export default function Aziende() {
     email: string;
     password: string;
   } | null>(null);
+  
+  // HR Password Reset state
+  const [resettingHRPassword, setResettingHRPassword] = useState(false);
+  const [hrResetCredentials, setHrResetCredentials] = useState<{
+    email: string;
+    password: string;
+  } | null>(null);
 
   // Filters
   const [searchTerm, setSearchTerm] = useState('');
@@ -512,8 +519,8 @@ export default function Aziende() {
       });
 
       toast({
-        title: 'Password rigenerata',
-        description: 'Le nuove credenziali sono state generate',
+        title: 'Password candidati rigenerata',
+        description: 'Le nuove credenziali per i candidati sono state generate',
       });
     } catch (error: any) {
       toast({
@@ -523,6 +530,59 @@ export default function Aziende() {
       });
     } finally {
       setRegeneratingPassword(false);
+    }
+  };
+
+  // Reset HR password (auth.users)
+  const resetHRPassword = async () => {
+    if (!editingAzienda) return;
+    
+    setResettingHRPassword(true);
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData?.session?.access_token;
+      
+      if (!token) {
+        throw new Error('Sessione non valida');
+      }
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/reset-company-password`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            azienda_id: editingAzienda.id,
+          }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Errore nel reset password');
+      }
+      
+      setHrResetCredentials({
+        email: result.email,
+        password: result.password,
+      });
+
+      toast({
+        title: 'Password HR resettata',
+        description: 'La nuova password per l\'accesso HR è stata generata',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Errore',
+        description: error.message || 'Impossibile resettare la password HR',
+        variant: 'destructive',
+      });
+    } finally {
+      setResettingHRPassword(false);
     }
   };
 
@@ -625,6 +685,7 @@ export default function Aziende() {
                     setEditingAzienda(null);
                     resetForm();
                     setRegeneratedCredentials(null);
+                    setHrResetCredentials(null);
                   }
                 }}>
                   <DialogTrigger asChild>
@@ -698,72 +759,148 @@ export default function Aziende() {
                           <Label htmlFor="attiva">Azienda attiva</Label>
                         </div>
 
-                        {/* Password Regeneration Section - only for existing companies */}
+                        {/* Credentials Sections - only for existing companies */}
                         {editingAzienda && (
-                          <div className="border-t pt-4 mt-2 space-y-3">
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <Label className="text-sm font-medium">Credenziali Accesso HR</Label>
-                                <p className="text-xs text-muted-foreground mt-0.5">
-                                  Rigenera le credenziali di accesso per l'azienda
-                                </p>
+                          <div className="border-t pt-4 mt-2 space-y-4">
+                            {/* HR Access Section */}
+                            <div className="space-y-3">
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <Label className="text-sm font-medium flex items-center gap-2">
+                                    <Building2 className="h-4 w-4" />
+                                    Accesso HR (Dashboard)
+                                  </Label>
+                                  <p className="text-xs text-muted-foreground mt-0.5">
+                                    Per il login del manager nel tab "Azienda"
+                                  </p>
+                                </div>
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={resetHRPassword}
+                                  disabled={resettingHRPassword}
+                                  className="gap-2"
+                                >
+                                  {resettingHRPassword ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <Key className="h-4 w-4" />
+                                  )}
+                                  Reset Password
+                                </Button>
                               </div>
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={regeneratePassword}
-                                disabled={regeneratingPassword}
-                                className="gap-2"
-                              >
-                                {regeneratingPassword ? (
-                                  <Loader2 className="h-4 w-4 animate-spin" />
-                                ) : (
-                                  <Key className="h-4 w-4" />
-                                )}
-                                Rigenera
-                              </Button>
+                              
+                              {hrResetCredentials && (
+                                <div className="p-3 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg space-y-2">
+                                  <p className="text-xs font-medium text-blue-800 dark:text-blue-200">
+                                    Nuova password HR generata:
+                                  </p>
+                                  <div className="flex items-center gap-2">
+                                    <Input 
+                                      value={hrResetCredentials.email} 
+                                      readOnly 
+                                      className="text-xs font-mono h-8 flex-1" 
+                                    />
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-8 w-8"
+                                      onClick={() => copyToClipboard(hrResetCredentials.email, 'hr-email')}
+                                    >
+                                      {copiedId === 'hr-email' ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                                    </Button>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <Input 
+                                      value={hrResetCredentials.password} 
+                                      readOnly 
+                                      className="text-xs font-mono h-8 flex-1" 
+                                    />
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-8 w-8"
+                                      onClick={() => copyToClipboard(hrResetCredentials.password, 'hr-pass')}
+                                    >
+                                      {copiedId === 'hr-pass' ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                                    </Button>
+                                  </div>
+                                </div>
+                              )}
                             </div>
-                            
-                            {regeneratedCredentials && (
-                              <div className="p-3 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg space-y-2">
-                                <p className="text-xs font-medium text-green-800 dark:text-green-200">
-                                  Nuove credenziali generate:
-                                </p>
-                                <div className="flex items-center gap-2">
-                                  <Input 
-                                    value={regeneratedCredentials.email} 
-                                    readOnly 
-                                    className="text-xs font-mono h-8 flex-1" 
-                                  />
-                                  <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8"
-                                    onClick={() => copyToClipboard(regeneratedCredentials.email, 'regen-email')}
-                                  >
-                                    {copiedId === 'regen-email' ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-                                  </Button>
+
+                            {/* Candidates Access Section */}
+                            <div className="space-y-3 border-t pt-4">
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <Label className="text-sm font-medium flex items-center gap-2">
+                                    <Users className="h-4 w-4" />
+                                    Accesso Candidati (Test)
+                                  </Label>
+                                  <p className="text-xs text-muted-foreground mt-0.5">
+                                    Per il login candidati nel tab "Candidato"
+                                  </p>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                  <Input 
-                                    value={regeneratedCredentials.password} 
-                                    readOnly 
-                                    className="text-xs font-mono h-8 flex-1" 
-                                  />
-                                  <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8"
-                                    onClick={() => copyToClipboard(regeneratedCredentials.password, 'regen-pass')}
-                                  >
-                                    {copiedId === 'regen-pass' ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-                                  </Button>
-                                </div>
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={regeneratePassword}
+                                  disabled={regeneratingPassword}
+                                  className="gap-2"
+                                >
+                                  {regeneratingPassword ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <Key className="h-4 w-4" />
+                                  )}
+                                  Rigenera
+                                </Button>
                               </div>
-                            )}
+                              
+                              {regeneratedCredentials && (
+                                <div className="p-3 bg-accent/50 border border-border rounded-lg space-y-2">
+                                  <p className="text-xs font-medium text-foreground">
+                                    Nuove credenziali candidati:
+                                  </p>
+                                  <div className="flex items-center gap-2">
+                                    <Input 
+                                      value={regeneratedCredentials.email} 
+                                      readOnly 
+                                      className="text-xs font-mono h-8 flex-1" 
+                                    />
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-8 w-8"
+                                      onClick={() => copyToClipboard(regeneratedCredentials.email, 'regen-email')}
+                                    >
+                                      {copiedId === 'regen-email' ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                                    </Button>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <Input 
+                                      value={regeneratedCredentials.password} 
+                                      readOnly 
+                                      className="text-xs font-mono h-8 flex-1" 
+                                    />
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-8 w-8"
+                                      onClick={() => copyToClipboard(regeneratedCredentials.password, 'regen-pass')}
+                                    >
+                                      {copiedId === 'regen-pass' ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                                    </Button>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
                           </div>
                         )}
                       </div>
