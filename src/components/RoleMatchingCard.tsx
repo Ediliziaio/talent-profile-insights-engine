@@ -346,6 +346,43 @@ export function RoleMatchingCard({
                 </ul>
               </div>
               
+              {/* Aspettative Temporali */}
+              {profiloInfo.aspettativeTemporali && (
+                <div className="bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-900/50 dark:to-slate-800/50 rounded-lg p-4 space-y-4">
+                  <h4 className="text-sm font-bold flex items-center gap-2 text-slate-700 dark:text-slate-300">
+                    📅 Cosa Aspettarsi nel Tempo
+                  </h4>
+                  <div className="grid gap-3">
+                    {/* Breve Termine */}
+                    <div className="border-l-4 border-cyan-500 pl-4 py-2 bg-white/50 dark:bg-black/20 rounded-r-lg">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-lg">🏃</span>
+                        <span className="text-xs font-bold text-cyan-700 dark:text-cyan-400 uppercase tracking-wider">Primi 3 Mesi</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">{profiloInfo.aspettativeTemporali.breveTermine}</p>
+                    </div>
+                    
+                    {/* Medio Termine */}
+                    <div className="border-l-4 border-amber-500 pl-4 py-2 bg-white/50 dark:bg-black/20 rounded-r-lg">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-lg">📈</span>
+                        <span className="text-xs font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider">3-12 Mesi</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">{profiloInfo.aspettativeTemporali.medioTermine}</p>
+                    </div>
+                    
+                    {/* Lungo Termine */}
+                    <div className="border-l-4 border-emerald-500 pl-4 py-2 bg-white/50 dark:bg-black/20 rounded-r-lg">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-lg">🎯</span>
+                        <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">Oltre 12 Mesi</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">{profiloInfo.aspettativeTemporali.lungoTermine}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Alert HR */}
               {profiloInfo.alertHR && (
                 <Alert className="border-primary/50 bg-primary/5">
