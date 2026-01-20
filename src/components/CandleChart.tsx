@@ -97,12 +97,12 @@ export function CandleChart({
   const isMobile = useIsMobile();
   const chartData = useMemo(() => generateCandleChartData(scalePunteggi), [scalePunteggi]);
   
-  // Altezza dinamica basata su numero di barre
-  const barHeight = isMobile ? 32 : 40;
-  const chartHeight = chartData.length * barHeight + 60;
-  const yAxisWidth = isMobile ? 90 : 120;
-  const fontSize = isMobile ? 10 : 11;
-
+  // Altezza dinamica basata su numero di barre - V5: più spazio per nomi completi
+  const barHeight = isMobile ? 36 : 44;
+  const chartHeight = chartData.length * barHeight + 80;
+  // V5: aumentato yAxisWidth per nomi completi visibili
+  const yAxisWidth = isMobile ? 110 : 150;
+  const fontSize = isMobile ? 10 : 12;
   if (layout === 'horizontal') {
     return (
       <div className={cn("w-full", className)}>
@@ -151,25 +151,25 @@ export function CandleChart({
     );
   }
 
-  // Layout verticale (default) - mostra come barre orizzontali per migliore leggibilità nomi
+  // Layout verticale (default) - V5: ottimizzato per nomi completi visibili
   return (
     <div className={cn("w-full", className)}>
       <ResponsiveContainer width="100%" height={chartHeight}>
         <BarChart 
           data={chartData} 
           layout="vertical"
-          margin={{ top: 10, right: 45, left: 5, bottom: 10 }}
+          margin={{ top: 15, right: 50, left: 8, bottom: 15 }}
         >
-          {/* Zone colorate di sfondo */}
-          <ReferenceArea x1={-50} x2={-15} fill="#fee2e2" fillOpacity={0.4} />
-          <ReferenceArea x1={-15} x2={15} fill="#fef9c3" fillOpacity={0.4} />
-          <ReferenceArea x1={15} x2={50} fill="#dcfce7" fillOpacity={0.4} />
+          {/* Zone colorate di sfondo - V5: range più ampi per leggibilità */}
+          <ReferenceArea x1={-50} x2={-15} fill="#fee2e2" fillOpacity={0.5} />
+          <ReferenceArea x1={-15} x2={15} fill="#fef9c3" fillOpacity={0.5} />
+          <ReferenceArea x1={15} x2={50} fill="#dcfce7" fillOpacity={0.5} />
           
           <XAxis 
             type="number"
             domain={[-50, 50]} 
             tickFormatter={(v) => `${v > 0 ? '+' : ''}${v}`}
-            tick={{ fontSize }}
+            tick={{ fontSize, fontWeight: 500 }}
             axisLine={{ stroke: 'hsl(var(--border))' }}
             tickLine={{ stroke: 'hsl(var(--border))' }}
           />
@@ -178,26 +178,26 @@ export function CandleChart({
             type="category"
             width={yAxisWidth}
             tick={{ 
-              fontSize: isMobile ? 9 : 11, 
+              fontSize: isMobile ? 10 : 12, 
               fill: 'hsl(var(--foreground))',
-              fontWeight: 500
+              fontWeight: 600
             }}
             axisLine={{ stroke: 'hsl(var(--border))' }}
             tickLine={false}
           />
           <Tooltip content={<CustomTooltip />} />
-          <ReferenceLine x={0} stroke="hsl(var(--muted-foreground))" strokeWidth={1.5} />
+          <ReferenceLine x={0} stroke="hsl(var(--muted-foreground))" strokeWidth={2} />
           
           <Bar 
             dataKey="value"
-            radius={[0, 4, 4, 0]}
-            maxBarSize={28}
+            radius={[0, 6, 6, 0]}
+            maxBarSize={32}
           >
             {chartData.map((entry, index) => (
               <Cell 
                 key={`cell-${index}`} 
                 fill={entry.value >= 0 ? '#22c55e' : '#ef4444'}
-                fillOpacity={0.85}
+                fillOpacity={0.9}
               />
             ))}
             {showLabels && (
@@ -206,7 +206,7 @@ export function CandleChart({
                 position="right"
                 formatter={(value: number) => value !== 0 ? `${value > 0 ? '+' : ''}${Math.round(value)}` : ''}
                 style={{ 
-                  fontSize: 10, 
+                  fontSize: isMobile ? 11 : 13, 
                   fontWeight: 'bold',
                   fill: 'hsl(var(--foreground))'
                 }}
@@ -216,19 +216,19 @@ export function CandleChart({
         </BarChart>
       </ResponsiveContainer>
 
-      {/* Legenda */}
-      <div className={`flex ${isMobile ? 'flex-wrap gap-2' : 'gap-4'} justify-center mt-3 ${isMobile ? 'text-[10px]' : 'text-xs'} text-muted-foreground`}>
-        <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded bg-red-200 border border-red-400" />
+      {/* Legenda V5: più chiara */}
+      <div className={`flex ${isMobile ? 'flex-wrap gap-2' : 'gap-6'} justify-center mt-4 ${isMobile ? 'text-[10px]' : 'text-sm'} text-muted-foreground font-medium`}>
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 rounded bg-red-200 border-2 border-red-400" />
           <span>Critico (&lt;-15)</span>
         </div>
-        <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded bg-yellow-200 border border-yellow-400" />
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 rounded bg-yellow-200 border-2 border-yellow-400" />
           <span>Attenzione (±15)</span>
         </div>
-        <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded bg-green-200 border border-green-400" />
-          <span>Ottimale (&gt;15)</span>
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 rounded bg-green-200 border-2 border-green-400" />
+          <span>Ottimale (&gt;+15)</span>
         </div>
       </div>
     </div>

@@ -491,18 +491,21 @@ export const SCALE_RANGE_TEXTS: ScaleRangeText[] = [
     domande_colloquio: []
   },
 
-  // ==================== SPAZIO VITALE (SP) ====================
+  // ==================== SPAZIO VITALE (SP) - AMBIZIONE (Manuale V5) ====================
+  // CORREZIONE V5: SP = AMBIZIONE, obiettivi personali materiali/economici
+  // Basso SP = nessun obiettivo, incompatibile con vendita
+  // COMBINAZIONE CRITICA: Alta MO + Basso SP = "Motore che gira a vuoto"
   {
     scala: 'SP',
     rangeMin: 0,
     rangeMax: 39,
     livello: 'Critico',
-    testo: 'Consapevolezza di sé quasi nulla. Non riconosce i propri bisogni, limiti, confini. Può essere manipolabile o avere difficoltà identitarie.',
-    implicazioni: 'RISCHIO ELEVATO di burnout perché non sa quando fermarsi. Può accettare condizioni inaccettabili. Difficoltà nella negoziazione e nell\'assertività.',
+    testo: 'Nessuna ambizione personale. Mancano completamente obiettivi materiali ed economici. Non desidera migliorare la propria condizione.',
+    implicazioni: 'INCOMPATIBILE con ruoli commerciali: come può convincere altri a comprare se non desidera nulla per sé? Può funzionare solo in ruoli di mera esecuzione senza obiettivi di crescita.',
     domande_colloquio: [
-      'Come si descriverebbe in tre parole?',
-      'Cosa la fa stare bene nel lavoro?',
-      'Come gestisce richieste che vanno oltre le sue capacità?'
+      'Cosa desidera raggiungere nella vita a livello economico e materiale?',
+      'Quali sono i suoi obiettivi per i prossimi 5 anni?',
+      'Cosa la motiva a lavorare oltre alla necessità economica base?'
     ]
   },
   {
@@ -510,11 +513,11 @@ export const SCALE_RANGE_TEXTS: ScaleRangeText[] = [
     rangeMin: 40,
     rangeMax: 59,
     livello: 'Carenza Significativa',
-    testo: 'Bassa consapevolezza di sé. Difficoltà nel riconoscere e comunicare i propri bisogni. Tendenza ad adattarsi troppo.',
-    implicazioni: 'Rischio di essere sfruttato. Può accumulare frustrazione senza esprimerla. Sviluppare assertività.',
+    testo: 'Bassa ambizione. Manca una spinta verso obiettivi materiali concreti. Non cerca miglioramenti significativi della propria condizione economica.',
+    implicazioni: 'ATTENZIONE per vendita: se combinato con alta MO = "Motore che gira a vuoto". Sembra motivato ma produce poco perché manca la meta. Adatto a ruoli stabili senza target.',
     domande_colloquio: [
-      'Come comunica quando qualcosa non le sta bene?',
-      'Riesce a dire no quando necessario?'
+      'Cosa vorrebbe cambiare della sua situazione economica attuale?',
+      'Ha obiettivi di carriera specifici che desidera raggiungere?'
     ]
   },
   {
@@ -522,10 +525,11 @@ export const SCALE_RANGE_TEXTS: ScaleRangeText[] = [
     rangeMin: 60,
     rangeMax: 79,
     livello: 'Sotto la Media',
-    testo: 'Consapevolezza moderata. Riconosce i propri bisogni ma può avere difficoltà a esprimerli o farli rispettare.',
-    implicazioni: 'Supportare lo sviluppo dell\'assertività. Creare ambiente sicuro per esprimersi.',
+    testo: 'Ambizione moderata. Ha qualche obiettivo ma non particolarmente forte. Non è guidato da traguardi economici specifici.',
+    implicazioni: 'Può funzionare in ruoli stabili ma NON in vendita o ruoli con obiettivi sfidanti. Manca la spinta per fare quel passo in più.',
     domande_colloquio: [
-      'Come gestisce situazioni in cui i suoi bisogni confliggono con quelli dell\'azienda?'
+      'Cosa la farebbe sentire realizzato professionalmente tra 3 anni?',
+      'Quanto sono importanti per lei gli incentivi economici?'
     ]
   },
   {
@@ -533,8 +537,8 @@ export const SCALE_RANGE_TEXTS: ScaleRangeText[] = [
     rangeMin: 80,
     rangeMax: 119,
     livello: 'Nella Norma',
-    testo: 'Adeguata consapevolezza di sé. Conosce i propri punti di forza e limiti. Comunica i propri bisogni quando necessario.',
-    implicazioni: 'Profilo equilibrato. Gestisce i confini in modo appropriato.',
+    testo: 'Ambizione nella media. Ha obiettivi personali ma non è particolarmente spinto. Cerca un equilibrio più che la crescita massima.',
+    implicazioni: 'Profilo equilibrato. Performance stabili ma potrebbe non brillare in ruoli ad alta competizione.',
     domande_colloquio: []
   },
   {
@@ -542,8 +546,8 @@ export const SCALE_RANGE_TEXTS: ScaleRangeText[] = [
     rangeMin: 120,
     rangeMax: 159,
     livello: 'Sopra la Media',
-    testo: 'Elevata consapevolezza. Chiara comprensione di sé, dei propri valori e bisogni. Comunica efficacemente.',
-    implicazioni: 'Affidabile nella comunicazione. Sa negoziare e fare richieste appropriate.',
+    testo: 'Buona ambizione. Ha obiettivi chiari di crescita materiale ed economica. Sa cosa vuole e lavora per ottenerlo.',
+    implicazioni: 'Buon profilo per ruoli commerciali e di crescita. Risponde bene a incentivi e bonus.',
     domande_colloquio: []
   },
   {
@@ -551,8 +555,8 @@ export const SCALE_RANGE_TEXTS: ScaleRangeText[] = [
     rangeMin: 160,
     rangeMax: 200,
     livello: 'Eccellenza',
-    testo: 'PUNTO DI FORZA. Eccezionale consapevolezza di sé. Assertivo, autentico, in contatto con i propri bisogni. Comunica con chiarezza.',
-    implicazioni: 'Asset per ruoli che richiedono negoziazione e autenticità. Può essere modello per colleghi.',
+    testo: 'PUNTO DI FORZA. Persona molto ambiziosa con obiettivi materiali chiari e definiti. Vuole migliorare significativamente la propria condizione. Ha fame di risultati.',
+    implicazioni: 'IDEALE per vendita e ruoli con bonus/incentivi. La sua ambizione è il motore che lo spinge a performare. Assicurarsi che gli obiettivi aziendali siano allineati con i suoi.',
     domande_colloquio: []
   },
 
