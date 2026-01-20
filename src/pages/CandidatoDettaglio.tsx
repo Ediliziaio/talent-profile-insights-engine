@@ -13,6 +13,7 @@ import { FitIndicator } from '@/components/FitIndicator';
 import { PDFExportButton } from '@/components/PDFExportButton';
 import { StressZoneHero } from '@/components/StressZoneHero';
 import { RoleMatchingCard } from '@/components/RoleMatchingCard';
+import { ExecutiveSummaryCardV5 } from '@/components/ExecutiveSummaryCardV5';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -37,7 +38,7 @@ import {
   ProfiloDescription 
 } from '@/lib/profiloDescriptions';
 import { calculateStressZoneSeverity, StressZoneSeverity, getStressZoneSeverityLabel } from '@/lib/stressZone';
-import { calculateRoleMatching, calculateAllRolesCompatibility, ROLE_PROFILES } from '@/lib/roleMatching';
+import { calculateRoleMatching, calculateAllRolesCompatibility, ROLE_PROFILES, getVerdictLabel } from '@/lib/roleMatching';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -383,13 +384,13 @@ export default function CandidatoDettaglio() {
 
           {profilo ? (
             <div ref={reportRef} className="space-y-6 bg-background">
-              {/* Executive Summary - NUOVO */}
-              <ExecutiveSummaryCard
-                verdict={mapFitVerdictToExecutive(analisi?.fit_verdict)}
-                fitScore={analisi?.fit_score || 0}
-                probabilitySuccess={probabilitaSuccesso}
-                profiloSintetico={analisi?.profilo_sintetico || ''}
-                stressSeverity={stressZoneSeverity}
+              {/* Executive Summary V5 - DETERMINISTICO */}
+              <ExecutiveSummaryCardV5
+                scalePunteggi={scalePunteggi}
+                ruoloRichiesto={candidato.funzione || 'Ufficio vendite'}
+                profiloTipo={profiloTipo}
+                eta={candidato.eta}
+                stressZone={stressZone}
               />
 
               {/* Alert HR se presente */}
@@ -439,7 +440,9 @@ export default function CandidatoDettaglio() {
                   <RoleMatchingCard
                     ruoloRichiesto={candidato.funzione || 'Ufficio vendite'}
                     scalePunteggi={scalePunteggi}
+                    profiloTipo={profiloTipo}
                     showFullDetails={true}
+                    showNarrativeSections={true}
                   />
                 </TabsContent>
                 {/* TAB: Analisi Dati */}

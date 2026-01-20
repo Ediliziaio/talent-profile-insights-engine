@@ -9,6 +9,7 @@
  * - Ruolo ideale suggerito
  * - Pattern rilevati
  * - Domande suggerite per colloquio
+ * - NUOVO: Sezioni narrative dal profilo
  */
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -20,7 +21,8 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { 
   CheckCircle2, XCircle, AlertTriangle, Target, 
   TrendingUp, HelpCircle, Briefcase, MessageSquare,
-  Award, AlertCircle, Lightbulb
+  Award, AlertCircle, Lightbulb, User, Heart, Ban,
+  Gift, Zap, GraduationCap, ShieldAlert
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { 
@@ -32,30 +34,39 @@ import {
   AllRolesCompatibility,
   ROLE_PROFILES,
 } from '@/lib/roleMatching';
+import { ProfiloTipo } from '@/types/database';
+import { getProfiloDetailedDescription, ProfiloDetailedDescription } from '@/lib/profiloDetailedDescriptions';
 
 interface RoleMatchingCardProps {
   ruoloRichiesto: string;
   scalePunteggi: Record<string, number>;
+  profiloTipo?: ProfiloTipo | null;
   showFullDetails?: boolean;
+  showNarrativeSections?: boolean;
   className?: string;
 }
 
 export function RoleMatchingCard({ 
   ruoloRichiesto, 
   scalePunteggi, 
+  profiloTipo,
   showFullDetails = true,
+  showNarrativeSections = false,
   className 
 }: RoleMatchingCardProps) {
   const matching = calculateAllRolesCompatibility(ruoloRichiesto, scalePunteggi);
   const result = matching.ruoloRichiesto;
   const roleProfile = ROLE_PROFILES[ruoloRichiesto];
+  
+  // Ottieni descrizione profilo per sezioni narrative
+  const profiloInfo = profiloTipo ? getProfiloDetailedDescription(profiloTipo) : null;
 
   return (
     <Card className={cn("border-2", className, {
       'border-green-500/50': result.verdict === 'IDONEO',
-      'border-amber-500/50': result.verdict === 'IDONEO_CON_RISERVA',
-      'border-orange-500/50': result.verdict === 'DA_VALUTARE',
-      'border-red-500/50': result.verdict === 'NON_IDONEO',
+      'border-blue-500/50': result.verdict === 'IDONEO_CON_RISERVA',
+      'border-amber-500/50': result.verdict === 'DA_VALUTARE',
+      'border-destructive/50': result.verdict === 'NON_IDONEO',
     })}>
       <CardHeader className="pb-3">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -85,12 +96,12 @@ export function RoleMatchingCard({
       <CardContent className="space-y-4">
         {/* ALERT PROMINENTE: Motore a Vuoto */}
         {result.patternRilevati.some(p => p.includes('MOTORE A VUOTO')) && (
-          <Alert variant="destructive" className="border-2 border-red-600 bg-red-100 dark:bg-red-950 shadow-lg animate-pulse">
-            <AlertTriangle className="h-6 w-6 text-red-600" />
-            <AlertTitle className="text-red-700 dark:text-red-400 font-bold text-lg flex items-center gap-2">
+          <Alert variant="destructive" className="border-2 border-destructive bg-destructive/10 shadow-lg animate-pulse">
+            <AlertTriangle className="h-6 w-6" />
+            <AlertTitle className="font-bold text-lg flex items-center gap-2">
               ⚠️ ALERT CRITICO: Motore a Vuoto
             </AlertTitle>
-            <AlertDescription className="text-red-600 dark:text-red-300 font-medium">
+            <AlertDescription className="font-medium">
               <strong>Alta Motivazione + Bassa Ambizione = PERICOLOSO per ruoli commerciali.</strong>
               <br />
               Questo candidato sembra molto motivato (lavora tanto) ma non ha obiettivi personali concreti.
@@ -104,12 +115,12 @@ export function RoleMatchingCard({
 
         {/* ALERT PROMINENTE: Stress Zone Critica */}
         {result.patternRilevati.some(p => p.includes('STRESS ZONE CRITICA')) && (
-          <Alert variant="destructive" className="border-2 border-red-600 bg-red-100 dark:bg-red-950 shadow-lg">
-            <AlertTriangle className="h-6 w-6 text-red-600" />
-            <AlertTitle className="text-red-700 dark:text-red-400 font-bold text-lg">
+          <Alert variant="destructive" className="border-2 border-destructive bg-destructive/10 shadow-lg">
+            <AlertTriangle className="h-6 w-6" />
+            <AlertTitle className="font-bold text-lg">
               🚨 ALERT: Stress Zone Critica
             </AlertTitle>
-            <AlertDescription className="text-red-600 dark:text-red-300 font-medium">
+            <AlertDescription className="font-medium">
               Situazione personale grave + Risorse minime. 
               <strong>Supportare prima come persona, poi come lavoratore.</strong>
             </AlertDescription>
@@ -118,12 +129,12 @@ export function RoleMatchingCard({
 
         {/* ALERT: Rigidità Fragile */}
         {result.patternRilevati.some(p => p.includes('RIGIDITÀ FRAGILE')) && (
-          <Alert className="border-2 border-orange-500 bg-orange-50 dark:bg-orange-950 shadow-md">
-            <AlertTriangle className="h-5 w-5 text-orange-600" />
-            <AlertTitle className="text-orange-700 dark:text-orange-400 font-bold">
+          <Alert className="border-2 border-warning bg-warning/10 shadow-md">
+            <AlertTriangle className="h-5 w-5 text-warning-foreground" />
+            <AlertTitle className="font-bold text-warning-foreground">
               ⚡ ALERT: Rigidità Fragile
             </AlertTitle>
-            <AlertDescription className="text-orange-600 dark:text-orange-300">
+            <AlertDescription>
               Schematicità estrema + Bassa resilienza = Rischio blocco su imprevisti.
               Verificare capacità di adattamento in colloquio.
             </AlertDescription>
@@ -131,11 +142,11 @@ export function RoleMatchingCard({
         )}
 
         {/* Motivazione principale */}
-        <Alert className={cn({
-          'border-green-500/50 bg-green-50/50': result.verdict === 'IDONEO',
-          'border-amber-500/50 bg-amber-50/50': result.verdict === 'IDONEO_CON_RISERVA',
-          'border-orange-500/50 bg-orange-50/50': result.verdict === 'DA_VALUTARE',
-          'border-red-500/50 bg-red-50/50': result.verdict === 'NON_IDONEO',
+        <Alert className={cn("border", {
+          'border-green-500/50 bg-green-50/50 dark:bg-green-950/30': result.verdict === 'IDONEO',
+          'border-blue-500/50 bg-blue-50/50 dark:bg-blue-950/30': result.verdict === 'IDONEO_CON_RISERVA',
+          'border-amber-500/50 bg-amber-50/50 dark:bg-amber-950/30': result.verdict === 'DA_VALUTARE',
+          'border-destructive/50 bg-destructive/10': result.verdict === 'NON_IDONEO',
         })}>
           <AlertCircle className={cn("h-4 w-4", getVerdictColor(result.verdict))} />
           <AlertDescription className="text-sm font-medium">
@@ -147,7 +158,7 @@ export function RoleMatchingCard({
         {result.patternRilevati.length > 0 && (
           <div className="space-y-2">
             <h4 className="text-sm font-semibold flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4 text-amber-600" />
+              <AlertTriangle className="h-4 w-4 text-warning-foreground" />
               Pattern Rilevati
             </h4>
             <div className="space-y-1.5">
@@ -166,7 +177,7 @@ export function RoleMatchingCard({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Requisiti OK */}
           <div className="space-y-2">
-            <h4 className="text-sm font-semibold flex items-center gap-2 text-green-700">
+            <h4 className="text-sm font-semibold flex items-center gap-2 text-green-700 dark:text-green-400">
               <CheckCircle2 className="h-4 w-4" />
               Requisiti Soddisfatti ({result.requisitiSoddisfatti.length})
             </h4>
@@ -174,7 +185,7 @@ export function RoleMatchingCard({
               <ul className="space-y-1">
                 {result.requisitiSoddisfatti.map((req, idx) => (
                   <li key={idx} className="flex items-center gap-2 text-sm">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-green-600 flex-shrink-0" />
+                    <CheckCircle2 className="h-3.5 w-3.5 text-green-600 dark:text-green-400 flex-shrink-0" />
                     <span>{req.label.split('(')[0].trim()}</span>
                     <Badge variant="outline" className="ml-auto text-xs">
                       {req.valore}
@@ -189,7 +200,7 @@ export function RoleMatchingCard({
 
           {/* Requisiti Mancanti */}
           <div className="space-y-2">
-            <h4 className="text-sm font-semibold flex items-center gap-2 text-red-700">
+            <h4 className="text-sm font-semibold flex items-center gap-2 text-destructive">
               <XCircle className="h-4 w-4" />
               Requisiti Mancanti ({result.requisitiMancanti.length})
             </h4>
@@ -197,7 +208,7 @@ export function RoleMatchingCard({
               <ul className="space-y-1">
                 {result.requisitiMancanti.map((req, idx) => (
                   <li key={idx} className="flex items-center gap-2 text-sm">
-                    <XCircle className="h-3.5 w-3.5 text-red-600 flex-shrink-0" />
+                    <XCircle className="h-3.5 w-3.5 text-destructive flex-shrink-0" />
                     <span>{req.label.split('(')[0].trim()}</span>
                     <Badge variant="destructive" className="ml-auto text-xs">
                       {req.valore} (min {req.soglia})
@@ -216,18 +227,135 @@ export function RoleMatchingCard({
           <>
             <Separator />
             <div className="space-y-2">
-              <h4 className="text-sm font-semibold flex items-center gap-2 text-amber-700">
+              <h4 className="text-sm font-semibold flex items-center gap-2 text-amber-700 dark:text-amber-400">
                 <AlertTriangle className="h-4 w-4" />
                 Aree di Attenzione ({result.areeAttenzione.length})
               </h4>
               <ul className="space-y-1">
                 {result.areeAttenzione.map((area, idx) => (
-                  <li key={idx} className="flex items-center gap-2 text-sm bg-amber-50 p-2 rounded">
-                    <AlertTriangle className="h-3.5 w-3.5 text-amber-600 flex-shrink-0" />
+                  <li key={idx} className="flex items-center gap-2 text-sm bg-amber-50 dark:bg-amber-950/30 p-2 rounded">
+                    <AlertTriangle className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
                     <span>{area.label.split('(')[0].trim()}: {area.motivo}</span>
                   </li>
                 ))}
               </ul>
+            </div>
+          </>
+        )}
+
+        {/* SEZIONI NARRATIVE - Dal profilo dettagliato */}
+        {showNarrativeSections && profiloInfo && (
+          <>
+            <Separator />
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <User className="h-5 w-5 text-primary" />
+                Analisi Dettagliata del Profilo
+              </h3>
+              
+              {/* Chi è questa persona */}
+              <div className="bg-muted/30 rounded-lg p-4 space-y-2">
+                <h4 className="text-sm font-semibold flex items-center gap-2">
+                  <User className="h-4 w-4 text-primary" />
+                  Chi è Questa Persona
+                </h4>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {profiloInfo.chiE}
+                </p>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Cosa lo Motiva */}
+                <div className="bg-green-50 dark:bg-green-950/30 rounded-lg p-4 space-y-2">
+                  <h4 className="text-sm font-semibold flex items-center gap-2 text-green-700 dark:text-green-400">
+                    <Heart className="h-4 w-4" />
+                    Cosa lo Motiva
+                  </h4>
+                  <ul className="space-y-1">
+                    {profiloInfo.cosaMotiva.map((item, idx) => (
+                      <li key={idx} className="text-sm flex items-start gap-2">
+                        <CheckCircle2 className="h-3.5 w-3.5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                
+                {/* Cosa lo Blocca */}
+                <div className="bg-red-50 dark:bg-red-950/30 rounded-lg p-4 space-y-2">
+                  <h4 className="text-sm font-semibold flex items-center gap-2 text-destructive">
+                    <Ban className="h-4 w-4" />
+                    Cosa lo Blocca
+                  </h4>
+                  <ul className="space-y-1">
+                    {profiloInfo.cosaBlocca.map((item, idx) => (
+                      <li key={idx} className="text-sm flex items-start gap-2">
+                        <XCircle className="h-3.5 w-3.5 text-destructive mt-0.5 flex-shrink-0" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                
+                {/* Cosa Dare */}
+                <div className="bg-blue-50 dark:bg-blue-950/30 rounded-lg p-4 space-y-2">
+                  <h4 className="text-sm font-semibold flex items-center gap-2 text-blue-700 dark:text-blue-400">
+                    <Gift className="h-4 w-4" />
+                    Cosa Dargli
+                  </h4>
+                  <ul className="space-y-1">
+                    {profiloInfo.cosaDare.map((item, idx) => (
+                      <li key={idx} className="text-sm flex items-start gap-2">
+                        <Zap className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                
+                {/* Cosa NON Dare */}
+                <div className="bg-amber-50 dark:bg-amber-950/30 rounded-lg p-4 space-y-2">
+                  <h4 className="text-sm font-semibold flex items-center gap-2 text-amber-700 dark:text-amber-400">
+                    <Ban className="h-4 w-4" />
+                    Cosa NON Dargli
+                  </h4>
+                  <ul className="space-y-1">
+                    {profiloInfo.cosaNonDare.map((item, idx) => (
+                      <li key={idx} className="text-sm flex items-start gap-2">
+                        <AlertTriangle className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+              
+              {/* Come Gestirlo */}
+              <div className="bg-purple-50 dark:bg-purple-950/30 rounded-lg p-4 space-y-2">
+                <h4 className="text-sm font-semibold flex items-center gap-2 text-purple-700 dark:text-purple-400">
+                  <GraduationCap className="h-4 w-4" />
+                  Come Gestirlo in Azienda
+                </h4>
+                <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  {profiloInfo.comeGestirlo.map((item, idx) => (
+                    <li key={idx} className="text-sm flex items-start gap-2">
+                      <Lightbulb className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400 mt-0.5 flex-shrink-0" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              
+              {/* Alert HR */}
+              {profiloInfo.alertHR && (
+                <Alert className="border-primary/50 bg-primary/5">
+                  <ShieldAlert className="h-4 w-4" />
+                  <AlertTitle className="text-sm font-semibold">Alert HR</AlertTitle>
+                  <AlertDescription className="text-sm">
+                    {profiloInfo.alertHR}
+                  </AlertDescription>
+                </Alert>
+              )}
             </div>
           </>
         )}
@@ -276,13 +404,13 @@ export function RoleMatchingCard({
                 <AccordionItem value="ideale">
                   <AccordionTrigger className="text-sm font-semibold">
                     <div className="flex items-center gap-2">
-                      <Lightbulb className="h-4 w-4 text-amber-600" />
+                      <Lightbulb className="h-4 w-4 text-amber-600 dark:text-amber-400" />
                       Ruolo Ideale Suggerito
                     </div>
                   </AccordionTrigger>
                   <AccordionContent>
-                    <Alert className="border-amber-500/50 bg-amber-50/50">
-                      <Lightbulb className="h-4 w-4 text-amber-600" />
+                    <Alert className="border-amber-500/50 bg-amber-50/50 dark:bg-amber-950/30">
+                      <Lightbulb className="h-4 w-4 text-amber-600 dark:text-amber-400" />
                       <AlertTitle>Considerare: {matching.ruoloIdeale.ruolo}</AlertTitle>
                       <AlertDescription className="text-sm">
                         Questo candidato mostra una compatibilità del {matching.ruoloIdeale.compatibilita}% 
