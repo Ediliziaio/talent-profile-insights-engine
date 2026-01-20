@@ -341,6 +341,7 @@ export default function CandidatoDettaglio() {
                     scalePunteggi={scalePunteggi}
                     stressZone={stressZone}
                     dataTest={candidato.data_test}
+                    schematicita={profilo?.schematicita ?? 100}
                   />
                   <PDFExportButton 
                     targetRef={reportRef} 
