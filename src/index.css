@@ -138,6 +138,18 @@
   }
 }
 
+/* Custom keyframes for Stress Zone animations */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  75% { transform: translateX(2px); }
+}
+
 /* Custom questionnaire styles */
 @layer components {
   .answer-button {

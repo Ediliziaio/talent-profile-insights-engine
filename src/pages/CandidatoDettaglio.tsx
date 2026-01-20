@@ -281,13 +281,16 @@ export default function CandidatoDettaglio() {
   const stressZone = profilo?.stress_zone || false;
   const schematicita = profilo?.schematicita || 100;
   
-  // Calcolo severità Stress Zone con valori reali (non default 100 che nasconde il problema)
+  // Calcolo severità Stress Zone con valori reali (fallback a 0 per mostrare dati mancanti)
   const sv = scalePunteggi['SV'];
   const cf = scalePunteggi['CF'];
-  const stressZoneSeverity = calculateStressZoneSeverity(
-    sv !== undefined ? sv : 100,
-    cf !== undefined ? cf : 100
-  );
+  const hasValidStressData = sv !== undefined && cf !== undefined;
+  // Fallback a 0 invece di 100: se dati mancano, StressZoneHero mostrerà "Dati non disponibili"
+  const effectiveSV = sv ?? 0;
+  const effectiveCF = cf ?? 0;
+  const stressZoneSeverity = hasValidStressData 
+    ? calculateStressZoneSeverity(sv, cf)
+    : calculateStressZoneSeverity(0, 0); // Questo attiverà il check "dati non disponibili" nel componente
   
   // Usa il profilo dal DB, non ricalcolarlo
   const profiloTipo = (profilo?.profilo_tipo as ProfiloTipo) || null;
@@ -475,10 +478,10 @@ export default function CandidatoDettaglio() {
                     />
                   </div>
 
-                  {/* Stress Zone Hero - UNICA rappresentazione */}
+                  {/* Stress Zone Hero - UNICA rappresentazione con valori centralizzati */}
                   <StressZoneHero
-                    sv={sv !== undefined ? sv : 100}
-                    cf={cf !== undefined ? cf : 100}
+                    sv={effectiveSV}
+                    cf={effectiveCF}
                     severity={stressZoneSeverity}
                   />
 

@@ -326,13 +326,13 @@ export function InterpretazioneDati({
 }: InterpretazioneDatiProps) {
   const [completedQuestions, setCompletedQuestions] = useState<Record<string, number[]>>({});
 
-  // Calcola la severità se non fornita
+  // Calcola la severità se non fornita (fallback a 0 per mostrare dati mancanti)
   const sv = scalePunteggi['SV'];
   const cf = scalePunteggi['CF'];
-  const stressZoneSeverity = propSeverity || calculateStressZoneSeverity(
-    sv !== undefined ? sv : 100,
-    cf !== undefined ? cf : 100
-  );
+  // Fallback a 0 invece di 100: coerente con CandidatoDettaglio
+  const effectiveSV = sv ?? 0;
+  const effectiveCF = cf ?? 0;
+  const stressZoneSeverity = propSeverity || calculateStressZoneSeverity(effectiveSV, effectiveCF);
 
   const interpretazioni = generateInterpretazione(
     scalePunteggi,
@@ -431,8 +431,8 @@ export function InterpretazioneDati({
       {/* Stress Zone Hero - Solo se richiesto */}
       {showStressZoneHero && (
         <StressZoneHero
-          sv={sv !== undefined ? sv : 100}
-          cf={cf !== undefined ? cf : 100}
+          sv={effectiveSV}
+          cf={effectiveCF}
           severity={stressZoneSeverity}
         />
       )}
