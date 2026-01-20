@@ -16,6 +16,90 @@ interface ScalePunteggi {
 
 type StressZoneSeverity = 'nessuna' | 'lieve' | 'moderata' | 'severa' | 'critica';
 
+// ============ REQUISITI RUOLI V5 ============
+const ROLE_REQUIREMENTS: Record<string, { requisiti: { scala: string; soglia: number; tipo: string; label: string }[]; attenzioni: { scala: string; soglia: number; tipo: string; label: string }[] }> = {
+  'Ufficio vendite': {
+    requisiti: [
+      { scala: 'SP', soglia: 130, tipo: 'min', label: 'Ambizione (SP > 130)' },
+      { scala: 'PA', soglia: 145, tipo: 'min', label: 'Partecipazione (PA > 145)' },
+      { scala: 'MO', soglia: 140, tipo: 'min', label: 'Motivazione (MO > 140)' },
+      { scala: 'CF', soglia: 130, tipo: 'min', label: 'Capacità Fronteggiare (CF > 130)' },
+      { scala: 'EC', soglia: 150, tipo: 'min', label: 'Efficacia (EC > 150)' },
+    ],
+    attenzioni: [
+      { scala: 'SC', soglia: 165, tipo: 'max', label: 'Schematicità (SC < 165)' },
+    ],
+  },
+  'Amministrazione': {
+    requisiti: [
+      { scala: 'EF', soglia: 145, tipo: 'min', label: 'Efficienza (EF > 145)' },
+      { scala: 'QR', soglia: 125, tipo: 'min', label: 'Qualità Responsabilità (QR > 125)' },
+    ],
+    attenzioni: [],
+  },
+  'Direzione generale': {
+    requisiti: [
+      { scala: 'QR', soglia: 160, tipo: 'min', label: 'Qualità Responsabilità (QR > 160)' },
+      { scala: 'CF', soglia: 150, tipo: 'min', label: 'Capacità Fronteggiare (CF > 150)' },
+      { scala: 'SP', soglia: 140, tipo: 'min', label: 'Ambizione (SP > 140)' },
+      { scala: 'PA', soglia: 140, tipo: 'min', label: 'Partecipazione (PA > 140)' },
+      { scala: 'EC', soglia: 150, tipo: 'min', label: 'Efficacia (EC > 150)' },
+    ],
+    attenzioni: [
+      { scala: 'SC', soglia: 160, tipo: 'max', label: 'Schematicità (SC < 160)' },
+    ],
+  },
+  'Ufficio risorse umane': {
+    requisiti: [
+      { scala: 'PA', soglia: 140, tipo: 'min', label: 'Partecipazione (PA > 140)' },
+      { scala: 'CF', soglia: 130, tipo: 'min', label: 'Capacità Fronteggiare (CF > 130)' },
+      { scala: 'SV', soglia: 110, tipo: 'min', label: 'Stile di Vita (SV > 110)' },
+    ],
+    attenzioni: [],
+  },
+  'Ufficio marketing': {
+    requisiti: [
+      { scala: 'SP', soglia: 130, tipo: 'min', label: 'Ambizione (SP > 130)' },
+      { scala: 'PA', soglia: 130, tipo: 'min', label: 'Partecipazione (PA > 130)' },
+      { scala: 'EC', soglia: 130, tipo: 'min', label: 'Efficacia (EC > 130)' },
+    ],
+    attenzioni: [
+      { scala: 'SC', soglia: 160, tipo: 'max', label: 'Schematicità (SC < 160)' },
+    ],
+  },
+  'Ufficio tecnico': {
+    requisiti: [
+      { scala: 'EC', soglia: 145, tipo: 'min', label: 'Efficacia (EC > 145)' },
+      { scala: 'EF', soglia: 130, tipo: 'min', label: 'Efficienza (EF > 130)' },
+    ],
+    attenzioni: [],
+  },
+  'Ufficio acquisti': {
+    requisiti: [
+      { scala: 'EC', soglia: 140, tipo: 'min', label: 'Efficacia (EC > 140)' },
+      { scala: 'QR', soglia: 130, tipo: 'min', label: 'Qualità Responsabilità (QR > 130)' },
+      { scala: 'EF', soglia: 130, tipo: 'min', label: 'Efficienza (EF > 130)' },
+    ],
+    attenzioni: [],
+  },
+  'Produzione': {
+    requisiti: [
+      { scala: 'EF', soglia: 130, tipo: 'min', label: 'Efficienza (EF > 130)' },
+      { scala: 'SC', soglia: 100, tipo: 'min', label: 'Schematicità (SC > 100)' },
+      { scala: 'EC', soglia: 110, tipo: 'min', label: 'Efficacia (EC > 110)' },
+    ],
+    attenzioni: [],
+  },
+  'Logistica': {
+    requisiti: [
+      { scala: 'EF', soglia: 140, tipo: 'min', label: 'Efficienza (EF > 140)' },
+      { scala: 'EC', soglia: 130, tipo: 'min', label: 'Efficacia (EC > 130)' },
+      { scala: 'CF', soglia: 110, tipo: 'min', label: 'Capacità Fronteggiare (CF > 110)' },
+    ],
+    attenzioni: [],
+  },
+};
+
 function calculateStressZoneSeverity(sv: number, cf: number): StressZoneSeverity {
   if (sv >= 100 || cf >= 100) return 'nessuna';
   const minValue = Math.min(sv, cf);
@@ -33,6 +117,76 @@ function getStressZoneSeverityDescription(severity: StressZoneSeverity): string 
     case 'lieve': return 'LIEVE - Difficoltà minore con risorse adeguate';
     default: return 'Nessuna stress zone rilevata';
   }
+}
+
+// Calcolo matching per ruolo V5
+function calculateRoleMatch(ruolo: string, scalePunteggi: ScalePunteggi): { 
+  criticalita: number; 
+  attenzioni: number; 
+  requisiti: { label: string; valore: number; soglia: number; ok: boolean }[];
+  requisitiMancanti: { label: string; valore: number; soglia: number }[];
+  areeAttenzione: { label: string; valore: number; soglia: number }[];
+} {
+  const config = ROLE_REQUIREMENTS[ruolo];
+  if (!config) {
+    return { criticalita: 0, attenzioni: 0, requisiti: [], requisitiMancanti: [], areeAttenzione: [] };
+  }
+
+  const requisiti: { label: string; valore: number; soglia: number; ok: boolean }[] = [];
+  const requisitiMancanti: { label: string; valore: number; soglia: number }[] = [];
+  const areeAttenzione: { label: string; valore: number; soglia: number }[] = [];
+
+  for (const req of config.requisiti) {
+    const valore = scalePunteggi[req.scala] ?? 100;
+    const ok = req.tipo === 'min' ? valore >= req.soglia : valore <= req.soglia;
+    requisiti.push({ label: req.label, valore, soglia: req.soglia, ok });
+    if (!ok) {
+      requisitiMancanti.push({ label: req.label, valore, soglia: req.soglia });
+    }
+  }
+
+  for (const att of config.attenzioni) {
+    const valore = scalePunteggi[att.scala] ?? 100;
+    const ok = att.tipo === 'min' ? valore >= att.soglia : valore <= att.soglia;
+    if (!ok) {
+      areeAttenzione.push({ label: att.label, valore, soglia: att.soglia });
+    }
+  }
+
+  return {
+    criticalita: requisitiMancanti.length,
+    attenzioni: areeAttenzione.length,
+    requisiti,
+    requisitiMancanti,
+    areeAttenzione,
+  };
+}
+
+// Calcola verdetto V5 (4 livelli)
+function calculateVerdict(criticalita: number, attenzioni: number): 'NON_IDONEO' | 'DA_VALUTARE' | 'IDONEO_CON_RISERVA' | 'IDONEO' {
+  if (criticalita >= 2) return 'NON_IDONEO';
+  if (criticalita === 1) return 'DA_VALUTARE';
+  if (attenzioni > 0) return 'IDONEO_CON_RISERVA';
+  return 'IDONEO';
+}
+
+// Calcola compatibilità per tutti i ruoli
+function calculateAllRolesCompatibility(scalePunteggi: ScalePunteggi): { ruolo: string; compatibilita: number; verdict: string }[] {
+  const results: { ruolo: string; compatibilita: number; verdict: string }[] = [];
+
+  for (const ruolo of Object.keys(ROLE_REQUIREMENTS)) {
+    const match = calculateRoleMatch(ruolo, scalePunteggi);
+    const totalReqs = ROLE_REQUIREMENTS[ruolo].requisiti.length;
+    const satisfiedReqs = totalReqs - match.criticalita;
+    const basePct = totalReqs > 0 ? (satisfiedReqs / totalReqs) * 100 : 100;
+    const attenzioniPenalty = match.attenzioni * 5;
+    const compatibilita = Math.max(0, Math.min(100, Math.round(basePct - attenzioniPenalty)));
+    const verdict = calculateVerdict(match.criticalita, match.attenzioni);
+    
+    results.push({ ruolo, compatibilita, verdict });
+  }
+
+  return results.sort((a, b) => b.compatibilita - a.compatibilita);
 }
 
 serve(async (req) => {
@@ -88,140 +242,181 @@ serve(async (req) => {
     const scalePunteggi: ScalePunteggi = profilo.scale_punteggi;
     const eta = candidato.eta;
     const ruolo = candidato.ruolo_attuale;
-    const funzione = candidato.funzione;
+    const funzione = candidato.funzione || 'Non specificata';
     const nome = `${candidato.nome} ${candidato.cognome}`;
     const sesso = candidato.sesso;
 
-    // Calcola la severità della stress zone (Manuale V3)
+    // Estrai tutti i punteggi
     const sv = scalePunteggi['SV'] || 100;
     const cf = scalePunteggi['CF'] || 100;
-    const stressZoneSeverity = calculateStressZoneSeverity(sv, cf);
-    const stressZoneDescription = getStressZoneSeverityDescription(stressZoneSeverity);
-
-    // Identifica pattern combinati critici
-    const patterns: string[] = [];
-    const ec = scalePunteggi['EC'] || 100;
+    const mo = scalePunteggi['MO'] || 100;
+    const sp = scalePunteggi['SP'] || 100;
     const ef = scalePunteggi['EF'] || 100;
+    const ec = scalePunteggi['EC'] || 100;
     const qn = scalePunteggi['QN'] || 100;
     const qr = scalePunteggi['QR'] || 100;
     const sc = scalePunteggi['SC'] || 100;
     const pa = scalePunteggi['PA'] || 100;
-    const mo = scalePunteggi['MO'] || 100;
 
-    if (ec - ef > 40) patterns.push('VISIONARIO DISORGANIZZATO FORTE: Gap EC-EF >40 punti');
-    else if (ec - ef > 20) patterns.push('Visionario Disorganizzato: Gap EC-EF 20-40 punti');
-    if (ef - ec > 40) patterns.push('ESECUTORE SENZA VISIONE: Gap EF-EC >40 punti');
-    if (qn > 130 && qr < 80) patterns.push('CARICATO IRRESPONSABILE: QN alto + QR basso');
-    if (qn < 70 && qr < 70) patterns.push('SCARICATORE DI RESPONSABILITÀ: QN e QR entrambi bassi');
-    if (qn > 160 && qr > 160 && sv < 90) patterns.push('SUPER-RESPONSABILE A RISCHIO: QN+QR altissimi + SV basso');
-    if (sc > 170 && cf < 80) patterns.push('RIGIDITÀ FRAGILE: SC molto alta + CF basso');
-    if (sv < 70 && ef > 150 && ec > 150) patterns.push('WORKAHOLIC A RISCHIO: Alta produttività + SV basso');
-    if (sv < 80 && mo > 140) patterns.push('Combattente sotto Pressione: SV basso + MO alto');
-    if (qr > 150 && pa < 80) patterns.push('Leader Isolato: QR alto + PA basso');
+    // Calcola matching V5
+    const roleMatch = calculateRoleMatch(funzione, scalePunteggi);
+    const allRolesMatch = calculateAllRolesCompatibility(scalePunteggi);
+    const verdict = calculateVerdict(roleMatch.criticalita, roleMatch.attenzioni);
+    const ruoloIdeale = allRolesMatch[0];
 
-    // Costruisci il prompt per l'AI (ARRICCHITO Manuale V3)
-    const systemPrompt = `Sei un Senior HR Expert specializzato in psicologia del lavoro e assessment professionale, con expertise nel Manuale Talent Profiler V3.
+    // Calcola la severità della stress zone
+    const stressZoneSeverity = calculateStressZoneSeverity(sv, cf);
+    const stressZoneDescription = getStressZoneSeverityDescription(stressZoneSeverity);
 
-ANALIZZA i dati del candidato e genera una valutazione ESAUSTIVA e DETTAGLIATA per supportare le decisioni di assunzione.
+    // Identifica pattern V5
+    const patterns: string[] = [];
+    
+    // PATTERN CHIAVE V5: Motore che gira a vuoto
+    if (mo > 140 && sp < 100) {
+      patterns.push(`🔴 MOTORE A VUOTO: Alta Motivazione (MO ${mo}) + Bassa Ambizione (SP ${sp}). Sembra motivato ma non ha obiettivi concreti. PERICOLOSO per vendita.`);
+    }
+    
+    if (sv < 60 && cf < 60) {
+      patterns.push(`🔴 STRESS ZONE CRITICA: SV ${sv} + CF ${cf}. Crisi grave.`);
+    } else if (sv < 80 && cf < 80) {
+      patterns.push(`🟠 STRESS ZONE ATTIVA: SV ${sv} + CF ${cf}. Inserimento graduale.`);
+    }
+    
+    if (ec - ef > 40) patterns.push(`🟠 VISIONARIO DISORGANIZZATO: Gap EC-EF di ${ec - ef} punti.`);
+    if (sc > 170 && cf < 90) patterns.push(`🔴 RIGIDITÀ FRAGILE: SC ${sc} + CF ${cf}.`);
+    if (qn > 140 && qr < 80) patterns.push(`🔴 CARICATO IRRESPONSABILE: QN ${qn} + QR ${qr}.`);
+    if ((ef + ec) / 2 > 150 && sv < 80) patterns.push(`🟠 WORKAHOLIC A RISCHIO: Produttività alta ma SV ${sv}.`);
+    if (qr > 150 && pa < 90) patterns.push(`🟠 LEADER ISOLATO: QR ${qr} + PA ${pa}.`);
 
-## STRESS ZONE - MANUALE V3
-La Stress Zone ha 4 livelli di severità basati su SV (Stile di Vita) e CF (Capacità di Fronteggiare):
-- CRITICA (almeno uno <40): Crisi grave, risorse quasi nulle. ASSUNZIONE FORTEMENTE SCONSIGLIATA.
-- SEVERA (almeno uno 40-59): Difficoltà significativa. Colloquio approfondito OBBLIGATORIO.
-- MODERATA (almeno uno 60-79): Difficoltà moderata. Inserimento graduale richiesto.
-- LIEVE (entrambi 80-99): Difficoltà minore. Monitorare senza allarmarsi.
+    // Costruisci requisiti per il prompt
+    const requisitiText = roleMatch.requisiti.map(r => 
+      `- ${r.label}: Valore ${r.valore} → ${r.ok ? '✅ OK' : '❌ CRITICITÀ'}`
+    ).join('\n');
 
-## PATTERN CRITICI DA IDENTIFICARE
-- Gap Efficacia-Efficienza (EC vs EF): Visionario Disorganizzato (EC >> EF) o Esecutore Cieco (EF >> EC)
-- Pattern Responsabilità (QN vs QR): Caricato Irresponsabile (QN alto, QR basso) o Scaricatore (entrambi bassi)
-- Pattern Workaholic: Alta produttività (EF+EC) + bassa sfera personale (SV)
-- Rigidità Fragile: Alta schematicità (SC) + bassa resilienza (CF)
-- Leader Isolato: Alta responsabilità (QR) + bassa partecipazione (PA)
+    const requisitiMancantiText = roleMatch.requisitiMancanti.length > 0 
+      ? roleMatch.requisitiMancanti.map(r => `- ${r.label}: Valore ${r.valore} (richiesto ${r.soglia})`).join('\n')
+      : 'Nessun requisito mancante';
 
-## OUTPUT RICHIESTO (JSON)
+    const areeAttenzioneText = roleMatch.areeAttenzione.length > 0
+      ? roleMatch.areeAttenzione.map(a => `- ${a.label}: Valore ${a.valore} (soglia ${a.soglia})`).join('\n')
+      : 'Nessuna area di attenzione';
+
+    // ============ PROMPT V5 COMPLETO ============
+    const systemPrompt = `Sei un Senior HR Expert specializzato in psicologia del lavoro secondo il Manuale Talent Profiler V5.
+
+## DEFINIZIONI SCALE CORRETTE (V5)
+
+### STILE DI VITA (SV) - Situazione Personale ATTUALE
+Misura come sta il candidato ORA nella sua vita personale:
+- Basso SV = Momento buio (problemi familiari, salute, economia, divorzio, lutto)
+- Alto SV = Vita personale serena e stabile
+NOTA: Se SV basso, la persona va supportata prima come individuo, poi come lavoratore.
+
+### SPAZIO VITALE (SP) - AMBIZIONE
+Misura gli obiettivi personali materiali ed economici:
+- Basso SP = Nessuna ambizione, non desidera migliorare la propria condizione
+- Alto SP = Forte ambizione, obiettivi chiari di crescita economica
+CRITICO per vendita: senza ambizione, come può convincere altri a comprare?
+
+### PATTERN CHIAVE: "Motore che gira a vuoto"
+Alta Motivazione (MO) + Basso Spazio Vitale (SP) = PERICOLOSO
+Il candidato sembra motivato (lavora tanto) ma non ha una meta (ambizione).
+Come un motore acceso in folle: consuma carburante senza andare da nessuna parte.
+Per la vendita è FATALE: produce sforzo ma non risultati.
+
+## 4 LIVELLI DI VERDETTO (MAI default generici!)
+- **IDONEO**: Tutti i requisiti soddisfatti, nessuna criticità né attenzione
+- **IDONEO_CON_RISERVA**: Tutti i requisiti OK, ma ci sono aree di attenzione da monitorare
+- **DA_VALUTARE**: Una criticità (requisito non soddisfatto), approfondimento in colloquio necessario
+- **NON_IDONEO**: 2+ criticità, profilo incompatibile con il ruolo
+
+## OUTPUT JSON RICHIESTO
 {
-  "profilo_sintetico": "Descrizione DETTAGLIATA del candidato in 4-6 frasi. Includi tratti dominanti, stile lavorativo, punti caratterizzanti.",
-  "punti_forza": ["5 punti di forza SPECIFICI con spiegazione concreta di come si manifestano"],
-  "punti_debolezza": ["5 punti di debolezza SPECIFICI con impatto concreto sul lavoro"],
-  "rischi_operativi": "Analisi APPROFONDITA dei rischi per l'azienda. Scenari concreti, costi potenziali, situazioni da evitare. Almeno 100 parole.",
+  "profilo_sintetico": "Descrizione DETTAGLIATA del candidato in 4-6 frasi secondo V5.",
+  "punti_forza": ["5 punti specifici con spiegazione"],
+  "punti_debolezza": ["5 punti specifici con impatto concreto"],
+  "rischi_operativi": "Analisi APPROFONDITA dei rischi (min 100 parole)",
   "fit_score": numero 0-100,
-  "fit_verdict": "NON_IDONEO" | "VALUTARE" | "IDONEO",
-  "fit_motivo": "Spiegazione DETTAGLIATA del verdetto in 2-3 frasi",
-  "stress_zone_severity": "${stressZoneSeverity}",
-  "stress_zone_analisi": "Analisi SPECIFICA della situazione stress del candidato e implicazioni per l'inserimento",
+  "fit_verdict": "${verdict}",
+  "fit_motivo": "Spiegazione dettagliata del verdetto in 2-3 frasi",
+  "matching_ruolo_richiesto": {
+    "ruolo": "${funzione}",
+    "compatibilita_pct": numero 0-100,
+    "requisiti_verificati": ${JSON.stringify(roleMatch.requisiti)},
+    "criticita": ${roleMatch.criticalita},
+    "attenzioni": ${roleMatch.attenzioni},
+    "verdict": "${verdict}"
+  },
+  "compatibilita_tutti_ruoli": ${JSON.stringify(allRolesMatch)},
+  "ruolo_ideale": "${ruoloIdeale?.ruolo || funzione}",
+  "pattern_rilevati": ${JSON.stringify(patterns)},
+  "stress_zone_analisi": "Analisi specifica della situazione stress",
   "domande_colloquio": [
-    { "area": "Nome area critica (es. Stress, Responsabilità, Flessibilità)", "domanda": "Domanda SPECIFICA e penetrante per il colloquio" },
-    // Genera 4-6 domande mirate alle aree critiche del candidato
+    { "area": "Nome area critica", "domanda": "Domanda SPECIFICA per il colloquio basata sul ruolo ${funzione}" }
   ],
   "raccomandazione": {
     "decisione": "ASSUMERE" | "VALUTARE" | "SCARTARE",
-    "motivo_principale": "Il motivo principale della decisione in 1-2 frasi",
-    "rischio_aziendale": "Il rischio principale per l'azienda se si assume",
-    "tempo_onboarding": "es: 2-4 settimane standard / 4-8 settimane esteso / 8-12 settimane con supervisione intensiva",
+    "motivo_principale": "Motivazione in 1-2 frasi",
+    "rischio_aziendale": "Rischio principale",
+    "tempo_onboarding": "es: 2-4 settimane",
     "probabilita_successo_12m": numero 0-100
   }
 }
 
-## CRITERI VERDETTO
-- 0-39: NON_IDONEO - Profilo incompatibile o rischi troppo elevati
-- 40-64: VALUTARE - Necessita approfondimento in colloquio, potenziale con riserve
-- 65-100: IDONEO - Buona compatibilità, rischi gestibili
+## REGOLE CRITICHE
+1. MAI verdetti generici tipo "Profilo in fase di analisi"
+2. SEMPRE verificare pattern "Motore a vuoto" per vendita
+3. Le domande colloquio devono essere SPECIFICHE per il ruolo ${funzione}
+4. Se età >55 + ruolo vendite + SC >150: segnalare resistenza al cambiamento`;
 
-## FATTORI PENALIZZANTI
-1. Stress Zone Critica o Severa: -20/-30 punti
-2. Età >55 + ruolo vendite + SC >150: -15 punti (resistenza al cambiamento in ruolo dinamico)
-3. >2 scale sotto 70: -10 punti (aree critiche multiple)
-4. Pattern Workaholic + Stress Zone: -15 punti (burnout imminente)
-5. Caricato Irresponsabile: -10 punti (affidabilità compromessa)
+    const userPrompt = `## CANDIDATO: ${nome}
+Età: ${eta || 'N/S'} | Sesso: ${sesso || 'N/S'}
+Ruolo attuale: ${ruolo || 'N/S'}
+**FUNZIONE RICHIESTA: ${funzione}**
 
-## FATTORI VALORIZZANTI
-1. Nessuna Stress Zone + strength points: +10 punti
-2. Profilo bilanciato (tutte le scale 90-160): +10 punti
-3. Alta leadership naturale (QR+PA+SP alti): +10 punti
-4. Funzione amministrativa + alta schematicità: +5 punti (compliance)`;
+## PUNTEGGI SCALE (0-200, 100=media)
+| Scala | Valore | Interpretazione |
+|-------|--------|-----------------|
+| SV - Situazione Personale | ${sv} | ${sv < 60 ? '⚠️ CRITICO' : sv < 80 ? '⚠️ Sotto media' : sv < 120 ? '✓ Norma' : sv < 160 ? '✓ Sopra media' : '★ Eccellenza'} |
+| MO - Motivazione | ${mo} | ${mo < 60 ? '⚠️ CRITICO' : mo < 80 ? '⚠️ Sotto media' : mo < 120 ? '✓ Norma' : mo < 160 ? '✓ Sopra media' : '★ Eccellenza'} |
+| CF - Resilienza | ${cf} | ${cf < 60 ? '⚠️ CRITICO' : cf < 80 ? '⚠️ Sotto media' : cf < 120 ? '✓ Norma' : cf < 160 ? '✓ Sopra media' : '★ Eccellenza'} |
+| EF - Efficienza | ${ef} | ${ef < 60 ? '⚠️ CRITICO' : ef < 80 ? '⚠️ Sotto media' : ef < 120 ? '✓ Norma' : ef < 160 ? '✓ Sopra media' : '★ Eccellenza'} |
+| EC - Efficacia | ${ec} | ${ec < 60 ? '⚠️ CRITICO' : ec < 80 ? '⚠️ Sotto media' : ec < 120 ? '✓ Norma' : ec < 160 ? '✓ Sopra media' : '★ Eccellenza'} |
+| QN - Quantità Responsabilità | ${qn} | ${qn < 60 ? '⚠️ CRITICO' : qn < 80 ? '⚠️ Sotto media' : qn < 120 ? '✓ Norma' : qn < 160 ? '✓ Sopra media' : '★ Eccellenza'} |
+| QR - Qualità Responsabilità | ${qr} | ${qr < 60 ? '⚠️ CRITICO' : qr < 80 ? '⚠️ Sotto media' : qr < 120 ? '✓ Norma' : qr < 160 ? '✓ Sopra media' : '★ Eccellenza'} |
+| SP - AMBIZIONE | ${sp} | ${sp < 60 ? '⚠️ CRITICO - Nessuna ambizione' : sp < 80 ? '⚠️ Bassa ambizione' : sp < 120 ? '✓ Norma' : sp < 160 ? '✓ Buona ambizione' : '★ Molto ambizioso'} |
+| PA - Partecipazione | ${pa} | ${pa < 60 ? '⚠️ CRITICO' : pa < 80 ? '⚠️ Sotto media' : pa < 120 ? '✓ Norma' : pa < 160 ? '✓ Sopra media' : '★ Eccellenza'} |
+| SC - Schematicità | ${sc} | ${sc < 80 ? '✓ Molto flessibile' : sc < 100 ? '✓ Flessibile' : sc < 140 ? '✓ Equilibrato' : sc < 165 ? '⚠️ Rigido' : '⚠️ MOLTO RIGIDO'} |
 
-    const userPrompt = `ANALIZZA questo candidato secondo il Manuale V3:
+## VERIFICA REQUISITI RUOLO "${funzione}"
+${requisitiText}
 
-## DATI ANAGRAFICI
-- Nome: ${nome}
-- Età: ${eta || 'Non specificata'}
-- Sesso: ${sesso || 'Non specificato'}
-- Ruolo attuale: ${ruolo || 'Non specificato'}
-- Funzione aziendale: ${funzione || 'Non specificata'}
+### CRITICITÀ (${roleMatch.criticalita})
+${requisitiMancantiText}
 
-## PUNTEGGI SCALE (0-200, 100 = media popolazione)
-| Scala | Punteggio | Interpretazione |
-|-------|-----------|-----------------|
-| Stile di Vita (SV) | ${sv} | ${sv < 60 ? 'CRITICO' : sv < 80 ? 'Sotto media' : sv < 120 ? 'Nella norma' : sv < 160 ? 'Sopra media' : 'ECCELLENZA'} |
-| Motivazione (MO) | ${mo} | ${mo < 60 ? 'CRITICO' : mo < 80 ? 'Sotto media' : mo < 120 ? 'Nella norma' : mo < 160 ? 'Sopra media' : 'ECCELLENZA'} |
-| Capacità di Fronteggiare (CF) | ${cf} | ${cf < 60 ? 'CRITICO' : cf < 80 ? 'Sotto media' : cf < 120 ? 'Nella norma' : cf < 160 ? 'Sopra media' : 'ECCELLENZA'} |
-| Efficienza (EF) | ${ef} | ${ef < 60 ? 'CRITICO' : ef < 80 ? 'Sotto media' : ef < 120 ? 'Nella norma' : ef < 160 ? 'Sopra media' : 'ECCELLENZA'} |
-| Efficacia (EC) | ${ec} | ${ec < 60 ? 'CRITICO' : ec < 80 ? 'Sotto media' : ec < 120 ? 'Nella norma' : ec < 160 ? 'Sopra media' : 'ECCELLENZA'} |
-| Quantità Responsabilità (QN) | ${qn} | ${qn < 60 ? 'CRITICO' : qn < 80 ? 'Sotto media' : qn < 120 ? 'Nella norma' : qn < 160 ? 'Sopra media' : 'ECCELLENZA'} |
-| Qualità Responsabilità (QR) | ${qr} | ${qr < 60 ? 'CRITICO' : qr < 80 ? 'Sotto media' : qr < 120 ? 'Nella norma' : qr < 160 ? 'Sopra media' : 'ECCELLENZA'} |
-| Spazio Vitale (SP) | ${scalePunteggi['SP'] || 100} | ${(scalePunteggi['SP'] || 100) < 60 ? 'CRITICO' : (scalePunteggi['SP'] || 100) < 80 ? 'Sotto media' : (scalePunteggi['SP'] || 100) < 120 ? 'Nella norma' : (scalePunteggi['SP'] || 100) < 160 ? 'Sopra media' : 'ECCELLENZA'} |
-| Partecipazione (PA) | ${pa} | ${pa < 60 ? 'CRITICO' : pa < 80 ? 'Sotto media' : pa < 120 ? 'Nella norma' : pa < 160 ? 'Sopra media' : 'ECCELLENZA'} |
-| Schematicità (SC) | ${sc} | ${sc < 80 ? 'Molto flessibile' : sc < 100 ? 'Flessibile' : sc < 140 ? 'Equilibrato' : sc < 160 ? 'Rigido' : 'MOLTO RIGIDO'} |
+### AREE ATTENZIONE (${roleMatch.attenzioni})
+${areeAttenzioneText}
 
-## INDICATORI CALCOLATI
-- Impatto Organizzativo (Leadership) %: ${profilo.leadership_pct?.toFixed(1) || 'N/A'}
-- Solidità Personale (Maturità) %: ${profilo.maturita_pct?.toFixed(1) || 'N/A'}
-- Capacità Produttiva (Potenziale) %: ${profilo.potenziale_pct?.toFixed(1) || 'N/A'}
-- Flessibilità al Cambiamento: ${200 - sc}/200
+## VERDETTO AUTOMATICO V5: **${verdict}**
+
+## PATTERN V5 RILEVATI
+${patterns.length > 0 ? patterns.join('\n') : '✓ Nessun pattern critico'}
 
 ## STRESS ZONE
-- Stato: ${stressZoneSeverity.toUpperCase()}
-- Descrizione: ${stressZoneDescription}
+Severità: ${stressZoneSeverity.toUpperCase()}
+${stressZoneDescription}
 
-## PATTERN IDENTIFICATI
-${patterns.length > 0 ? patterns.map(p => `- ${p}`).join('\n') : '- Nessun pattern critico identificato'}
-
-## DATI AGGIUNTIVI
-- Profilo Tipo: ${profilo.profilo_tipo || 'N/A'}
+## INDICATORI CALCOLATI
+- Leadership %: ${profilo.leadership_pct?.toFixed(1) || 'N/A'}
+- Maturità %: ${profilo.maturita_pct?.toFixed(1) || 'N/A'}
+- Potenziale %: ${profilo.potenziale_pct?.toFixed(1) || 'N/A'}
 - Out Points: ${profilo.out_points?.join(', ') || 'Nessuno'}
 - Strength Points: ${profilo.strength_points?.join(', ') || 'Nessuno'}
 
-Genera l'analisi JSON completa secondo il Manuale V3.`;
+## COMPATIBILITÀ TUTTI I RUOLI
+${allRolesMatch.map((r, i) => `${i+1}. ${r.ruolo}: ${r.compatibilita}% (${r.verdict})`).join('\n')}
+
+Genera l'analisi JSON completa secondo il Manuale V5. Le domande colloquio devono essere SPECIFICHE per ${funzione}.`;
 
     // Chiama Lovable AI Gateway
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
@@ -274,7 +469,6 @@ Genera l'analisi JSON completa secondo il Manuale V3.`;
     // Parse JSON dalla risposta
     let analisi;
     try {
-      // Rimuovi eventuali backticks markdown
       const cleanContent = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
       analisi = JSON.parse(cleanContent);
     } catch (parseError) {
@@ -285,7 +479,7 @@ Genera l'analisi JSON completa secondo il Manuale V3.`;
       );
     }
 
-    // Salva nel database
+    // Salva nel database con dati V5 arricchiti
     const { data: savedAnalisi, error: saveError } = await supabase
       .from('analisi_candidato')
       .upsert({
@@ -295,13 +489,22 @@ Genera l'analisi JSON completa secondo il Manuale V3.`;
         punti_debolezza: analisi.punti_debolezza,
         rischi_operativi: analisi.rischi_operativi,
         fit_score: analisi.fit_score,
-        fit_verdict: analisi.fit_verdict,
+        fit_verdict: verdict, // Usa il verdetto calcolato automaticamente
         fit_motivo: analisi.fit_motivo,
         raccomandazione: {
           ...analisi.raccomandazione,
           stress_zone_severity: stressZoneSeverity,
           stress_zone_analisi: analisi.stress_zone_analisi,
-          domande_colloquio: analisi.domande_colloquio
+          domande_colloquio: analisi.domande_colloquio,
+          matching_ruolo_richiesto: {
+            ruolo: funzione,
+            requisiti: roleMatch.requisiti,
+            criticita: roleMatch.criticalita,
+            attenzioni: roleMatch.attenzioni,
+          },
+          compatibilita_tutti_ruoli: allRolesMatch,
+          ruolo_ideale: ruoloIdeale?.ruolo,
+          pattern_rilevati: patterns,
         },
         generated_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
@@ -313,14 +516,13 @@ Genera l'analisi JSON completa secondo il Manuale V3.`;
 
     if (saveError) {
       console.error('Error saving analysis:', saveError);
-      // Restituisci comunque l'analisi anche se il salvataggio fallisce
     }
 
     return new Response(
       JSON.stringify({ 
         success: true, 
         analisi: savedAnalisi || analisi,
-        message: 'Analisi generata con successo secondo il Manuale V3'
+        message: 'Analisi generata con successo secondo il Manuale V5'
       }),
       { 
         status: 200, 
