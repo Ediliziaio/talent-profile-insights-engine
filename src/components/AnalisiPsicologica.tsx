@@ -187,17 +187,58 @@ export function AnalisiPsicologica({
 // Placeholder per quando l'analisi non è ancora disponibile
 export function AnalisiPsicologicaPlaceholder() {
   return (
-    <Card className="border-dashed">
-      <CardContent className="flex flex-col items-center justify-center py-8 sm:py-12 text-center">
-        <Sparkles className="h-8 w-8 sm:h-12 sm:w-12 text-muted-foreground/50 mb-3 sm:mb-4" />
-        <h3 className="text-base sm:text-lg font-semibold text-muted-foreground mb-1.5 sm:mb-2">
-          Analisi AI Non Generata
-        </h3>
-        <p className="text-xs sm:text-sm text-muted-foreground max-w-md px-4">
-          Clicca sul pulsante "Genera Analisi AI" per ottenere un'analisi psicologica 
-          approfondita basata sui dati del test.
-        </p>
-      </CardContent>
-    </Card>
+    <div className="space-y-4">
+      {/* Info box: dati già disponibili */}
+      <div className="bg-muted/50 border border-muted rounded-lg p-4">
+        <div className="flex items-start gap-3">
+          <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 shrink-0" />
+          <div>
+            <p className="text-sm font-medium text-foreground">
+              I dati deterministici sono già disponibili
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Verdetto, matching ruolo, pattern critici, profilo e aspettative temporali
+              sono visibili nelle tab <strong>Match</strong>, <strong>Profilo</strong> e <strong>Colloquio</strong>.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Cosa genera l'AI */}
+      <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+        <CardContent className="flex flex-col items-center justify-center py-8 sm:py-10 text-center">
+          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+            <Sparkles className="h-8 w-8 text-primary" />
+          </div>
+          <h3 className="text-base sm:text-lg font-semibold mb-3">
+            Arricchisci con AI Insights
+          </h3>
+          <div className="text-xs sm:text-sm text-muted-foreground max-w-md space-y-2">
+            <p className="font-medium text-foreground">L'AI genererà contenuti personalizzati:</p>
+            <ul className="text-left space-y-1.5 mt-2">
+              <li className="flex items-start gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
+                Analisi narrativa personalizzata sul candidato
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
+                Suggerimenti di sviluppo su misura
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
+                Domande colloquio specifiche per criticità individuali
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
+                Rischi operativi e previsioni comportamentali
+              </li>
+            </ul>
+          </div>
+          <p className="text-[10px] text-muted-foreground mt-4 italic">
+            Questa funzione consuma crediti AI
+          </p>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

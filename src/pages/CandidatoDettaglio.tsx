@@ -664,30 +664,38 @@ export default function CandidatoDettaglio() {
                   />
                 </TabsContent>
 
-                {/* TAB: AI Report */}
+                {/* TAB: AI Insights (Opzionale) */}
                 <TabsContent value="ai" className="mt-6">
-                  <Card>
-                    <CardHeader>
+                  <Card className="border-2 border-dashed border-primary/30">
+                    <CardHeader className="pb-3">
                       <div className="flex items-center justify-between">
-                        <CardTitle className="flex items-center gap-2">
-                          <Brain className="h-5 w-5 text-primary" />
-                          Analisi AI
-                        </CardTitle>
+                        <div>
+                          <CardTitle className="flex items-center gap-2">
+                            <Sparkles className="h-5 w-5 text-primary" />
+                            AI Insights
+                            <Badge variant="secondary" className="text-xs">Opzionale</Badge>
+                          </CardTitle>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            Arricchimenti personalizzati aggiuntivi
+                          </p>
+                        </div>
                         <Button
-                          variant="outline"
+                          variant={analisi ? "outline" : "default"}
                           size="sm"
                           onClick={() => generateMutation.mutate()}
                           disabled={generateMutation.isPending}
+                          className="gap-2"
                         >
                           {generateMutation.isPending ? (
                             <>
-                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              <Loader2 className="h-4 w-4 animate-spin" />
                               Generando...
                             </>
-                          ) : analisi ? (
-                            'Rigenera Analisi'
                           ) : (
-                            'Genera Analisi'
+                            <>
+                              <Sparkles className="h-4 w-4" />
+                              {analisi ? 'Rigenera' : 'Genera AI Insights'}
+                            </>
                           )}
                         </Button>
                       </div>
