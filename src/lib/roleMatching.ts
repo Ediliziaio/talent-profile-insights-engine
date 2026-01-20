@@ -330,6 +330,11 @@ function identifyPatterns(scalePunteggi: Record<string, number>): string[] {
   if (ec - ef > 40 && ef < 100) {
     patterns.push('🟠 VISIONARIO DISORGANIZZATO: Gap EC-EF di ' + (ec - ef) + ' punti con EF basso (' + ef + '). Sa cosa fare ma fatica a organizzarsi.');
   }
+  
+  // PATTERN POSITIVO: Determinazione Superiore (alto EC + alto EF)
+  if (ec >= 160 && ef >= 130) {
+    patterns.push('🟢 DETERMINAZIONE SUPERIORE: EC eccellente (' + ec + ') + EF alto (' + ef + '). Sa cosa fare E sa organizzarsi per farlo. Punto di forza significativo.')
+  }
 
   // Rigidità Fragile
   if (sc > 170 && cf < 90) {

@@ -14,6 +14,7 @@ import { PDFExportButton } from '@/components/PDFExportButton';
 import { StressZoneHero } from '@/components/StressZoneHero';
 import { RoleMatchingCard } from '@/components/RoleMatchingCard';
 import { ExecutiveSummaryCardV5 } from '@/components/ExecutiveSummaryCardV5';
+import { SintesiFinaleCard } from '@/components/SintesiFinaleCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -427,13 +428,24 @@ export default function CandidatoDettaglio() {
           </TabsList>
           
                 {/* TAB: Matching Ruolo (NUOVO V5) */}
-                <TabsContent value="matching" className="mt-6">
+                <TabsContent value="matching" className="mt-6 space-y-6">
                   <RoleMatchingCard
                     ruoloRichiesto={candidato.funzione || 'Ufficio vendite'}
                     scalePunteggi={scalePunteggi}
                     profiloTipo={profiloTipo}
                     showFullDetails={true}
                     showNarrativeSections={true}
+                  />
+                  
+                  {/* Sintesi Finale */}
+                  <SintesiFinaleCard
+                    candidatoNome={candidato.nome}
+                    candidatoCognome={candidato.cognome}
+                    eta={candidato.eta}
+                    ruoloRichiesto={candidato.funzione || 'Ufficio vendite'}
+                    profiloTipo={profiloTipo}
+                    scalePunteggi={scalePunteggi}
+                    stressZone={stressZone}
                   />
                 </TabsContent>
                 {/* TAB: Analisi Dati */}
