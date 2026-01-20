@@ -90,6 +90,11 @@ export default function Questionario() {
   const isLastPage = currentPage === totalPages - 1;
   const allAnswered = Object.keys(risposte).length === DOMANDE.length;
 
+  // Auto-scroll to top when page changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentPage]);
+
   // Only candidato role can access this page
   if (!authLoading && profile?.ruolo !== 'candidato') {
     return <Navigate to="/" replace />;
@@ -246,11 +251,10 @@ export default function Questionario() {
                     onClick={() => handleAnswer(domanda.id, 'A')}
                     className={cn(
                       "p-3 rounded-lg border-2 text-center transition-all",
-                      "hover:border-accent/50 hover:bg-accent/5",
                       "flex items-center justify-center gap-2",
                       risposte[domanda.id] === 'A'
                         ? "border-accent bg-accent text-accent-foreground"
-                        : "border-border bg-card"
+                        : "border-border bg-card hover:border-accent/50 hover:bg-accent/5"
                     )}
                   >
                     <div className={cn(
@@ -269,11 +273,10 @@ export default function Questionario() {
                     onClick={() => handleAnswer(domanda.id, 'B')}
                     className={cn(
                       "p-3 rounded-lg border-2 text-center transition-all",
-                      "hover:border-accent/50 hover:bg-accent/5",
                       "flex items-center justify-center gap-2",
                       risposte[domanda.id] === 'B'
                         ? "border-accent bg-accent text-accent-foreground"
-                        : "border-border bg-card"
+                        : "border-border bg-card hover:border-accent/50 hover:bg-accent/5"
                     )}
                   >
                     <div className={cn(
@@ -292,11 +295,10 @@ export default function Questionario() {
                     onClick={() => handleAnswer(domanda.id, 'C')}
                     className={cn(
                       "p-3 rounded-lg border-2 text-center transition-all",
-                      "hover:border-accent/50 hover:bg-accent/5",
                       "flex items-center justify-center gap-2",
                       risposte[domanda.id] === 'C'
                         ? "border-accent bg-accent text-accent-foreground"
-                        : "border-border bg-card"
+                        : "border-border bg-card hover:border-accent/50 hover:bg-accent/5"
                     )}
                   >
                     <div className={cn(
@@ -332,7 +334,7 @@ export default function Questionario() {
                         "flex flex-col items-center justify-center gap-0.5",
                         risposte[domanda.id] === 'A'
                           ? "border-accent bg-accent text-accent-foreground shadow-md"
-                          : "border-border bg-card"
+                          : "border-border bg-card hover:border-accent/50 hover:bg-accent/5"
                       )}
                     >
                       <div className={cn(
@@ -355,7 +357,7 @@ export default function Questionario() {
                         "flex flex-col items-center justify-center gap-0.5",
                         risposte[domanda.id] === 'B'
                           ? "border-accent bg-accent text-accent-foreground shadow-md"
-                          : "border-border bg-card"
+                          : "border-border bg-card hover:border-accent/50 hover:bg-accent/5"
                       )}
                     >
                       <div className={cn(
@@ -378,7 +380,7 @@ export default function Questionario() {
                         "flex flex-col items-center justify-center gap-0.5",
                         risposte[domanda.id] === 'C'
                           ? "border-accent bg-accent text-accent-foreground shadow-md"
-                          : "border-border bg-card"
+                          : "border-border bg-card hover:border-accent/50 hover:bg-accent/5"
                       )}
                     >
                       <div className={cn(
