@@ -45,129 +45,96 @@ type CandidatoWithRelations = Candidato & {
 };
 
 // Executive Summary Component
-function ExecutiveSummaryCard({
-  fitScore,
-  fitVerdict,
-  fitMotivo,
-  profiloSintetico,
-  probabilitaSuccesso,
-  stressZoneSeverity,
-}: {
-  fitScore: number;
-  fitVerdict: 'NON_IDONEO' | 'VALUTARE' | 'IDONEO';
-  fitMotivo: string;
-  profiloSintetico: string;
-  probabilitaSuccesso: number;
-  stressZoneSeverity: string;
+function ExecutiveSummaryCard({ 
+  verdict, 
+  fitScore, 
+  probabilitySuccess,
+  stressSeverity,
+  profiloSintetico 
+}: { 
+  verdict: 'ASSUMERE' | 'VALUTARE' | 'SCARTARE' | null;
+  fitScore: number | null;
+  probabilitySuccess: number | null;
+  stressSeverity?: StressZoneSeverity;
+  profiloSintetico?: string | null;
 }) {
-  const getVerdictConfig = (verdict: string) => {
-    switch (verdict) {
-      case 'IDONEO':
-        return {
-          label: 'ASSUMERE',
-          bgClass: 'bg-green-500',
-          textClass: 'text-green-700',
-          borderClass: 'border-green-200',
-          bgLightClass: 'bg-green-50',
-          icon: CheckCircle2,
-        };
-      case 'NON_IDONEO':
-        return {
-          label: 'SCARTARE',
-          bgClass: 'bg-destructive',
-          textClass: 'text-destructive',
-          borderClass: 'border-destructive/30',
-          bgLightClass: 'bg-destructive/5',
-          icon: XCircle,
-        };
-      default:
-        return {
-          label: 'VALUTARE',
-          bgClass: 'bg-amber-500',
-          textClass: 'text-amber-700',
-          borderClass: 'border-amber-200',
-          bgLightClass: 'bg-amber-50',
-          icon: AlertTriangle,
-        };
-    }
+  const verdictConfig = {
+    ASSUMERE: { color: 'bg-green-100 border-green-500', textColor: 'text-green-700', icon: CheckCircle2, label: 'ASSUMERE' },
+    VALUTARE: { color: 'bg-amber-100 border-amber-500', textColor: 'text-amber-700', icon: AlertCircle, label: 'VALUTARE' },
+    SCARTARE: { color: 'bg-red-100 border-red-500', textColor: 'text-red-700', icon: XCircle, label: 'SCARTARE' },
   };
 
-  const verdictConfig = getVerdictConfig(fitVerdict);
-  const VerdictIcon = verdictConfig.icon;
+  const config = verdict ? verdictConfig[verdict] : null;
+  const Icon = config?.icon || HelpCircle;
 
   return (
-    <Card className={cn("border-2", verdictConfig.borderClass, verdictConfig.bgLightClass)}>
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <Award className="h-5 w-5 text-primary" />
-          Executive Summary
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Verdict prominente */}
-          <div className="flex flex-col items-center justify-center p-4 rounded-xl bg-background border">
+    <Card className="border-2 border-primary/20 bg-gradient-to-br from-background to-muted/30">
+      <CardContent className="pt-4 sm:pt-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+          {/* Verdict principale */}
+          <div className="flex flex-col items-center justify-center text-center">
             <div className={cn(
-              "w-20 h-20 rounded-full flex items-center justify-center mb-3",
-              verdictConfig.bgClass
+              "w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center border-4",
+              config?.color || "bg-muted border-muted-foreground/30"
             )}>
-              <VerdictIcon className="h-10 w-10 text-white" />
+              <Icon className={cn("h-8 w-8 sm:h-10 sm:w-10", config?.textColor || "text-muted-foreground")} />
             </div>
-            <Badge className={cn("text-lg px-4 py-1.5 font-bold", verdictConfig.bgClass, "text-white")}>
-              {verdictConfig.label}
+            <Badge 
+              className={cn(
+                "mt-2 sm:mt-3 text-base sm:text-lg px-3 sm:px-4 py-1",
+                config?.color,
+                config?.textColor
+              )}
+              variant="outline"
+            >
+              {config?.label || 'N/D'}
             </Badge>
-            <p className="text-xs text-muted-foreground mt-2 text-center">{fitMotivo}</p>
+            <p className="text-xs text-muted-foreground mt-1">Verdetto HR</p>
           </div>
 
           {/* Metriche */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-background border">
-              <div className="p-2 rounded-full bg-primary/10">
-                <Target className="h-5 w-5 text-primary" />
-              </div>
-              <div className="flex-1">
-                <p className="text-xs text-muted-foreground">FIT Score</p>
-                <p className="text-2xl font-bold">{fitScore}%</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-background border">
-              <div className="p-2 rounded-full bg-primary/10">
-                <Percent className="h-5 w-5 text-primary" />
-              </div>
-              <div className="flex-1">
-                <p className="text-xs text-muted-foreground">Probabilità Successo 12 mesi</p>
-                <p className="text-2xl font-bold">{probabilitaSuccesso}%</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-background border">
-              <div className="p-2 rounded-full bg-primary/10">
-                <Activity className="h-5 w-5 text-primary" />
-              </div>
-              <div className="flex-1">
-                <p className="text-xs text-muted-foreground">Stress Zone</p>
-                <Badge variant="outline" className={cn(
-                  stressZoneSeverity === 'nessuna' && "bg-green-100 text-green-700 border-green-300",
-                  stressZoneSeverity === 'lieve' && "bg-amber-100 text-amber-700 border-amber-300",
-                  stressZoneSeverity === 'moderata' && "bg-orange-100 text-orange-700 border-orange-300",
-                  stressZoneSeverity === 'severa' && "bg-red-100 text-red-700 border-red-300",
-                  stressZoneSeverity === 'critica' && "bg-destructive text-destructive-foreground"
+          <div className="flex flex-col gap-2 sm:gap-3">
+            <div className="p-2 sm:p-3 rounded-lg bg-muted/50">
+              <div className="flex items-center justify-between">
+                <span className="text-xs sm:text-sm text-muted-foreground">FIT Score</span>
+                <span className={cn(
+                  "text-xl sm:text-2xl font-bold",
+                  fitScore && fitScore >= 70 ? "text-green-600" :
+                  fitScore && fitScore >= 50 ? "text-amber-600" : "text-red-600"
                 )}>
-                  {stressZoneSeverity.charAt(0).toUpperCase() + stressZoneSeverity.slice(1)}
-                </Badge>
+                  {fitScore ?? 'N/D'}%
+                </span>
               </div>
             </div>
+            <div className="p-2 sm:p-3 rounded-lg bg-muted/50">
+              <div className="flex items-center justify-between">
+                <span className="text-xs sm:text-sm text-muted-foreground">Prob. Successo 12m</span>
+                <span className={cn(
+                  "text-xl sm:text-2xl font-bold",
+                  probabilitySuccess && probabilitySuccess >= 70 ? "text-green-600" :
+                  probabilitySuccess && probabilitySuccess >= 50 ? "text-amber-600" : "text-red-600"
+                )}>
+                  {probabilitySuccess ?? 'N/D'}%
+                </span>
+              </div>
+            </div>
+            {stressSeverity && stressSeverity !== 'nessuna' && (
+              <div className="p-2 sm:p-3 rounded-lg bg-destructive/10 border border-destructive/30">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs sm:text-sm text-destructive">Stress Zone</span>
+                  <Badge variant="destructive" className="text-xs sm:text-sm">
+                    {getStressZoneSeverityLabel(stressSeverity).toUpperCase()}
+                  </Badge>
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* Profilo sintetico */}
-          <div className="p-4 rounded-lg bg-background border">
-            <div className="flex items-center gap-2 mb-2">
-              <FileText className="h-4 w-4 text-muted-foreground" />
-              <p className="text-xs font-semibold text-muted-foreground uppercase">Profilo Sintetico</p>
-            </div>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              {profiloSintetico || 'Genera l\'analisi AI per ottenere un profilo sintetico del candidato.'}
+          {/* Profilo Sintetico */}
+          <div className="flex flex-col">
+            <h4 className="text-xs sm:text-sm font-semibold text-muted-foreground mb-1 sm:mb-2">Profilo Sintetico</h4>
+            <p className="text-xs sm:text-sm text-foreground leading-relaxed line-clamp-5">
+              {profiloSintetico || 'Analisi AI non ancora generata.'}
             </p>
           </div>
         </div>
@@ -175,7 +142,6 @@ function ExecutiveSummaryCard({
     </Card>
   );
 }
-
 export default function CandidatoDettaglio() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -422,33 +388,29 @@ export default function CandidatoDettaglio() {
               )}
 
               {/* TABS per organizzare i contenuti */}
-              <Tabs defaultValue="analisi" className="w-full">
-                <TabsList className="grid w-full grid-cols-5">
-                  <TabsTrigger value="analisi" className="flex items-center gap-1.5 text-xs sm:text-sm">
-                    <BarChart3 className="h-4 w-4" />
-                    <span className="hidden sm:inline">Analisi Dati</span>
-                    <span className="sm:hidden">Dati</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="interpretazione" className="flex items-center gap-1.5 text-xs sm:text-sm">
-                    <Activity className="h-4 w-4" />
-                    <span className="hidden sm:inline">Interpretazione</span>
-                    <span className="sm:hidden">Interp.</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="profilo" className="flex items-center gap-1.5 text-xs sm:text-sm">
-                    <User className="h-4 w-4" />
-                    <span>Profilo</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="colloquio" className="flex items-center gap-1.5 text-xs sm:text-sm">
-                    <MessageSquare className="h-4 w-4" />
-                    <span>Colloquio</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="ai" className="flex items-center gap-1.5 text-xs sm:text-sm">
-                    <Sparkles className="h-4 w-4" />
-                    <span className="hidden sm:inline">AI Report</span>
-                    <span className="sm:hidden">AI</span>
-                  </TabsTrigger>
-                </TabsList>
-
+        <Tabs defaultValue="analisi" className="w-full">
+          <TabsList className="flex overflow-x-auto scrollbar-hide mb-4 sm:mb-6 w-full">
+            <TabsTrigger value="analisi" className="flex-1 min-w-[60px] text-xs sm:text-sm px-2 sm:px-4">
+              <BarChart2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 sm:mr-1" />
+              <span className="hidden sm:inline">Analisi</span>
+            </TabsTrigger>
+            <TabsTrigger value="interpretazione" className="flex-1 min-w-[60px] text-xs sm:text-sm px-2 sm:px-4">
+              <Brain className="h-3.5 w-3.5 sm:h-4 sm:w-4 sm:mr-1" />
+              <span className="hidden sm:inline">Interpr.</span>
+            </TabsTrigger>
+            <TabsTrigger value="profilo" className="flex-1 min-w-[60px] text-xs sm:text-sm px-2 sm:px-4">
+              <User className="h-3.5 w-3.5 sm:h-4 sm:w-4 sm:mr-1" />
+              <span className="hidden sm:inline">Profilo</span>
+            </TabsTrigger>
+            <TabsTrigger value="colloquio" className="flex-1 min-w-[60px] text-xs sm:text-sm px-2 sm:px-4">
+              <MessageSquare className="h-3.5 w-3.5 sm:h-4 sm:w-4 sm:mr-1" />
+              <span className="hidden sm:inline">Colloq.</span>
+            </TabsTrigger>
+            <TabsTrigger value="ai" className="flex-1 min-w-[60px] text-xs sm:text-sm px-2 sm:px-4">
+              <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 sm:mr-1" />
+              <span className="hidden sm:inline">AI</span>
+            </TabsTrigger>
+          </TabsList>
                 {/* TAB: Analisi Dati */}
                 <TabsContent value="analisi" className="space-y-6 mt-6">
                   {/* I 3 Cerchi con tooltip esplicativo */}

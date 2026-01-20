@@ -38,161 +38,152 @@ export function AnalisiPsicologica({
   className 
 }: AnalisiPsicologicaProps) {
   return (
-    <div className={cn('space-y-6', className)}>
+    <div className={cn("space-y-4 sm:space-y-6", className)}>
       {/* Profilo Sintetico */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Brain className="h-5 w-5 text-primary" />
-            Profilo Generale
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-foreground leading-relaxed whitespace-pre-line">
-            {analisi.profilo_sintetico}
-          </p>
-        </CardContent>
-      </Card>
-
-      {/* Analisi Stress Zone AI (se presente) */}
-      {analisi.stress_zone_analisi && analisi.stress_zone_severity && analisi.stress_zone_severity !== 'nessuna' && (
-        <Card className={cn(
-          "border-l-4",
-          analisi.stress_zone_severity === 'critica' ? "border-destructive bg-destructive/5" :
-          analisi.stress_zone_severity === 'severa' ? "border-red-500 bg-red-50" :
-          analisi.stress_zone_severity === 'moderata' ? "border-orange-500 bg-orange-50" :
-          "border-amber-500 bg-amber-50"
-        )}>
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <AlertTriangle className={cn(
-                "h-5 w-5",
-                analisi.stress_zone_severity === 'critica' || analisi.stress_zone_severity === 'severa' 
-                  ? "text-destructive" : "text-amber-600"
-              )} />
-              Analisi Stress Zone ({analisi.stress_zone_severity.toUpperCase()})
+      {analisi.profilo_sintetico && (
+        <Card>
+          <CardHeader className="pb-2 pt-3 sm:pt-4">
+            <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+              <User className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+              Profilo Sintetico
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-foreground leading-relaxed whitespace-pre-line">
-              {analisi.stress_zone_analisi}
+          <CardContent className="pb-3 sm:pb-4">
+            <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+              {analisi.profilo_sintetico}
             </p>
           </CardContent>
         </Card>
       )}
-      
-      {/* Punti di Forza e Debolezza */}
-      <div className="grid md:grid-cols-2 gap-6">
-        {/* Punti di Forza */}
-        <Card className="border-success/30 bg-success/5">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-lg text-success">
-              <CheckCircle2 className="h-5 w-5" />
-              Punti di Forza
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-3">
-              {analisi.punti_forza.map((punto, idx) => (
-                <li key={idx} className="flex items-start gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-success mt-0.5 shrink-0" />
-                  <span className="text-foreground">{punto}</span>
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-        
-        {/* Punti di Debolezza */}
-        <Card className="border-warning/30 bg-warning/5">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-lg text-warning">
-              <AlertCircle className="h-5 w-5" />
-              Punti di Debolezza
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-3">
-              {analisi.punti_debolezza.map((punto, idx) => (
-                <li key={idx} className="flex items-start gap-2">
-                  <AlertCircle className="h-4 w-4 text-warning mt-0.5 shrink-0" />
-                  <span className="text-foreground">{punto}</span>
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-      </div>
-      
-      {/* Rischi Operativi */}
-      <Card className="border-destructive/30 bg-destructive/5">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-lg text-destructive">
-            <AlertTriangle className="h-5 w-5" />
-            Rischi Operativi per l'Azienda
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-foreground leading-relaxed whitespace-pre-line">
-            {analisi.rischi_operativi}
-          </p>
-        </CardContent>
-      </Card>
 
-      {/* Domande per il Colloquio generate dall'AI */}
-      {analisi.domande_colloquio && analisi.domande_colloquio.length > 0 && (
-        <Card className="border-primary/30">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-lg text-primary">
-              <MessageSquare className="h-5 w-5" />
-              Domande Suggerite dall'AI per il Colloquio
-              <Badge variant="outline" className="ml-2">{analisi.domande_colloquio.length}</Badge>
+      {/* Analisi Stress Zone AI */}
+      {analisi.stress_zone_analysis && (
+        <Card className="border-amber-200 bg-amber-50/30">
+          <CardHeader className="pb-2 pt-3 sm:pt-4">
+            <CardTitle className="flex items-center gap-2 text-amber-700 text-sm sm:text-base">
+              <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5" />
+              Analisi Stress Zone AI
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {analisi.domande_colloquio.map((item, idx) => (
-                <Collapsible key={idx}>
-                  <CollapsibleTrigger className="w-full">
-                    <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors">
-                      <div className="flex items-center gap-3">
-                        <Badge variant="secondary" className="text-xs">{item.area}</Badge>
-                      </div>
-                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <div className="p-4 bg-background border rounded-b-lg -mt-1">
-                      <p className="text-sm italic text-foreground">"{item.domanda}"</p>
-                    </div>
-                  </CollapsibleContent>
-                </Collapsible>
-              ))}
-            </div>
+          <CardContent className="pb-3 sm:pb-4">
+            <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+              {analisi.stress_zone_analysis}
+            </p>
           </CardContent>
         </Card>
       )}
-      
-      {/* Fit Score */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg">Fit per il Ruolo</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <FitScoreDisplay 
-            score={analisi.fit_score}
-            verdict={analisi.fit_verdict}
-            motivo={analisi.fit_motivo}
-          />
-        </CardContent>
-      </Card>
-      
+
+      {/* Punti di Forza e Debolezza */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+        {/* Punti di Forza */}
+        <Card className="border-green-200">
+          <CardHeader className="pb-2 pt-3 sm:pt-4">
+            <CardTitle className="flex items-center gap-2 text-green-700 text-sm sm:text-base">
+              <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5" />
+              Punti di Forza
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pb-3 sm:pb-4">
+            {analisi.punti_forza && analisi.punti_forza.length > 0 ? (
+              <ul className="space-y-1.5 sm:space-y-2">
+                {analisi.punti_forza.map((punto: string, idx: number) => (
+                  <li key={idx} className="flex items-start gap-2">
+                    <CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-500 mt-0.5 shrink-0" />
+                    <span className="text-xs sm:text-sm">{punto}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-xs sm:text-sm text-muted-foreground italic">Nessun punto di forza identificato.</p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Punti di Debolezza */}
+        <Card className="border-amber-200">
+          <CardHeader className="pb-2 pt-3 sm:pt-4">
+            <CardTitle className="flex items-center gap-2 text-amber-700 text-sm sm:text-base">
+              <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5" />
+              Aree di Miglioramento
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pb-3 sm:pb-4">
+            {analisi.punti_debolezza && analisi.punti_debolezza.length > 0 ? (
+              <ul className="space-y-1.5 sm:space-y-2">
+                {analisi.punti_debolezza.map((punto: string, idx: number) => (
+                  <li key={idx} className="flex items-start gap-2">
+                    <AlertTriangle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-500 mt-0.5 shrink-0" />
+                    <span className="text-xs sm:text-sm">{punto}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-xs sm:text-sm text-muted-foreground italic">Nessuna area di miglioramento identificata.</p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Rischi Operativi */}
+      {analisi.rischi_operativi && (
+        <Card className="border-red-200 bg-red-50/30">
+          <CardHeader className="pb-2 pt-3 sm:pt-4">
+            <CardTitle className="flex items-center gap-2 text-red-700 text-sm sm:text-base">
+              <XCircle className="h-4 w-4 sm:h-5 sm:w-5" />
+              Rischi Operativi
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pb-3 sm:pb-4">
+            <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+              {analisi.rischi_operativi}
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Domande Colloquio AI */}
+      {analisi.domande_colloquio && analisi.domande_colloquio.length > 0 && (
+        <Card>
+          <CardHeader className="pb-2 pt-3 sm:pt-4">
+            <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+              <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+              Domande Colloquio Suggerite (AI)
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pb-3 sm:pb-4">
+            <Collapsible>
+              <CollapsibleTrigger className="flex items-center gap-2 text-xs sm:text-sm text-primary hover:underline">
+                <ChevronDown className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                Mostra {analisi.domande_colloquio.length} domande
+              </CollapsibleTrigger>
+              <CollapsibleContent className="mt-3 space-y-2 sm:space-y-3">
+                {analisi.domande_colloquio.map((item: DomandaColloquioAI, idx: number) => (
+                  <div key={idx} className="border-l-2 border-primary/30 pl-3 sm:pl-4">
+                    <Badge variant="outline" className="mb-1 text-[10px] sm:text-xs">{item.area}</Badge>
+                    <p className="text-xs sm:text-sm">"{item.domanda}"</p>
+                  </div>
+                ))}
+              </CollapsibleContent>
+            </Collapsible>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Fit Score Display */}
+      <FitScoreDisplay 
+        fitScore={analisi.fit_score}
+        fitVerdict={analisi.fit_verdict}
+        fitMotivo={analisi.fit_motivo}
+        probabilitySuccess={analisi.probability_success}
+      />
+
       {/* Raccomandazione Finale */}
-      <RaccomandazioneCard raccomandazione={analisi.raccomandazione} />
+      {analisi.raccomandazione && (
+        <RaccomandazioneCard raccomandazione={analisi.raccomandazione} />
+      )}
     </div>
   );
 }
-
 // Placeholder per quando l'analisi non è ancora disponibile
 export function AnalisiPsicologicaPlaceholder() {
   return (
