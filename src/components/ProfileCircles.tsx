@@ -2,6 +2,7 @@ import { cn } from '@/lib/utils';
 import { SCALE_LABELS, ScalaCode } from '@/types/database';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { HelpCircle } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface ProfileCirclesProps {
   leadership_pct: number;
@@ -63,6 +64,7 @@ function CircularProgress({ percentage, color, size = 140, isMobile = false }: {
     </div>
   );
 }
+
 function ScaleBar({ label, value, isMobile = false }: { label: string; value: number; isMobile?: boolean }) {
   const percentage = (value / 200) * 100;
   const isLow = value < 80;
@@ -96,17 +98,20 @@ function ScaleBar({ label, value, isMobile = false }: { label: string; value: nu
     </Tooltip>
   );
 }
-function Circle({ title, subtitle, tooltip, percentage, color, scales, abbreviation }: CircleProps & { abbreviation?: string }) {
+
+function Circle({ title, subtitle, tooltip, percentage, color, scales, abbreviation, isMobile }: CircleProps & { abbreviation?: string; isMobile?: boolean }) {
+  const circleSize = isMobile ? 100 : 140;
+  
   return (
-    <div className="flex flex-col items-center p-5 bg-card rounded-xl border shadow-sm hover:shadow-md transition-shadow">
+    <div className={`flex flex-col items-center ${isMobile ? 'p-3' : 'p-5'} bg-card rounded-xl border shadow-sm hover:shadow-md transition-shadow`}>
       <div className="flex items-center gap-2 mb-1">
         {abbreviation && (
           <span className={cn("text-xs font-bold px-2 py-0.5 rounded", color.replace('text-', 'bg-').replace('[#', '[').replace(']', '/15]'), color)}>
             {abbreviation}
           </span>
         )}
-        <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-          {title}
+        <h3 className={`${isMobile ? 'text-[10px]' : 'text-sm'} font-semibold uppercase tracking-wider text-muted-foreground`}>
+          {isMobile ? title.split(' ')[0] : title}
         </h3>
         <TooltipProvider>
           <Tooltip>
@@ -120,14 +125,15 @@ function Circle({ title, subtitle, tooltip, percentage, color, scales, abbreviat
           </Tooltip>
         </TooltipProvider>
       </div>
-      <p className={cn("text-xs font-medium mb-4 text-muted-foreground")}>{subtitle}</p>
-      <CircularProgress percentage={percentage} color={color} />
-      <div className="w-full mt-5 space-y-2.5">
+      <p className={cn(`${isMobile ? 'text-[9px]' : 'text-xs'} font-medium mb-3 sm:mb-4 text-muted-foreground`)}>{subtitle}</p>
+      <CircularProgress percentage={percentage} color={color} size={circleSize} isMobile={isMobile} />
+      <div className={`w-full ${isMobile ? 'mt-3 space-y-1.5' : 'mt-5 space-y-2.5'}`}>
         {scales.map((scale) => (
           <ScaleBar 
             key={scale.code} 
             label={scale.label} 
-            value={scale.value} 
+            value={scale.value}
+            isMobile={isMobile}
           />
         ))}
       </div>
@@ -136,10 +142,10 @@ function Circle({ title, subtitle, tooltip, percentage, color, scales, abbreviat
 }
 
 export function ProfileCircles({ 
-  leadershipPct, 
-  maturitaPct, 
-  potenzialePct, 
-  scalePunteggi 
+  leadership_pct, 
+  maturita_pct, 
+  potenziale_pct, 
+  scale_punteggi 
 }: ProfileCirclesProps) {
   const isMobile = useIsMobile();
   
@@ -148,36 +154,36 @@ export function ProfileCircles({
       title: "Impatto Organizzativo",
       subtitle: "IIO - Leadership",
       tooltip: "Misura la capacità di influenzare, guidare e lasciare un'impronta nell'organizzazione. Basato su Motivazione (MO), Qualità Negoziali (QN) e Spinta alla Performance (SP).",
-      percentage: leadershipPct,
+      percentage: leadership_pct,
       color: "#1e3a5f",
       scales: [
-        { key: 'MO', label: 'Motivazione', value: scalePunteggi['MO'] || 100 },
-        { key: 'QN', label: 'Qualità Negoziali', value: scalePunteggi['QN'] || 100 },
-        { key: 'SP', label: 'Spinta Performance', value: scalePunteggi['SP'] || 100 },
+        { code: 'MO', label: 'Motivazione', value: scale_punteggi['MO'] || 100 },
+        { code: 'QN', label: 'Qualità Negoziali', value: scale_punteggi['QN'] || 100 },
+        { code: 'SP', label: 'Spinta Performance', value: scale_punteggi['SP'] || 100 },
       ]
     },
     {
       title: "Solidità Personale",
       subtitle: "ISP - Maturità",
       tooltip: "Indica la stabilità emotiva, la capacità di gestire lo stress e la maturità personale. Basato su Stile di Vita (SV), Capacità di Fronteggiare (CF) e Pensiero Autonomo (PA).",
-      percentage: maturitaPct,
+      percentage: maturita_pct,
       color: "#22c55e",
       scales: [
-        { key: 'SV', label: 'Stile di Vita', value: scalePunteggi['SV'] || 100 },
-        { key: 'CF', label: 'Fronteggiamento', value: scalePunteggi['CF'] || 100 },
-        { key: 'PA', label: 'Pensiero Autonomo', value: scalePunteggi['PA'] || 100 },
+        { code: 'SV', label: 'Stile di Vita', value: scale_punteggi['SV'] || 100 },
+        { code: 'CF', label: 'Fronteggiamento', value: scale_punteggi['CF'] || 100 },
+        { code: 'PA', label: 'Pensiero Autonomo', value: scale_punteggi['PA'] || 100 },
       ]
     },
     {
       title: "Capacità Produttiva",
       subtitle: "ICP - Potenziale",
       tooltip: "Valuta l'orientamento al risultato, l'efficienza operativa e la capacità di produrre valore. Basato su Efficienza (EF), Qualità Realizzativa (QR) e Schematicità (SC).",
-      percentage: potenzialePct,
+      percentage: potenziale_pct,
       color: "#f09133",
       scales: [
-        { key: 'EF', label: 'Efficienza', value: scalePunteggi['EF'] || 100 },
-        { key: 'QR', label: 'Qualità Realizz.', value: scalePunteggi['QR'] || 100 },
-        { key: 'SC', label: 'Schematicità', value: scalePunteggi['SC'] || 100 },
+        { code: 'EF', label: 'Efficienza', value: scale_punteggi['EF'] || 100 },
+        { code: 'QR', label: 'Qualità Realizz.', value: scale_punteggi['QR'] || 100 },
+        { code: 'SC', label: 'Schematicità', value: scale_punteggi['SC'] || 100 },
       ]
     },
   ];
