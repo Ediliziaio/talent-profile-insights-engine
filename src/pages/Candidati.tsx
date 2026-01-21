@@ -1431,20 +1431,21 @@ export default function Candidati() {
                               selectedIds.has(candidato.id) && "bg-primary/5"
                             )}
                           >
-                            <div className="flex items-start justify-between gap-3">
-                              <div className="flex items-center gap-3">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex items-center gap-2 min-w-0 flex-1">
                                 <Checkbox 
                                   checked={selectedIds.has(candidato.id)}
                                   onCheckedChange={() => toggleSelect(candidato.id)}
+                                  className="shrink-0"
                                 />
-                                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-sm shrink-0">
+                                <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-xs shrink-0">
                                   {candidato.nome?.[0]}{candidato.cognome?.[0]}
                                 </div>
-                                <div className="min-w-0">
-                                  <div className="flex items-center gap-2">
-                                    <p className="font-medium truncate">{candidato.cognome} {candidato.nome}</p>
+                                <div className="min-w-0 flex-1">
+                                  <div className="flex items-center gap-1">
+                                    <p className="font-medium text-sm truncate">{candidato.cognome} {candidato.nome}</p>
                                     {hasDuplicates && (
-                                      <AlertTriangle className="h-4 w-4 text-yellow-500 shrink-0" />
+                                      <AlertTriangle className="h-3 w-3 text-yellow-500 shrink-0" />
                                     )}
                                   </div>
                                   {candidato.email && (
@@ -1452,15 +1453,15 @@ export default function Candidati() {
                                   )}
                                 </div>
                               </div>
-                              <div className="flex items-center gap-1">
+                              <div className="flex items-center gap-1 shrink-0">
                                 {candidato.test_completato ? (
                                   <Button 
                                     variant="default" 
                                     size="sm"
-                                    className="h-8 px-3 text-xs"
+                                    className="h-8 px-2 text-xs whitespace-nowrap"
                                     onClick={() => navigate(`/candidati/${candidato.id}`)}
                                   >
-                                    <Eye className="h-4 w-4 mr-1" />
+                                    <Eye className="h-3 w-3 mr-1" />
                                     Vedi
                                   </Button>
                                 ) : (
