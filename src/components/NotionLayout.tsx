@@ -1,11 +1,11 @@
 import { ReactNode, useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
-import { LogOut, Home, Users, BarChart3, Settings, BookOpen, ChevronLeft, ChevronRight, Menu, X } from 'lucide-react';
+import { LogOut, Home, Users, BarChart3, Settings, BookOpen, ChevronLeft, ChevronRight, Menu } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
-import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface NotionLayoutProps {
@@ -126,7 +126,7 @@ export function NotionLayout({ children }: NotionLayoutProps) {
     return (
       <div className="min-h-screen bg-background flex flex-col">
         {/* Mobile Header */}
-        <header className="sticky top-0 z-50 bg-sidebar-background border-b border-sidebar-border flex items-center justify-between px-3 py-2">
+        <header className="sticky top-0 z-50 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between px-3 py-2">
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="h-9 w-9">
@@ -135,7 +135,7 @@ export function NotionLayout({ children }: NotionLayoutProps) {
             </SheetTrigger>
             <SheetContent side="left" className="w-64 p-0 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 border-r border-slate-200 dark:border-slate-700">
               <div className="flex flex-col h-full">
-                <div className="flex items-center justify-between p-3">
+                <div className="flex items-center p-3">
                   <Link to="/" onClick={() => setMobileOpen(false)}>
                     <img 
                       src="/talentprofile_logo_v3.png?v=20260119" 
@@ -143,11 +143,6 @@ export function NotionLayout({ children }: NotionLayoutProps) {
                       className="h-10 w-auto max-w-[120px] object-contain"
                     />
                   </Link>
-                  <SheetClose asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </SheetClose>
                 </div>
                 <Separator className="bg-sidebar-border" />
                 <nav className="flex-1 p-2 space-y-1">
