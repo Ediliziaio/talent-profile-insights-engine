@@ -307,7 +307,7 @@ export default function CandidatoDettaglio() {
   return (
     <ProtectedRoute allowedRoles={['superadmin', 'azienda']}>
       <NotionLayout>
-        <div className="space-y-6 pb-8">
+        <div className="space-y-6 pb-24 md:pb-8">
           {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-center gap-4">
             <Button variant="ghost" size="icon" onClick={() => navigate('/candidati')}>
@@ -760,6 +760,18 @@ export default function CandidatoDettaglio() {
               </CardContent>
             </Card>
           )}
+        </div>
+
+        {/* Mobile fixed back button */}
+        <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t border-border md:hidden z-40">
+          <Button 
+            variant="outline" 
+            className="w-full h-12 text-base font-medium"
+            onClick={() => navigate('/candidati')}
+          >
+            <ArrowLeft className="h-5 w-5 mr-2" />
+            Torna alla lista candidati
+          </Button>
         </div>
       </NotionLayout>
     </ProtectedRoute>
