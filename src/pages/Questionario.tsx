@@ -5,22 +5,21 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-
+import { AnswerButton } from '@/components/AnswerButton';
 import { useToast } from '@/hooks/use-toast';
 import { DOMANDE } from '@/data/questionario';
 import { calcolaProfilo, RispostaInput } from '@/lib/scoring';
-import { Brain, ChevronLeft, ChevronRight, Send, Loader2, Check } from 'lucide-react';
+import { QUESTIONS_PER_PAGE, ANSWER_OPTIONS, type AnswerValue } from '@/lib/constants';
+import { Brain, ChevronLeft, ChevronRight, Send, Loader2 } from 'lucide-react';
 import { Candidato } from '@/types/database';
 import { cn } from '@/lib/utils';
-
-const QUESTIONS_PER_PAGE = 20;
 
 export default function Questionario() {
   const { user, profile, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [currentPage, setCurrentPage] = useState(0);
-  const [risposte, setRisposte] = useState<Record<number, 'A' | 'B' | 'C'>>({});
+  const [risposte, setRisposte] = useState<Record<number, AnswerValue>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const totalPages = Math.ceil(DOMANDE.length / QUESTIONS_PER_PAGE);
@@ -52,9 +51,9 @@ export default function Questionario() {
         .eq('candidato_id', candidato.id)
         .then(({ data }) => {
           if (data) {
-            const existing: Record<number, 'A' | 'B' | 'C'> = {};
+            const existing: Record<number, AnswerValue> = {};
             data.forEach((r) => {
-              existing[r.domanda_id] = r.valore as 'A' | 'B' | 'C';
+              existing[r.domanda_id] = r.valore as AnswerValue;
             });
             setRisposte(existing);
           }
@@ -63,7 +62,7 @@ export default function Questionario() {
   }, [candidato]);
 
   const saveMutation = useMutation({
-    mutationFn: async ({ domandaId, valore }: { domandaId: number; valore: 'A' | 'B' | 'C' }) => {
+    mutationFn: async ({ domandaId, valore }: { domandaId: number; valore: AnswerValue }) => {
       if (!candidato) throw new Error('Candidato non trovato');
 
       const { error } = await supabase
@@ -80,7 +79,7 @@ export default function Questionario() {
     },
   });
 
-  const handleAnswer = (domandaId: number, valore: 'A' | 'B' | 'C') => {
+  const handleAnswer = (domandaId: number, valore: AnswerValue) => {
     setRisposte((prev) => ({ ...prev, [domandaId]: valore }));
     saveMutation.mutate({ domandaId, valore });
   };
@@ -246,71 +245,17 @@ export default function Questionario() {
                     </p>
                   </div>
 
-                  {/* Column 2: Answer A */}
-                  <button
-                    onClick={() => handleAnswer(domanda.id, 'A')}
-                    className={cn(
-                      "p-3 rounded-lg border-2 text-center transition-all",
-                      "flex items-center justify-center gap-2",
-                      risposte[domanda.id] === 'A'
-                        ? "border-accent bg-accent text-accent-foreground"
-                        : "border-border bg-card hover:border-accent/50 hover:bg-accent/5"
-                    )}
-                  >
-                    <div className={cn(
-                      "w-6 h-6 rounded-full flex items-center justify-center shrink-0 font-bold text-xs",
-                      risposte[domanda.id] === 'A' 
-                        ? "bg-white/20" 
-                        : "bg-primary/10 text-primary"
-                    )}>
-                      {risposte[domanda.id] === 'A' ? <Check className="h-3 w-3" /> : 'A'}
-                    </div>
-                    <span className="text-sm font-medium">Sì, sempre</span>
-                  </button>
-
-                  {/* Column 3: Answer B */}
-                  <button
-                    onClick={() => handleAnswer(domanda.id, 'B')}
-                    className={cn(
-                      "p-3 rounded-lg border-2 text-center transition-all",
-                      "flex items-center justify-center gap-2",
-                      risposte[domanda.id] === 'B'
-                        ? "border-accent bg-accent text-accent-foreground"
-                        : "border-border bg-card hover:border-accent/50 hover:bg-accent/5"
-                    )}
-                  >
-                    <div className={cn(
-                      "w-6 h-6 rounded-full flex items-center justify-center shrink-0 font-bold text-xs",
-                      risposte[domanda.id] === 'B' 
-                        ? "bg-white/20" 
-                        : "bg-primary/10 text-primary"
-                    )}>
-                      {risposte[domanda.id] === 'B' ? <Check className="h-3 w-3" /> : 'B'}
-                    </div>
-                    <span className="text-sm font-medium">A volte</span>
-                  </button>
-
-                  {/* Column 4: Answer C */}
-                  <button
-                    onClick={() => handleAnswer(domanda.id, 'C')}
-                    className={cn(
-                      "p-3 rounded-lg border-2 text-center transition-all",
-                      "flex items-center justify-center gap-2",
-                      risposte[domanda.id] === 'C'
-                        ? "border-accent bg-accent text-accent-foreground"
-                        : "border-border bg-card hover:border-accent/50 hover:bg-accent/5"
-                    )}
-                  >
-                    <div className={cn(
-                      "w-6 h-6 rounded-full flex items-center justify-center shrink-0 font-bold text-xs",
-                      risposte[domanda.id] === 'C' 
-                        ? "bg-white/20" 
-                        : "bg-primary/10 text-primary"
-                    )}>
-                      {risposte[domanda.id] === 'C' ? <Check className="h-3 w-3" /> : 'C'}
-                    </div>
-                    <span className="text-sm font-medium">No, mai</span>
-                  </button>
+                  {/* Answer buttons - Desktop */}
+                  {ANSWER_OPTIONS.map(option => (
+                    <AnswerButton
+                      key={option.value}
+                      value={option.value}
+                      label={option.label}
+                      selected={risposte[domanda.id] === option.value}
+                      onClick={() => handleAnswer(domanda.id, option.value)}
+                      variant="desktop"
+                    />
+                  ))}
                 </div>
 
                 {/* Mobile: Stack layout */}
@@ -323,76 +268,19 @@ export default function Questionario() {
                     <p className="font-medium text-sm leading-relaxed">{domanda.testo}</p>
                   </div>
 
-                  {/* Answer buttons - horizontal on mobile with min-height for touch */}
+                  {/* Answer buttons - Mobile */}
                   <div className="grid grid-cols-3 gap-2">
-                    {/* Answer A */}
-                    <button
-                      onClick={() => handleAnswer(domanda.id, 'A')}
-                      className={cn(
-                        "min-h-[56px] p-2 rounded-lg border-2 text-center transition-all touch-manipulation",
-                        "active:scale-[0.98]",
-                        "flex flex-col items-center justify-center gap-0.5",
-                        risposte[domanda.id] === 'A'
-                          ? "border-accent bg-accent text-accent-foreground shadow-md"
-                          : "border-border bg-card hover:border-accent/50 hover:bg-accent/5"
-                      )}
-                    >
-                      <div className={cn(
-                        "w-7 h-7 rounded-full flex items-center justify-center shrink-0 font-bold text-xs",
-                        risposte[domanda.id] === 'A' 
-                          ? "bg-white/20" 
-                          : "bg-primary/10 text-primary"
-                      )}>
-                        {risposte[domanda.id] === 'A' ? <Check className="h-3.5 w-3.5" /> : 'A'}
-                      </div>
-                      <span className="text-[10px] font-medium leading-tight">Sì, sempre</span>
-                    </button>
-
-                    {/* Answer B */}
-                    <button
-                      onClick={() => handleAnswer(domanda.id, 'B')}
-                      className={cn(
-                        "min-h-[56px] p-2 rounded-lg border-2 text-center transition-all touch-manipulation",
-                        "active:scale-[0.98]",
-                        "flex flex-col items-center justify-center gap-0.5",
-                        risposte[domanda.id] === 'B'
-                          ? "border-accent bg-accent text-accent-foreground shadow-md"
-                          : "border-border bg-card hover:border-accent/50 hover:bg-accent/5"
-                      )}
-                    >
-                      <div className={cn(
-                        "w-7 h-7 rounded-full flex items-center justify-center shrink-0 font-bold text-xs",
-                        risposte[domanda.id] === 'B' 
-                          ? "bg-white/20" 
-                          : "bg-primary/10 text-primary"
-                      )}>
-                        {risposte[domanda.id] === 'B' ? <Check className="h-3.5 w-3.5" /> : 'B'}
-                      </div>
-                      <span className="text-[10px] font-medium leading-tight">A volte</span>
-                    </button>
-
-                    {/* Answer C */}
-                    <button
-                      onClick={() => handleAnswer(domanda.id, 'C')}
-                      className={cn(
-                        "min-h-[56px] p-2 rounded-lg border-2 text-center transition-all touch-manipulation",
-                        "active:scale-[0.98]",
-                        "flex flex-col items-center justify-center gap-0.5",
-                        risposte[domanda.id] === 'C'
-                          ? "border-accent bg-accent text-accent-foreground shadow-md"
-                          : "border-border bg-card hover:border-accent/50 hover:bg-accent/5"
-                      )}
-                    >
-                      <div className={cn(
-                        "w-7 h-7 rounded-full flex items-center justify-center shrink-0 font-bold text-xs",
-                        risposte[domanda.id] === 'C' 
-                          ? "bg-white/20" 
-                          : "bg-primary/10 text-primary"
-                      )}>
-                        {risposte[domanda.id] === 'C' ? <Check className="h-3.5 w-3.5" /> : 'C'}
-                      </div>
-                      <span className="text-[10px] font-medium leading-tight">No, mai</span>
-                    </button>
+                    {ANSWER_OPTIONS.map(option => (
+                      <AnswerButton
+                        key={option.value}
+                        value={option.value}
+                        label={option.label}
+                        shortLabel={option.shortLabel}
+                        selected={risposte[domanda.id] === option.value}
+                        onClick={() => handleAnswer(domanda.id, option.value)}
+                        variant="mobile"
+                      />
+                    ))}
                   </div>
                 </div>
               </CardContent>
@@ -425,16 +313,16 @@ export default function Questionario() {
               ) : (
                 <Send className="h-4 w-4 sm:mr-2" />
               )}
-              <span className="hidden sm:inline">Invia Risposte</span>
+              <span className="hidden sm:inline">Invia Test</span>
               <span className="sm:hidden">Invia</span>
             </Button>
           ) : (
             <Button
               onClick={() => setCurrentPage((p) => p + 1)}
               disabled={!canGoNext}
-              className="h-12 px-4 sm:px-6 text-sm sm:text-base"
+              className="h-12 px-3 sm:px-4 text-sm sm:text-base"
             >
-              Avanti
+              <span className="hidden sm:inline">Avanti</span>
               <ChevronRight className="h-4 w-4 sm:ml-2" />
             </Button>
           )}
