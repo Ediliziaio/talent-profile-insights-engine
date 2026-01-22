@@ -6,6 +6,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { QUERY_CONFIG } from "@/lib/constants";
 import {
   DashboardSkeleton,
   CandidatiSkeleton,
@@ -32,9 +34,14 @@ const FormAnagrafico = lazy(() => import('./pages/FormAnagrafico'));
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutes
-      gcTime: 1000 * 60 * 10, // 10 minutes (formerly cacheTime)
+      staleTime: QUERY_CONFIG.STALE_TIME,
+      gcTime: QUERY_CONFIG.GC_TIME,
       refetchOnWindowFocus: false,
+      retry: QUERY_CONFIG.RETRY_COUNT,
+      retryDelay: attemptIndex => Math.min(
+        QUERY_CONFIG.RETRY_DELAY_BASE * 2 ** attemptIndex, 
+        QUERY_CONFIG.RETRY_DELAY_MAX
+      ),
     },
   },
 });
@@ -59,56 +66,58 @@ function CandidatoRedirect() {
 }
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<CandidatoRedirect />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/aziende" element={
-              <Suspense fallback={<AziendeSkeleton />}>
-                <Aziende />
-              </Suspense>
-            } />
-            <Route path="/candidati" element={
-              <Suspense fallback={<CandidatiSkeleton />}>
-                <Candidati />
-              </Suspense>
-            } />
-            <Route path="/candidati/:id" element={
-              <Suspense fallback={<CandidatoDettaglioSkeleton />}>
-                <CandidatoDettaglio />
-              </Suspense>
-            } />
-            <Route path="/test/anagrafica" element={
-              <Suspense fallback={<FormSkeleton />}>
-                <FormAnagrafico />
-              </Suspense>
-            } />
-            <Route path="/test/privacy" element={
-              <Suspense fallback={<FormSkeleton />}>
-                <ConsensoPrivacy />
-              </Suspense>
-            } />
-            <Route path="/test/questionario" element={
-              <Suspense fallback={<QuestionarioSkeleton />}>
-                <Questionario />
-              </Suspense>
-            } />
-            <Route path="/test/completato" element={
-              <Suspense fallback={<FormSkeleton />}>
-                <TestCompletato />
-              </Suspense>
-            } />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
-  </QueryClientProvider>
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<CandidatoRedirect />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/aziende" element={
+                <Suspense fallback={<AziendeSkeleton />}>
+                  <Aziende />
+                </Suspense>
+              } />
+              <Route path="/candidati" element={
+                <Suspense fallback={<CandidatiSkeleton />}>
+                  <Candidati />
+                </Suspense>
+              } />
+              <Route path="/candidati/:id" element={
+                <Suspense fallback={<CandidatoDettaglioSkeleton />}>
+                  <CandidatoDettaglio />
+                </Suspense>
+              } />
+              <Route path="/test/anagrafica" element={
+                <Suspense fallback={<FormSkeleton />}>
+                  <FormAnagrafico />
+                </Suspense>
+              } />
+              <Route path="/test/privacy" element={
+                <Suspense fallback={<FormSkeleton />}>
+                  <ConsensoPrivacy />
+                </Suspense>
+              } />
+              <Route path="/test/questionario" element={
+                <Suspense fallback={<QuestionarioSkeleton />}>
+                  <Questionario />
+                </Suspense>
+              } />
+              <Route path="/test/completato" element={
+                <Suspense fallback={<FormSkeleton />}>
+                  <TestCompletato />
+                </Suspense>
+              } />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;

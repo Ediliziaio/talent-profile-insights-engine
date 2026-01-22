@@ -38,58 +38,8 @@ export interface FitAdjustment {
   adjustment: number;
 }
 
-// Funzioni aziendali per fallback (compatibilità)
-const FUNCTION_IDEAL_PROFILES: Record<string, {
-  requiredTraits: string[];
-  penaltyTraits: string[];
-  baseMultiplier: number;
-}> = {
-  'Ufficio vendite': {
-    requiredTraits: ['PA', 'SP', 'EC', 'MO', 'CF'],
-    penaltyTraits: ['SC'], 
-    baseMultiplier: 1.2,
-  },
-  'Direzione generale': {
-    requiredTraits: ['QR', 'PA', 'MO', 'CF', 'SP', 'EC'],
-    penaltyTraits: [],
-    baseMultiplier: 1.0,
-  },
-  'Amministrazione': {
-    requiredTraits: ['EF', 'SC', 'QR'],
-    penaltyTraits: [],
-    baseMultiplier: 1.0,
-  },
-  'Ufficio risorse umane': {
-    requiredTraits: ['PA', 'CF', 'SV'],
-    penaltyTraits: [],
-    baseMultiplier: 1.0,
-  },
-  'Produzione': {
-    requiredTraits: ['EF', 'EC', 'SC'],
-    penaltyTraits: [],
-    baseMultiplier: 1.0,
-  },
-  'Logistica': {
-    requiredTraits: ['EF', 'EC', 'CF'],
-    penaltyTraits: [],
-    baseMultiplier: 1.0,
-  },
-  'Ufficio marketing': {
-    requiredTraits: ['PA', 'SP', 'EC'],
-    penaltyTraits: ['SC'],
-    baseMultiplier: 1.0,
-  },
-  'Ufficio tecnico': {
-    requiredTraits: ['EF', 'EC'],
-    penaltyTraits: [],
-    baseMultiplier: 1.0,
-  },
-  'Ufficio acquisti': {
-    requiredTraits: ['EC', 'QR', 'EF'],
-    penaltyTraits: [],
-    baseMultiplier: 1.0,
-  },
-};
+// NOTA: FUNCTION_IDEAL_PROFILES rimosso - ora usiamo ROLE_PROFILES da roleMatching.ts
+// per evitare duplicazione. Il fallback utilizza la media delle scale principali.
 
 export function calculateFitScore(context: FitContext): FitResult {
   const { eta, ruolo_attuale, funzione, profilo } = context;
@@ -146,7 +96,7 @@ export function calculateFitScore(context: FitContext): FitResult {
     };
   }
   
-  // ============ FALLBACK: Logica originale per funzioni non mappate ============
+  // ============ FALLBACK: Logica per funzioni non mappate in ROLE_PROFILES ============
   
   // 1. Calcola score base dalla media delle scale principali
   const mainScales = ['SV', 'MO', 'CF', 'EF', 'EC', 'QN', 'QR', 'SP', 'PA'];
@@ -157,24 +107,7 @@ export function calculateFitScore(context: FitContext): FitResult {
   let baseScore = Math.round(((avgScore - 50) / 150) * 100);
   baseScore = Math.max(0, Math.min(100, baseScore));
   
-  // 2. Bonus/Penalità per funzione specifica
-  if (funzione && FUNCTION_IDEAL_PROFILES[funzione]) {
-    const profile = FUNCTION_IDEAL_PROFILES[funzione];
-    
-    const requiredAvg = profile.requiredTraits
-      .map(t => scalePunteggi[t] || 100)
-      .reduce((a, b) => a + b, 0) / profile.requiredTraits.length;
-    
-    if (requiredAvg > 140) {
-      const bonus = Math.round((requiredAvg - 140) / 6);
-      adjustments.push({ reason: `Eccellenza nelle competenze chiave per ${funzione}`, adjustment: bonus });
-    } else if (requiredAvg < 100) {
-      const penalty = -Math.round((100 - requiredAvg) / 5);
-      adjustments.push({ reason: `Competenze chiave sotto la media per ${funzione}`, adjustment: penalty });
-    }
-  }
-  
-  // 3. Correzione età + ruolo vendite
+  // 2. Correzione età + ruolo vendite
   if (eta && eta > 55 && (funzione === 'Ufficio vendite' || ruolo_attuale?.toLowerCase().includes('vendite'))) {
     const schematicita = scalePunteggi['SC'] || 100;
     const capFronteggiare = scalePunteggi['CF'] || 100;
@@ -189,7 +122,7 @@ export function calculateFitScore(context: FitContext): FitResult {
     }
   }
   
-  // 4. Pattern critico V5: Motore a vuoto
+  // 3. Pattern critico V5: Motore a vuoto
   const mo = scalePunteggi['MO'] || 100;
   const sp = scalePunteggi['SP'] || 100;
   if (mo > 140 && sp < 100 && funzione === 'Ufficio vendite') {
@@ -197,7 +130,7 @@ export function calculateFitScore(context: FitContext): FitResult {
     alerts.push('MOTORE A VUOTO: Alta Motivazione ma Bassa Ambizione. Sembra motivato ma non produce risultati concreti.');
   }
   
-  // 5. Correzione amministrativo troppo rigido
+  // 4. Correzione amministrativo troppo rigido
   if (funzione === 'Amministrazione') {
     const schematicita = scalePunteggi['SC'] || 100;
     const efficacia = scalePunteggi['EC'] || 100;
@@ -207,20 +140,20 @@ export function calculateFitScore(context: FitContext): FitResult {
     }
   }
   
-  // 6. Stress zone penalty
+  // 5. Stress zone penalty
   if (profilo.stress_zone) {
     adjustments.push({ reason: 'Zona stress attiva - difficoltà potenziale sotto pressione', adjustment: -15 });
     alerts.push('Candidato in zona stress. Valutare attentamente il contesto lavorativo.');
   }
   
-  // 7. Out points penalty
+  // 6. Out points penalty
   const outPoints = (profilo.out_points as string[]) || [];
   if (outPoints.length > 2) {
     const penalty = -5 * (outPoints.length - 2);
     adjustments.push({ reason: `${outPoints.length} aree critiche rilevate`, adjustment: penalty });
   }
   
-  // 8. Strength points bonus
+  // 7. Strength points bonus
   const strengthPoints = (profilo.strength_points as string[]) || [];
   if (strengthPoints.length >= 3) {
     const bonus = 5 * Math.min(strengthPoints.length - 2, 3);

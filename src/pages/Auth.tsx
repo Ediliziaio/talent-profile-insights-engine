@@ -8,6 +8,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { User, Building2, Loader2 } from 'lucide-react';
+import { 
+  loginEmailSchema, 
+  loginCandidateSchema, 
+  registerSchema,
+  type LoginEmailInput,
+  type LoginCandidateInput,
+  type RegisterInput 
+} from '@/lib/validationSchemas';
 
 export default function Auth() {
   const [email, setEmail] = useState('');
@@ -15,11 +23,13 @@ export default function Auth() {
   const [nome, setNome] = useState('');
   const [cognome, setCognome] = useState('');
   const [loading, setLoading] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   
   // Candidate login state
   const [candidateUsername, setCandidateUsername] = useState('');
   const [candidatePassword, setCandidatePassword] = useState('');
   const [candidateLoading, setCandidateLoading] = useState(false);
+  const [candidateErrors, setCandidateErrors] = useState<Record<string, string>>({});
   
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
@@ -27,15 +37,30 @@ export default function Auth() {
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFieldErrors({});
+    
+    // Validate with Zod
+    const validation = loginEmailSchema.safeParse({ email, password });
+    if (!validation.success) {
+      const errors: Record<string, string> = {};
+      validation.error.errors.forEach(err => {
+        if (err.path[0]) {
+          errors[err.path[0].toString()] = err.message;
+        }
+      });
+      setFieldErrors(errors);
+      return;
+    }
+    
     setLoading(true);
     
     // If input doesn't contain @, treat as username and construct internal email
-    let loginEmail = email;
-    if (!email.includes('@')) {
-      loginEmail = `${email}@candidati.talentprofile.local`;
+    let loginEmail = validation.data.email;
+    if (!loginEmail.includes('@')) {
+      loginEmail = `${loginEmail}@candidati.talentprofile.local`;
     }
     
-    const { error } = await signIn(loginEmail, password);
+    const { error } = await signIn(loginEmail, validation.data.password);
     setLoading(false);
     
     if (error) {
@@ -47,8 +72,28 @@ export default function Auth() {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFieldErrors({});
+    
+    // Validate with Zod
+    const validation = registerSchema.safeParse({ nome, cognome, email, password });
+    if (!validation.success) {
+      const errors: Record<string, string> = {};
+      validation.error.errors.forEach(err => {
+        if (err.path[0]) {
+          errors[err.path[0].toString()] = err.message;
+        }
+      });
+      setFieldErrors(errors);
+      return;
+    }
+    
     setLoading(true);
-    const { error } = await signUp(email, password, nome, cognome);
+    const { error } = await signUp(
+      validation.data.email, 
+      validation.data.password, 
+      validation.data.nome, 
+      validation.data.cognome
+    );
     setLoading(false);
     
     if (error) {
@@ -61,6 +106,24 @@ export default function Auth() {
 
   const handleCandidateLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setCandidateErrors({});
+    
+    // Validate with Zod
+    const validation = loginCandidateSchema.safeParse({ 
+      username: candidateUsername, 
+      password: candidatePassword 
+    });
+    if (!validation.success) {
+      const errors: Record<string, string> = {};
+      validation.error.errors.forEach(err => {
+        if (err.path[0]) {
+          errors[err.path[0].toString()] = err.message;
+        }
+      });
+      setCandidateErrors(errors);
+      return;
+    }
+    
     setCandidateLoading(true);
 
     try {
@@ -72,8 +135,8 @@ export default function Auth() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            username: candidateUsername.trim().toLowerCase(),
-            password: candidatePassword,
+            username: validation.data.username,
+            password: validation.data.password,
           }),
         }
       );
@@ -151,10 +214,12 @@ export default function Auth() {
                     type="text" 
                     value={candidateUsername} 
                     onChange={e => setCandidateUsername(e.target.value)} 
-                    required 
                     placeholder="es. teknofinestre-a1b2"
-                    className="h-11 text-base"
+                    className={`h-11 text-base ${candidateErrors.username ? 'border-destructive' : ''}`}
                   />
+                  {candidateErrors.username && (
+                    <p className="text-xs text-destructive">{candidateErrors.username}</p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="candidate-password" className="text-sm">Password</Label>
@@ -163,9 +228,11 @@ export default function Auth() {
                     type="password" 
                     value={candidatePassword} 
                     onChange={e => setCandidatePassword(e.target.value)} 
-                    required 
-                    className="h-11 text-base"
+                    className={`h-11 text-base ${candidateErrors.password ? 'border-destructive' : ''}`}
                   />
+                  {candidateErrors.password && (
+                    <p className="text-xs text-destructive">{candidateErrors.password}</p>
+                  )}
                 </div>
                 <Button type="submit" className="w-full h-12 text-base bg-accent hover:bg-accent/90" disabled={candidateLoading}>
                   {candidateLoading ? (
@@ -193,14 +260,25 @@ export default function Auth() {
                     type="email" 
                     value={email} 
                     onChange={e => setEmail(e.target.value)} 
-                    required 
                     placeholder="email@azienda.it"
-                    className="h-11 text-base"
+                    className={`h-11 text-base ${fieldErrors.email ? 'border-destructive' : ''}`}
                   />
+                  {fieldErrors.email && (
+                    <p className="text-xs text-destructive">{fieldErrors.email}</p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="password" className="text-sm">Password</Label>
-                  <Input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} required className="h-11 text-base" />
+                  <Input 
+                    id="password" 
+                    type="password" 
+                    value={password} 
+                    onChange={e => setPassword(e.target.value)} 
+                    className={`h-11 text-base ${fieldErrors.password ? 'border-destructive' : ''}`}
+                  />
+                  {fieldErrors.password && (
+                    <p className="text-xs text-destructive">{fieldErrors.password}</p>
+                  )}
                 </div>
                 <Button type="submit" className="w-full h-12 text-base" disabled={loading}>
                   {loading ? (
@@ -221,20 +299,54 @@ export default function Auth() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="nome" className="text-sm">Nome</Label>
-                    <Input id="nome" value={nome} onChange={e => setNome(e.target.value)} required className="h-11 text-base" />
+                    <Input 
+                      id="nome" 
+                      value={nome} 
+                      onChange={e => setNome(e.target.value)} 
+                      className={`h-11 text-base ${fieldErrors.nome ? 'border-destructive' : ''}`}
+                    />
+                    {fieldErrors.nome && (
+                      <p className="text-xs text-destructive">{fieldErrors.nome}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="cognome" className="text-sm">Cognome</Label>
-                    <Input id="cognome" value={cognome} onChange={e => setCognome(e.target.value)} required className="h-11 text-base" />
+                    <Input 
+                      id="cognome" 
+                      value={cognome} 
+                      onChange={e => setCognome(e.target.value)} 
+                      className={`h-11 text-base ${fieldErrors.cognome ? 'border-destructive' : ''}`}
+                    />
+                    {fieldErrors.cognome && (
+                      <p className="text-xs text-destructive">{fieldErrors.cognome}</p>
+                    )}
                   </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="reg-email" className="text-sm">Email</Label>
-                  <Input id="reg-email" type="email" value={email} onChange={e => setEmail(e.target.value)} required className="h-11 text-base" />
+                  <Input 
+                    id="reg-email" 
+                    type="email" 
+                    value={email} 
+                    onChange={e => setEmail(e.target.value)} 
+                    className={`h-11 text-base ${fieldErrors.email ? 'border-destructive' : ''}`}
+                  />
+                  {fieldErrors.email && (
+                    <p className="text-xs text-destructive">{fieldErrors.email}</p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="reg-password" className="text-sm">Password</Label>
-                  <Input id="reg-password" type="password" value={password} onChange={e => setPassword(e.target.value)} required minLength={6} className="h-11 text-base" />
+                  <Input 
+                    id="reg-password" 
+                    type="password" 
+                    value={password} 
+                    onChange={e => setPassword(e.target.value)} 
+                    className={`h-11 text-base ${fieldErrors.password ? 'border-destructive' : ''}`}
+                  />
+                  {fieldErrors.password && (
+                    <p className="text-xs text-destructive">{fieldErrors.password}</p>
+                  )}
                 </div>
                 <Button type="submit" className="w-full h-12 text-base" disabled={loading}>
                   {loading ? (
