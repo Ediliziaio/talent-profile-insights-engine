@@ -41,46 +41,48 @@ export default function Dashboard() {
     }
   }, [period]);
 
-  // Query per tutti i candidati (per calcoli avanzati)
-  const { data: allCandidati } = useQuery({
-    queryKey: ['dashboard-all-candidati', currentAziendaId, isSuperadmin, dateRange],
+  // Single consolidated query for all dashboard data
+  const { data: dashboardData, isLoading: isLoadingData } = useQuery({
+    queryKey: ['dashboard-data', currentAziendaId, isSuperadmin, period],
     queryFn: async () => {
-      let query = supabase
-        .from('candidati')
-        .select('*, aziende(nome), analisi_candidato(fit_score, fit_verdict)');
+      // Parallel fetch for better performance
+      const [candidatiResult, aziendeResult] = await Promise.all([
+        supabase
+          .from('candidati')
+          .select('*, aziende(nome), analisi_candidato(fit_score, fit_verdict), profili_candidato(leadership_pct, maturita_pct, potenziale_pct)')
+          .order('created_at', { ascending: false }),
+        isSuperadmin 
+          ? supabase.from('aziende').select('*, candidati(id, test_completato)')
+          : Promise.resolve({ data: null, error: null })
+      ]);
       
+      if (candidatiResult.error) throw candidatiResult.error;
+      
+      let candidati = candidatiResult.data || [];
+      
+      // Filter by azienda if not superadmin
       if (!isSuperadmin && currentAziendaId) {
-        query = query.eq('azienda_id', currentAziendaId);
+        candidati = candidati.filter(c => c.azienda_id === currentAziendaId);
       }
       
-      const { data, error } = await query;
-      if (error) throw error;
-      
       // Filter by date if period selected
-      let filtered = data || [];
       if (dateRange) {
-        filtered = filtered.filter(c => 
+        candidati = candidati.filter(c => 
           c.created_at && isAfter(parseISO(c.created_at), dateRange)
         );
       }
       
-      return filtered;
+      return {
+        candidati,
+        aziende: aziendeResult.data || []
+      };
     },
     enabled: !!profile,
+    staleTime: 1000 * 60 * 2, // 2 minutes cache
   });
 
-  // Query per aziende (solo superadmin)
-  const { data: aziende } = useQuery({
-    queryKey: ['dashboard-aziende'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('aziende')
-        .select('*, candidati(id, test_completato)');
-      if (error) throw error;
-      return data;
-    },
-    enabled: isSuperadmin && !!profile,
-  });
+  const allCandidati = dashboardData?.candidati || [];
+  const aziende = dashboardData?.aziende || [];
 
   // Statistiche calcolate
   const stats = useMemo(() => {
@@ -217,56 +219,39 @@ export default function Dashboard() {
       .map(([name, value]) => ({ name, value }));
   }, [allCandidati]);
 
-  // Query per candidati recenti
-  const { data: recentCandidati } = useQuery({
-    queryKey: ['recent-candidati', currentAziendaId, isSuperadmin],
-    queryFn: async () => {
-      let query = supabase
-        .from('candidati')
-        .select('*, aziende(nome), profili_candidato(*)')
-        .eq('test_completato', true)
-        .order('data_test', { ascending: false })
-        .limit(5);
+  // Derive recent candidati and top performers from allCandidati (no extra queries!)
+  const recentCandidati = useMemo(() => {
+    if (!allCandidati.length) return [];
+    return allCandidati
+      .filter(c => c.test_completato)
+      .sort((a, b) => {
+        const dateA = a.data_test ? new Date(a.data_test).getTime() : 0;
+        const dateB = b.data_test ? new Date(b.data_test).getTime() : 0;
+        return dateB - dateA;
+      })
+      .slice(0, 5)
+      .map(c => ({
+        ...c,
+        analisi: (c.analisi_candidato as any)?.[0] || null
+      }));
+  }, [allCandidati]);
 
-      if (!isSuperadmin && currentAziendaId) {
-        query = query.eq('azienda_id', currentAziendaId);
-      }
-
-      const { data } = await query;
-      
-      if (data && data.length > 0) {
-        const candidatoIds = data.map(c => c.id);
-        const { data: analisiData } = await supabase
-          .from('analisi_candidato')
-          .select('*')
-          .in('candidato_id', candidatoIds);
-        
-        return data.map(c => ({
-          ...c,
-          analisi: analisiData?.find(a => a.candidato_id === c.id) || null
-        }));
-      }
-      
-      return data || [];
-    },
-    enabled: !!profile,
-  });
-
-  // Query per top performers
-  const { data: topPerformers } = useQuery({
-    queryKey: ['top-performers', currentAziendaId, isSuperadmin],
-    queryFn: async () => {
-      const { data: analisi } = await supabase
-        .from('analisi_candidato')
-        .select('*, candidati!inner(*, aziende(nome))')
-        .not('fit_score', 'is', null)
-        .order('fit_score', { ascending: false })
-        .limit(3);
-
-      return analisi || [];
-    },
-    enabled: !!profile,
-  });
+  const topPerformers = useMemo(() => {
+    if (!allCandidati.length) return [];
+    return allCandidati
+      .filter(c => (c.analisi_candidato as any)?.[0]?.fit_score !== null)
+      .sort((a, b) => {
+        const scoreA = (a.analisi_candidato as any)?.[0]?.fit_score || 0;
+        const scoreB = (b.analisi_candidato as any)?.[0]?.fit_score || 0;
+        return scoreB - scoreA;
+      })
+      .slice(0, 3)
+      .map(c => ({
+        fit_score: (c.analisi_candidato as any)?.[0]?.fit_score,
+        fit_verdict: (c.analisi_candidato as any)?.[0]?.fit_verdict,
+        candidati: c
+      }));
+  }, [allCandidati]);
 
   // Query per duplicati cross-azienda (solo superadmin)
   const { data: duplicates } = useQuery({
