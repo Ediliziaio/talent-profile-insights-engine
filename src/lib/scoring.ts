@@ -224,21 +224,6 @@ export function getScaleForRadarChart(punteggi: Record<string, number>): ScalaPu
   }));
 }
 
-export function getScoreColor(score: number): string {
-  if (score < 60) return 'hsl(var(--chart-danger))';
-  if (score < 80) return 'hsl(var(--chart-warning))';
-  if (score > 160) return 'hsl(var(--chart-strength))';
-  if (score > 140) return 'hsl(var(--chart-normal))';
-  return 'hsl(var(--muted-foreground))';
-}
-
-export function getScoreColorClass(score: number): string {
-  if (score < 60) return 'text-destructive';
-  if (score < 80) return 'text-orange-500';
-  if (score > 160) return 'text-green-600';
-  if (score > 140) return 'text-blue-600';
-  return 'text-muted-foreground';
-}
 
 export function getProfiloTipoLabel(tipo: ProfiloTipo): string {
   const labels: Record<ProfiloTipo, string> = {
@@ -256,61 +241,3 @@ export function getProfiloTipoLabel(tipo: ProfiloTipo): string {
   return labels[tipo] || 'Non definito';
 }
 
-export function getProfiloTipoDescription(tipo: ProfiloTipo): string {
-  const descriptions: Record<ProfiloTipo, string> = {
-    'LEADER_NATURALE': 'Elevata propensione alla guida. Assume responsabilità con naturalezza e influenza positivamente il team.',
-    'ESECUTORE_AFFIDABILE': 'Affidabile e metodico. Porta a termine i compiti con precisione e costanza.',
-    'CREATIVO_DESTABILIZZANTE': 'Innovativo e non convenzionale. Genera idee ma può destabilizzare processi consolidati.',
-    'TECNICO_SPECIALISTA': 'Competente e preciso. Eccelle in ambiti tecnici, meno nelle relazioni.',
-    'COMMERCIALE_NATURALE': 'Naturalmente orientato alla vendita. Persuasivo e resiliente ai rifiuti.',
-    'AMMINISTRATIVO_METODICO': 'Organizzato e procedurale. Ideale per ruoli di back-office e compliance.',
-    'COLLABORATORE_CRESCITA': 'Potenziale in sviluppo. Con formazione adeguata può crescere in diversi ruoli.',
-    'PROFESSIONISTA_AUTONOMO': 'Preferisce lavorare in autonomia. Efficace ma non adatto a team numerosi.',
-    'SUPPORTO_OPERATIVO': 'Adatto a ruoli esecutivi con supervisione. Affidabile nelle mansioni definite.',
-    'IN_TRANSIZIONE': 'Situazione di vulnerabilità. Richiede valutazione approfondita prima dell\'inserimento.'
-  };
-  return descriptions[tipo] || 'Profilo in valutazione';
-}
-
-/**
- * Zone di interpretazione per ogni punteggio (Manuale V2)
- */
-export type ZonaInterpretazione = 'critica' | 'attenzione' | 'norma' | 'sopra_media' | 'eccellenza';
-
-export function getZonaInterpretazione(score: number): {
-  zona: ZonaInterpretazione;
-  colore: string;
-  classe: string;
-  descrizione: string;
-} {
-  if (score < 60) return { 
-    zona: 'critica', 
-    colore: 'red', 
-    classe: 'text-destructive bg-destructive/10',
-    descrizione: 'Carenza grave' 
-  };
-  if (score < 80) return { 
-    zona: 'attenzione', 
-    colore: 'orange', 
-    classe: 'text-orange-600 bg-orange-50',
-    descrizione: 'Carenza moderata' 
-  };
-  if (score < 120) return { 
-    zona: 'norma', 
-    colore: 'gray', 
-    classe: 'text-muted-foreground bg-muted/30',
-    descrizione: 'Nella norma' 
-  };
-  if (score < 160) return { 
-    zona: 'sopra_media', 
-    colore: 'blue', 
-    classe: 'text-blue-600 bg-blue-50',
-    descrizione: 'Sopra la media' 
-  };
-  return { 
-    zona: 'eccellenza', 
-    colore: 'green', 
-    classe: 'text-green-600 bg-green-50',
-    descrizione: 'Eccellenza' 
-  };
-}
