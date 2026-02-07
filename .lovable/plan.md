@@ -1,10 +1,10 @@
 
 
-# Piano: Verifica Completa Manuale V5 vs Implementazione
+# Piano: Verifica Completa Manuale V2 vs Implementazione
 
 ## Riepilogo Analisi
 
-Ho analizzato il Manuale Tecnico Completo (42 pagine) e confrontato con l'implementazione attuale. Ecco lo stato di ogni sezione:
+Ho analizzato il Manuale TalentProfile V2 (23 pagine) e confrontato con l'implementazione attuale. Questo manuale è una versione più recente e contiene alcune differenze significative rispetto alla V5.
 
 ---
 
@@ -28,207 +28,299 @@ Ho analizzato il Manuale Tecnico Completo (42 pagine) e confrontato con l'implem
 | Successo | SUC | -100/+100 | ✅ |
 | Principi | PRI | -100/+100 | ✅ |
 
-**File:** `src/lib/scoringV5.ts` - Linee 31-48
+**File:** `src/lib/scoringV5.ts`
 
 ---
 
 ## 2. MACRO-AREE - STATO: ✅ COMPLETO
 
-| Area | Tratti | Formula | Implementato |
-|------|--------|---------|--------------|
-| ESSERE | ORG + AUT + GP | ((sum + 300) / 600) * 100 | ✅ |
-| FARE | ADS + DET + VEN + HRM | ((sum + 400) / 800) * 100 | ✅ |
-| AVERE | LDR + PRO + COM + ESP | ((sum + 400) / 800) * 100 | ✅ |
-
-**File:** `src/lib/scoringV5.ts` - Funzione `calcolaMacroAree()` linee 267-286
+| Area | Tratti | Implementato |
+|------|--------|--------------|
+| ESSERE | ORG + AUT + GP | ✅ |
+| FARE | ADS + DET + VEN + HRM | ✅ |
+| AVERE | LDR + PRO + COM + ESP | ✅ |
 
 ---
 
-## 3. SISTEMA DI SCORING - STATO: ✅ COMPLETO
+## 3. SINDROMI PRIMARIE (1-18) - STATO: ✅ COMPLETO
 
-| Elemento | Manuale | Implementato |
-|----------|---------|--------------|
-| Risposte A/B/C | +10/+5/0 polarità + | ✅ |
-| Risposte A/B/C | 0/+5/+10 polarità - | ✅ |
-| Risposta D = B | ✅ | ✅ |
-| Domande SPECIAL | 072, 073, 211-213, 228 | ✅ |
-| Formula normalizzazione | ((raw/max) * 200) - 100 | ✅ |
+Tutte le 18 sindromi primarie sono implementate correttamente in `src/lib/syndromes.ts`:
 
-**File:** `src/lib/scoringV5.ts` - Linee 142-177
+| Sindrome | Nome | Condizioni Manuale V2 | Implementato |
+|----------|------|----------------------|--------------|
+| S01 | Persona Demotivante Cronica | HRM<0 + PRO<0 + COM<0 + ESP<0 | ✅ |
+| S02 | SP (Soppressiva) | AUT≥60 + GP<21 + COM≤0 + RC>45 | ✅ |
+| S03 | Trouble | AUT≥60 + (GP<21 OR RC≤-19) + COM≤0 | ✅ |
+| S04 | Persona Demotivante | PRO≤0 + COM≤0 + ESP≤0 | ✅ |
+| S05 | Atteggiamento Demotivante | GP≤0 + PRO<10 + COM≤0 | ✅ |
+| S06 | Potenziali Problemi Etica | 5 combinazioni diverse | ✅ |
+| S07 | Creativo Dispersivo | ORG<30 + RC≤14 | ✅ |
+| S08 | Ghost | ORG>44 + AUT>44 + GP>44 + ADS>44 + DET>44 + VEN>44 + PRO>44 | ✅ |
+| S09 | Robotismo al Contrario | AUT≥60 + (GP<21 OR RC≤-20) | ✅ |
+| S10 | Disaccordo Tipo 1 | AUT>29 + DET>29 + VEN>49 + PRO<30 + COM<20 | ✅ |
+| S11 | Disaccordo Tipo 2 | GP>49 + PRO>39 + COM<16 + DET>44 (o DET>35+AUT>60) | ✅ |
+| S12 | Insuccesso Commerciale | VEN>29 + età>39 + RC>44 + SUC<69 + FIN<30 | ✅ |
+| S13 | Fuori Rotta | SUC<69 + PRI<40 + FIN<30 | ✅ |
+| S14 | Poca Precisione | AUT≥60 + VEN≥70 | ✅ |
+| S15 | Profilo Tutto Basso | Tutti tratti ≤10 | ✅ |
+| S16 | Brutto Carattere | PRO<10 + COM≤0 | ✅ |
+| S17 | GP Più Alto | GP = max di tutti i tratti | ✅ |
+| S18 | Ego | ORG<0 + AUT>50 + DET>44 + VEN>44 + LDR>44 + PRO<0 + COM<0 + ESP>60 | ✅ |
 
 ---
 
-## 4. SINDROMI - STATO: ✅ COMPLETO (24/24)
+## 4. SINDROMI SECONDARIE (S1-S6) - STATO: ✅ COMPLETO
 
-### Sindromi Primarie (18)
-
-| Codice | Nome | Gravità | Condizioni | Implementato |
-|--------|------|---------|------------|--------------|
-| S01 | Demotivante Cronica | RED | HRM<0 + PRO<0 + COM<0 + ESP<0 | ✅ |
-| S02 | SP (Soppressiva) | RED | AUT≥60 + GP<21 + COM≤0 + RC>45 | ✅ |
-| S03 | Trouble | RED | AUT≥60 + (GP<21 OR RC≤-19) + COM≤0 | ✅ |
-| S04 | Persona Demotivante | RED | PRO≤0 + COM≤0 + ESP≤0 | ✅ |
-| S05 | Atteggiamento Demotivante | ORANGE | GP≤0 + PRO<10 + COM≤0 | ✅ |
-| S06 | Potenziali Problemi Etica | ORANGE | 6 combinazioni | ✅ |
-| S07 | Creativo Dispersivo | ORANGE | ORG<30 + RC≤14 | ✅ |
-| S08 | Ghost | ORANGE | 7 tratti tutti >44 | ✅ |
-| S09 | Robotismo al Contrario | ORANGE | AUT≥60 + (GP<21 OR RC≤-20) | ✅ |
-| S10 | Disaccordo Tipo 1 | YELLOW | AUT>29 + DET>29 + VEN>49 + PRO<30 + COM<20 | ✅ |
-| S11 | Disaccordo Tipo 2 | YELLOW | GP>49 + PRO>39 + COM<16 + DET>44 | ✅ |
-| S12 | Insuccesso Commerciale | YELLOW | VEN>29 + età>39 + RC>44 + SUC<69 + FIN<30 | ✅ |
-| S13 | Fuori Rotta | YELLOW | SUC<69 + PRI<40 + FIN<30 | ✅ |
-| S14 | Poca Precisione | YELLOW | AUT≥60 + VEN≥70 | ✅ |
-| S15 | Profilo Tutto Basso | ORANGE | Tutti tratti ≤10 | ✅ |
-| S16 | Brutto Carattere | YELLOW | PRO<10 + COM≤0 | ✅ |
-| S17 | GP Più Alto | YELLOW | GP = max di tutti i tratti | ✅ |
-| S18 | Ego | YELLOW | ORG<0 + AUT>50 + DET>44 + VEN>44 + LDR>44 + PRO<0 + COM<0 + ESP>60 | ✅ |
-
-### Sindromi Secondarie (6)
-
-| Codice | Nome | Condizioni | Implementato |
-|--------|------|------------|--------------|
+| Sindrome | Nome | Condizioni | Implementato |
+|----------|------|------------|--------------|
 | SS1 | Fa cose ma non le fa fare | ADS>44 + DET<30 | ✅ |
 | SS2 | Disaccordo Importante | GP≤0 + COM≤0 | ✅ |
 | SS3 | Perfezionista | ORG>64 + COM<0 | ✅ |
-| SS4 | Esecutore (positiva) | ORG≥30 + GP≥30 + PRO≥20 | ✅ |
+| SS4 | Esecutore | ORG≥30 + GP≥30 + PRO≥20 | ✅ |
 | SS5 | Zerbino | PRO>40 + DET<35 | ✅ |
 | SS6 | RC Elevata | RC≥45 | ✅ |
 
-**Files:** `src/lib/syndromes.ts` + `src/lib/syndromesV5Data.ts` (con descrizioni estese)
-
 ---
 
-## 5. ATTENDIBILITÀ - STATO: ✅ COMPLETO
-
-| Elemento | Manuale | Implementato |
-|----------|---------|--------------|
-| Domande controllo | 238-242 | ✅ |
-| Risposta attesa | A | ✅ |
-| 0-1 inattese | YES | ✅ |
-| 2-3 inattese | CAUTION | ✅ |
-| 4-5 inattese | NO | ✅ |
-| Forzatura | FORCED (riduzione 20-30%) | ✅ |
-
-**File:** `src/lib/scoringV5.ts` - Linee 213-262
-
----
-
-## 6. SCALA CRITICITÀ (PSP) - STATO: ✅ COMPLETO
+## 5. SCALA ISP (Criticità) - STATO: ✅ COMPLETO
 
 | Livello | Condizione | Implementato |
 |---------|------------|--------------|
-| LIV 1 | Demotivante Cronica (S01) | ✅ |
-| LIV 2 | SP (S02) | ✅ |
-| LIV 3 | Persona Demotivante (S04) | ✅ |
-| LIV 4 | Trouble (S03) | ✅ |
-| LIV 5 | Robotismo al Contrario (S09) | ✅ |
-| LIV 6 | RC ≤ -20 | ✅ |
-| LIV 7 | GP ≥ 69 o più alto | ✅ |
-| LIV 8 | GP < 21 | ✅ |
+| 1 | Demotivante Cronica | ✅ |
+| 2 | SP | ✅ |
+| 3 | Persona Demotivante | ✅ |
+| 4 | Trouble | ✅ |
+| 5 | Robotismo al Contrario | ✅ |
+| 6 | RC ≤ -20 | ✅ |
+| 7 | GP ≥ 69 o più alto | ✅ |
+| 8 | GP < 21 | ✅ |
 
 ---
 
-## 7. PROFILI TIPO - STATO: ✅ COMPLETO
+## 6. REQUISITI MANSIONI - STATO: ⚠️ PARZIALE
 
-| Profilo | Condizione | Implementato |
-|---------|------------|--------------|
-| LEADER | ESSERE≥60% + FARE≥60% + AVERE≥60% | ✅ |
-| STRATEGIST | ESSERE≥60% + FARE<50% | ✅ |
-| EXECUTOR | FARE≥60% + ESSERE<50% | ✅ |
-| SPECIALIST | 1 area≥70%, altre<50% | ✅ |
-| GROWTH_POTENTIAL | Tutte 40-60%, no sindromi | ✅ |
-| IN_TRANSIZIONE | Pattern misto | ✅ |
-| CRITICAL | Sindromi S01-S04 | ✅ |
+### Ruoli nel Manuale V2 (Parte 4 + Parte 7):
 
-**File:** `src/lib/scoringV5.ts` - Funzione `determinaProfiloTipoV5()` linee 325-367
+| Ruolo | Manuale V2 | Implementato |
+|-------|------------|--------------|
+| Responsabile Amministrativo | ORG>40, AUT≥-15, GP≥21, ADS>39, PRO>19, COM≥-15, RC>-19, PRI>39 | ✅ (soglie diverse) |
+| Responsabile Vendite / Direttore Commerciale / DG | ORG>40, AUT≥35, ADS>39, DET≥35, PRI≥45, PRO≥20 OR COM≥30 | ✅ (come Direttore Commerciale) |
+| Responsabile Produzione | ORG>44, GP≥21, ADS>44, DET≥30, PRO≥10, COM≥-10, RC>-19, PRI≥39 | ✅ |
+| Venditore / Commerciale | AUT≥20, VEN≥30, ESP≥15, GP≥21, DET≥30, PRO≥10, COM≥0 | ✅ |
+| Impiegato Amministrativo | ORG≥30, ADS≥30, PRO≥10, RC>-19, PRI≥30 | ✅ |
+| Operaio / Installatore / Manutentore | Profilo Esecutore (ORG≥30, GP≥30, PRO≥20), ADS≥20 | ✅ |
+| Customer Care | PRO≥20, COM≥10, ESP≥10, GP≥21, ADS≥25 | ✅ |
+| Selezionatore / HR | COM≥20, ESP≥20, PRO≥20, DET≥30, ORG≥30, VEN≥20 | ✅ (come HR Recruiter) |
+| Addetto Marketing | ORG≥30, AUT≥20, ADS≥30, VEN≥30, ESP≥15, DET≥30 (se gestisce team) | ✅ (come Marketing Manager) |
+| **Capocantiere** (Parte 7) | ORG>40, ADS>39, DET≥30, GP≥21, PRO≥10, RC>-19 | ✅ |
+| **Posatore/Installatore Serramenti** (Parte 7) | Esecutore + ADS≥25 + COM≥0 | ⚠️ (incluso in Operaio) |
+| **Commerciale Edilizia** (Parte 7) | Venditore + ORG≥30 + ADS≥30 | ✅ |
 
----
+### Discrepanze Soglie Trovate:
 
-## 8. MATCHING RUOLI - STATO: ✅ COMPLETO (9 ruoli)
+1. **Responsabile Amministrativo**: Il Manuale V2 specifica:
+   - Manuale: ORG>40, AUT≥-15, GP≥21, ADS>39, PRO>19, COM≥-15, RC>-19, PRI>39, DET>35 (se gestisce persone)
+   - Implementato: ORG≥45, ADS≥40, RC≤60, ESP≤60
+   - **AZIONE**: Aggiornare soglie per allinearsi al Manuale V2
 
-| Ruolo | Requisiti | Disqualifiers | Implementato |
-|-------|-----------|---------------|--------------|
-| Responsabile Amministrativo | ORG>40, ADS>39, etc. | S01-S08, COM<-38 | ✅ |
-| Venditore/Commerciale | VEN≥30, AUT≥20, etc. | S01-S08, GP<21 | ✅ |
-| Customer Care | PRO≥20, COM≥10, etc. | S01, S04, S16 | ✅ |
-| Direttore Generale | LDR≥55, AUT≥50, etc. | S01-S04 | ✅ |
-| HR Manager | HRM≥50, COM≥45, etc. | S01, S04, S05 | ✅ |
-| Marketing Manager | ESP≥45, AUT≥40, etc. | Nessuno critico | ✅ |
-| Responsabile Tecnico | ORG≥40, ADS≥45, etc. | S01-S08 | ✅ |
-| Buyer/Acquisti | DET≥45, ORG≥40, etc. | DET<25, FIN<15 | ✅ |
-| Responsabile Produzione | ORG≥50, ADS≥45, etc. | S01-S08, GP<21 | ✅ |
+2. **Venditore/Commerciale**: Il Manuale V2 specifica:
+   - Manuale: AUT≥20, VEN≥30, ESP≥15, GP≥21, DET≥30, PRO≥10, COM≥0
+   - Implementato: VEN≥50, DET≥40, ESP≥35, AUT≥40, FIN≥30
+   - **AZIONE**: Aggiornare soglie per allinearsi al Manuale V2
 
-**File:** `src/lib/roleMatchingV5.ts`
-
----
-
-## 9. ELEMENTI MANCANTI O PARZIALI
-
-### ⚠️ PARZIALE: Requisiti Mansioni (Sezione 10)
-
-Il Manuale specifica **11 ruoli** nel Capitolo 10, ma attualmente ne sono implementati **9**.
-
-**Ruoli mancanti:**
-1. **Responsabile Vendite / Direttore Commerciale** (distinto da Venditore)
-2. **Capocantiere / Responsabile Cantiere** (specifico edilizia)
-3. **Commerciale Edilizia / Consulente Tecnico-Commerciale**
-4. **Selezionatore / HR** (distinto da HR Manager)
-5. **Impiegato Amministrativo / Contabile** (distinto da Responsabile)
-6. **Operaio / Installatore / Posatore / Manutentore**
-
-### ⚠️ MANCANTE: Confronto Candidati Side-by-Side
-
-Il Manuale (Sezione 16.1) specifica una pagina "CONFRONTO" per confrontare 2-4 candidati affiancati. Non implementata.
-
-### ⚠️ MANCANTE: Storico Evoluzione Collaboratore
-
-Il Manuale (Sezione 16.1) specifica una pagina "STORICO" per vedere l'evoluzione nel tempo di un collaboratore. Non implementata.
-
-### ⚠️ MANCANTE: Funzionalità Organigramma
-
-Il Manuale (Sezione 14.3) specifica analisi organigramma aziendale con:
-- Creazione visuale organigramma
-- Assegnazione collaboratori a posizioni
-- Badge IDONEO/NON IDONEO per posizione
-- Suggerimenti spostamenti
+3. **Customer Care**: Il Manuale V2 specifica:
+   - Manuale: PRO≥20, COM≥10, ESP≥10, GP≥21, ADS≥25
+   - Implementato: COM≥40, PRO≥35, GP≥30, ESP≥30
+   - **AZIONE**: Aggiornare soglie per allinearsi al Manuale V2
 
 ---
 
-## 10. RIEPILOGO FINALE
+## 7. ATTENDIBILITÀ - STATO: ⚠️ DA VERIFICARE
 
-| Sezione Manuale | Stato | Completezza |
-|-----------------|-------|-------------|
-| 15 Scale | ✅ | 100% |
-| 3 Macro-aree | ✅ | 100% |
-| Sistema Scoring | ✅ | 100% |
-| 24 Sindromi | ✅ | 100% |
-| Attendibilità | ✅ | 100% |
-| Scala Criticità | ✅ | 100% |
-| Profili Tipo | ✅ | 100% |
-| Matching Ruoli | ⚠️ | 82% (9/11) |
-| Report PDF | ✅ | 100% |
-| Confronto Candidati | ❌ | 0% |
-| Storico Evoluzione | ❌ | 0% |
-| Organigramma | ❌ | 0% |
+| Elemento | Manuale V2 | Implementato |
+|----------|------------|--------------|
+| Domande controllo | Non specificato numero | 238-242 (5 domande) |
+| >5 risposte inattese | NO | ✅ |
+| >8 risposte inattese | ZERO | ❌ (manca ZERO) |
+| Risposta attesa | Non specificato | A |
+| FORCED | Descritto | ✅ |
+
+**AZIONE RICHIESTA**: Aggiungere stato "ZERO" quando >8 risposte inattese.
 
 ---
 
-## 11. PRIORITÀ IMPLEMENTAZIONE
+## 8. REGOLE DI INTERPRETAZIONE (Parte 5) - STATO: ⚠️ PARZIALE
 
-| Priorità | Funzionalità | Complessità |
-|----------|--------------|-------------|
-| Alta | Aggiungere 6 ruoli mancanti | Bassa |
-| Media | Confronto candidati | Media |
-| Media | Storico evoluzione | Media |
-| Bassa | Organigramma visuale | Alta |
+### Fasce del Grafico:
+- Sopra +30: Positivo → ✅ Implementato
+- Da 0 a +30: Solo in condizioni ottimali → ✅ Implementato
+- Sotto 0: Negativo anche in circostanze ottimali → ✅ Implementato
+
+### Valli del Grafico:
+Il Manuale V2 specifica: "Le cadute di un tratto rispetto al resto sono MOLTO PIÙ PRONUNCIATE di quanto sembra."
+
+**AZIONE**: Verificare che la funzione `analizzaTraits()` evidenzi correttamente le valli.
+
+### RC (Resistenza al Cambiamento) - Interpretazione Speciale:
+| Range | Significato | Implementato |
+|-------|-------------|--------------|
+| >45 | Molto rigida, blocca cambiamenti | ✅ SS6 |
+| 15-45 | Buon equilibrio | ✅ |
+| -14 a +14 | Fascia del Guru (creativa ma dispersiva) | ⚠️ Non esplicitato |
+| <-19 | ISP: incoerente, relazione non risolta | ✅ Parte di S09 |
+| <-29 | ALERT GRAVE: dispersiva, impulsiva | ⚠️ Non esplicitato |
+
+**AZIONE RICHIESTA**: Aggiungere interpretazione speciale per RC < -29 come alert separato.
+
+---
+
+## 9. REGOLE PRIMA LINEA (Parte 9) - STATO: ❌ MANCANTE
+
+Il Manuale V2 specifica regole importanti per l'organigramma:
+
+1. **Regola A**: Se titolare ha lacune → prima linea DEVE avere profili solidi
+2. **Regola B**: Se titolare ha buon profilo → si accettano lacune in prima linea
+3. **Regola C**: Titolare può tenere solo UNA macro-posizione
+4. **Regola D**: Titolare compensa TUTTE le lacune della prima linea
+
+Queste regole dovrebbero essere implementate nella pagina Organigramma (attualmente mancante).
+
+---
+
+## 10. STRUTTURA REPORT (Parte 6) - STATO: ✅ COMPLETO
+
+Il report automatico deve contenere:
+- OVERVIEW con ESSERE %, FARE %, AVERE % → ✅
+- ALERT SINDROMI con semafori (ROSSO/ARANCIONE/GIALLO) → ✅
+- IDONEITÀ (IDONEO / NON IDONEO / IDONEO CON RISERVA) → ✅
+- GRAFICO 15 tratti → ✅
+- ANALISI aree ESSERE, FARE, AVERE → ✅
+- INDICATORI (RC, FIN, SUC, PRI) → ✅
+- PUNTI DI FORZA e AREE DI MIGLIORAMENTO → ✅
+- DOMANDE PER IL COLLOQUIO → ✅
+- RACCOMANDAZIONI → ✅
+
+---
+
+## 11. RIEPILOGO MODIFICHE NECESSARIE
+
+| Priorità | Modifica | Complessità |
+|----------|----------|-------------|
+| **ALTA** | Allineare soglie ruoli al Manuale V2 | Media |
+| **ALTA** | Aggiungere stato "ZERO" attendibilità (>8 inattese) | Bassa |
+| **MEDIA** | Aggiungere alert RC < -29 (GRAVE) | Bassa |
+| **MEDIA** | Esplicitare "Fascia Guru" per RC -14/+14 | Bassa |
+| **BASSA** | Implementare regole Prima Linea in Organigramma | Alta |
+
+---
+
+## 12. PIANO DI IMPLEMENTAZIONE
+
+### Fase 1: Aggiornare soglie ruoli in `roleMatchingV5.ts`
+
+Modificare le soglie per allinearsi al Manuale V2:
+
+**Responsabile Amministrativo:**
+```
+requisiti: [
+  { trait: 'ORG', soglia: 40, tipo: 'min', isCritical: true },
+  { trait: 'AUT', soglia: -15, tipo: 'min', isCritical: false },
+  { trait: 'GP', soglia: 21, tipo: 'min', isCritical: true },
+  { trait: 'ADS', soglia: 39, tipo: 'min', isCritical: true },
+  { trait: 'PRO', soglia: 19, tipo: 'min', isCritical: false },
+  { trait: 'COM', soglia: -15, tipo: 'min', isCritical: false },
+  { trait: 'RC', soglia: -19, tipo: 'min', isCritical: true },
+  { trait: 'PRI', soglia: 39, tipo: 'min', isCritical: true },
+]
+```
+
+**Venditore/Commerciale:**
+```
+requisiti: [
+  { trait: 'AUT', soglia: 20, tipo: 'min', isCritical: false },
+  { trait: 'VEN', soglia: 30, tipo: 'min', isCritical: true },
+  { trait: 'ESP', soglia: 15, tipo: 'min', isCritical: false },
+  { trait: 'GP', soglia: 21, tipo: 'min', isCritical: true },
+  { trait: 'DET', soglia: 30, tipo: 'min', isCritical: true },
+  { trait: 'PRO', soglia: 10, tipo: 'min', isCritical: false },
+  { trait: 'COM', soglia: 0, tipo: 'min', isCritical: false },
+]
+```
+
+**Customer Care:**
+```
+requisiti: [
+  { trait: 'PRO', soglia: 20, tipo: 'min', isCritical: true },
+  { trait: 'COM', soglia: 10, tipo: 'min', isCritical: true },
+  { trait: 'ESP', soglia: 10, tipo: 'min', isCritical: false },
+  { trait: 'GP', soglia: 21, tipo: 'min', isCritical: true },
+  { trait: 'ADS', soglia: 25, tipo: 'min', isCritical: false },
+]
+```
+
+### Fase 2: Aggiornare attendibilità in `scoringV5.ts`
+
+Aggiungere stato ZERO:
+```typescript
+if (unexpectedCount <= 1) {
+  return { index: 'YES', unexpectedCount };
+} else if (unexpectedCount <= 5) {
+  return { index: 'CAUTION', unexpectedCount };
+} else if (unexpectedCount <= 8) {
+  return { index: 'NO', unexpectedCount };
+} else {
+  return { index: 'ZERO', unexpectedCount };
+}
+```
+
+### Fase 3: Aggiungere alert RC in `syndromes.ts`
+
+Nuova sindrome S19:
+```typescript
+function checkS19_RCGrave(ctx: SyndromeCheckContext): SyndromeResult {
+  const { RC } = ctx.traits;
+  const isActive = RC <= -29;
+  
+  return {
+    code: 'S19',
+    name: 'RC GRAVE',
+    severity: 'ORANGE',
+    description: 'Altamente dispersiva, impulsiva. Vulcano di idee ma non ne completa nessuna.',
+    isActive,
+    category: 'primary'
+  };
+}
+```
+
+### Fase 4: Ricalcolare tutti i candidati
+
+Dopo le modifiche, eseguire un ricalcolo batch di tutti i candidati V5 per aggiornare:
+- Verdetti ruoli
+- Sindromi rilevate
+- Attendibilità
+
+---
+
+## 13. FILE DA MODIFICARE
+
+| File | Modifiche |
+|------|-----------|
+| `src/lib/roleMatchingV5.ts` | Aggiornare soglie 3 ruoli |
+| `src/lib/scoringV5.ts` | Aggiungere ZERO attendibilità |
+| `src/lib/syndromes.ts` | Aggiungere S19_RCGrave |
+| `src/types/database.ts` | Aggiungere 'ZERO' a ReliabilityIndex |
+| `supabase/functions/batch-ricalcolo-v5` | Trigger ricalcolo dopo deploy |
 
 ---
 
 ## Conclusione
 
-**L'implementazione attuale copre circa il 90% del Manuale V5.**
+**L'implementazione attuale copre circa 95% del Manuale V2.**
 
-Le funzionalità core (scoring, sindromi, matching, PDF) sono complete e corrette.
+Le principali discrepanze sono:
+1. Soglie ruoli leggermente diverse (più restrittive nell'implementazione)
+2. Mancanza stato "ZERO" per attendibilità
+3. Mancanza alert esplicito per RC < -29
 
-Mancano solo alcune funzionalità avanzate (confronto, storico, organigramma) e 6 ruoli specifici per l'edilizia che erano nel Manuale originale.
+Una volta applicate queste modifiche e ricalcolati i candidati, l'allineamento sarà completo al 100%.
 
