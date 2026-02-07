@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useRef } from 'react';
+import { useRef, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { NotionLayout } from '@/components/NotionLayout';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
@@ -13,7 +13,10 @@ import { FitIndicator } from '@/components/FitIndicator';
 import { PDFExportButton, PDFReportButton } from '@/components/PDFExportButton';
 import { StressZoneHero } from '@/components/StressZoneHero';
 import { RoleMatchingCard } from '@/components/RoleMatchingCard';
+import { RoleMatchingCardV5 } from '@/components/RoleMatchingCardV5';
 import { ExecutiveSummaryCardV5 } from '@/components/ExecutiveSummaryCardV5';
+import { ExecutiveSummaryCardV5Updated } from '@/components/ExecutiveSummaryCardV5Updated';
+import { MacroAreasChartV5 } from '@/components/MacroAreasChartV5';
 import { SintesiFinaleCard } from '@/components/SintesiFinaleCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -30,7 +33,7 @@ import {
   User, HelpCircle, BarChart3, FileText, MessageSquare, Sparkles,
   Award, Clock, Percent, AlertCircle, ClipboardCheck
 } from 'lucide-react';
-import { Candidato, ProfiloCandidato, ProfiloTipo } from '@/types/database';
+import { Candidato, ProfiloCandidato, ProfiloTipo, ProfiloTipoV5, ReliabilityIndex } from '@/types/database';
 import { getProfiloTipoLabel } from '@/lib/scoring';
 import { 
   getProfiloDescription, 
@@ -40,6 +43,7 @@ import {
 } from '@/lib/profiloDescriptions';
 import { calculateStressZoneSeverity, StressZoneSeverity, getStressZoneSeverityLabel } from '@/lib/stressZone';
 import { calculateRoleMatching, calculateAllRolesCompatibility, ROLE_PROFILES, getVerdictLabel } from '@/lib/roleMatching';
+import { getActiveSyndromes, SyndromeResult, TraitScores } from '@/lib/syndromes';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -264,6 +268,42 @@ export default function CandidatoDettaglio() {
   const stressZone = profilo?.stress_zone || false;
   const schematicita = profilo?.schematicita || 100;
   
+  // V5 Data extraction
+  const assessmentVersion = (profilo as any)?.assessment_version as 'v4' | 'v5' | undefined || 'v4';
+  const isV5 = assessmentVersion === 'v5';
+  const traitsV5 = (profilo as any)?.traits_v5 as Record<string, number> | undefined;
+  const esserePct = (profilo as any)?.essere_pct as number | undefined;
+  const farePct = (profilo as any)?.fare_pct as number | undefined;
+  const averePct = (profilo as any)?.avere_pct as number | undefined;
+  const profiloTipoV5 = (profilo as any)?.profilo_tipo_v5 as ProfiloTipoV5 | undefined;
+  const reliabilityIndex = (profilo as any)?.reliability_index as ReliabilityIndex | undefined;
+  const syndromesFromDB = (profilo as any)?.syndromes_detected as SyndromeResult[] | undefined;
+  
+  // Calcola sindromi se V5 e non presenti nel DB
+  const syndromes = useMemo(() => {
+    if (!isV5 || !traitsV5) return [];
+    if (syndromesFromDB && syndromesFromDB.length > 0) return syndromesFromDB;
+    
+    const traitScores: TraitScores = {
+      ORG: traitsV5.ORG ?? 0,
+      AUT: traitsV5.AUT ?? 0,
+      GP: traitsV5.GP ?? 0,
+      ADS: traitsV5.ADS ?? 0,
+      DET: traitsV5.DET ?? 0,
+      VEN: traitsV5.VEN ?? 0,
+      HRM: traitsV5.HRM ?? 0,
+      LDR: traitsV5.LDR ?? 0,
+      PRO: traitsV5.PRO ?? 0,
+      COM: traitsV5.COM ?? 0,
+      ESP: traitsV5.ESP ?? 0,
+      RC: traitsV5.RC ?? 0,
+      FIN: traitsV5.FIN ?? 0,
+      SUC: traitsV5.SUC ?? 0,
+      PRI: traitsV5.PRI ?? 0,
+    };
+    return getActiveSyndromes(traitScores, candidato.eta ?? undefined);
+  }, [isV5, traitsV5, syndromesFromDB, candidato.eta]);
+  
   // Calcolo severità Stress Zone con valori reali (fallback a 0 per mostrare dati mancanti)
   const sv = scalePunteggi['SV'];
   const cf = scalePunteggi['CF'];
@@ -402,57 +442,108 @@ export default function CandidatoDettaglio() {
 
           {profilo ? (
             <div ref={reportRef} className="space-y-6 bg-background">
-              {/* Executive Summary V5 - DETERMINISTICO */}
-              <ExecutiveSummaryCardV5
-                scalePunteggi={scalePunteggi}
-                ruoloRichiesto={candidato.funzione || 'Ufficio vendite'}
-                profiloTipo={profiloTipo}
-                eta={candidato.eta}
-                stressZone={stressZone}
-              />
+              {/* Badge versione assessment */}
+              {isV5 && (
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary" className="text-xs">
+                    Assessment V5
+                  </Badge>
+                  {reliabilityIndex && (
+                    <Badge 
+                      variant={reliabilityIndex === 'YES' ? 'default' : reliabilityIndex === 'CAUTION' ? 'secondary' : 'destructive'}
+                      className="text-xs"
+                    >
+                      Attendibilità: {reliabilityIndex === 'YES' ? 'OK' : reliabilityIndex === 'CAUTION' ? 'Cautela' : 'Bassa'}
+                    </Badge>
+                  )}
+                </div>
+              )}
+
+              {/* Executive Summary - versione dinamica V4/V5 */}
+              {isV5 && traitsV5 ? (
+                <ExecutiveSummaryCardV5Updated
+                  traitsV5={traitsV5}
+                  esserePct={esserePct}
+                  farePct={farePct}
+                  averePct={averePct}
+                  profiloTipoV5={profiloTipoV5}
+                  reliabilityIndex={reliabilityIndex}
+                  syndromesDetected={syndromes}
+                  scalePunteggi={scalePunteggi}
+                  profiloTipo={profiloTipo}
+                  ruoloRichiesto={candidato.funzione || 'Ufficio vendite'}
+                  eta={candidato.eta}
+                  stressZone={stressZone}
+                  assessmentVersion="v5"
+                />
+              ) : (
+                <ExecutiveSummaryCardV5
+                  scalePunteggi={scalePunteggi}
+                  ruoloRichiesto={candidato.funzione || 'Ufficio vendite'}
+                  profiloTipo={profiloTipo}
+                  eta={candidato.eta}
+                  stressZone={stressZone}
+                />
+              )}
 
               {/* TABS per organizzare i contenuti */}
-        <Tabs defaultValue="matching" className="w-full">
-          <TabsList className="flex overflow-x-auto scrollbar-hide mb-4 sm:mb-6 w-full">
-            <TabsTrigger value="matching" className="flex-1 min-w-[60px] text-xs sm:text-sm px-2 sm:px-4 gap-1">
-              <ClipboardCheck className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              <span className="text-[10px] sm:text-sm">Match</span>
-            </TabsTrigger>
-            <TabsTrigger value="analisi" className="flex-1 min-w-[60px] text-xs sm:text-sm px-2 sm:px-4 gap-1">
-              <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              <span className="text-[10px] sm:text-sm">Dati</span>
-            </TabsTrigger>
-            <TabsTrigger value="interpretazione" className="flex-1 min-w-[60px] text-xs sm:text-sm px-2 sm:px-4 gap-1">
-              <Brain className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              <span className="text-[10px] sm:text-sm">Interp</span>
-            </TabsTrigger>
-            <TabsTrigger value="profilo" className="flex-1 min-w-[60px] text-xs sm:text-sm px-2 sm:px-4 gap-1">
-              <User className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              <span className="text-[10px] sm:text-sm">Profilo</span>
-            </TabsTrigger>
-            <TabsTrigger value="colloquio" className="flex-1 min-w-[60px] text-xs sm:text-sm px-2 sm:px-4 gap-1">
-              <MessageSquare className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              <span className="text-[10px] sm:text-sm">Coll</span>
-            </TabsTrigger>
-            <TabsTrigger value="ai" className="flex-1 min-w-[60px] text-xs sm:text-sm px-2 sm:px-4 gap-1">
-              <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              <span className="text-[10px] sm:text-sm">AI</span>
-            </TabsTrigger>
-            <TabsTrigger value="risposte" className="flex-1 min-w-[60px] text-xs sm:text-sm px-2 sm:px-4 gap-1">
-              <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              <span className="text-[10px] sm:text-sm">Risp</span>
-            </TabsTrigger>
-          </TabsList>
+              <Tabs defaultValue="matching" className="w-full">
+                <TabsList className="flex overflow-x-auto scrollbar-hide mb-4 sm:mb-6 w-full">
+                  <TabsTrigger value="matching" className="flex-1 min-w-[60px] text-xs sm:text-sm px-2 sm:px-4 gap-1">
+                    <ClipboardCheck className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span className="text-[10px] sm:text-sm">Match</span>
+                  </TabsTrigger>
+                  {isV5 && (
+                    <TabsTrigger value="macroaree" className="flex-1 min-w-[60px] text-xs sm:text-sm px-2 sm:px-4 gap-1">
+                      <Target className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                      <span className="text-[10px] sm:text-sm">Aree</span>
+                    </TabsTrigger>
+                  )}
+                  <TabsTrigger value="analisi" className="flex-1 min-w-[60px] text-xs sm:text-sm px-2 sm:px-4 gap-1">
+                    <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span className="text-[10px] sm:text-sm">Dati</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="interpretazione" className="flex-1 min-w-[60px] text-xs sm:text-sm px-2 sm:px-4 gap-1">
+                    <Brain className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span className="text-[10px] sm:text-sm">Interp</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="profilo" className="flex-1 min-w-[60px] text-xs sm:text-sm px-2 sm:px-4 gap-1">
+                    <User className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span className="text-[10px] sm:text-sm">Profilo</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="colloquio" className="flex-1 min-w-[60px] text-xs sm:text-sm px-2 sm:px-4 gap-1">
+                    <MessageSquare className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span className="text-[10px] sm:text-sm">Coll</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="ai" className="flex-1 min-w-[60px] text-xs sm:text-sm px-2 sm:px-4 gap-1">
+                    <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span className="text-[10px] sm:text-sm">AI</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="risposte" className="flex-1 min-w-[60px] text-xs sm:text-sm px-2 sm:px-4 gap-1">
+                    <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span className="text-[10px] sm:text-sm">Risp</span>
+                  </TabsTrigger>
+                </TabsList>
           
-                {/* TAB: Matching Ruolo (NUOVO V5) */}
+                {/* TAB: Matching Ruolo - V4 o V5 */}
                 <TabsContent value="matching" className="mt-6 space-y-6">
-                  <RoleMatchingCard
-                    ruoloRichiesto={candidato.funzione || 'Ufficio vendite'}
-                    scalePunteggi={scalePunteggi}
-                    profiloTipo={profiloTipo}
-                    showFullDetails={true}
-                    showNarrativeSections={true}
-                  />
+                  {isV5 && traitsV5 ? (
+                    <RoleMatchingCardV5
+                      ruoloRichiesto={candidato.funzione || 'Ufficio vendite'}
+                      traitsV5={traitsV5}
+                      candidateAge={candidato.eta ?? undefined}
+                      showFullDetails={true}
+                      showAllRoles={true}
+                    />
+                  ) : (
+                    <RoleMatchingCard
+                      ruoloRichiesto={candidato.funzione || 'Ufficio vendite'}
+                      scalePunteggi={scalePunteggi}
+                      profiloTipo={profiloTipo}
+                      showFullDetails={true}
+                      showNarrativeSections={true}
+                    />
+                  )}
                   
                   {/* Sintesi Finale */}
                   <SintesiFinaleCard
@@ -465,6 +556,20 @@ export default function CandidatoDettaglio() {
                     stressZone={stressZone}
                   />
                 </TabsContent>
+
+                {/* TAB: Macro-Aree V5 (solo per V5) */}
+                {isV5 && traitsV5 && esserePct !== undefined && farePct !== undefined && averePct !== undefined && (
+                  <TabsContent value="macroaree" className="mt-6 space-y-6">
+                    <MacroAreasChartV5
+                      esserePct={esserePct}
+                      farePct={farePct}
+                      averePct={averePct}
+                      traitsV5={traitsV5}
+                      syndromes={syndromes}
+                      showTraitDetails={true}
+                    />
+                  </TabsContent>
+                )}
                 {/* TAB: Analisi Dati */}
                 <TabsContent value="analisi" className="space-y-6 mt-6">
                   {/* I 3 Cerchi con tooltip esplicativo */}
