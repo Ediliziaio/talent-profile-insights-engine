@@ -320,6 +320,21 @@ function checkS18_Ego(ctx: SyndromeCheckContext): SyndromeResult {
   };
 }
 
+// S19: RC GRAVE (Manuale V2 - RC < -29)
+function checkS19_RCGrave(ctx: SyndromeCheckContext): SyndromeResult {
+  const { RC } = ctx.traits;
+  const isActive = RC <= -29;
+  
+  return {
+    code: 'S19',
+    name: 'RC GRAVE',
+    severity: 'ORANGE',
+    description: 'Altamente dispersiva, impulsiva. Vulcano di idee ma non ne completa nessuna. Cambia continuamente direzione.',
+    isActive,
+    category: 'primary'
+  };
+}
+
 // ============================================
 // SINDROMI SECONDARIE (SS1-SS6)
 // ============================================
@@ -451,6 +466,7 @@ export function checkAllSyndromes(
     checkS16_BruttoCarattere(ctx),
     checkS17_GPPiuAlto(ctx),
     checkS18_Ego(ctx),
+    checkS19_RCGrave(ctx),
     // Secondarie
     checkSS1_FaCoseMaNonLeFaFare(ctx),
     checkSS2_DisaccordoImportante(ctx),
