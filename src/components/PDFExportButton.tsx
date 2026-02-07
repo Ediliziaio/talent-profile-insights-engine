@@ -1,13 +1,14 @@
 import { useState, useRef, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Button } from '@/components/ui/button';
-import { Download, Loader2, FileText } from 'lucide-react';
+import { Download, Loader2, FileText, AlertTriangle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { PDFReportLayout } from './PDFReportLayout';
+import { PDFSyndromeReportLayout } from './PDFSyndromeReportLayout';
 import { ProfiloTipo } from '@/types/database';
-
+import { SyndromeResult } from '@/lib/syndromes';
 interface PDFExportButtonProps {
   targetRef: React.RefObject<HTMLDivElement>;
   fileName: string;
@@ -340,6 +341,171 @@ export function PDFReportButton({
         <>
           <FileText className="h-4 w-4 mr-2" />
           Report Colloquio
+        </>
+      )}
+    </Button>
+  );
+}
+
+// ================================================================
+// PDFSyndromeReportButton - Genera PDF Report Sindromi V5
+// ================================================================
+
+interface PDFSyndromeReportButtonProps {
+  candidatoNome: string;
+  candidatoCognome: string;
+  azienda?: string | null;
+  ruoloRichiesto?: string;
+  dataTest?: string | null;
+  syndromes: SyndromeResult[];
+  className?: string;
+}
+
+/**
+ * PDFSyndromeReportButton - Genera PDF con report sindromi V5 dettagliato
+ */
+export function PDFSyndromeReportButton({
+  candidatoNome,
+  candidatoCognome,
+  azienda,
+  ruoloRichiesto,
+  dataTest,
+  syndromes,
+  className
+}: PDFSyndromeReportButtonProps) {
+  const [isExporting, setIsExporting] = useState(false);
+  const { toast } = useToast();
+
+  const activeSyndromes = syndromes.filter(s => s.isActive);
+
+  const handleExport = async () => {
+    setIsExporting(true);
+    
+    try {
+      // Create a temporary container
+      const container = document.createElement('div');
+      container.style.position = 'absolute';
+      container.style.left = '-9999px';
+      container.style.top = '0';
+      container.style.width = '210mm';
+      document.body.appendChild(container);
+      
+      // Render the PDF layout component
+      const root = createRoot(container);
+      
+      await new Promise<void>((resolve) => {
+        root.render(
+          <PDFSyndromeReportLayout
+            candidatoNome={candidatoNome}
+            candidatoCognome={candidatoCognome}
+            azienda={azienda}
+            ruoloRichiesto={ruoloRichiesto}
+            dataTest={dataTest}
+            syndromes={syndromes}
+          />
+        );
+        // Wait for render - longer timeout for multi-page
+        setTimeout(resolve, 800);
+      });
+      
+      // Load logo
+      const logoData = await loadLogoAsBase64();
+      
+      // Get all pages
+      const pages = container.querySelectorAll('[style*="page-break-after"]');
+      const pageElements = pages.length > 0 ? Array.from(pages) : [container.firstElementChild as HTMLElement];
+      
+      // Create PDF
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+      });
+
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+
+      // Process each page
+      for (let i = 0; i < pageElements.length; i++) {
+        const pageElement = pageElements[i] as HTMLElement;
+        
+        if (i > 0) {
+          pdf.addPage();
+        }
+
+        // Capture page
+        const canvas = await html2canvas(pageElement, {
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#ffffff',
+          logging: false,
+          width: pageElement.scrollWidth,
+          height: pageElement.scrollHeight,
+        });
+
+        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+        
+        // Calculate dimensions
+        const margin = 5;
+        const contentWidth = pdfWidth - (margin * 2);
+        const ratio = contentWidth / canvas.width;
+        const scaledHeight = canvas.height * ratio;
+        
+        // Add image
+        pdf.addImage(imgData, 'JPEG', margin, margin, contentWidth, scaledHeight);
+        
+        // Add watermark to each page
+        addWatermarkToPage(pdf, logoData, pdfWidth, pdfHeight);
+      }
+      
+      // Cleanup React root
+      root.unmount();
+      document.body.removeChild(container);
+
+      // Generate filename
+      const date = new Date().toISOString().split('T')[0];
+      const safeFileName = `${candidatoCognome}_${candidatoNome}`.replace(/[^a-zA-Z0-9_-]/g, '_');
+      pdf.save(`Report_Sindromi_${safeFileName}_${date}.pdf`);
+
+      toast({
+        title: 'Report Sindromi Generato',
+        description: `PDF con ${activeSyndromes.length} sindromi rilevate pronto per il download`,
+      });
+    } catch (error) {
+      console.error('PDF syndrome report error:', error);
+      toast({
+        title: 'Errore',
+        description: 'Errore nella generazione del Report Sindromi',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  return (
+    <Button 
+      variant="outline" 
+      size="sm" 
+      onClick={handleExport} 
+      disabled={isExporting}
+      className={className}
+    >
+      {isExporting ? (
+        <>
+          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+          Generando...
+        </>
+      ) : (
+        <>
+          <AlertTriangle className="h-4 w-4 mr-2" />
+          Report Sindromi
+          {activeSyndromes.length > 0 && (
+            <span className="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-destructive/20 text-destructive">
+              {activeSyndromes.length}
+            </span>
+          )}
         </>
       )}
     </Button>
