@@ -199,7 +199,8 @@ export const SCALE_LABELS: Record<ScalaCode, string> = {
 export type RispostaValueV5 = 'A' | 'B' | 'C' | 'D';
 
 // V5 Polarità Types
-export type PolaritaV5 = '+' | '-' | 'SPECIAL' | 'CTRL_YES';
+// '+' = positiva, '-' = negativa, 'S' = SPECIAL scoring, 'C' = CTRL (domande controllo)
+export type PolaritaV5 = '+' | '-' | 'S' | 'C';
 
 // Ruoli candidato per il form anagrafico
 export const RUOLI_CANDIDATO = [
