@@ -10,6 +10,7 @@ type TraitCode = 'ORG' | 'AUT' | 'GP' | 'ADS' | 'DET' | 'VEN' | 'HRM' | 'LDR' | 
 type PolaritaV5 = '+' | '-' | 'S' | 'C';
 type RispostaValueV5 = 'A' | 'B' | 'C' | 'D';
 type ReliabilityIndex = 'YES' | 'CAUTION' | 'NO' | 'FORCED';
+type SyndromeSeverity = 'RED' | 'ORANGE' | 'YELLOW';
 
 interface DomandaV5 {
   id: number;
@@ -52,13 +53,21 @@ interface ProfiloCalcolatoV5 {
   valleys: TraitCode[];
 }
 
+interface SyndromeDetected {
+  code: string;
+  name: string;
+  severity: SyndromeSeverity;
+  description: string;
+  category: 'primary' | 'secondary';
+  triggeredBy: string[];
+}
+
 const MACRO_AREA_TRAITS: Record<string, TraitCode[]> = {
   ESSERE: ['ORG', 'AUT', 'GP'],
   FARE: ['ADS', 'DET', 'VEN', 'HRM'],
   AVERE: ['LDR', 'PRO', 'COM', 'ESP']
 };
 
-const INDICATOR_TRAITS: TraitCode[] = ['RC', 'FIN', 'SUC', 'PRI'];
 const ALL_CORE_TRAITS: TraitCode[] = ['ORG', 'AUT', 'GP', 'ADS', 'DET', 'VEN', 'HRM', 'LDR', 'PRO', 'COM', 'ESP', 'RC', 'FIN', 'SUC', 'PRI'];
 
 function calcolaProfiloV5(risposte: RispostaInputV5[], domande: DomandaV5[]): ProfiloCalcolatoV5 {
@@ -203,107 +212,331 @@ function calcolaProfiloV5(risposte: RispostaInputV5[], domande: DomandaV5[]): Pr
   };
 }
 
-// Syndrome detection
-interface SyndromeDetected {
-  code: string;
-  name: string;
-  severity: 'RED' | 'ORANGE' | 'YELLOW';
-  triggeredBy: string[];
-}
+// ============================================
+// COMPLETE SYNDROME DETECTION (24 SYNDROMES)
+// Based on Manuale V5
+// ============================================
 
 function getActiveSyndromes(traits: TraitsV5, eta?: number): SyndromeDetected[] {
   const syndromes: SyndromeDetected[] = [];
   
-  // S01 - Depression Pattern
-  if (traits.AUT <= -60 && traits.GP <= -40) {
+  const allTraitValues = [
+    traits.ORG, traits.AUT, traits.GP, traits.ADS, traits.DET,
+    traits.VEN, traits.HRM, traits.LDR, traits.PRO, traits.COM,
+    traits.ESP, traits.RC, traits.FIN, traits.SUC, traits.PRI
+  ];
+  
+  // ============================================
+  // PRIMARY SYNDROMES (S01-S18)
+  // ============================================
+  
+  // S01 - PERSONA DEMOTIVANTE CRONICA
+  if (traits.HRM < 0 && traits.PRO < 0 && traits.COM < 0 && traits.ESP < 0) {
     syndromes.push({
       code: 'S01',
-      name: 'Pattern Depressivo',
+      name: 'PERSONA DEMOTIVANTE CRONICA',
       severity: 'RED',
-      triggeredBy: ['AUT', 'GP']
+      description: 'SEMPRE NON IDONEA. Porta al fallimento chi gestisce.',
+      category: 'primary',
+      triggeredBy: ['HRM', 'PRO', 'COM', 'ESP']
     });
   }
   
-  // S02 - Burnout Risk
-  if (traits.GP <= -60 && traits.ADS >= 60) {
+  // S02 - SP (SOPPRESSIVA)
+  if (traits.AUT >= 60 && traits.GP < 21 && traits.COM <= 0 && traits.RC > 45) {
     syndromes.push({
       code: 'S02',
-      name: 'Rischio Burnout',
+      name: 'SP (SOPPRESSIVA)',
       severity: 'RED',
-      triggeredBy: ['GP', 'ADS']
+      description: 'SEMPRE NON IDONEA. Porta aziende al fallimento.',
+      category: 'primary',
+      triggeredBy: ['AUT', 'GP', 'COM', 'RC']
     });
   }
   
-  // S03 - Authority Conflict
-  if (traits.LDR <= -60 && traits.RC >= 60) {
+  // S03 - TROUBLE
+  if (traits.AUT >= 60 && (traits.GP < 21 || traits.RC <= -19) && traits.COM <= 0) {
     syndromes.push({
       code: 'S03',
-      name: 'Conflitto con Autorità',
+      name: 'TROUBLE',
       severity: 'RED',
-      triggeredBy: ['LDR', 'RC']
+      description: 'Bomba a mano. Idonea SOLO con controllo costante.',
+      category: 'primary',
+      triggeredBy: ['AUT', 'GP', 'RC', 'COM']
     });
   }
   
-  // S04 - Imposter Syndrome
-  if (traits.PRO <= -60 && traits.ESP <= -40) {
+  // S04 - PERSONA DEMOTIVANTE
+  if (traits.PRO <= 0 && traits.COM <= 0 && traits.ESP <= 0) {
     syndromes.push({
       code: 'S04',
-      name: 'Sindrome Impostore',
+      name: 'PERSONA DEMOTIVANTE',
       severity: 'RED',
-      triggeredBy: ['PRO', 'ESP']
+      description: 'SEMPRE NON IDONEA. Amplifica difficoltà, demotiva.',
+      category: 'primary',
+      triggeredBy: ['PRO', 'COM', 'ESP']
     });
   }
   
-  // S05 - Procrastination Risk
-  if (traits.DET <= -40 && traits.ORG <= -20) {
+  // S05 - ATTEGGIAMENTO DEMOTIVANTE
+  if (traits.GP <= 0 && traits.PRO < 10 && traits.COM <= 0) {
     syndromes.push({
       code: 'S05',
-      name: 'Rischio Procrastinazione',
+      name: 'ATTEGGIAMENTO DEMOTIVANTE',
       severity: 'ORANGE',
-      triggeredBy: ['DET', 'ORG']
+      description: '50% casi problemi etica. NON IDONEA ruoli chiave.',
+      category: 'primary',
+      triggeredBy: ['GP', 'PRO', 'COM']
     });
   }
   
-  // S06 - Conflict Avoidance
-  if (traits.COM >= 60 && traits.LDR <= -20) {
+  // S06 - POTENZIALI PROBLEMI ETICA (6 combinazioni)
+  const S06a = traits.ORG < 31 && traits.ADS < 0 && traits.PRO < 15 && traits.FIN < 0;
+  const S06b = traits.RC < -14 && traits.FIN < 31 && traits.GP < 0 && traits.ADS < 40 && traits.PRI < 70;
+  const S06c = traits.RC < -14 && traits.FIN < 31 && traits.GP > 60 && traits.ADS < 40 && traits.PRI < 70;
+  const S06d = (traits.ESP > 49 && traits.ORG < 26 && traits.AUT < 30 && traits.ADS < 40) || 
+               (traits.COM > 14 && traits.ORG < 26 && traits.AUT < 30 && traits.ADS < 40);
+  const S06e = traits.PRO > 0 && traits.COM > 0 && traits.ESP > 0 && traits.SUC < 69 && traits.PRI < 40 && traits.FIN < 30;
+  const S06f = traits.PRO < -50 && traits.COM < -50;
+  
+  if (S06a || S06b || S06c || S06d || S06e || S06f) {
     syndromes.push({
       code: 'S06',
-      name: 'Evitamento Conflitti',
+      name: 'POTENZIALI PROBLEMI ETICA',
       severity: 'ORANGE',
-      triggeredBy: ['COM', 'LDR']
+      description: 'Attendibilità 85%. Richiede approfondimento.',
+      category: 'primary',
+      triggeredBy: ['Multiple']
     });
   }
   
-  // S07 - Excessive Rigidity
-  if (traits.RC >= 80) {
+  // S07 - CREATIVO DISPERSIVO
+  if (traits.ORG < 30 && traits.RC <= 14) {
     syndromes.push({
       code: 'S07',
-      name: 'Rigidità Eccessiva',
+      name: 'CREATIVO DISPERSIVO',
       severity: 'ORANGE',
-      triggeredBy: ['RC']
+      description: 'Inizia progetti, non completa.',
+      category: 'primary',
+      triggeredBy: ['ORG', 'RC']
     });
   }
   
-  // S08 - Workaholic Pattern
-  if (traits.ADS >= 80 && traits.ESP <= -20) {
+  // S08 - GHOST
+  if (traits.ORG > 44 && traits.AUT > 44 && traits.GP > 44 && traits.ADS > 44 && 
+      traits.DET > 44 && traits.VEN > 44 && traits.PRO > 44) {
     syndromes.push({
       code: 'S08',
-      name: 'Pattern Workaholic',
-      severity: 'YELLOW',
-      triggeredBy: ['ADS', 'ESP']
+      name: 'GHOST',
+      severity: 'ORANGE',
+      description: '80% prestazioni inferiori al grafico.',
+      category: 'primary',
+      triggeredBy: ['ORG', 'AUT', 'GP', 'ADS', 'DET', 'VEN', 'PRO']
     });
   }
   
-  // Age-related syndromes
-  if (eta && eta < 25) {
-    if (traits.ORG <= -40) {
-      syndromes.push({
-        code: 'S09',
-        name: 'Immaturità Organizzativa',
-        severity: 'YELLOW',
-        triggeredBy: ['ORG', 'età']
-      });
-    }
+  // S09 - ROBOTISMO AL CONTRARIO
+  if ((traits.AUT >= 60 && traits.GP < 21) || (traits.AUT >= 60 && traits.RC <= -20)) {
+    syndromes.push({
+      code: 'S09',
+      name: 'ROBOTISMO AL CONTRARIO',
+      severity: 'ORANGE',
+      description: 'Fa opposto di richiesto. Non idonea Capo Area.',
+      category: 'primary',
+      triggeredBy: ['AUT', 'GP', 'RC']
+    });
+  }
+  
+  // S10 - DISACCORDO Tipo 1
+  if (traits.AUT > 29 && traits.DET > 29 && traits.VEN > 49 && traits.PRO < 30 && traits.COM < 20) {
+    syndromes.push({
+      code: 'S10',
+      name: 'DISACCORDO Tipo 1',
+      severity: 'YELLOW',
+      description: 'Genera disaccordi inconsapevoli.',
+      category: 'primary',
+      triggeredBy: ['AUT', 'DET', 'VEN', 'PRO', 'COM']
+    });
+  }
+  
+  // S11 - DISACCORDO Tipo 2
+  if (traits.GP > 49 && traits.PRO > 39 && traits.COM < 16 && 
+      (traits.DET > 44 || (traits.DET > 35 && traits.AUT > 60))) {
+    syndromes.push({
+      code: 'S11',
+      name: 'DISACCORDO Tipo 2',
+      severity: 'YELLOW',
+      description: 'Attacca chi non concorda.',
+      category: 'primary',
+      triggeredBy: ['GP', 'PRO', 'COM', 'DET', 'AUT']
+    });
+  }
+  
+  // S12 - INSUCCESSO COMMERCIALE
+  if (traits.VEN > 29 && (eta || 0) > 39 && traits.RC > 44 && traits.SUC < 69 && traits.FIN < 30) {
+    syndromes.push({
+      code: 'S12',
+      name: 'INSUCCESSO COMMERCIALE',
+      severity: 'YELLOW',
+      description: 'Scarsi risultati nonostante attitudine.',
+      category: 'primary',
+      triggeredBy: ['VEN', 'RC', 'SUC', 'FIN', 'età']
+    });
+  }
+  
+  // S13 - FUORI ROTTA
+  if (traits.SUC < 69 && traits.PRI < 40 && traits.FIN < 30) {
+    syndromes.push({
+      code: 'S13',
+      name: 'FUORI ROTTA',
+      severity: 'YELLOW',
+      description: 'Principi sbagliati per prosperità.',
+      category: 'primary',
+      triggeredBy: ['SUC', 'PRI', 'FIN']
+    });
+  }
+  
+  // S14 - POCA PRECISIONE
+  if (traits.AUT >= 60 && traits.VEN >= 70) {
+    syndromes.push({
+      code: 'S14',
+      name: 'POCA PRECISIONE',
+      severity: 'YELLOW',
+      description: 'Non adatta ruoli impiegatizi/back office.',
+      category: 'primary',
+      triggeredBy: ['AUT', 'VEN']
+    });
+  }
+  
+  // S15 - PROFILO TUTTO BASSO
+  const allLow = traits.ORG <= 10 && traits.AUT <= 10 && traits.GP <= 10 && traits.ADS <= 10 && 
+                 traits.DET <= 10 && traits.VEN <= 10 && traits.HRM <= 10 && traits.LDR <= 10 && 
+                 traits.PRO <= 10 && traits.COM <= 10 && traits.ESP <= 10 && traits.FIN <= 10 && 
+                 traits.SUC <= 10 && traits.PRI <= 10;
+  
+  if (allLow) {
+    syndromes.push({
+      code: 'S15',
+      name: 'PROFILO TUTTO BASSO',
+      severity: 'ORANGE',
+      description: 'Condizione PSP. Relazione demotivante in corso.',
+      category: 'primary',
+      triggeredBy: ['All traits low']
+    });
+  }
+  
+  // S16 - BRUTTO CARATTERE
+  if (traits.PRO < 10 && traits.COM <= 0) {
+    syndromes.push({
+      code: 'S16',
+      name: 'BRUTTO CARATTERE',
+      severity: 'YELLOW',
+      description: 'Difficoltà relazionali evidenti.',
+      category: 'primary',
+      triggeredBy: ['PRO', 'COM']
+    });
+  }
+  
+  // S17 - GP PIÙ ALTO
+  const maxTrait = Math.max(...allTraitValues);
+  if (traits.GP === maxTrait && traits.GP > 0) {
+    syndromes.push({
+      code: 'S17',
+      name: 'GP PIÙ ALTO',
+      severity: 'YELLOW',
+      description: 'Non affronta situazioni.',
+      category: 'primary',
+      triggeredBy: ['GP']
+    });
+  }
+  
+  // S18 - EGO
+  if (traits.ORG < 0 && traits.AUT > 50 && traits.DET > 44 && traits.VEN > 44 && 
+      traits.LDR > 44 && traits.PRO < 0 && traits.COM < 0 && traits.ESP > 60) {
+    syndromes.push({
+      code: 'S18',
+      name: 'EGO',
+      severity: 'YELLOW',
+      description: 'Ego ipertrofico. Difficile da gestire.',
+      category: 'primary',
+      triggeredBy: ['ORG', 'AUT', 'DET', 'VEN', 'LDR', 'PRO', 'COM', 'ESP']
+    });
+  }
+  
+  // ============================================
+  // SECONDARY SYNDROMES (SS1-SS6)
+  // ============================================
+  
+  // SS1 - FA COSE MA NON LE FA FARE
+  if (traits.ADS > 44 && traits.DET < 30) {
+    syndromes.push({
+      code: 'SS1',
+      name: 'FA COSE MA NON LE FA FARE',
+      severity: 'YELLOW',
+      description: 'Alta autodisciplina ma bassa determinazione nella delega.',
+      category: 'secondary',
+      triggeredBy: ['ADS', 'DET']
+    });
+  }
+  
+  // SS2 - DISACCORDO IMPORTANTE
+  if (traits.GP <= 0 && traits.COM <= 0) {
+    syndromes.push({
+      code: 'SS2',
+      name: 'DISACCORDO IMPORTANTE',
+      severity: 'YELLOW',
+      description: 'Combinazione pressione e scarsa comprensione genera conflitti.',
+      category: 'secondary',
+      triggeredBy: ['GP', 'COM']
+    });
+  }
+  
+  // SS3 - PERFEZIONISTA
+  if (traits.ORG > 64 && traits.COM < 0) {
+    syndromes.push({
+      code: 'SS3',
+      name: 'PERFEZIONISTA',
+      severity: 'YELLOW',
+      description: 'Alta organizzazione ma poca tolleranza per errori altrui.',
+      category: 'secondary',
+      triggeredBy: ['ORG', 'COM']
+    });
+  }
+  
+  // SS4 - ESECUTORE (Positive pattern)
+  if (traits.ORG >= 30 && traits.GP >= 30 && traits.PRO >= 20) {
+    syndromes.push({
+      code: 'SS4',
+      name: 'ESECUTORE',
+      severity: 'YELLOW',
+      description: 'Profilo positivo: affidabile, organizzato, proattivo.',
+      category: 'secondary',
+      triggeredBy: ['ORG', 'GP', 'PRO']
+    });
+  }
+  
+  // SS5 - ZERBINO
+  if (traits.PRO > 40 && traits.DET < 35) {
+    syndromes.push({
+      code: 'SS5',
+      name: 'ZERBINO',
+      severity: 'YELLOW',
+      description: 'Alta proattività ma non si impone.',
+      category: 'secondary',
+      triggeredBy: ['PRO', 'DET']
+    });
+  }
+  
+  // SS6 - RC ELEVATA
+  if (traits.RC >= 45) {
+    syndromes.push({
+      code: 'SS6',
+      name: 'RC ELEVATA',
+      severity: 'YELLOW',
+      description: 'Rigidità elevata. Resiste ai cambiamenti.',
+      category: 'secondary',
+      triggeredBy: ['RC']
+    });
   }
   
   return syndromes;
@@ -382,7 +615,7 @@ Deno.serve(async (req) => {
         // Calculate V5 profile
         const profilo = calcolaProfiloV5(risposte as RispostaInputV5[], domande as DomandaV5[]);
         
-        // Calculate syndromes
+        // Calculate syndromes (now with all 24)
         const syndromes = getActiveSyndromes(profilo.traits_v5, candidato.eta || undefined);
         
         // Check if profile exists
@@ -440,7 +673,8 @@ Deno.serve(async (req) => {
             essere_pct: profilo.essere_pct,
             fare_pct: profilo.fare_pct,
             avere_pct: profilo.avere_pct,
-            syndromes_count: syndromes.length
+            syndromes_count: syndromes.length,
+            syndromes: syndromes.map(s => ({ code: s.code, severity: s.severity }))
           });
           success++;
         }
