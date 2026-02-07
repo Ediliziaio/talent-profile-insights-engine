@@ -407,6 +407,253 @@ export const ROLE_PROFILES_V5: Record<string, RoleProfileV5> = {
       'Come motiva un team operativo sotto pressione?',
     ],
   },
+
+  // ============================================
+  // NUOVI RUOLI V5 (dal Manuale Completo)
+  // ============================================
+
+  'Direttore Commerciale': {
+    id: 'dir_comm',
+    nome: 'Direttore Commerciale',
+    categoria: 'direzione',
+    descrizione: 'Strategia vendite, gestione rete commerciale, obiettivi fatturato',
+    requisiti: [
+      { trait: 'LDR', soglia: 50, tipo: 'min', isCritical: true, label: 'Leadership ≥ 50' },
+      { trait: 'VEN', soglia: 45, tipo: 'min', isCritical: true, label: 'Attitudine Vendita ≥ 45' },
+      { trait: 'DET', soglia: 50, tipo: 'min', isCritical: true, label: 'Determinazione ≥ 50' },
+      { trait: 'HRM', soglia: 35, tipo: 'min', isCritical: true, label: 'HR Management ≥ 35' },
+      { trait: 'AUT', soglia: 45, tipo: 'min', isCritical: false, label: 'Automotivazione ≥ 45' },
+      { trait: 'FIN', soglia: 40, tipo: 'min', isCritical: false, label: 'Orientamento Finanze ≥ 40' },
+    ],
+    disqualifiers: [
+      {
+        condition: (t) => t.LDR < 35,
+        reason: 'Leadership insufficiente per dirigere team commerciale',
+        severity: 'blocking'
+      },
+      {
+        condition: (t) => t.VEN < 30,
+        reason: 'Senza esperienza vendita non può guidare venditori',
+        severity: 'blocking'
+      },
+      {
+        condition: (t) => t.HRM < 20,
+        reason: 'Incapace di gestire e motivare la rete vendita',
+        severity: 'blocking'
+      },
+      {
+        condition: (_, s) => s.some(syn => ['S01', 'S02', 'S03', 'S04'].includes(syn.code) && syn.isActive),
+        reason: 'Sindrome critica: danneggerà l\'intera rete commerciale',
+        severity: 'blocking'
+      },
+    ],
+    profiloIdeale: 'Leader commerciale. Vende, ma soprattutto fa vendere gli altri. Visione strategica + execution.',
+    trattiFondamentali: ['LDR', 'VEN', 'DET', 'HRM'],
+    domandeColloquio: [
+      'Come costruisce e motiva una rete vendita?',
+      'Racconti del suo miglior anno commerciale: come lo ha ottenuto?',
+      'Come gestisce un venditore che non performa?',
+      'Qual è la sua strategia per entrare in un nuovo mercato?',
+    ],
+  },
+
+  'Capocantiere': {
+    id: 'capocantiere',
+    nome: 'Capocantiere',
+    categoria: 'operativo',
+    descrizione: 'Gestione cantiere edile, coordinamento maestranze, sicurezza, tempistiche',
+    requisiti: [
+      { trait: 'ORG', soglia: 50, tipo: 'min', isCritical: true, label: 'Organizzazione ≥ 50' },
+      { trait: 'GP', soglia: 45, tipo: 'min', isCritical: true, label: 'Gestione Pressioni ≥ 45' },
+      { trait: 'LDR', soglia: 40, tipo: 'min', isCritical: true, label: 'Leadership ≥ 40' },
+      { trait: 'ADS', soglia: 40, tipo: 'min', isCritical: true, label: 'Autodisciplina ≥ 40' },
+      { trait: 'DET', soglia: 35, tipo: 'min', isCritical: false, label: 'Determinazione ≥ 35' },
+    ],
+    disqualifiers: [
+      {
+        condition: (t) => t.ORG < 35,
+        reason: 'Organizzazione insufficiente per gestire un cantiere',
+        severity: 'blocking'
+      },
+      {
+        condition: (t) => t.GP < 30,
+        reason: 'Non regge la pressione tipica del cantiere',
+        severity: 'blocking'
+      },
+      {
+        condition: (t) => t.LDR < 25,
+        reason: 'Incapace di comandare le maestranze',
+        severity: 'blocking'
+      },
+      {
+        condition: (_, s) => s.some(syn => ['S01', 'S04', 'S05'].includes(syn.code) && syn.isActive),
+        reason: 'Demotivante: causerà turnover e problemi di sicurezza',
+        severity: 'blocking'
+      },
+    ],
+    profiloIdeale: 'Comandante di cantiere. Polso fermo, organizzato, sa far rispettare tempi e sicurezza.',
+    trattiFondamentali: ['ORG', 'GP', 'LDR', 'ADS'],
+    domandeColloquio: [
+      'Come gestisce ritardi dovuti a maltempo o imprevisti?',
+      'Racconti di un problema di sicurezza che ha risolto.',
+      'Come fa rispettare le regole a maestranze difficili?',
+      'Come gestisce più subappaltatori contemporaneamente?',
+    ],
+  },
+
+  'Commerciale Edilizia': {
+    id: 'comm_edilizia',
+    nome: 'Commerciale Edilizia',
+    categoria: 'commerciale',
+    descrizione: 'Vendita prodotti/servizi edilizia, consulenza tecnico-commerciale',
+    requisiti: [
+      { trait: 'VEN', soglia: 45, tipo: 'min', isCritical: true, label: 'Attitudine Vendita ≥ 45' },
+      { trait: 'DET', soglia: 40, tipo: 'min', isCritical: true, label: 'Determinazione ≥ 40' },
+      { trait: 'ORG', soglia: 35, tipo: 'min', isCritical: true, label: 'Organizzazione ≥ 35' },
+      { trait: 'ESP', soglia: 35, tipo: 'min', isCritical: false, label: 'Espansività ≥ 35' },
+      { trait: 'ADS', soglia: 30, tipo: 'min', isCritical: false, label: 'Autodisciplina ≥ 30' },
+    ],
+    disqualifiers: [
+      {
+        condition: (t) => t.VEN < 30,
+        reason: 'Attitudine vendita insufficiente',
+        severity: 'blocking'
+      },
+      {
+        condition: (t) => t.ORG < 20,
+        reason: 'Troppo disorganizzato per gestire progetti complessi',
+        severity: 'blocking'
+      },
+      {
+        condition: (t) => t.GP < 21,
+        reason: 'PSP: non regge trattative lunghe e pressioni cliente',
+        severity: 'blocking'
+      },
+    ],
+    profiloIdeale: 'Consulente tecnico-commerciale. Capisce il prodotto, lo sa vendere, segue il progetto.',
+    trattiFondamentali: ['VEN', 'DET', 'ORG', 'ADS'],
+    domandeColloquio: [
+      'Come gestisce una trattativa che dura mesi?',
+      'Racconti di un progetto complesso che ha portato a casa.',
+      'Come bilancia esigenze tecniche e commerciali?',
+      'Come gestisce il post-vendita e i reclami?',
+    ],
+  },
+
+  'HR Recruiter': {
+    id: 'hr_recruiter',
+    nome: 'HR Recruiter',
+    categoria: 'amministrativo',
+    descrizione: 'Selezione del personale, screening CV, colloqui, valutazione candidati',
+    requisiti: [
+      { trait: 'COM', soglia: 50, tipo: 'min', isCritical: true, label: 'Comprensione ≥ 50' },
+      { trait: 'PRO', soglia: 40, tipo: 'min', isCritical: true, label: 'Proattività ≥ 40' },
+      { trait: 'ORG', soglia: 35, tipo: 'min', isCritical: true, label: 'Organizzazione ≥ 35' },
+      { trait: 'ESP', soglia: 35, tipo: 'min', isCritical: false, label: 'Espansività ≥ 35' },
+      { trait: 'HRM', soglia: 30, tipo: 'min', isCritical: false, label: 'HR Management ≥ 30' },
+    ],
+    disqualifiers: [
+      {
+        condition: (t) => t.COM < 30,
+        reason: 'Comprensione insufficiente: non leggerà le persone',
+        severity: 'blocking'
+      },
+      {
+        condition: (t) => t.PRO < 20,
+        reason: 'Troppo passivo per cercare attivamente talenti',
+        severity: 'blocking'
+      },
+      {
+        condition: (_, s) => s.some(syn => ['S01', 'S04', 'S16'].includes(syn.code) && syn.isActive),
+        reason: 'Demotivante: allontanerà i candidati migliori',
+        severity: 'blocking'
+      },
+    ],
+    profiloIdeale: 'Cacciatore di talenti. Empatico, proattivo, sa vedere oltre il CV.',
+    trattiFondamentali: ['COM', 'PRO', 'ORG', 'ESP'],
+    domandeColloquio: [
+      'Come identifica un talento nascosto in un colloquio?',
+      'Racconti di un\'assunzione di cui va particolarmente fiero.',
+      'Come gestisce un candidato che rifiuta l\'offerta?',
+      'Quali domande chiave fa sempre in un colloquio?',
+    ],
+  },
+
+  'Impiegato Amministrativo': {
+    id: 'imp_amm',
+    nome: 'Impiegato Amministrativo',
+    categoria: 'amministrativo',
+    descrizione: 'Attività amministrative, contabilità ordinaria, gestione documenti',
+    requisiti: [
+      { trait: 'ORG', soglia: 40, tipo: 'min', isCritical: true, label: 'Organizzazione ≥ 40' },
+      { trait: 'ADS', soglia: 40, tipo: 'min', isCritical: true, label: 'Autodisciplina ≥ 40' },
+      { trait: 'PRO', soglia: 20, tipo: 'min', isCritical: false, label: 'Proattività ≥ 20' },
+      { trait: 'RC', soglia: 65, tipo: 'max', isCritical: false, label: 'RC ≤ 65 (minima flessibilità)' },
+    ],
+    disqualifiers: [
+      {
+        condition: (t) => t.ORG < 25,
+        reason: 'Organizzazione insufficiente per lavoro amministrativo',
+        severity: 'blocking'
+      },
+      {
+        condition: (t) => t.ADS < 25,
+        reason: 'Autodisciplina troppo bassa per lavoro ripetitivo',
+        severity: 'blocking'
+      },
+      {
+        condition: (t) => t.VEN > 65,
+        reason: 'Troppo orientato alla vendita: soffrirà in back-office',
+        severity: 'warning'
+      },
+    ],
+    profiloIdeale: 'Affidabile e preciso. Ama l\'ordine, le procedure, i numeri che tornano.',
+    trattiFondamentali: ['ORG', 'ADS'],
+    domandeColloquio: [
+      'Come organizza le sue attività giornaliere?',
+      'Racconti di un errore che ha scoperto e corretto.',
+      'Come gestisce le scadenze multiple?',
+      'Cosa le piace del lavoro amministrativo?',
+    ],
+  },
+
+  'Operaio/Installatore': {
+    id: 'operaio',
+    nome: 'Operaio/Installatore',
+    categoria: 'operativo',
+    descrizione: 'Lavoro manuale, installazione, posa, manutenzione',
+    requisiti: [
+      { trait: 'ADS', soglia: 35, tipo: 'min', isCritical: true, label: 'Autodisciplina ≥ 35' },
+      { trait: 'ORG', soglia: 30, tipo: 'min', isCritical: true, label: 'Organizzazione ≥ 30' },
+      { trait: 'GP', soglia: 25, tipo: 'min', isCritical: false, label: 'Gestione Pressioni ≥ 25' },
+      { trait: 'PRO', soglia: 15, tipo: 'min', isCritical: false, label: 'Proattività ≥ 15' },
+    ],
+    disqualifiers: [
+      {
+        condition: (t) => t.ADS < 20,
+        reason: 'Autodisciplina insufficiente per lavoro manuale costante',
+        severity: 'blocking'
+      },
+      {
+        condition: (_, s) => s.some(syn => ['S01', 'S04'].includes(syn.code) && syn.isActive),
+        reason: 'Demotivante: creerà problemi nel team operativo',
+        severity: 'blocking'
+      },
+      {
+        condition: (t) => t.RC > 70,
+        reason: 'Troppo rigido per adattarsi a situazioni diverse',
+        severity: 'warning'
+      },
+    ],
+    profiloIdeale: 'Esecutore affidabile. Fa il suo lavoro bene, rispetta tempi e istruzioni.',
+    trattiFondamentali: ['ADS', 'ORG'],
+    domandeColloquio: [
+      'Racconti del lavoro che ha fatto meglio.',
+      'Come gestisce istruzioni poco chiare?',
+      'Cosa fa quando trova un problema imprevisto?',
+      'Come si trova a lavorare in squadra?',
+    ],
+  },
 };
 
 // ============================================

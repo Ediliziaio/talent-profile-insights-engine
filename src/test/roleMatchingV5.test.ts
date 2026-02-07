@@ -119,8 +119,8 @@ const criticalProfile: TraitScores = {
 // ============================================
 
 describe('RoleMatchingV5 - Configurazione', () => {
-  it('dovrebbe avere 9 ruoli configurati', () => {
-    expect(RUOLI_V5.length).toBe(9);
+  it('dovrebbe avere 15 ruoli configurati', () => {
+    expect(RUOLI_V5.length).toBe(15);
   });
 
   it('ogni ruolo dovrebbe avere struttura completa', () => {
@@ -196,9 +196,9 @@ describe('RoleMatchingV5 - Matching Singolo', () => {
 // ============================================
 
 describe('RoleMatchingV5 - Matching Completo', () => {
-  it('dovrebbe calcolare compatibilità per tutti i 9 ruoli', () => {
+  it('dovrebbe calcolare compatibilità per tutti i 15 ruoli', () => {
     const result = calculateAllRolesCompatibilityV5('Venditore/Commerciale', idealSalesperson);
-    expect(result.tuttiRuoli.length).toBe(9);
+    expect(result.tuttiRuoli.length).toBe(15);
   });
 
   it('dovrebbe identificare ruolo ideale se diverso dal richiesto', () => {
