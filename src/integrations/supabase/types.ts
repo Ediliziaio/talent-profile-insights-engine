@@ -294,48 +294,72 @@ export type Database = {
       }
       profili_candidato: {
         Row: {
+          assessment_version: string | null
+          avere_pct: number | null
           candidato_id: string
           created_at: string | null
+          essere_pct: number | null
+          fare_pct: number | null
           id: string
           leadership_pct: number | null
           maturita_pct: number | null
           out_points: Json | null
           potenziale_pct: number | null
           profilo_tipo: string | null
+          profilo_tipo_v5: string | null
+          reliability_index: string | null
           scale_punteggi: Json | null
           schematicita: number | null
           strength_points: Json | null
           stress_zone: boolean | null
+          syndromes_detected: Json | null
+          traits_v5: Json | null
           updated_at: string | null
         }
         Insert: {
+          assessment_version?: string | null
+          avere_pct?: number | null
           candidato_id: string
           created_at?: string | null
+          essere_pct?: number | null
+          fare_pct?: number | null
           id?: string
           leadership_pct?: number | null
           maturita_pct?: number | null
           out_points?: Json | null
           potenziale_pct?: number | null
           profilo_tipo?: string | null
+          profilo_tipo_v5?: string | null
+          reliability_index?: string | null
           scale_punteggi?: Json | null
           schematicita?: number | null
           strength_points?: Json | null
           stress_zone?: boolean | null
+          syndromes_detected?: Json | null
+          traits_v5?: Json | null
           updated_at?: string | null
         }
         Update: {
+          assessment_version?: string | null
+          avere_pct?: number | null
           candidato_id?: string
           created_at?: string | null
+          essere_pct?: number | null
+          fare_pct?: number | null
           id?: string
           leadership_pct?: number | null
           maturita_pct?: number | null
           out_points?: Json | null
           potenziale_pct?: number | null
           profilo_tipo?: string | null
+          profilo_tipo_v5?: string | null
+          reliability_index?: string | null
           scale_punteggi?: Json | null
           schematicita?: number | null
           strength_points?: Json | null
           stress_zone?: boolean | null
+          syndromes_detected?: Json | null
+          traits_v5?: Json | null
           updated_at?: string | null
         }
         Relationships: [
