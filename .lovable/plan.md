@@ -1,311 +1,214 @@
 
+# Piano: Report PDF con Sindromi V5 Complete
 
-# Piano di Migrazione: Sistema Assessment Psicometrico V5
-
-## Panoramica del Cambiamento
-
-Questo aggiornamento è una **revisione completa** del sistema di assessment, che passa da:
-
-| Aspetto | Sistema Attuale | Nuovo Sistema V5 |
-|---------|-----------------|------------------|
-| Domande | 200 | 242 (+42 nuove) |
-| Tratti/Scale | 12 (SV,MO,CF,EF,EC,QN,QR,SP,PA,SC,ST,LE) | 15 nuovi (ORG,AUT,GP,ADS,DET,VEN,HRM,LDR,PRO,COM,ESP,RC,FIN,SUC,PRI) + CTRL |
-| Range punteggi | 0-200 | -100/+100 |
-| Macro-aree | Impatto Organizzativo, Solidità Personale, Capacità Produttiva | ESSERE, FARE, AVERE |
-| Sindromi | ~5 pattern (Stress Zone, Motore a Vuoto, etc.) | 24 sindromi (18 primarie + 6 secondarie) |
-| Attendibilità | Nessuna | 5 domande di controllo (238-242) |
-| Risposte | A/B/C | A/B/C/D (con "D" = preferisco non rispondere) |
+## Obiettivo
+Creare un report PDF esteso che includa tutte le sindromi V5 rilevate con descrizioni dettagliate, impatto sul ruolo, e raccomandazioni specifiche per il colloquio e la gestione.
 
 ---
 
-## FASE 1: Nuove Domande (42 domande aggiuntive)
-
-### 1.1 Aggiornamento Tabella `domande` nel Database
-
-Aggiungere 42 nuove domande (201-242) alla tabella `domande` con i nuovi tratti:
+## Architettura Proposta
 
 ```text
-Struttura colonne:
-- id: 201-242
-- testo: testo della domanda
-- scala_primaria: nuovo codice tratto (ORG, AUT, GP, ADS, DET, VEN, HRM, LDR, PRO, COM, ESP, RC, FIN, SUC, PRI, CTRL)
-- polarita: '+' | '-' | 'SPECIAL' | 'CTRL_YES'
-- blocco_tematico: 7 (Vendita/Finanze/Successo) o 8 (Controllo)
-```
-
-### 1.2 Aggiornamento File `questionario.ts`
-
-Aggiungere le 42 nuove domande con:
-- Domande 201-237: Blocco Vendita, Finanze, Successo
-- Domande 238-242: Blocco Controllo (attendibilità)
-
-### 1.3 Aggiornamento Tipi TypeScript
-
-```typescript
-// src/types/database.ts
-export type TraitCode = 
-  | 'ORG' | 'AUT' | 'GP' | 'ADS' | 'DET' | 'VEN' | 'HRM' 
-  | 'LDR' | 'PRO' | 'COM' | 'ESP' | 'RC' | 'FIN' | 'SUC' | 'PRI' | 'CTRL';
-
-export const TRAIT_LABELS: Record<TraitCode, string> = {
-  ORG: 'Organizzazione',
-  AUT: 'Automotivazione',
-  GP: 'Gestione Pressioni',
-  ADS: 'Autodisciplina',
-  DET: 'Determinazione',
-  VEN: 'Attitudine Vendita',
-  HRM: 'HR Management',
-  LDR: 'Leadership Naturale',
-  PRO: 'Proattività',
-  COM: 'Comprensione',
-  ESP: 'Espansività',
-  RC: 'Resistenza al Cambiamento',
-  FIN: 'Finanze',
-  SUC: 'Successo',
-  PRI: 'Principi',
-  CTRL: 'Controllo'
-};
-```
-
-### 1.4 Gestione Domande Speciali
-
-Alcune domande hanno risposte con punteggi non standard:
-- **072**: Età primo guadagno (a=Prima 21 +10, b=21-23 +5, c=Dopo 23 0)
-- **073**: % risparmio (a=<5% 0, b=5-15% +5, c=>15% +10)
-- **211**: Tempo investimenti (a=Sì +10, b=Meno del dovuto +5, c=No 0)
-- **212-213**: Riserve finanziarie con fasce
-- **228**: Potenziale successo con fasce
-
-Queste richiedono una mappatura speciale nello scoring.
-
----
-
-## FASE 2: Nuovo Sistema di Scoring (-100/+100)
-
-### 2.1 Creare `src/lib/scoringV5.ts`
-
-```typescript
-// Nuova formula di normalizzazione
-export function calculateNormalizedScore(rawScore: number, maxScore: number): number {
-  // punteggio_normalizzato = ((punteggio_grezzo / punteggio_max) * 200) - 100
-  return Math.round(((rawScore / maxScore) * 200) - 100);
-}
-
-// Punteggi max per tratto
-export const TRAIT_MAX_SCORES: Record<TraitCode, number> = {
-  ORG: 120,  // 12 domande
-  AUT: 220,  // 22 domande
-  GP: 180,   // 18 domande
-  ADS: 210,  // 21 domande
-  DET: 190,  // 19 domande
-  VEN: 190,  // 19 domande
-  HRM: 80,   // 8 domande
-  LDR: 110,  // 11 domande
-  PRO: 160,  // 16 domande
-  COM: 160,  // 16 domande
-  ESP: 130,  // 13 domande
-  RC: 170,   // 17 domande
-  FIN: 140,  // 14 domande
-  SUC: 160,  // 16 domande
-  PRI: 170,  // 17 domande
-  CTRL: 50,  // 5 domande (non produce punteggio, solo conteggio)
-};
-```
-
-### 2.2 Nuove Fasce di Interpretazione
-
-Il nuovo sistema usa fasce diverse per ogni tratto, non più soglie universali:
-
-| Tratto | Eccellente | Buono | Discreto | Mediocre | Critico |
-|--------|------------|-------|----------|----------|---------|
-| ORG | >65 | 40-65 | 30-40 | 0-30 | <0 |
-| AUT | >60 | 35-60 | 20-35 | 0-20 | <0 |
-| GP | >65 | 30-65 | 21-30 | 0-21 | <0 |
-| ... | ... | ... | ... | ... | ... |
-
-### 2.3 Macro-Aree V5
-
-```typescript
-// Calcolo Macro-Aree
-ESSERE% = ((ORG + AUT + GP + 300) / 600) * 100
-FARE% = ((ADS + DET + VEN + HRM + 400) / 800) * 100
-AVERE% = ((LDR + PRO + COM + ESP + 400) / 800) * 100
+                  PDFExportButton.tsx
+                         │
+                         ▼
+    ┌─────────────────────────────────────────┐
+    │        PDFReportLayoutV5.tsx            │
+    │  (nuovo layout 6+ pagine per V5)        │
+    └─────────────────────────────────────────┘
+                         │
+         ┌───────────────┼───────────────┐
+         ▼               ▼               ▼
+   syndromes.ts   syndromesV5Data.ts   roleMatchingV5.ts
+   (logica)       (descrizioni         (impatto ruoli)
+                   estese - NUOVO)
 ```
 
 ---
 
-## FASE 3: Sistema Attendibilità
+## Modifiche Previste
 
-### 3.1 Logica Controllo (domande 238-242)
+### 1. Nuovo file: `src/lib/syndromesV5Data.ts`
+Database completo delle 24 sindromi con:
+- **Descrizione estesa** (80-150 parole): spiegazione dettagliata del pattern comportamentale
+- **Impatto organizzativo**: come la sindrome influenza team e risultati
+- **Segnali da osservare**: comportamenti visibili durante il colloquio
+- **Domande specifiche**: 3-4 domande da fare al candidato
+- **Raccomandazioni gestionali**: come gestire la persona se assunta
+- **Controindicazioni ruolo**: ruoli da evitare assolutamente
 
-Le 5 domande di controllo hanno risposta attesa "A":
-- 0-1 risposte inattese: **YES** (attendibile)
-- 2-3 risposte inattese: **CAUTION** (avviso)
-- 4-5 risposte inattese: **NO** (blocco, chiede ricompilazione)
+### 2. Nuovo file: `src/components/PDFSyndromeReportLayout.tsx`
+Layout PDF dedicato alle sindromi con struttura:
 
-### 3.2 Logica Forzatura (FORCED)
+**PAGINA 1: Riepilogo Sindromi**
+- Header con dati candidato
+- Tabella riassuntiva sindromi rilevate (codice, nome, severità)
+- Semaforo visivo (verde/giallo/arancione/rosso)
+- Livello di criticità globale (LIV 1-8)
 
-Quando l'attendibilità è NO e si forza:
-- Se media tratti > 40: ridurre tutti i tratti del 20%
-- Se media tratti > 60: ridurre tutti i tratti del 30%
-- Ricalcolare sindromi dopo riduzione
-- Marcare come "FORCED - Risultati da utilizzare con riserva"
+**PAGINA 2-N: Dettaglio per ogni sindrome RED/ORANGE**
+- Box sindrome con codice e nome
+- Descrizione estesa del pattern
+- Impatto organizzativo
+- Segnali comportamentali
+- Domande colloquio specifiche
+- Raccomandazioni gestionali
+- Ruoli controindicati
+
+**PAGINA FINALE: Sintesi e Azioni**
+- Checklist decisionale
+- Matrice rischio/opportunità
+- Piano di onboarding condizionato
+- Spazio note
+
+### 3. Modifica: `src/components/PDFExportButton.tsx`
+Aggiungere nuovo bottone `PDFSyndromeReportButton`:
+- Props: candidato data + traitsV5 + syndromes
+- Genera PDF specifico per sindromi
+- Etichetta: "Report Sindromi"
+- Icona: AlertTriangle
+
+### 4. Modifica: `src/pages/CandidatoDettaglio.tsx`
+Aggiungere il nuovo bottone PDF nell'header:
+- Visibile solo per profili V5
+- Affiancato ai bottoni esistenti
 
 ---
 
-## FASE 4: Sistema Sindromi (24 totali)
-
-### 4.1 Creare `src/lib/syndromes.ts`
-
-Implementare tutte le 18 sindromi primarie (S01-S18) e 6 secondarie (SS1-SS6):
+## Struttura Dati Sindromi Estese
 
 ```typescript
-export type SyndromeSeverity = 'RED' | 'ORANGE' | 'YELLOW';
-
-export interface SyndromeResult {
+interface SyndromeExtendedData {
   code: string;
   name: string;
-  severity: SyndromeSeverity;
-  description: string;
-  isActive: boolean;
-}
-
-// Esempio S01
-function checkS01_DemotivanteCreonica(traits: TraitScores): SyndromeResult {
-  const isActive = traits.HRM < 0 && traits.PRO < 0 && traits.COM < 0 && traits.ESP < 0;
-  return {
-    code: 'S01',
-    name: 'PERSONA DEMOTIVANTE CRONICA',
-    severity: 'RED',
-    description: 'SEMPRE NON IDONEA. Porta al fallimento chi gestisce.',
-    isActive
-  };
+  severity: 'RED' | 'ORANGE' | 'YELLOW';
+  shortDescription: string;      // Esistente
+  extendedDescription: string;   // NUOVO: 80-150 parole
+  organizationalImpact: string;  // NUOVO
+  warningSignals: string[];      // NUOVO: segnali colloquio
+  interviewQuestions: string[];  // NUOVO: domande specifiche
+  managementTips: string[];      // NUOVO: come gestire
+  contraindicatedRoles: string[]; // NUOVO: ruoli da evitare
+  category: 'primary' | 'secondary';
 }
 ```
 
-### 4.2 Tabella Database `syndromes_detected`
+---
 
-```sql
-CREATE TABLE syndromes_detected (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  assessment_id UUID NOT NULL REFERENCES profili_candidato(id),
-  syndrome_code VARCHAR NOT NULL,
-  syndrome_name VARCHAR NOT NULL,
-  severity VARCHAR NOT NULL,
-  description TEXT,
-  created_at TIMESTAMPTZ DEFAULT now()
-);
-```
+## Contenuto Sindromi (Esempi)
+
+### S01 - Persona Demotivante Cronica (RED)
+**Descrizione estesa**: 
+Questa persona presenta un pattern sistematico di negatività che pervade ogni aspetto della vita lavorativa. Tende a vedere ostacoli dove non esistono, a minimizzare i successi altrui e a massimizzare i problemi. La sua presenza in un team riduce progressivamente la motivazione di tutti i collaboratori, creando un effetto domino di disimpegno.
+
+**Impatto organizzativo**: 
+Può causare un aumento del turnover del 40% nel suo team. I colleghi tendono a evitare interazioni, riducendo la collaborazione. I progetti subiscono ritardi cronici.
+
+**Segnali colloquio**:
+- Parla prevalentemente di esperienze negative
+- Attribuisce i fallimenti sempre ad altri
+- Non cita mai successi personali o di team
+- Tono vocale piatto, linguaggio pessimistico
+
+**Domande specifiche**:
+- Qual è stato il suo più grande successo professionale e come l'ha ottenuto?
+- Come reagisce quando un progetto va meglio del previsto?
+- Mi racconti di un momento in cui ha motivato un collega in difficoltà
+
+**Raccomandazioni**: 
+NON ASSUMERE in nessun caso. Se già presente in organico, isolare da ruoli di team e valutare percorso di uscita.
+
+**Ruoli controindicati**: 
+Tutti i ruoli con gestione persone, customer facing, team work
 
 ---
 
-## FASE 5: Nuovo Matching Ruoli (9 Mansioni)
+### S02 - Soppressiva (SP) (RED)
+**Descrizione estesa**: 
+Pattern comportamentale caratterizzato da manipolazione sistematica e tendenza a sabotare il successo altrui. Questa persona può apparire inizialmente collaborativa, ma nel tempo emerge un pattern di comportamenti volti a destabilizzare colleghi percepiti come minaccia. Possibili problematiche etiche significative.
 
-### 5.1 Aggiornare `roleMatching.ts`
+**Impatto organizzativo**: 
+Rischio elevato di cause legali, mobbing, ambiente tossico. Può portare al fallimento di interi reparti o aziende di piccole dimensioni.
 
-Ogni ruolo ha:
-- **DISQUALIFIER**: sindromi che rendono automaticamente NON IDONEO
-- **TRATTI NECESSARI**: soglie minime per i tratti richiesti
-- **TOLLERANZE**: numero di tratti leggermente fuori range accettabili
+**Segnali colloquio**:
+- Riferimenti frequenti a ingiustizie subite
+- Difficoltà a riconoscere meriti altrui
+- Risposte evasive su uscite da aziende precedenti
+- Tendenza a criticare ex colleghi/capi
 
-### 5.2 Esempio Requisiti Venditore
+**Domande specifiche**:
+- Come ha gestito situazioni in cui un collega ha avuto più successo di lei?
+- Può raccontarmi di un conflitto lavorativo significativo e come si è risolto?
+- Perché ha lasciato le sue ultime 3 posizioni?
 
-```text
-VENDITORE / COMMERCIALE
-DQ: S01, S02, S03 (senza controllo), S04, S05, S08, S12
-TRATTI: AUT>=20, VEN>=30, ESP>=15, GP>=21 (o RC>-19)
-IDEALE: DET>=30, PRO>=10, COM>=0
-REGOLA: GP più alto + DET<30 = NON IDONEO
-```
+**Raccomandazioni**: 
+ASSOLUTAMENTE NON ASSUMERE. Se identificata post-assunzione, predisporre uscita immediata con documentazione legale.
 
----
-
-## FASE 6: Aggiornamento UI
-
-### 6.1 Nuovo Grafico Tratti
-
-- Grafico a barre orizzontali -100/+100
-- Colori: verde (>30), giallo (0-30), arancione (-30/0), rosso (<-30)
-- Evidenziare valli (tratti inferiori alla media di 20+ punti)
-
-### 6.2 Badge Sindromi
-
-- ROSSO #DC2626 per sindromi critiche
-- ARANCIONE #EA580C per sindromi moderate
-- GIALLO #CA8A04 per attenzioni
-
-### 6.3 Report PDF 10 Pagine
-
-Struttura completa:
-1. Copertina (nome, ruolo, data, attendibilità)
-2. Summary (ESSERE/FARE/AVERE %, profilo tipo, alert, idoneità)
-3. Grafico 15 tratti
-4. Area ESSERE (ORG, AUT, GP)
-5. Area FARE (ADS, DET, VEN, HRM)
-6. Area AVERE (LDR, PRO, COM, ESP)
-7. Indicatori (RC, FIN, SUC, PRI)
-8. Sindromi rilevate
-9. Matching ruolo
-10. Raccomandazioni
+**Ruoli controindicati**: 
+Tutti
 
 ---
 
-## FASE 7: Migrazione Database
+## Stile PDF
 
-### 7.1 Aggiornamento Schema `profili_candidato`
-
-```sql
-ALTER TABLE profili_candidato ADD COLUMN IF NOT EXISTS 
-  assessment_version VARCHAR DEFAULT 'v4';
-
--- Nuovi campi V5
-ALTER TABLE profili_candidato 
-  ADD COLUMN IF NOT EXISTS essere_pct NUMERIC,
-  ADD COLUMN IF NOT EXISTS fare_pct NUMERIC,
-  ADD COLUMN IF NOT EXISTS avere_pct NUMERIC,
-  ADD COLUMN IF NOT EXISTS reliability_index VARCHAR DEFAULT 'YES',
-  ADD COLUMN IF NOT EXISTS syndromes_detected JSONB DEFAULT '[]',
-  ADD COLUMN IF NOT EXISTS traits_v5 JSONB DEFAULT '{}';
-```
-
-### 7.2 Compatibilità Retroattiva
-
-- Mantenere i campi vecchi (`scale_punteggi`, `leadership_pct`, etc.) per candidati esistenti
-- Usare `assessment_version` per distinguere V4 vs V5
-- UI mostra automaticamente il layout corretto in base alla versione
+- **Formato**: A4, orientamento portrait
+- **Font**: Arial/Helvetica per leggibilità
+- **Colori**: 
+  - RED syndromes: sfondo rosso chiaro (#FEE2E2), bordo rosso (#DC2626)
+  - ORANGE syndromes: sfondo arancione chiaro (#FFEDD5), bordo arancione (#EA580C)
+  - YELLOW syndromes: sfondo giallo chiaro (#FEF9C3), bordo giallo (#CA8A04)
+- **Watermark**: Logo TalentProfile in basso a destra
+- **Header**: Dati candidato su ogni pagina
+- **Footer**: Numero pagina e disclaimer confidenzialità
 
 ---
 
-## Ordine di Implementazione Suggerito
+## File da Creare
 
-1. **FASE 1.3**: Aggiornare tipi TypeScript (TraitCode, TRAIT_LABELS)
-2. **FASE 7.1**: Creare migrazione database per nuovi campi
-3. **FASE 1.1-1.2**: Aggiungere 42 nuove domande
-4. **FASE 2**: Implementare nuovo scoring (-100/+100)
-5. **FASE 3**: Implementare sistema attendibilità
-6. **FASE 4**: Implementare sindromi
-7. **FASE 5**: Aggiornare matching ruoli
-8. **FASE 6**: Aggiornare UI (grafico, badge, report)
-9. **Test End-to-End**: Verificare flusso completo
+| File | Tipo | Descrizione |
+|------|------|-------------|
+| `src/lib/syndromesV5Data.ts` | Nuovo | Database descrizioni estese 24 sindromi |
+| `src/components/PDFSyndromeReportLayout.tsx` | Nuovo | Layout PDF sindromi multi-pagina |
+
+## File da Modificare
+
+| File | Modifica |
+|------|----------|
+| `src/components/PDFExportButton.tsx` | Aggiungere `PDFSyndromeReportButton` |
+| `src/pages/CandidatoDettaglio.tsx` | Aggiungere bottone report sindromi nell'header |
 
 ---
 
-## Note Tecniche
+## Dettagli Tecnici
 
-### Impatto sui Candidati Esistenti
-- I candidati che hanno già completato il test V4 manterranno i loro risultati
-- Solo i nuovi assessment useranno il sistema V5
-- Possibilità di ricompilare dopo 2 anni per vedere cambiamenti
+### Generazione PDF
+Utilizzo dello stesso pattern esistente:
+1. Render React component in container temporaneo off-screen
+2. Cattura con `html2canvas` a scala 2x
+3. Conversione in PDF multi-pagina con `jsPDF`
+4. Watermark logo su ogni pagina
+5. Download automatico con nome file strutturato
 
-### Gestione Risposta "D"
-La nuova risposta "D" (Preferisco non rispondere) viene trattata come "B" nel calcolo:
-- Polarità positiva: d = +5
-- Polarità negativa: d = +5
+### Gestione Pagine Dinamiche
+- Pagina 1: sempre presente (riepilogo)
+- Pagine 2-N: una pagina per ogni sindrome RED/ORANGE (max 2 sindromi per pagina per YELLOW)
+- Pagina finale: sempre presente (sintesi)
+- Calcolo dinamico numero pagine basato su sindromi attive
 
-### Tempo Stimato
-Questo è un aggiornamento significativo che richiede multiple iterazioni:
-- Fase 1-3: ~2-3 sessioni
-- Fase 4-5: ~2 sessioni
-- Fase 6-7: ~2 sessioni
-- Testing: ~1-2 sessioni
+### Performance
+- Lazy loading delle descrizioni estese
+- Render condizionale solo per sindromi attive
+- Timeout adeguato per render completo prima di cattura
 
+---
+
+## Risultato Atteso
+
+Un report PDF professionale di 6-15 pagine (a seconda delle sindromi) che fornisce all'HR:
+- Visione immediata del livello di rischio
+- Comprensione profonda di ogni pattern problematico
+- Strumenti pratici per il colloquio
+- Guida decisionale chiara
+- Documentazione per eventuali decisioni future
+
+Il report sarà esportabile con un click dal bottone "Report Sindromi" nella pagina dettaglio candidato V5.
