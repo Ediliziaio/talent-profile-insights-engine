@@ -31,11 +31,11 @@ import {
 export const TRAIT_MAX_SCORES: Record<TraitCode, number> = {
   ORG: 120,   // 12 domande
   AUT: 220,   // 22 domande (include 228 SPECIAL)
-  GP: 180,    // 18 domande
+  GP: 170,    // 17 domande (verificato da DB)
   ADS: 210,   // 21 domande
   DET: 190,   // 19 domande
   VEN: 190,   // 19 domande
-  HRM: 80,    // 8 domande
+  HRM: 70,    // 7 domande (verificato da mappatura manuale)
   LDR: 110,   // 11 domande
   PRO: 160,   // 16 domande
   COM: 160,   // 16 domande
