@@ -10,7 +10,7 @@ import { InterpretazioneDati } from '@/components/InterpretazioneDati';
 import { AnalisiPsicologica, AnalisiPsicologicaPlaceholder, AnalisiAI } from '@/components/AnalisiPsicologica';
 import { RisposteDettagliate } from '@/components/RisposteDettagliate';
 import { FitIndicator } from '@/components/FitIndicator';
-import { PDFExportButton, PDFReportButton } from '@/components/PDFExportButton';
+import { PDFExportButton, PDFReportButton, PDFSyndromeReportButton } from '@/components/PDFExportButton';
 import { StressZoneHero } from '@/components/StressZoneHero';
 import { RoleMatchingCard } from '@/components/RoleMatchingCard';
 import { RoleMatchingCardV5 } from '@/components/RoleMatchingCardV5';
@@ -383,6 +383,16 @@ export default function CandidatoDettaglio() {
                     dataTest={candidato.data_test}
                     schematicita={profilo?.schematicita ?? 100}
                   />
+                  {isV5 && syndromes.length > 0 && (
+                    <PDFSyndromeReportButton
+                      candidatoNome={candidato.nome}
+                      candidatoCognome={candidato.cognome}
+                      azienda={candidato.aziende?.nome}
+                      ruoloRichiesto={candidato.funzione || undefined}
+                      dataTest={candidato.data_test}
+                      syndromes={syndromes}
+                    />
+                  )}
                   <PDFExportButton 
                     targetRef={reportRef} 
                     fileName={`${candidato.cognome}_${candidato.nome}`}
