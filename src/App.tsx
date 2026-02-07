@@ -26,6 +26,8 @@ const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Aziende = lazy(() => import('./pages/Aziende'));
 const Candidati = lazy(() => import('./pages/Candidati'));
 const CandidatoDettaglio = lazy(() => import('./pages/CandidatoDettaglio'));
+const ConfrontoCandidati = lazy(() => import('./pages/ConfrontoCandidati'));
+const StoricoCandidato = lazy(() => import('./pages/StoricoCandidato'));
 const ConsensoPrivacy = lazy(() => import('./pages/ConsensoPrivacy'));
 const Questionario = lazy(() => import('./pages/Questionario'));
 const TestCompletato = lazy(() => import('./pages/TestCompletato'));
@@ -89,6 +91,16 @@ const App = () => (
               <Route path="/candidati/:id" element={
                 <Suspense fallback={<CandidatoDettaglioSkeleton />}>
                   <CandidatoDettaglio />
+                </Suspense>
+              } />
+              <Route path="/candidati/:id/storico" element={
+                <Suspense fallback={<CandidatoDettaglioSkeleton />}>
+                  <StoricoCandidato />
+                </Suspense>
+              } />
+              <Route path="/confronto" element={
+                <Suspense fallback={<CandidatiSkeleton />}>
+                  <ConfrontoCandidati />
                 </Suspense>
               } />
               <Route path="/test/anagrafica" element={
