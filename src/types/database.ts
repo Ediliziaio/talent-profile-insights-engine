@@ -146,7 +146,8 @@ export const MACRO_AREA_TRAITS: Record<MacroAreaCode, TraitCode[]> = {
 export const INDICATOR_TRAITS: TraitCode[] = ['RC', 'FIN', 'SUC', 'PRI'];
 
 // V5 Reliability Index
-export type ReliabilityIndex = 'YES' | 'CAUTION' | 'NO' | 'FORCED';
+// Manuale V2: ZERO = profilo non utilizzabile (>8 risposte inattese)
+export type ReliabilityIndex = 'YES' | 'CAUTION' | 'NO' | 'ZERO' | 'FORCED';
 
 // V5 Syndrome Severity
 export type SyndromeSeverity = 'RED' | 'ORANGE' | 'YELLOW';

@@ -85,11 +85,16 @@ export const ROLE_PROFILES_V5: Record<string, RoleProfileV5> = {
     nome: 'Responsabile Amministrativo',
     categoria: 'amministrativo',
     descrizione: 'Gestione contabilità, bilancio, fiscalità e procedure amministrative',
+    // Soglie allineate al Manuale V2: ORG>40, AUT≥-15, GP≥21, ADS>39, PRO>19, COM≥-15, RC>-19, PRI>39
     requisiti: [
-      { trait: 'ORG', soglia: 45, tipo: 'min', isCritical: true, label: 'Organizzazione ≥ 45' },
-      { trait: 'ADS', soglia: 40, tipo: 'min', isCritical: true, label: 'Autodisciplina ≥ 40' },
-      { trait: 'RC', soglia: 60, tipo: 'max', isCritical: false, label: 'RC ≤ 60 (flessibilità)' },
-      { trait: 'ESP', soglia: 60, tipo: 'max', isCritical: false, label: 'ESP ≤ 60 (non troppo espansivo)' },
+      { trait: 'ORG', soglia: 40, tipo: 'min', isCritical: true, label: 'Organizzazione > 40' },
+      { trait: 'AUT', soglia: -15, tipo: 'min', isCritical: false, label: 'Automotivazione ≥ -15' },
+      { trait: 'GP', soglia: 21, tipo: 'min', isCritical: true, label: 'Gestione Pressioni ≥ 21' },
+      { trait: 'ADS', soglia: 39, tipo: 'min', isCritical: true, label: 'Autodisciplina > 39' },
+      { trait: 'PRO', soglia: 19, tipo: 'min', isCritical: false, label: 'Proattività > 19' },
+      { trait: 'COM', soglia: -15, tipo: 'min', isCritical: false, label: 'Comprensione ≥ -15' },
+      { trait: 'RC', soglia: -19, tipo: 'min', isCritical: true, label: 'RC > -19' },
+      { trait: 'PRI', soglia: 39, tipo: 'min', isCritical: true, label: 'Principi > 39' },
     ],
     disqualifiers: [
       {
@@ -98,13 +103,28 @@ export const ROLE_PROFILES_V5: Record<string, RoleProfileV5> = {
         severity: 'blocking'
       },
       {
+        condition: (t) => t.GP < 21,
+        reason: 'PSP: non regge la pressione lavorativa',
+        severity: 'blocking'
+      },
+      {
         condition: (t) => t.VEN > 60,
         reason: 'Troppo orientato alla vendita, soffrirà in ruolo back-office',
         severity: 'warning'
       },
+      {
+        condition: (_, s) => s.some(syn => ['S01', 'S02', 'S03', 'S04', 'S05', 'S06', 'S07', 'S08'].includes(syn.code) && syn.isActive),
+        reason: 'Sindrome critica o problematica per ruolo amministrativo',
+        severity: 'blocking'
+      },
+      {
+        condition: (t) => t.COM < -38,
+        reason: 'Comprensione troppo bassa per gestire relazioni interne',
+        severity: 'blocking'
+      },
     ],
     profiloIdeale: 'Persona metodica, precisa, affidabile. Ama le procedure e i numeri.',
-    trattiFondamentali: ['ORG', 'ADS', 'DET'],
+    trattiFondamentali: ['ORG', 'ADS', 'PRI', 'GP'],
     domandeColloquio: [
       'Come organizza la gestione delle scadenze fiscali?',
       'Racconti di un errore contabile grave e come lo ha risolto.',
@@ -117,21 +137,24 @@ export const ROLE_PROFILES_V5: Record<string, RoleProfileV5> = {
     nome: 'Venditore/Commerciale',
     categoria: 'commerciale',
     descrizione: 'Sviluppo clienti, negoziazione, raggiungimento obiettivi di fatturato',
+    // Soglie allineate al Manuale V2: AUT≥20, VEN≥30, ESP≥15, GP≥21, DET≥30, PRO≥10, COM≥0
     requisiti: [
-      { trait: 'VEN', soglia: 50, tipo: 'min', isCritical: true, label: 'Attitudine Vendita ≥ 50' },
-      { trait: 'DET', soglia: 40, tipo: 'min', isCritical: true, label: 'Determinazione ≥ 40' },
-      { trait: 'ESP', soglia: 35, tipo: 'min', isCritical: true, label: 'Espansività ≥ 35' },
-      { trait: 'AUT', soglia: 40, tipo: 'min', isCritical: false, label: 'Automotivazione ≥ 40' },
-      { trait: 'FIN', soglia: 30, tipo: 'min', isCritical: false, label: 'Orientamento Finanze ≥ 30' },
+      { trait: 'VEN', soglia: 30, tipo: 'min', isCritical: true, label: 'Attitudine Vendita ≥ 30' },
+      { trait: 'DET', soglia: 30, tipo: 'min', isCritical: true, label: 'Determinazione ≥ 30' },
+      { trait: 'GP', soglia: 21, tipo: 'min', isCritical: true, label: 'Gestione Pressioni ≥ 21' },
+      { trait: 'AUT', soglia: 20, tipo: 'min', isCritical: false, label: 'Automotivazione ≥ 20' },
+      { trait: 'ESP', soglia: 15, tipo: 'min', isCritical: false, label: 'Espansività ≥ 15' },
+      { trait: 'PRO', soglia: 10, tipo: 'min', isCritical: false, label: 'Proattività ≥ 10' },
+      { trait: 'COM', soglia: 0, tipo: 'min', isCritical: false, label: 'Comprensione ≥ 0' },
     ],
     disqualifiers: [
       {
-        condition: (t) => t.VEN < 30,
+        condition: (t) => t.VEN < 20,
         reason: 'Attitudine vendita insufficiente',
         severity: 'blocking'
       },
       {
-        condition: (t) => t.DET < 20,
+        condition: (t) => t.DET < 15,
         reason: 'Determinazione troppo bassa per gestire rifiuti e negoziazioni',
         severity: 'blocking'
       },
@@ -141,18 +164,23 @@ export const ROLE_PROFILES_V5: Record<string, RoleProfileV5> = {
         severity: 'blocking'
       },
       {
+        condition: (_, s) => s.some(syn => ['S01', 'S02', 'S03', 'S04', 'S05', 'S06', 'S07', 'S08'].includes(syn.code) && syn.isActive),
+        reason: 'Sindrome critica o problematica per ruolo commerciale',
+        severity: 'blocking'
+      },
+      {
         condition: (_, s) => s.some(syn => syn.code === 'S17' && syn.isActive),
         reason: 'GP più alto: evita la chiusura, non affronta il cliente',
         severity: 'warning'
       },
       {
-        condition: (t) => t.AUT > 60 && t.VEN < 40,
+        condition: (t) => t.AUT > 60 && t.VEN < 20,
         reason: 'Alto AUT + Basso VEN: motivato ma non per vendere',
         severity: 'warning'
       },
     ],
     profiloIdeale: 'Cacciatore naturale. Ama la sfida, la conquista, il riconoscimento economico.',
-    trattiFondamentali: ['VEN', 'DET', 'ESP', 'FIN'],
+    trattiFondamentali: ['VEN', 'DET', 'GP', 'ESP'],
     domandeColloquio: [
       'Quanto vuole guadagnare tra 3 anni? Cosa farà con quei soldi?',
       'Racconti della vendita più difficile che ha chiuso.',
@@ -166,16 +194,18 @@ export const ROLE_PROFILES_V5: Record<string, RoleProfileV5> = {
     nome: 'Customer Care',
     categoria: 'commerciale',
     descrizione: 'Gestione clienti, risoluzione problemi, fidelizzazione',
+    // Soglie allineate al Manuale V2: PRO≥20, COM≥10, ESP≥10, GP≥21, ADS≥25
     requisiti: [
-      { trait: 'COM', soglia: 40, tipo: 'min', isCritical: true, label: 'Comprensione ≥ 40' },
-      { trait: 'PRO', soglia: 35, tipo: 'min', isCritical: true, label: 'Proattività ≥ 35' },
-      { trait: 'GP', soglia: 30, tipo: 'min', isCritical: true, label: 'Gestione Pressioni ≥ 30' },
-      { trait: 'ESP', soglia: 30, tipo: 'min', isCritical: false, label: 'Espansività ≥ 30' },
+      { trait: 'PRO', soglia: 20, tipo: 'min', isCritical: true, label: 'Proattività ≥ 20' },
+      { trait: 'COM', soglia: 10, tipo: 'min', isCritical: true, label: 'Comprensione ≥ 10' },
+      { trait: 'GP', soglia: 21, tipo: 'min', isCritical: true, label: 'Gestione Pressioni ≥ 21' },
+      { trait: 'ESP', soglia: 10, tipo: 'min', isCritical: false, label: 'Espansività ≥ 10' },
+      { trait: 'ADS', soglia: 25, tipo: 'min', isCritical: false, label: 'Autodisciplina ≥ 25' },
     ],
     disqualifiers: [
       {
-        condition: (t) => t.COM < 20,
-        reason: 'Comprensione insufficiente per gestire clienti difficili',
+        condition: (t) => t.COM < 0,
+        reason: 'Comprensione negativa: non capirà le esigenze del cliente',
         severity: 'blocking'
       },
       {
@@ -184,13 +214,18 @@ export const ROLE_PROFILES_V5: Record<string, RoleProfileV5> = {
         severity: 'blocking'
       },
       {
-        condition: (_, s) => s.some(syn => ['S01', 'S04'].includes(syn.code) && syn.isActive),
-        reason: 'Sindrome demotivante: trasmetterà negatività ai clienti',
+        condition: (t) => t.GP < 21,
+        reason: 'PSP: non regge la pressione dei clienti difficili',
+        severity: 'blocking'
+      },
+      {
+        condition: (_, s) => s.some(syn => ['S01', 'S04', 'S16'].includes(syn.code) && syn.isActive),
+        reason: 'Sindrome demotivante o brutto carattere: trasmetterà negatività ai clienti',
         severity: 'blocking'
       },
     ],
     profiloIdeale: 'Empatico, paziente, orientato alla soluzione. Ama aiutare le persone.',
-    trattiFondamentali: ['COM', 'PRO', 'GP'],
+    trattiFondamentali: ['PRO', 'COM', 'GP', 'ESP'],
     domandeColloquio: [
       'Racconti di un cliente molto arrabbiato e come lo ha gestito.',
       'Come fa a mantenere la calma dopo la decima telefonata difficile?',

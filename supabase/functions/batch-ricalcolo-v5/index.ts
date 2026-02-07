@@ -9,7 +9,7 @@ const corsHeaders = {
 type TraitCode = 'ORG' | 'AUT' | 'GP' | 'ADS' | 'DET' | 'VEN' | 'HRM' | 'LDR' | 'PRO' | 'COM' | 'ESP' | 'RC' | 'FIN' | 'SUC' | 'PRI' | 'CTRL';
 type PolaritaV5 = '+' | '-' | 'S' | 'C';
 type RispostaValueV5 = 'A' | 'B' | 'C' | 'D';
-type ReliabilityIndex = 'YES' | 'CAUTION' | 'NO' | 'FORCED';
+type ReliabilityIndex = 'YES' | 'CAUTION' | 'NO' | 'ZERO' | 'FORCED';
 type SyndromeSeverity = 'RED' | 'ORANGE' | 'YELLOW';
 
 interface DomandaV5 {
@@ -143,8 +143,11 @@ function calcolaProfiloV5(risposte: RispostaInputV5[], domande: DomandaV5[]): Pr
   const ctrlData = rawScores['CTRL'];
   const ctrlAvg = ctrlData.count > 0 ? ctrlData.sum / ctrlData.count : 1;
   
-  // Determine reliability index
+  // Determine reliability index (Manuale V2)
+  // 0-1 inattese = YES, 2-5 = CAUTION, 6-8 = NO, >8 = ZERO
   let reliability_index: ReliabilityIndex;
+  const ctrlUnexpected = ctrlData.count - Math.floor(ctrlData.sum / 2);
+  
   if (ctrlAvg >= 1.5) {
     reliability_index = 'YES';
   } else if (ctrlAvg >= 1.0) {
@@ -152,7 +155,7 @@ function calcolaProfiloV5(risposte: RispostaInputV5[], domande: DomandaV5[]): Pr
   } else if (ctrlAvg >= 0.5) {
     reliability_index = 'NO';
   } else {
-    reliability_index = 'FORCED';
+    reliability_index = 'ZERO';
   }
   
   // Calculate macro-area percentages
@@ -463,6 +466,17 @@ function getActiveSyndromes(traits: TraitsV5, eta?: number): SyndromeDetected[] 
     });
   }
   
+  // S19 - RC GRAVE (Manuale V2)
+  if (traits.RC <= -29) {
+    syndromes.push({
+      code: 'S19',
+      name: 'RC GRAVE',
+      severity: 'ORANGE',
+      description: 'Altamente dispersiva, impulsiva. Vulcano di idee ma non ne completa nessuna.',
+      category: 'primary',
+      triggeredBy: ['RC']
+    });
+  }
   // ============================================
   // SECONDARY SYNDROMES (SS1-SS6)
   // ============================================
