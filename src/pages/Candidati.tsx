@@ -8,12 +8,13 @@ import { cn } from '@/lib/utils';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { CandidatoDrawer } from '@/components/CandidatoDrawer';
 import { FitIndicator } from '@/components/FitIndicator';
+import { DateRangePicker } from '@/components/DateRangePicker';
+import { CandidatiFilters } from '@/components/CandidatiFilters';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Calendar } from '@/components/ui/calendar';
 import {
   Popover,
   PopoverContent,
@@ -75,7 +76,7 @@ import {
 } from 'lucide-react';
 import { Candidato, Azienda, AccessoAzienda, ProfiloCandidato, RUOLI_AZIENDALI, FUNZIONI } from '@/types/database';
 import { getProfiloTipoLabel } from '@/lib/scoring';
-import { format, subDays, subMonths, startOfDay, endOfDay, isWithinInterval, parseISO } from 'date-fns';
+import { format, subDays, subMonths, startOfDay, endOfDay, parseISO } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -691,225 +692,6 @@ export default function Candidati() {
     }
   };
 
-  // Date picker component
-  const DateRangePicker = ({ 
-    label, 
-    fromDate, 
-    toDate, 
-    onFromChange, 
-    onToChange,
-    className
-  }: { 
-    label: string;
-    fromDate: Date | undefined;
-    toDate: Date | undefined;
-    onFromChange: (date: Date | undefined) => void;
-    onToChange: (date: Date | undefined) => void;
-    className?: string;
-  }) => (
-    <div className={cn("space-y-2", className)}>
-      <Label className="text-xs font-medium">{label}</Label>
-      <div className="flex gap-2">
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              className={cn(
-                "h-9 flex-1 justify-start text-left font-normal",
-                !fromDate && "text-muted-foreground"
-              )}
-            >
-              <CalendarIcon className="mr-2 h-3 w-3" />
-              {fromDate ? format(fromDate, "dd/MM/yy", { locale: it }) : "Da"}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0 z-[100] bg-background shadow-lg border" align="start">
-            <Calendar
-              mode="single"
-              selected={fromDate}
-              onSelect={onFromChange}
-              initialFocus
-              className="p-3 pointer-events-auto bg-background"
-            />
-          </PopoverContent>
-        </Popover>
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              className={cn(
-                "h-9 flex-1 justify-start text-left font-normal",
-                !toDate && "text-muted-foreground"
-              )}
-            >
-              <CalendarIcon className="mr-2 h-3 w-3" />
-              {toDate ? format(toDate, "dd/MM/yy", { locale: it }) : "A"}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0 z-[100] bg-background shadow-lg border" align="start">
-            <Calendar
-              mode="single"
-              selected={toDate}
-              onSelect={onToChange}
-              initialFocus
-              className="p-3 pointer-events-auto bg-background"
-            />
-          </PopoverContent>
-        </Popover>
-        {(fromDate || toDate) && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-9 w-9 shrink-0"
-            onClick={() => {
-              onFromChange(undefined);
-              onToChange(undefined);
-            }}
-          >
-            <X className="h-3 w-3" />
-          </Button>
-        )}
-      </div>
-    </div>
-  );
-
-  // Filters content for mobile sheet
-  const FiltersContent = () => (
-    <div className="space-y-4">
-      {/* Date presets */}
-      <div className="space-y-2">
-        <Label className="text-xs font-medium">Periodo rapido</Label>
-        <div className="flex flex-wrap gap-1">
-          {[
-            { value: 'all', label: 'Tutti' },
-            { value: 'today', label: 'Oggi' },
-            { value: 'week', label: '7 giorni' },
-            { value: 'month', label: '30 giorni' },
-            { value: '3months', label: '3 mesi' },
-          ].map((preset) => (
-            <Button
-              key={preset.value}
-              variant={datePreset === preset.value ? 'default' : 'outline'}
-              size="sm"
-              className="h-7 text-xs"
-              onClick={() => applyDatePreset(preset.value)}
-            >
-              {preset.label}
-            </Button>
-          ))}
-        </div>
-      </div>
-      
-      {/* Date range - Registrazione */}
-      <DateRangePicker
-        label="Data Registrazione"
-        fromDate={filterDateFrom}
-        toDate={filterDateTo}
-        onFromChange={(d) => { setFilterDateFrom(d); setDatePreset('custom'); }}
-        onToChange={(d) => { setFilterDateTo(d); setDatePreset('custom'); }}
-      />
-      
-      {/* Date range - Test */}
-      <DateRangePicker
-        label="Data Test"
-        fromDate={filterTestDateFrom}
-        toDate={filterTestDateTo}
-        onFromChange={setFilterTestDateFrom}
-        onToChange={setFilterTestDateTo}
-      />
-      
-      <div className="space-y-2">
-        <Label className="text-xs font-medium">Stato Test</Label>
-        <Select value={filterStato} onValueChange={setFilterStato}>
-          <SelectTrigger className="h-9">
-            <SelectValue placeholder="Stato" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Tutti</SelectItem>
-            <SelectItem value="completato">Completato</SelectItem>
-            <SelectItem value="da_fare">Da fare</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="space-y-2">
-        <Label className="text-xs font-medium">Sesso</Label>
-        <Select value={filterSesso} onValueChange={setFilterSesso}>
-          <SelectTrigger className="h-9">
-            <SelectValue placeholder="Sesso" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Tutti</SelectItem>
-            <SelectItem value="M">Maschio</SelectItem>
-            <SelectItem value="F">Femmina</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="space-y-2">
-        <Label className="text-xs font-medium">Età</Label>
-        <Select value={filterEta} onValueChange={setFilterEta}>
-          <SelectTrigger className="h-9">
-            <SelectValue placeholder="Età" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Tutte</SelectItem>
-            <SelectItem value="18-30">18-30</SelectItem>
-            <SelectItem value="31-45">31-45</SelectItem>
-            <SelectItem value="46-60">46-60</SelectItem>
-            <SelectItem value="60+">60+</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="space-y-2">
-        <Label className="text-xs font-medium">Ruolo</Label>
-        <Select value={filterRuolo} onValueChange={setFilterRuolo}>
-          <SelectTrigger className="h-9">
-            <SelectValue placeholder="Ruolo" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Tutti</SelectItem>
-            {RUOLI_AZIENDALI.map((ruolo) => (
-              <SelectItem key={ruolo} value={ruolo}>{ruolo}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="space-y-2">
-        <Label className="text-xs font-medium">Funzione</Label>
-        <Select value={filterFunzione} onValueChange={setFilterFunzione}>
-          <SelectTrigger className="h-9">
-            <SelectValue placeholder="Funzione" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Tutte</SelectItem>
-            {FUNZIONI.map((funzione) => (
-              <SelectItem key={funzione} value={funzione}>{funzione}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="space-y-2">
-        <Label className="text-xs font-medium">Fit Score</Label>
-        <Select value={filterFitVerdict} onValueChange={setFilterFitVerdict}>
-          <SelectTrigger className="h-9">
-            <SelectValue placeholder="Fit" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Tutti</SelectItem>
-            <SelectItem value="IDONEO">Idoneo</SelectItem>
-            <SelectItem value="VALUTARE">Valutare</SelectItem>
-            <SelectItem value="NON_IDONEO">Non Idoneo</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-      {hasActiveFilters && (
-        <Button variant="outline" size="sm" onClick={resetFilters} className="w-full">
-          Resetta filtri
-        </Button>
-      )}
-    </div>
-  );
 
   return (
     <ProtectedRoute allowedRoles={['superadmin', 'azienda']}>
@@ -1240,7 +1022,32 @@ export default function Candidati() {
                       <SheetTitle>Filtri</SheetTitle>
                     </SheetHeader>
                     <div className="mt-4">
-                      <FiltersContent />
+                      <CandidatiFilters
+                        datePreset={datePreset}
+                        onDatePresetChange={applyDatePreset}
+                        filterDateFrom={filterDateFrom}
+                        filterDateTo={filterDateTo}
+                        onFilterDateFromChange={(d) => { setFilterDateFrom(d); setDatePreset('custom'); }}
+                        onFilterDateToChange={(d) => { setFilterDateTo(d); setDatePreset('custom'); }}
+                        filterTestDateFrom={filterTestDateFrom}
+                        filterTestDateTo={filterTestDateTo}
+                        onFilterTestDateFromChange={setFilterTestDateFrom}
+                        onFilterTestDateToChange={setFilterTestDateTo}
+                        filterStato={filterStato}
+                        onFilterStatoChange={setFilterStato}
+                        filterSesso={filterSesso}
+                        onFilterSessoChange={setFilterSesso}
+                        filterEta={filterEta}
+                        onFilterEtaChange={setFilterEta}
+                        filterRuolo={filterRuolo}
+                        onFilterRuoloChange={setFilterRuolo}
+                        filterFunzione={filterFunzione}
+                        onFilterFunzioneChange={setFilterFunzione}
+                        filterFitVerdict={filterFitVerdict}
+                        onFilterFitVerdictChange={setFilterFitVerdict}
+                        hasActiveFilters={hasActiveFilters}
+                        onResetFilters={resetFilters}
+                      />
                     </div>
                   </SheetContent>
                 </Sheet>
