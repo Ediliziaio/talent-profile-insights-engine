@@ -14,7 +14,7 @@ import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   CheckCircle2, XCircle, AlertCircle, AlertTriangle, 
-  Target, TrendingUp, Clock, Shield, Award, Brain, Sparkles
+  Target, TrendingUp, Clock, Shield, Award, Brain, Sparkles, Lightbulb
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ProfiloTipo, ProfiloTipoV5, TraitCode, ReliabilityIndex } from '@/types/database';
@@ -178,6 +178,10 @@ export function ExecutiveSummaryCardV5Updated({
   const hasCriticalSyndromes = syndromes.some(s => 
     ['S01', 'S02', 'S03', 'S04'].includes(s.code) && s.isActive
   );
+  
+  // Fascia Guru check (RC tra -14 e +14 = creativi ma dispersivi)
+  const rcValue = traitsV5?.RC ?? null;
+  const isFasciaGuru = isV5 && rcValue !== null && rcValue >= -14 && rcValue <= 14;
   
   return (
     <Card className={cn(
@@ -367,6 +371,17 @@ export function ExecutiveSummaryCardV5Updated({
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription className="text-xs sm:text-sm">
               <strong>Stress Zone Attiva</strong> - Momento di difficoltà. Valutare contesto.
+            </AlertDescription>
+          </Alert>
+        )}
+        
+        {/* Fascia Guru Alert (RC -14 a +14) */}
+        {isFasciaGuru && !hasCriticalSyndromes && (
+          <Alert className="py-2 border-purple-500 bg-purple-50 dark:bg-purple-950">
+            <Lightbulb className="h-4 w-4 text-purple-600" />
+            <AlertDescription className="text-xs sm:text-sm text-purple-800 dark:text-purple-300">
+              <strong>Fascia Guru (RC = {rcValue})</strong> - Profilo creativo e aperto al cambiamento, ma potenzialmente dispersivo. 
+              Vulcano di idee, può faticare a completare progetti. Richiede guida e struttura per essere produttivo.
             </AlertDescription>
           </Alert>
         )}

@@ -124,6 +124,53 @@ export default function CandidatoDettaglio() {
     },
   });
 
+  // NOTE: All hooks must be called before any conditional returns
+  // We extract all data first, then do conditional returns for loading/error states
+  
+  const profilo = candidato?.profili_candidato;
+  const scalePunteggi = (profilo?.scale_punteggi as Record<string, number>) || {};
+  const outPoints = (profilo?.out_points as string[]) || [];
+  const strengthPoints = (profilo?.strength_points as string[]) || [];
+  const stressZone = profilo?.stress_zone || false;
+  const schematicita = profilo?.schematicita || 100;
+  
+  // V5 Data extraction
+  const assessmentVersion = (profilo as any)?.assessment_version as 'v4' | 'v5' | undefined || 'v4';
+  const isV5 = assessmentVersion === 'v5';
+  const traitsV5 = (profilo as any)?.traits_v5 as Record<string, number> | undefined;
+  const esserePct = (profilo as any)?.essere_pct as number | undefined;
+  const farePct = (profilo as any)?.fare_pct as number | undefined;
+  const averePct = (profilo as any)?.avere_pct as number | undefined;
+  const profiloTipoV5 = (profilo as any)?.profilo_tipo_v5 as ProfiloTipoV5 | undefined;
+  const reliabilityIndex = (profilo as any)?.reliability_index as ReliabilityIndex | undefined;
+  const syndromesFromDB = (profilo as any)?.syndromes_detected as SyndromeResult[] | undefined;
+  
+  // Calcola sindromi se V5 e non presenti nel DB (MUST be before any conditional returns)
+  const syndromes = useMemo(() => {
+    if (!isV5 || !traitsV5) return [];
+    if (syndromesFromDB && syndromesFromDB.length > 0) return syndromesFromDB;
+    
+    const traitScores: TraitScores = {
+      ORG: traitsV5.ORG ?? 0,
+      AUT: traitsV5.AUT ?? 0,
+      GP: traitsV5.GP ?? 0,
+      ADS: traitsV5.ADS ?? 0,
+      DET: traitsV5.DET ?? 0,
+      VEN: traitsV5.VEN ?? 0,
+      HRM: traitsV5.HRM ?? 0,
+      LDR: traitsV5.LDR ?? 0,
+      PRO: traitsV5.PRO ?? 0,
+      COM: traitsV5.COM ?? 0,
+      ESP: traitsV5.ESP ?? 0,
+      RC: traitsV5.RC ?? 0,
+      FIN: traitsV5.FIN ?? 0,
+      SUC: traitsV5.SUC ?? 0,
+      PRI: traitsV5.PRI ?? 0,
+    };
+    return getActiveSyndromes(traitScores, candidato?.eta ?? undefined);
+  }, [isV5, traitsV5, syndromesFromDB, candidato?.eta]);
+  
+  // Loading state
   if (isLoading) {
     return (
       <ProtectedRoute allowedRoles={['superadmin', 'azienda']}>
@@ -152,49 +199,7 @@ export default function CandidatoDettaglio() {
     );
   }
 
-  const profilo = candidato.profili_candidato;
-  const scalePunteggi = (profilo?.scale_punteggi as Record<string, number>) || {};
-  const outPoints = (profilo?.out_points as string[]) || [];
-  const strengthPoints = (profilo?.strength_points as string[]) || [];
-  const stressZone = profilo?.stress_zone || false;
-  const schematicita = profilo?.schematicita || 100;
-  
-  // V5 Data extraction
-  const assessmentVersion = (profilo as any)?.assessment_version as 'v4' | 'v5' | undefined || 'v4';
-  const isV5 = assessmentVersion === 'v5';
-  const traitsV5 = (profilo as any)?.traits_v5 as Record<string, number> | undefined;
-  const esserePct = (profilo as any)?.essere_pct as number | undefined;
-  const farePct = (profilo as any)?.fare_pct as number | undefined;
-  const averePct = (profilo as any)?.avere_pct as number | undefined;
-  const profiloTipoV5 = (profilo as any)?.profilo_tipo_v5 as ProfiloTipoV5 | undefined;
-  const reliabilityIndex = (profilo as any)?.reliability_index as ReliabilityIndex | undefined;
-  const syndromesFromDB = (profilo as any)?.syndromes_detected as SyndromeResult[] | undefined;
-  
-  // Calcola sindromi se V5 e non presenti nel DB
-  const syndromes = useMemo(() => {
-    if (!isV5 || !traitsV5) return [];
-    if (syndromesFromDB && syndromesFromDB.length > 0) return syndromesFromDB;
-    
-    const traitScores: TraitScores = {
-      ORG: traitsV5.ORG ?? 0,
-      AUT: traitsV5.AUT ?? 0,
-      GP: traitsV5.GP ?? 0,
-      ADS: traitsV5.ADS ?? 0,
-      DET: traitsV5.DET ?? 0,
-      VEN: traitsV5.VEN ?? 0,
-      HRM: traitsV5.HRM ?? 0,
-      LDR: traitsV5.LDR ?? 0,
-      PRO: traitsV5.PRO ?? 0,
-      COM: traitsV5.COM ?? 0,
-      ESP: traitsV5.ESP ?? 0,
-      RC: traitsV5.RC ?? 0,
-      FIN: traitsV5.FIN ?? 0,
-      SUC: traitsV5.SUC ?? 0,
-      PRI: traitsV5.PRI ?? 0,
-    };
-    return getActiveSyndromes(traitScores, candidato.eta ?? undefined);
-  }, [isV5, traitsV5, syndromesFromDB, candidato.eta]);
-  
+  // Variables already extracted before early returns, no need to redeclare
   // Calcolo severità Stress Zone con valori reali (fallback a 0 per mostrare dati mancanti)
   const sv = scalePunteggi['SV'];
   const cf = scalePunteggi['CF'];

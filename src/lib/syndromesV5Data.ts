@@ -696,6 +696,43 @@ export const SYNDROMES_V5_DATA: Record<string, SyndromeExtendedData> = {
     category: 'primary'
   },
 
+  S19: {
+    code: 'S19',
+    name: 'RC GRAVE',
+    severity: 'ORANGE',
+    shortDescription: 'Altamente dispersiva, impulsiva. Vulcano di idee ma non ne completa nessuna.',
+    extendedDescription: `Resistenza al Cambiamento gravemente negativa (RC <= -29). Questa persona presenta un pattern di estrema apertura al cambiamento che sconfina nella dispersività. È un vulcano di idee: ne genera continuamente ma raramente le porta a termine. Cambia direzione frequentemente, spesso prima di vedere i risultati delle azioni intraprese. L'impulsività decisionale può portare a scelte affrettate che poi vengono rapidamente abbandonate. In contesti che richiedono persistenza e follow-through, questo pattern è fortemente problematico.`,
+    organizationalImpact: `Costo elevato di progetti iniziati e abbandonati. I colleghi si frustrano nel vedere continui cambiamenti di direzione. La pianificazione a lungo termine diventa impossibile. Le risorse vengono disperse su troppe iniziative simultanee. Tuttavia, può essere preziosa in ruoli puramente creativi/ideazione se affiancata da figure esecutive.`,
+    warningSignals: [
+      'Curriculum con molti cambi di direzione o progetti brevi',
+      'Entusiasmo per nuove idee ma vago su come le ha concluse',
+      'Difficoltà a descrivere progetti portati a termine',
+      'Impazienza visibile quando si parla di dettagli operativi',
+      'Tende a interrompere per proporre alternative'
+    ],
+    interviewQuestions: [
+      'Mi racconti di un progetto importante che ha portato a termine nonostante le difficoltà',
+      'Come gestisce la tentazione di cambiare direzione quando emerge una nuova opportunità?',
+      'Qual è il suo rapporto con la routine e le attività ripetitive?',
+      'Come reagiscono i suoi colleghi quando propone cambiamenti?'
+    ],
+    managementTips: [
+      'Affiancare sempre con figure "completers" che portano a termine',
+      'Obiettivi a brevissimo termine (1-2 settimane)',
+      'Check frequenti per evitare derive',
+      'Valorizzare la creatività incanalandola in processi strutturati',
+      'Non affidare progetti lunghi in autonomia'
+    ],
+    contraindicatedRoles: [
+      'Project manager',
+      'Ruoli che richiedono persistenza plurimensile',
+      'Gestione operativa quotidiana',
+      'Ruoli amministrativi o procedurali',
+      'Posizioni con deadline critiche non negoziabili'
+    ],
+    category: 'primary'
+  },
+
   // ==========================================
   // SINDROMI SECONDARIE (SS1-SS6)
   // ==========================================
