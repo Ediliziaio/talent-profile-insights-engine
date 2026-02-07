@@ -544,28 +544,31 @@ export default function Candidati() {
     }
   };
 
-  const sortedCandidati = candidati ? [...candidati].sort((a, b) => {
-    let aVal: any;
-    let bVal: any;
-    
-    if (sortField === 'fit_score') {
-      aVal = Array.isArray(a.analisi_candidato) ? (a.analisi_candidato[0]?.fit_score ?? -1) : -1;
-      bVal = Array.isArray(b.analisi_candidato) ? (b.analisi_candidato[0]?.fit_score ?? -1) : -1;
-    } else {
-      aVal = a[sortField];
-      bVal = b[sortField];
-    }
-    
-    if (aVal === null || aVal === undefined) aVal = '';
-    if (bVal === null || bVal === undefined) bVal = '';
-    
-    if (typeof aVal === 'string') aVal = aVal.toLowerCase();
-    if (typeof bVal === 'string') bVal = bVal.toLowerCase();
-    
-    if (aVal < bVal) return sortOrder === 'asc' ? -1 : 1;
-    if (aVal > bVal) return sortOrder === 'asc' ? 1 : -1;
-    return 0;
-  }) : [];
+  const sortedCandidati = useMemo(() => {
+    if (!candidati) return [];
+    return [...candidati].sort((a, b) => {
+      let aVal: any;
+      let bVal: any;
+      
+      if (sortField === 'fit_score') {
+        aVal = Array.isArray(a.analisi_candidato) ? (a.analisi_candidato[0]?.fit_score ?? -1) : -1;
+        bVal = Array.isArray(b.analisi_candidato) ? (b.analisi_candidato[0]?.fit_score ?? -1) : -1;
+      } else {
+        aVal = a[sortField];
+        bVal = b[sortField];
+      }
+      
+      if (aVal === null || aVal === undefined) aVal = '';
+      if (bVal === null || bVal === undefined) bVal = '';
+      
+      if (typeof aVal === 'string') aVal = aVal.toLowerCase();
+      if (typeof bVal === 'string') bVal = bVal.toLowerCase();
+      
+      if (aVal < bVal) return sortOrder === 'asc' ? -1 : 1;
+      if (aVal > bVal) return sortOrder === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }, [candidati, sortField, sortOrder]);
 
   const exportCSV = () => {
     if (!sortedCandidati || sortedCandidati.length === 0) return;
