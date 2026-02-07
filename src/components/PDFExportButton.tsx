@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Button } from '@/components/ui/button';
 import { Download, Loader2, FileText, AlertTriangle } from 'lucide-react';
@@ -208,7 +208,6 @@ export function PDFReportButton({
 }: PDFReportButtonProps) {
   const [isExporting, setIsExporting] = useState(false);
   const { toast } = useToast();
-  const containerRef = useRef<HTMLDivElement | null>(null);
 
   const handleExport = async () => {
     setIsExporting(true);
