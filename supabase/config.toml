@@ -1,1 +1,4 @@
 project_id = "zpobytjptrmrvmegkqnb"
+
+[functions.batch-ricalcolo-v5]
+verify_jwt = false
