@@ -689,6 +689,84 @@ export const ROLE_PROFILES_V5: Record<string, RoleProfileV5> = {
       'Come si trova a lavorare in squadra?',
     ],
   },
+
+  'Project Manager': {
+    id: 'project_manager',
+    nome: 'Project Manager',
+    categoria: 'tecnico',
+    descrizione: 'Gestione progetti, coordinamento team, rispetto tempi e budget',
+    requisiti: [
+      { trait: 'ORG', soglia: 50, tipo: 'min', isCritical: true, label: 'Organizzazione ≥ 50' },
+      { trait: 'GP', soglia: 40, tipo: 'min', isCritical: true, label: 'Gestione Pressioni ≥ 40' },
+      { trait: 'LDR', soglia: 35, tipo: 'min', isCritical: true, label: 'Leadership ≥ 35' },
+      { trait: 'PRO', soglia: 35, tipo: 'min', isCritical: false, label: 'Proattività ≥ 35' },
+      { trait: 'COM', soglia: 25, tipo: 'min', isCritical: false, label: 'Comprensione ≥ 25' },
+    ],
+    disqualifiers: [
+      {
+        condition: (t) => t.ORG < 35,
+        reason: 'Organizzazione insufficiente per gestire progetti complessi',
+        severity: 'blocking'
+      },
+      {
+        condition: (t) => t.GP < 25,
+        reason: 'Non regge la pressione delle deadline',
+        severity: 'blocking'
+      },
+      {
+        condition: (_, s) => s.some(syn => ['S01', 'S02', 'S03', 'S04'].includes(syn.code) && syn.isActive),
+        reason: 'Sindrome critica: non può coordinare team',
+        severity: 'blocking'
+      },
+    ],
+    profiloIdeale: 'Orchestratore di complessità. Sa tenere insieme persone, tempi, budget e qualità.',
+    trattiFondamentali: ['ORG', 'GP', 'LDR', 'PRO'],
+    domandeColloquio: [
+      'Racconti di un progetto che ha gestito dall\'inizio alla fine.',
+      'Come gestisce le priorità quando tutto è urgente?',
+      'Come affronta uno stakeholder che cambia i requisiti a metà progetto?',
+      'Qual è il suo approccio per gestire team cross-funzionali?',
+    ],
+  },
+
+  'Assistente di Direzione': {
+    id: 'assistente_dir',
+    nome: 'Assistente di Direzione',
+    categoria: 'amministrativo',
+    descrizione: 'Supporto direzionale, gestione agenda, coordinamento flussi informativi',
+    requisiti: [
+      { trait: 'ORG', soglia: 55, tipo: 'min', isCritical: true, label: 'Organizzazione ≥ 55' },
+      { trait: 'ADS', soglia: 50, tipo: 'min', isCritical: true, label: 'Autodisciplina ≥ 50' },
+      { trait: 'PRO', soglia: 40, tipo: 'min', isCritical: true, label: 'Proattività ≥ 40' },
+      { trait: 'COM', soglia: 35, tipo: 'min', isCritical: false, label: 'Comprensione ≥ 35' },
+      { trait: 'PRI', soglia: 45, tipo: 'min', isCritical: false, label: 'Principi ≥ 45 (riservatezza)' },
+    ],
+    disqualifiers: [
+      {
+        condition: (t) => t.ORG < 40,
+        reason: 'Organizzazione insufficiente per gestire agenda complessa',
+        severity: 'blocking'
+      },
+      {
+        condition: (t) => t.PRI < 30,
+        reason: 'Principi troppo bassi: rischio riservatezza',
+        severity: 'blocking'
+      },
+      {
+        condition: (_, s) => s.some(syn => ['S01', 'S04', 'S16'].includes(syn.code) && syn.isActive),
+        reason: 'Sindrome problematica per ruolo di fiducia',
+        severity: 'blocking'
+      },
+    ],
+    profiloIdeale: 'Braccio destro affidabile. Anticipa, organizza, protegge. Riservatezza assoluta.',
+    trattiFondamentali: ['ORG', 'ADS', 'PRO', 'PRI'],
+    domandeColloquio: [
+      'Come gestisce le richieste di ultima ora del dirigente?',
+      'Racconti di una situazione riservata che ha dovuto gestire.',
+      'Come fa a far rispettare le priorità del dirigente?',
+      'Come gestisce le chiamate e le visite indesiderate?',
+    ],
+  },
 };
 
 // ============================================
