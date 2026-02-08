@@ -16,6 +16,10 @@ import { RoleMatchingCardV5 } from '@/components/RoleMatchingCardV5';
 import { ExecutiveSummaryCardV5Updated } from '@/components/ExecutiveSummaryCardV5Updated';
 import { MacroAreasChartV5 } from '@/components/MacroAreasChartV5';
 import { SintesiFinaleCard } from '@/components/SintesiFinaleCard';
+import { PersonalityNarrativeV5 } from '@/components/PersonalityNarrativeV5';
+import { StrengthsWeaknessesCardV5 } from '@/components/StrengthsWeaknessesCardV5';
+import { ManagementGuideV5 } from '@/components/ManagementGuideV5';
+import { ActionPlanCardV5 } from '@/components/ActionPlanCardV5';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -29,9 +33,9 @@ import {
   Brain, Loader2, AlertTriangle, TrendingUp, TrendingDown, 
   Activity, Target, Shield, Lightbulb, XCircle, CheckCircle2,
   User, HelpCircle, BarChart3, FileText, MessageSquare, Sparkles,
-  Award, Clock, Percent, AlertCircle, ClipboardCheck
+  Award, Clock, Percent, AlertCircle, ClipboardCheck, BookOpen, UserCog
 } from 'lucide-react';
-import { Candidato, ProfiloCandidato, ProfiloTipo, ProfiloTipoV5, ReliabilityIndex } from '@/types/database';
+import { Candidato, ProfiloCandidato, ProfiloTipo, ProfiloTipoV5, ReliabilityIndex, TraitCode } from '@/types/database';
 import { getProfiloTipoV5Label } from '@/lib/scoringV5';
 import { 
   getProfiloDescription, 
@@ -405,6 +409,18 @@ export default function CandidatoDettaglio() {
                     <User className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     <span className="text-[10px] sm:text-sm">Profilo</span>
                   </TabsTrigger>
+                  {isV5 && traitsV5 && (
+                    <TabsTrigger value="narrativa" className="flex-1 min-w-[60px] text-xs sm:text-sm px-2 sm:px-4 gap-1">
+                      <BookOpen className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                      <span className="text-[10px] sm:text-sm">Chi è</span>
+                    </TabsTrigger>
+                  )}
+                  {isV5 && traitsV5 && (
+                    <TabsTrigger value="gestione" className="flex-1 min-w-[60px] text-xs sm:text-sm px-2 sm:px-4 gap-1">
+                      <UserCog className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                      <span className="text-[10px] sm:text-sm">Gestire</span>
+                    </TabsTrigger>
+                  )}
                   <TabsTrigger value="colloquio" className="flex-1 min-w-[60px] text-xs sm:text-sm px-2 sm:px-4 gap-1">
                     <MessageSquare className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     <span className="text-[10px] sm:text-sm">Coll</span>
@@ -667,6 +683,49 @@ export default function CandidatoDettaglio() {
                     </CardContent>
                   </Card>
                 </TabsContent>
+
+                {/* TAB: Narrativa V5 - Chi è [Nome] come Persona */}
+                {isV5 && traitsV5 && (
+                  <TabsContent value="narrativa" className="mt-6 space-y-6">
+                    <PersonalityNarrativeV5
+                      candidatoNome={candidato.nome}
+                      candidatoSesso={candidato.sesso}
+                      traits={traitsV5 as Record<TraitCode, number>}
+                      macroAree={{
+                        essere: esserePct || 0,
+                        fare: farePct || 0,
+                        avere: averePct || 0
+                      }}
+                    />
+                    
+                    {/* Forza e Debolezze sotto la narrativa */}
+                    <StrengthsWeaknessesCardV5
+                      candidatoNome={candidato.nome}
+                      candidatoSesso={candidato.sesso}
+                      traits={traitsV5 as Record<TraitCode, number>}
+                    />
+                  </TabsContent>
+                )}
+
+                {/* TAB: Gestione V5 - Come Gestire [Nome] + Piano d'Azione */}
+                {isV5 && traitsV5 && (
+                  <TabsContent value="gestione" className="mt-6 space-y-6">
+                    <ManagementGuideV5
+                      candidatoNome={candidato.nome}
+                      candidatoSesso={candidato.sesso}
+                      traits={traitsV5 as Record<TraitCode, number>}
+                      syndromes={syndromes.map(s => s.code)}
+                    />
+                    
+                    <ActionPlanCardV5
+                      candidatoNome={candidato.nome}
+                      sesso={candidato.sesso}
+                      traits={traitsV5 as Record<TraitCode, number>}
+                      syndromes={syndromes}
+                      reliabilityIndex={reliabilityIndex || 'CAUTION'}
+                    />
+                  </TabsContent>
+                )}
 
                 {/* TAB: Colloquio */}
                 <TabsContent value="colloquio" className="mt-6">
