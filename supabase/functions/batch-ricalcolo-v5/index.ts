@@ -70,6 +70,26 @@ const MACRO_AREA_TRAITS: Record<string, TraitCode[]> = {
 
 const ALL_CORE_TRAITS: TraitCode[] = ['ORG', 'AUT', 'GP', 'ADS', 'DET', 'VEN', 'HRM', 'LDR', 'PRO', 'COM', 'ESP', 'RC', 'FIN', 'SUC', 'PRI'];
 
+// Punteggi massimi per tratto (Manuale V2.0)
+const TRAIT_MAX_SCORES: Record<TraitCode, number> = {
+  ORG: 120, AUT: 220, GP: 170, ADS: 210, DET: 190,
+  VEN: 190, HRM: 70, LDR: 110, PRO: 160, COM: 160,
+  ESP: 130, RC: 170, FIN: 140, SUC: 160, PRI: 170, CTRL: 50
+};
+
+// Domande di controllo (238-242) - risposta attesa sempre "A"
+const CONTROL_QUESTIONS = [238, 239, 240, 241, 242];
+
+// Scoring speciale per domande specifiche (Manuale V2.0)
+const SPECIAL_SCORING: Record<number, { a: number; b: number; c: number }> = {
+  72: { a: 10, b: 5, c: 0 },   // Età primo guadagno (SUC)
+  73: { a: 0, b: 5, c: 10 },   // % risparmio (FIN)
+  211: { a: 10, b: 5, c: 0 },  // Tempo investimenti (FIN)
+  212: { a: 0, b: 5, c: 10 },  // Riserve finanziarie (FIN)
+  213: { a: 0, b: 5, c: 10 },  // Autonomia finanziaria (FIN)
+  228: { a: 10, b: 5, c: 0 },  // Potenziale successo (AUT)
+};
+
 function calcolaProfiloV5(risposte: RispostaInputV5[], domande: DomandaV5[]): ProfiloCalcolatoV5 {
   // Initialize raw scores
   const rawScores: Record<TraitCode, { sum: number; count: number }> = {} as any;
@@ -81,7 +101,7 @@ function calcolaProfiloV5(risposte: RispostaInputV5[], domande: DomandaV5[]): Pr
   // Create domanda lookup
   const domandaMap = new Map(domande.map(d => [d.id, d]));
   
-  // Process each response
+  // Process each response - Scala 0-10 (Manuale V2.0)
   for (const risposta of risposte) {
     const domanda = domandaMap.get(risposta.domanda_id);
     if (!domanda) continue;
@@ -93,31 +113,38 @@ function calcolaProfiloV5(risposte: RispostaInputV5[], domande: DomandaV5[]): Pr
     // Skip 'D' (preferisco non rispondere)
     if (valore === 'D') continue;
     
-    // Calculate score based on polarity
+    // Calculate score based on polarity - SCALA 0-10
     let score: number;
     
     if (polarita === 'C') {
-      // CTRL questions
-      score = valore === 'A' ? 2 : valore === 'B' ? 1 : 0;
+      // CTRL questions - non contribuiscono al punteggio, solo per attendibilità
+      score = valore === 'A' ? 10 : valore === 'B' ? 5 : 0;
       rawScores['CTRL'].sum += score;
       rawScores['CTRL'].count++;
     } else if (polarita === 'S') {
-      // Special scoring
-      score = valore === 'A' ? 2 : valore === 'B' ? 1 : 0;
+      // Special scoring - usa mappa specifica se disponibile
+      if (SPECIAL_SCORING[domanda.id]) {
+        const scoring = SPECIAL_SCORING[domanda.id];
+        const key = valore.toLowerCase() as 'a' | 'b' | 'c';
+        score = scoring[key] || 0;
+      } else {
+        // Fallback per domande S non mappate
+        score = valore === 'A' ? 10 : valore === 'B' ? 5 : 0;
+      }
       if (rawScores[trait]) {
         rawScores[trait].sum += score;
         rawScores[trait].count++;
       }
     } else if (polarita === '+') {
-      // Positive polarity: A=2, B=1, C=0
-      score = valore === 'A' ? 2 : valore === 'B' ? 1 : 0;
+      // Positive polarity: A=10, B=5, C=0
+      score = valore === 'A' ? 10 : valore === 'B' ? 5 : 0;
       if (rawScores[trait]) {
         rawScores[trait].sum += score;
         rawScores[trait].count++;
       }
     } else {
-      // Negative polarity: A=0, B=1, C=2
-      score = valore === 'A' ? 0 : valore === 'B' ? 1 : 2;
+      // Negative polarity: A=0, B=5, C=10
+      score = valore === 'A' ? 0 : valore === 'B' ? 5 : 10;
       if (rawScores[trait]) {
         rawScores[trait].sum += score;
         rawScores[trait].count++;
@@ -125,7 +152,7 @@ function calcolaProfiloV5(risposte: RispostaInputV5[], domande: DomandaV5[]): Pr
     }
   }
   
-  // Normalize to -100/+100 range
+  // Normalize to -100/+100 range usando TRAIT_MAX_SCORES (Manuale V2.0)
   const traits_v5: TraitsV5 = {} as TraitsV5;
   
   for (const trait of ALL_CORE_TRAITS) {
@@ -133,26 +160,31 @@ function calcolaProfiloV5(risposte: RispostaInputV5[], domande: DomandaV5[]): Pr
     if (data.count === 0) {
       traits_v5[trait] = 0;
     } else {
-      const avg = data.sum / data.count;
-      // avg is 0-2, normalize to -100/+100
-      traits_v5[trait] = Math.round((avg - 1) * 100);
+      const rawScore = data.sum;
+      const maxScore = TRAIT_MAX_SCORES[trait];
+      // Formula: ((rawScore / maxScore) * 200) - 100 → range -100/+100
+      traits_v5[trait] = Math.round(((rawScore / maxScore) * 200) - 100);
     }
   }
   
-  // Calculate CTRL for reliability
-  const ctrlData = rawScores['CTRL'];
-  const ctrlAvg = ctrlData.count > 0 ? ctrlData.sum / ctrlData.count : 1;
+  // Calcola attendibilità contando risposte inattese (Manuale V2.0)
+  // Domande di controllo 238-242: risposta attesa = "A"
+  let unexpectedCount = 0;
+  for (const questionId of CONTROL_QUESTIONS) {
+    const risposta = risposte.find(r => r.domanda_id === questionId);
+    // Se non risponde o risponde diversamente da "A", è inattesa
+    if (!risposta || risposta.valore !== 'A') {
+      unexpectedCount++;
+    }
+  }
   
-  // Determine reliability index (Manuale V2)
-  // 0-1 inattese = YES, 2-5 = CAUTION, 6-8 = NO, >8 = ZERO
+  // Soglie attendibilità Manuale V2.0
   let reliability_index: ReliabilityIndex;
-  const ctrlUnexpected = ctrlData.count - Math.floor(ctrlData.sum / 2);
-  
-  if (ctrlAvg >= 1.5) {
+  if (unexpectedCount <= 1) {
     reliability_index = 'YES';
-  } else if (ctrlAvg >= 1.0) {
+  } else if (unexpectedCount <= 3) {
     reliability_index = 'CAUTION';
-  } else if (ctrlAvg >= 0.5) {
+  } else if (unexpectedCount <= 5) {
     reliability_index = 'NO';
   } else {
     reliability_index = 'ZERO';
