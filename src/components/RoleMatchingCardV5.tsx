@@ -17,7 +17,8 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { 
   CheckCircle2, XCircle, AlertTriangle, Target, 
   TrendingUp, HelpCircle, Briefcase, MessageSquare,
-  Award, AlertCircle, Lightbulb, User, Shield, Ban
+  Award, AlertCircle, Lightbulb, User, Shield, Ban,
+  ArrowRight, Star
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { 
@@ -265,7 +266,59 @@ export function RoleMatchingCardV5({
           </>
         )}
 
-        {/* Tutti i Ruoli */}
+        {/* Ruoli Alternativi - Solo se NON IDONEO o DA VALUTARE */}
+        {(result.verdict === 'NON_IDONEO' || result.verdict === 'DA_VALUTARE') && allRoles.tuttiRuoli.length > 1 && (
+          <>
+            <Separator />
+            <div className="space-y-3">
+              <h4 className="text-sm font-semibold flex items-center gap-2">
+                <Star className="h-4 w-4 text-amber-500" />
+                Ruoli Alternativi Consigliati
+              </h4>
+              <p className="text-xs text-muted-foreground">
+                In base al profilo, questi ruoli potrebbero essere più adatti:
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {allRoles.tuttiRuoli
+                  .filter(r => r.ruolo !== ruoloRichiesto && r.compatibilita >= 50)
+                  .sort((a, b) => b.compatibilita - a.compatibilita)
+                  .slice(0, 4)
+                  .map((r, idx) => (
+                    <div 
+                      key={idx} 
+                      className={cn(
+                        "p-3 rounded-lg border flex items-center justify-between",
+                        r.verdict === 'IDONEO' && 'border-green-300 bg-green-50/50 dark:bg-green-950/20',
+                        r.verdict === 'IDONEO_CON_RISERVA' && 'border-blue-300 bg-blue-50/50 dark:bg-blue-950/20',
+                        r.verdict === 'DA_VALUTARE' && 'border-amber-300 bg-amber-50/50 dark:bg-amber-950/20',
+                      )}
+                    >
+                      <div className="flex items-center gap-2">
+                        <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm font-medium">{r.ruolo}</span>
+                      </div>
+                      <Badge 
+                        variant={getVerdictBadgeVariantV5(r.verdict)}
+                        className="text-xs"
+                      >
+                        {r.compatibilita}%
+                      </Badge>
+                    </div>
+                  ))}
+              </div>
+              {allRoles.ruoloIdeale && allRoles.ruoloIdeale.ruolo !== ruoloRichiesto && (
+                <Alert className="border-green-300 bg-green-50/50 dark:bg-green-950/20 mt-2">
+                  <Star className="h-4 w-4 text-green-600" />
+                  <AlertDescription className="text-sm">
+                    <strong>Ruolo Ideale:</strong> {allRoles.ruoloIdeale.ruolo} ({allRoles.ruoloIdeale.compatibilita}% compatibilità)
+                  </AlertDescription>
+                </Alert>
+              )}
+            </div>
+          </>
+        )}
+
+        {/* Tutti i Ruoli - Accordion per vedere tutto */}
         {showAllRoles && allRoles.tuttiRuoli.length > 1 && (
           <>
             <Separator />
@@ -274,7 +327,7 @@ export function RoleMatchingCardV5({
                 <AccordionTrigger className="hover:no-underline py-2">
                   <div className="flex items-center gap-2 text-sm font-semibold">
                     <Briefcase className="h-4 w-4" />
-                    Compatibilità Altri Ruoli
+                    Compatibilità Tutti i Ruoli
                     {allRoles.ruoloIdeale && allRoles.ruoloIdeale.ruolo !== ruoloRichiesto && (
                       <Badge variant="secondary" className="ml-2 text-xs">
                         Ideale: {allRoles.ruoloIdeale.ruolo}
