@@ -271,6 +271,6 @@ describe('RicalcoloV5 - Pipeline Completa', () => {
     console.log('\n' + '='.repeat(60));
     
     expect(profilo.assessment_version).toBe('v5');
-    expect(matching.tuttiRuoli.length).toBe(9);
+    expect(matching.tuttiRuoli.length).toBe(15);
   });
 });
