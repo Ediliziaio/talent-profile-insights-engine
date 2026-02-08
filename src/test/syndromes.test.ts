@@ -315,9 +315,9 @@ describe('Syndromes - Funzioni Helper', () => {
     expect(formatted[0]).toHaveProperty('severity');
   });
 
-  it('checkAllSyndromes dovrebbe ritornare 24 sindromi totali', () => {
+  it('checkAllSyndromes dovrebbe ritornare 25 sindromi totali', () => {
     const allSyndromes = checkAllSyndromes(healthyProfile);
-    expect(allSyndromes.length).toBe(24); // 18 primarie + 6 secondarie
+    expect(allSyndromes.length).toBe(25); // 19 primarie (S01-S19) + 6 secondarie (SS1-SS6)
   });
 });
 
