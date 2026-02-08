@@ -361,7 +361,7 @@ export default function Candidati() {
         description: 'Le nuove credenziali sono state create con successo',
       });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: 'Errore',
         description: error.message,
@@ -483,7 +483,7 @@ export default function Candidati() {
         description: 'Candidato e credenziali creati con successo',
       });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: 'Errore',
         description: error.message,

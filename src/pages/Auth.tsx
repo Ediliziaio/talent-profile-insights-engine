@@ -225,7 +225,8 @@ export default function Auth() {
                   <Label htmlFor="candidate-password" className="text-sm">Password</Label>
                   <Input 
                     id="candidate-password" 
-                    type="password" 
+                    type="password"
+                    autoComplete="current-password"
                     value={candidatePassword} 
                     onChange={e => setCandidatePassword(e.target.value)} 
                     className={`h-11 text-base ${candidateErrors.password ? 'border-destructive' : ''}`}
@@ -271,7 +272,8 @@ export default function Auth() {
                   <Label htmlFor="password" className="text-sm">Password</Label>
                   <Input 
                     id="password" 
-                    type="password" 
+                    type="password"
+                    autoComplete="current-password"
                     value={password} 
                     onChange={e => setPassword(e.target.value)} 
                     className={`h-11 text-base ${fieldErrors.password ? 'border-destructive' : ''}`}
@@ -339,7 +341,8 @@ export default function Auth() {
                   <Label htmlFor="reg-password" className="text-sm">Password</Label>
                   <Input 
                     id="reg-password" 
-                    type="password" 
+                    type="password"
+                    autoComplete="new-password"
                     value={password} 
                     onChange={e => setPassword(e.target.value)} 
                     className={`h-11 text-base ${fieldErrors.password ? 'border-destructive' : ''}`}

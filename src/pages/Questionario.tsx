@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -13,6 +13,7 @@ import { QUESTIONS_PER_PAGE, ANSWER_OPTIONS, type AnswerValue } from '@/lib/cons
 import { Brain, ChevronLeft, ChevronRight, Send, Loader2 } from 'lucide-react';
 import { Candidato } from '@/types/database';
 import { cn } from '@/lib/utils';
+import { QuestionarioSkeleton } from '@/components/skeletons';
 
 export default function Questionario() {
   const { user, profile, loading: authLoading } = useAuth();
@@ -21,6 +22,8 @@ export default function Questionario() {
   const [currentPage, setCurrentPage] = useState(0);
   const [risposte, setRisposte] = useState<Record<number, AnswerValue>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loadingRisposte, setLoadingRisposte] = useState(true);
+  const [savingId, setSavingId] = useState<number | null>(null);
 
   const totalPages = Math.ceil(DOMANDE.length / QUESTIONS_PER_PAGE);
   const startIndex = currentPage * QUESTIONS_PER_PAGE;
@@ -42,24 +45,34 @@ export default function Questionario() {
     enabled: !!user,
   });
 
-  // Load existing answers
+  // Load existing answers with proper loading state
   useEffect(() => {
     if (candidato) {
+      setLoadingRisposte(true);
       supabase
         .from('risposte')
         .select('domanda_id, valore')
         .eq('candidato_id', candidato.id)
-        .then(({ data }) => {
-          if (data) {
+        .then(({ data, error }) => {
+          if (error) {
+            toast({
+              title: 'Errore caricamento',
+              description: 'Impossibile caricare le risposte salvate',
+              variant: 'destructive',
+            });
+          } else if (data) {
             const existing: Record<number, AnswerValue> = {};
             data.forEach((r) => {
               existing[r.domanda_id] = r.valore as AnswerValue;
             });
             setRisposte(existing);
           }
+          setLoadingRisposte(false);
         });
+    } else {
+      setLoadingRisposte(false);
     }
-  }, [candidato]);
+  }, [candidato, toast]);
 
   const saveMutation = useMutation({
     mutationFn: async ({ domandaId, valore }: { domandaId: number; valore: AnswerValue }) => {
@@ -77,12 +90,24 @@ export default function Questionario() {
 
       if (error) throw error;
     },
+    onMutate: ({ domandaId }) => {
+      setSavingId(domandaId);
+    },
+    onSettled: () => {
+      setSavingId(null);
+    },
+    onError: () => {
+      toast({
+        title: 'Errore salvataggio',
+        description: 'Riprova a selezionare la risposta',
+      });
+    },
   });
 
-  const handleAnswer = (domandaId: number, valore: AnswerValue) => {
+  const handleAnswer = useCallback((domandaId: number, valore: AnswerValue) => {
     setRisposte((prev) => ({ ...prev, [domandaId]: valore }));
     saveMutation.mutate({ domandaId, valore });
-  };
+  }, [saveMutation]);
 
   const canGoNext = currentQuestions.every((q) => risposte[q.id]);
   const progress = (Object.keys(risposte).length / DOMANDE.length) * 100;
@@ -93,6 +118,13 @@ export default function Questionario() {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [currentPage]);
+
+  // Redirect if test already completed (using useEffect for side effects)
+  useEffect(() => {
+    if (candidato?.test_completato) {
+      navigate('/test/completato');
+    }
+  }, [candidato?.test_completato, navigate]);
 
   // Only candidato role can access this page
   if (!authLoading && profile?.ruolo !== 'candidato') {
@@ -168,12 +200,9 @@ export default function Questionario() {
     }
   };
 
-  if (loadingCandidato) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-      </div>
-    );
+  // Loading states
+  if (loadingCandidato || loadingRisposte) {
+    return <QuestionarioSkeleton />;
   }
 
   if (!candidato) {
@@ -193,8 +222,8 @@ export default function Questionario() {
     );
   }
 
+  // Guard for completed test (navigation handled by useEffect above)
   if (candidato.test_completato) {
-    navigate('/test/completato');
     return null;
   }
 
@@ -229,9 +258,10 @@ export default function Questionario() {
         <div className="space-y-3">
           {currentQuestions.map((domanda, idx) => (
             <Card key={domanda.id} className={cn(
-              "transition-all duration-200 min-h-[72px]",
+              "transition-all duration-300 min-h-[72px]",
+              "animate-in fade-in-50 slide-in-from-bottom-1",
               risposte[domanda.id] ? "border-accent/50 shadow-md" : ""
-            )}>
+            )} style={{ animationDelay: `${idx * 30}ms` }}>
               <CardContent className="p-3 lg:p-4">
                 {/* Desktop: 4 column grid [50% | 16% | 17% | 17%] */}
                 <div className="hidden lg:grid lg:grid-cols-[1fr_auto_auto_auto] gap-3 items-center">
@@ -254,6 +284,7 @@ export default function Questionario() {
                       selected={risposte[domanda.id] === option.value}
                       onClick={() => handleAnswer(domanda.id, option.value)}
                       variant="desktop"
+                      isSaving={savingId === domanda.id}
                     />
                   ))}
                 </div>
@@ -278,6 +309,7 @@ export default function Questionario() {
                         shortLabel={option.shortLabel}
                         selected={risposte[domanda.id] === option.value}
                         onClick={() => handleAnswer(domanda.id, option.value)}
+                        isSaving={savingId === domanda.id}
                         variant="mobile"
                       />
                     ))}

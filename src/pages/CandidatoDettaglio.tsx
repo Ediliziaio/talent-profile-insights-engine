@@ -33,7 +33,7 @@ import {
   Brain, Loader2, AlertTriangle, TrendingUp, TrendingDown, 
   Activity, Target, Shield, Lightbulb, XCircle, CheckCircle2,
   User, HelpCircle, BarChart3, FileText, MessageSquare, Sparkles,
-  Award, Clock, Percent, AlertCircle, ClipboardCheck, BookOpen, UserCog
+  Clock, Percent, AlertCircle, ClipboardCheck, BookOpen, UserCog
 } from 'lucide-react';
 import { Candidato, ProfiloCandidato, ProfiloTipo, ProfiloTipoV5, ReliabilityIndex, TraitCode } from '@/types/database';
 import { getProfiloTipoV5Label } from '@/lib/scoringV5';
