@@ -215,6 +215,14 @@ export function normalizzaPunteggio(rawScore: number, maxScore: number): number 
  * - 6-8 inattese = NO
  * - >8 inattese = ZERO (profilo non utilizzabile)
  */
+/**
+ * Calcola l'attendibilità basata sulle domande di controllo
+ * Soglie allineate al Manuale Definitivo V2.0:
+ * - 0-1 inattese = YES (Attendibile)
+ * - 2-3 inattese = CAUTION (Attenzione)
+ * - 4-5 inattese = NO (Non attendibile, ricompilazione consigliata)
+ * - >5 inattese = ZERO (Profilo non utilizzabile)
+ */
 export function calcolaAttendibilita(risposte: RispostaInputV5[]): {
   index: ReliabilityIndex;
   unexpectedCount: number;
@@ -229,11 +237,12 @@ export function calcolaAttendibilita(risposte: RispostaInputV5[]): {
     }
   }
   
+  // Soglie allineate al Manuale Definitivo V2.0
   if (unexpectedCount <= 1) {
     return { index: 'YES', unexpectedCount };
-  } else if (unexpectedCount <= 5) {
+  } else if (unexpectedCount <= 3) {
     return { index: 'CAUTION', unexpectedCount };
-  } else if (unexpectedCount <= 8) {
+  } else if (unexpectedCount <= 5) {
     return { index: 'NO', unexpectedCount };
   } else {
     return { index: 'ZERO', unexpectedCount };
