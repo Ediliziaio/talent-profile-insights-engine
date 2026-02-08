@@ -10,7 +10,7 @@ import { InterpretazioneDati } from '@/components/InterpretazioneDati';
 import { AnalisiPsicologica, AnalisiPsicologicaPlaceholder, AnalisiAI } from '@/components/AnalisiPsicologica';
 import { RisposteDettagliate } from '@/components/RisposteDettagliate';
 import { FitIndicator } from '@/components/FitIndicator';
-import { PDFExportButton, PDFReportButton, PDFSyndromeReportButton } from '@/components/PDFExportButton';
+import { PDFExportButton, PDFReportButton, PDFSyndromeReportButton, InterviewSheetPDFButton } from '@/components/PDFExportButton';
 import { StressZoneHero } from '@/components/StressZoneHero';
 import { RoleMatchingCardV5 } from '@/components/RoleMatchingCardV5';
 import { ExecutiveSummaryCardV5Updated } from '@/components/ExecutiveSummaryCardV5Updated';
@@ -289,6 +289,32 @@ export default function CandidatoDettaglio() {
                       ruoloRichiesto={candidato.funzione || undefined}
                       dataTest={candidato.data_test}
                       syndromes={syndromes}
+                    />
+                  )}
+                  {isV5 && traitsV5 && profiloTipoV5 && reliabilityIndex && (
+                    <InterviewSheetPDFButton
+                      candidato={{
+                        nome: candidato.nome,
+                        cognome: candidato.cognome,
+                        sesso: candidato.sesso,
+                        ruolo_attuale: candidato.ruolo_attuale,
+                        data_test: candidato.data_test,
+                        funzione: candidato.funzione
+                      }}
+                      traits={traitsV5 as Record<TraitCode, number>}
+                      macroAreas={{
+                        essere: esserePct || 0,
+                        fare: farePct || 0,
+                        avere: averePct || 0
+                      }}
+                      profiloTipo={profiloTipoV5}
+                      reliabilityIndex={reliabilityIndex}
+                      syndromes={syndromes}
+                      roleMatch={calculateRoleMatchingV5(
+                        candidato.funzione || 'Ufficio vendite',
+                        traitsV5 as Record<TraitCode, number>,
+                        candidato.eta ?? undefined
+                      )}
                     />
                   )}
                   <PDFExportButton 

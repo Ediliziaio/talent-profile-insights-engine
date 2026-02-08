@@ -510,3 +510,226 @@ export function PDFSyndromeReportButton({
     </Button>
   );
 }
+
+// ================================================================
+// InterviewSheetPDFButton - Genera PDF Scheda Colloquio A4
+// ================================================================
+
+import { InterviewSheetPDF } from './InterviewSheetPDF';
+import { SYNDROMES_V5_DATA } from '@/lib/syndromesV5Data';
+import { RoleMatchResultV5 } from '@/lib/roleMatchingV5';
+import { TraitCode, ProfiloTipoV5, ReliabilityIndex, TRAIT_LABELS } from '@/types/database';
+import { ClipboardList } from 'lucide-react';
+
+interface InterviewSheetPDFButtonProps {
+  candidato: {
+    nome: string;
+    cognome: string;
+    sesso?: string | null;
+    ruolo_attuale?: string | null;
+    data_test?: string | null;
+    funzione?: string | null;
+  };
+  traits: Record<TraitCode, number>;
+  macroAreas: {
+    essere: number;
+    fare: number;
+    avere: number;
+  };
+  profiloTipo: ProfiloTipoV5;
+  reliabilityIndex: ReliabilityIndex;
+  syndromes: SyndromeResult[];
+  roleMatch?: RoleMatchResultV5;
+  className?: string;
+}
+
+/**
+ * Genera domande per il colloquio basate su:
+ * 1. Domande standard obbligatorie (apertura/chiusura)
+ * 2. Domande dalle sindromi attive
+ * 3. Domande sui tratti più bassi (< 10)
+ */
+function generateInterviewQuestionsV5(
+  syndromes: SyndromeResult[],
+  traits: Record<TraitCode, number>
+): string[] {
+  const questions: string[] = [];
+  
+  // Domanda di apertura (sempre prima)
+  questions.push("Cosa la motiva a candidarsi per questa posizione?");
+  
+  // Domande dalle sindromi attive (max 2 per sindrome, ordinate per severità)
+  const activeSyndromes = [...syndromes]
+    .filter(s => s.isActive)
+    .sort((a, b) => {
+      const order: Record<string, number> = { RED: 1, ORANGE: 2, YELLOW: 3 };
+      return (order[a.severity] || 4) - (order[b.severity] || 4);
+    });
+  
+  for (const syndrome of activeSyndromes) {
+    const data = SYNDROMES_V5_DATA[syndrome.code];
+    if (data?.interviewQuestions) {
+      questions.push(...data.interviewQuestions.slice(0, 2));
+    }
+    if (questions.length >= 8) break;
+  }
+  
+  // Domande sui tratti critici (< 10)
+  const criticalTraits = Object.entries(traits)
+    .filter(([key, value]) => key !== 'CTRL' && value < 10)
+    .sort((a, b) => a[1] - b[1])
+    .slice(0, 3);
+  
+  for (const [trait] of criticalTraits) {
+    const traitLabel = TRAIT_LABELS[trait as TraitCode];
+    if (traitLabel && questions.length < 9) {
+      questions.push(`Come gestisce situazioni che richiedono ${traitLabel}?`);
+    }
+  }
+  
+  // Rimuovi duplicati
+  const uniqueQuestions = [...new Set(questions)];
+  
+  // Domanda di chiusura (sempre ultima)
+  uniqueQuestions.push("C'è qualcosa che vuole aggiungere o chiedermi?");
+  
+  // Ritorna max 10 domande
+  return uniqueQuestions.slice(0, 10);
+}
+
+/**
+ * InterviewSheetPDFButton - Genera PDF Scheda Colloquio compatta A4
+ */
+export function InterviewSheetPDFButton({
+  candidato,
+  traits,
+  macroAreas,
+  profiloTipo,
+  reliabilityIndex,
+  syndromes,
+  roleMatch,
+  className
+}: InterviewSheetPDFButtonProps) {
+  const [isExporting, setIsExporting] = useState(false);
+  const { toast } = useToast();
+
+  const handleExport = async () => {
+    setIsExporting(true);
+    
+    try {
+      // Generate interview questions
+      const interviewQuestions = generateInterviewQuestionsV5(syndromes, traits);
+      
+      // Create a temporary container
+      const container = document.createElement('div');
+      container.style.position = 'absolute';
+      container.style.left = '-9999px';
+      container.style.top = '0';
+      container.style.width = '210mm';
+      document.body.appendChild(container);
+      
+      // Render the PDF layout component
+      const root = createRoot(container);
+      
+      await new Promise<void>((resolve) => {
+        root.render(
+          <InterviewSheetPDF
+            candidato={candidato}
+            traits={traits}
+            macroAreas={macroAreas}
+            profiloTipo={profiloTipo}
+            reliabilityIndex={reliabilityIndex}
+            syndromes={syndromes}
+            roleMatch={roleMatch}
+            interviewQuestions={interviewQuestions}
+          />
+        );
+        // Wait for render
+        setTimeout(resolve, 500);
+      });
+      
+      // Load logo
+      const logoData = await loadLogoAsBase64();
+      
+      // Capture the rendered layout
+      const canvas = await html2canvas(container, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+        width: container.scrollWidth,
+        height: container.scrollHeight,
+      });
+      
+      // Cleanup React root
+      root.unmount();
+      document.body.removeChild(container);
+
+      const imgData = canvas.toDataURL('image/jpeg', 0.95);
+      
+      // Create PDF A4
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+      });
+
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      
+      // Calculate dimensions with margins
+      const margin = 5;
+      const contentWidth = pdfWidth - (margin * 2);
+      const ratio = contentWidth / canvas.width;
+      const scaledHeight = canvas.height * ratio;
+      
+      // Add image
+      pdf.addImage(imgData, 'JPEG', margin, margin, contentWidth, scaledHeight);
+      
+      // Add watermark
+      addWatermarkToPage(pdf, logoData, pdfWidth, pdfHeight);
+
+      // Generate filename
+      const date = new Date().toISOString().split('T')[0];
+      const safeFileName = `${candidato.cognome}_${candidato.nome}`.replace(/[^a-zA-Z0-9_-]/g, '_');
+      pdf.save(`Scheda_Colloquio_${safeFileName}_${date}.pdf`);
+
+      toast({
+        title: 'Scheda Colloquio Generata',
+        description: 'Il PDF è pronto per la stampa',
+      });
+    } catch (error) {
+      console.error('Interview Sheet PDF error:', error);
+      toast({
+        title: 'Errore',
+        description: 'Errore nella generazione della Scheda Colloquio',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  return (
+    <Button 
+      variant="outline" 
+      size="sm" 
+      onClick={handleExport} 
+      disabled={isExporting}
+      className={className}
+    >
+      {isExporting ? (
+        <>
+          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+          Generando...
+        </>
+      ) : (
+        <>
+          <ClipboardList className="h-4 w-4 mr-2" />
+          Scheda Colloquio
+        </>
+      )}
+    </Button>
+  );
+}
