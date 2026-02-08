@@ -1,4 +1,7 @@
-import { DOMANDE } from '@/data/questionario';
+/**
+ * LEGACY V4 Scoring - Mantenuto per retrocompatibilità
+ * Per nuovi assessment usare scoringV5.ts
+ */
 import { ProfiloTipo, ScalaCode, SCALE_LABELS } from '@/types/database';
 import { StressZoneSeverity, calculateStressZoneSeverity } from './stressZone';
 
@@ -37,29 +40,15 @@ export { calculateStressZoneSeverity };
 // Main scale codes (excluding ST and LE which are sub-scales)
 const MAIN_SCALE_CODES: ScalaCode[] = ['SV', 'MO', 'CF', 'EF', 'EC', 'QN', 'QR', 'SP', 'PA', 'SC'];
 
-export function calcolaPunteggio(risposte: RispostaInput[], scala: ScalaCode): number {
-  const domandeScala = DOMANDE.filter(d => d.scala_primaria === scala);
-  
-  let punteggio = 100;
-  
-  for (const domanda of domandeScala) {
-    const risposta = risposte.find(r => r.domanda_id === domanda.id);
-    if (!risposta) continue;
-    
-    if (domanda.polarita === '+') {
-      if (risposta.valore === 'A') punteggio += 10;
-      else if (risposta.valore === 'B') punteggio += 5;
-      // C = 0
-    } else {
-      // Polarità negativa
-      if (risposta.valore === 'A') punteggio -= 10;
-      else if (risposta.valore === 'B') punteggio -= 5;
-      // C = 0
-    }
-  }
-  
-  // Normalize to 0-200 range
-  return Math.max(0, Math.min(200, punteggio));
+/**
+ * @deprecated Usare calcolaProfiloV5 da scoringV5.ts per nuovi assessment
+ * Questa funzione è mantenuta solo per retrocompatibilità con profili V4 esistenti
+ */
+export function calcolaPunteggio(_risposte: RispostaInput[], _scala: ScalaCode): number {
+  // Legacy V4 - non più funzionale, le DOMANDE ora sono in formato V5
+  // Ritorna punteggio base 100 per evitare errori
+  console.warn('calcolaPunteggio V4 è deprecato. Usa calcolaProfiloV5 da scoringV5.ts');
+  return 100;
 }
 
 export function calcolaProfilo(risposte: RispostaInput[]): ProfiloCalcolato {
