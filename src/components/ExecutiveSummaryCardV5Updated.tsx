@@ -14,7 +14,7 @@ import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   CheckCircle2, XCircle, AlertCircle, AlertTriangle, 
-  Target, TrendingUp, Clock, Shield, Award, Brain, Sparkles, Lightbulb
+  Target, TrendingUp, Clock, Shield, Award, Brain, Sparkles, Lightbulb, BookOpen
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ProfiloTipo, ProfiloTipoV5, TraitCode, ReliabilityIndex } from '@/types/database';
@@ -26,6 +26,7 @@ import {
   RoleMatchResultV5 
 } from '@/lib/roleMatchingV5';
 import { getProfiloDetailedDescription } from '@/lib/profiloDetailedDescriptions';
+import { getProfiloTipoV5Extended, PROFILI_TIPO_V5_EXTENDED } from '@/lib/profiloTipoV5Extended';
 
 // Helper: Calcola probabilità successo dai tratti V5
 function calculateSuccessProbabilityFromTraits(
@@ -127,7 +128,8 @@ export function ExecutiveSummaryCardV5Updated({
   // Calcola probabilità successo deterministicamente
   const successProbability = calculateSuccessProbabilityFromTraits(traitsV5, matching?.compatibilitaPct ?? 0, stressZone);
   
-  // Profilo info
+  // Profilo info - V5 o V4 fallback
+  const profiloInfoV5 = profiloTipoV5 ? getProfiloTipoV5Extended(profiloTipoV5) : null;
   const profiloInfo = profiloTipo ? getProfiloDetailedDescription(profiloTipo) : null;
   
   // Configurazione verdetto
@@ -346,8 +348,55 @@ export function ExecutiveSummaryCardV5Updated({
           </div>
         </div>
         
-        {/* Profilo Sintetico */}
-        {profiloInfo && (
+        {/* Profilo Sintetico V5 */}
+        {profiloInfoV5 && (
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-xl">{profiloInfoV5.emoji}</span>
+              <h4 className="text-xs sm:text-sm font-semibold">{profiloInfoV5.label}</h4>
+              <Badge variant="outline" className={profiloInfoV5.colorClass}>
+                {profiloInfoV5.labelBreve}
+              </Badge>
+            </div>
+            <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+              {profiloInfoV5.descrizioneBreve}
+            </p>
+            {/* Testo esteso */}
+            <div className={cn("p-3 rounded-lg text-xs leading-relaxed", profiloInfoV5.bgColorClass)}>
+              <p className="text-foreground/80 whitespace-pre-line">
+                {profiloInfoV5.descrizioneEstesa.split('\n\n')[0]}
+              </p>
+            </div>
+            {/* Punti chiave */}
+            <div className="grid grid-cols-2 gap-3 mt-2">
+              <div>
+                <p className="text-[10px] font-medium text-green-600 mb-1 flex items-center gap-1">
+                  <CheckCircle2 className="h-3 w-3" />
+                  Punti di Forza
+                </p>
+                <ul className="text-[10px] text-muted-foreground space-y-0.5">
+                  {profiloInfoV5.puntiForza.slice(0, 3).map((p, i) => (
+                    <li key={i} className="truncate">• {p}</li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <p className="text-[10px] font-medium text-amber-600 mb-1 flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  Attenzione
+                </p>
+                <ul className="text-[10px] text-muted-foreground space-y-0.5">
+                  {profiloInfoV5.areeAttenzione.slice(0, 3).map((p, i) => (
+                    <li key={i} className="truncate">• {p}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {/* Fallback a profilo V4 se non V5 */}
+        {!profiloInfoV5 && profiloInfo && (
           <div className="space-y-1.5">
             <div className="flex items-center gap-2 flex-wrap">
               <Award className="h-3.5 w-3.5 text-primary" />
