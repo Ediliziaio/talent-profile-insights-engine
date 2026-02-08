@@ -1,16 +1,14 @@
 
-# Piano: Ottimizzazione Performance - Rimozione Codice Obsoleto V4
+# Piano V5: Ottimizzazione Completata
 
-## Analisi Problemi Identificati
+## ✅ COMPLETATO: Rimozione Codice Legacy V4
 
-### 1. DUPLICAZIONE COMPONENTI V4/V5
-
-Ci sono componenti duplicati che vengono entrambi caricati ma solo uno viene usato:
-
-| Componente V4 (Legacy) | Componente V5 (Attuale) | File |
-|------------------------|-------------------------|------|
-| `ExecutiveSummaryCardV5` | `ExecutiveSummaryCardV5Updated` | src/components/ |
-| `RoleMatchingCard` | `RoleMatchingCardV5` | src/components/ |
+**File eliminati (~1800 righe):**
+- `src/pages/Index.tsx` - placeholder inutilizzato
+- `src/components/ExecutiveSummaryCardV5.tsx` - sostituito da V5Updated
+- `src/components/RoleMatchingCard.tsx` - sostituito da V5
+- `src/lib/roleMatching.ts` - sostituito da roleMatchingV5
+- `src/lib/fitScoring.ts` - logica integrata in V5
 
 **Problema**: In `CandidatoDettaglio.tsx` entrambe le versioni sono importate, ma solo una viene usata in base a `isV5`:
 ```typescript

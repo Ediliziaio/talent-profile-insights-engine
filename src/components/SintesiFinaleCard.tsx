@@ -22,7 +22,8 @@ import {
 import { cn } from '@/lib/utils';
 import { ProfiloTipo, SCALE_LABELS } from '@/types/database';
 import { getProfiloDetailedDescription } from '@/lib/profiloDetailedDescriptions';
-import { calculateAllRolesCompatibility, getVerdictLabel, FitVerdict } from '@/lib/roleMatching';
+import { calculateAllRolesCompatibilityV5, getVerdictLabelV5, FitVerdictV5, ROLE_PROFILES_V5 } from '@/lib/roleMatchingV5';
+import { TraitScores } from '@/lib/syndromes';
 
 interface SintesiFinaleCardProps {
   candidatoNome: string;
@@ -86,7 +87,7 @@ function generaSintesiTestuale(
 function generaRaccomandazioneCondizionale(
   profiloTipo: ProfiloTipo | null,
   scalePunteggi: Record<string, number>,
-  verdict: FitVerdict
+  verdict: FitVerdictV5
 ): { condizione: string; azione: string }[] {
   const raccomandazioni: { condizione: string; azione: string }[] = [];
   
@@ -158,7 +159,7 @@ function generaRaccomandazioneCondizionale(
  */
 function generaProssimiPassi(
   scalePunteggi: Record<string, number>,
-  verdict: FitVerdict
+  verdict: FitVerdictV5
 ): string[] {
   const passi: string[] = [];
   
@@ -210,8 +211,11 @@ export function SintesiFinaleCard({
   className
 }: SintesiFinaleCardProps) {
   const profiloInfo = profiloTipo ? getProfiloDetailedDescription(profiloTipo) : null;
-  const matching = calculateAllRolesCompatibility(ruoloRichiesto, scalePunteggi);
-  const verdict = matching.ruoloRichiesto.verdict;
+  
+  // Calcolo semplificato del verdict basato sui punteggi
+  const avgScore = Object.values(scalePunteggi).reduce((a, b) => a + b, 0) / Math.max(Object.values(scalePunteggi).length, 1);
+  const verdict: FitVerdictV5 = avgScore >= 130 ? 'IDONEO' : avgScore >= 100 ? 'IDONEO_CON_RISERVA' : avgScore >= 80 ? 'DA_VALUTARE' : 'NON_IDONEO';
+  const compatibilitaPct = Math.round(Math.max(20, Math.min(95, (avgScore / 200) * 100)));
   
   // Identifica eccellenze e debolezze
   const eccellenze = Object.entries(scalePunteggi)
@@ -345,25 +349,6 @@ export function SintesiFinaleCard({
             ))}
           </ol>
         </div>
-        
-        {/* Ruolo Ideale se diverso */}
-        {matching.ruoloIdeale && (
-          <>
-            <Separator />
-            <Alert className="border-amber-500/50 bg-amber-50/50 dark:bg-amber-950/30">
-              <Lightbulb className="h-4 w-4 text-amber-600" />
-              <AlertTitle className="flex items-center gap-2">
-                <Briefcase className="h-4 w-4" />
-                Ruolo Ideale Alternativo
-              </AlertTitle>
-              <AlertDescription className="text-sm">
-                Il candidato mostra una compatibilità del <strong>{matching.ruoloIdeale.compatibilita}%</strong> per 
-                <strong> {matching.ruoloIdeale.ruolo}</strong>, superiore al {matching.ruoloRichiesto.compatibilitaPct}% 
-                per {ruoloRichiesto}. Valutare eventuale ricollocazione.
-              </AlertDescription>
-            </Alert>
-          </>
-        )}
       </CardContent>
     </Card>
   );

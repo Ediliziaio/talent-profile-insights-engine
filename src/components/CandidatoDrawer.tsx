@@ -11,7 +11,7 @@ import { CandleChart } from './CandleChart';
 import { AnalisiPsicologica, AnalisiPsicologicaPlaceholder, AnalisiAI } from './AnalisiPsicologica';
 import { FitIndicator } from './FitIndicator';
 import { Candidato, ProfiloCandidato } from '@/types/database';
-import { getProfiloTipoLabel } from '@/lib/scoring';
+import { getProfiloTipoV5Label } from '@/lib/scoringV5';
 import { Brain, Mail, Phone, Briefcase, Building2, Calendar, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
@@ -154,7 +154,7 @@ export function CandidatoDrawer({ candidato, open, onOpenChange }: CandidatoDraw
                 {candidato.test_completato ? 'Test Completato' : 'Test da fare'}
               </Badge>
               {profilo?.profilo_tipo && (
-                <Badge variant="outline">{getProfiloTipoLabel(profilo.profilo_tipo as any)}</Badge>
+                <Badge variant="outline">{getProfiloTipoV5Label(profilo.profilo_tipo as any)}</Badge>
               )}
               {profilo?.stress_zone && (
                 <Badge variant="destructive">Zona Stress</Badge>

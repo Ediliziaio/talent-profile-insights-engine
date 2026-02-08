@@ -12,9 +12,7 @@ import { RisposteDettagliate } from '@/components/RisposteDettagliate';
 import { FitIndicator } from '@/components/FitIndicator';
 import { PDFExportButton, PDFReportButton, PDFSyndromeReportButton } from '@/components/PDFExportButton';
 import { StressZoneHero } from '@/components/StressZoneHero';
-import { RoleMatchingCard } from '@/components/RoleMatchingCard';
 import { RoleMatchingCardV5 } from '@/components/RoleMatchingCardV5';
-import { ExecutiveSummaryCardV5 } from '@/components/ExecutiveSummaryCardV5';
 import { ExecutiveSummaryCardV5Updated } from '@/components/ExecutiveSummaryCardV5Updated';
 import { MacroAreasChartV5 } from '@/components/MacroAreasChartV5';
 import { SintesiFinaleCard } from '@/components/SintesiFinaleCard';
@@ -34,7 +32,7 @@ import {
   Award, Clock, Percent, AlertCircle, ClipboardCheck
 } from 'lucide-react';
 import { Candidato, ProfiloCandidato, ProfiloTipo, ProfiloTipoV5, ReliabilityIndex } from '@/types/database';
-import { getProfiloTipoLabel } from '@/lib/scoring';
+import { getProfiloTipoV5Label } from '@/lib/scoringV5';
 import { 
   getProfiloDescription, 
   getMacrocategoria, 
@@ -42,7 +40,7 @@ import {
   ProfiloDescription 
 } from '@/lib/profiloDescriptions';
 import { calculateStressZoneSeverity, StressZoneSeverity, getStressZoneSeverityLabel } from '@/lib/stressZone';
-import { calculateRoleMatching, calculateAllRolesCompatibility, ROLE_PROFILES, getVerdictLabel } from '@/lib/roleMatching';
+import { calculateRoleMatchingV5 } from '@/lib/roleMatchingV5';
 import { getActiveSyndromes, SyndromeResult, TraitScores } from '@/lib/syndromes';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
@@ -365,32 +363,22 @@ export default function CandidatoDettaglio() {
                 </div>
               )}
 
-              {/* Executive Summary - versione dinamica V4/V5 */}
-              {isV5 && traitsV5 ? (
-                <ExecutiveSummaryCardV5Updated
-                  traitsV5={traitsV5}
-                  esserePct={esserePct}
-                  farePct={farePct}
-                  averePct={averePct}
-                  profiloTipoV5={profiloTipoV5}
-                  reliabilityIndex={reliabilityIndex}
-                  syndromesDetected={syndromes}
-                  scalePunteggi={scalePunteggi}
-                  profiloTipo={profiloTipo}
-                  ruoloRichiesto={candidato.funzione || 'Ufficio vendite'}
-                  eta={candidato.eta}
-                  stressZone={stressZone}
-                  assessmentVersion="v5"
-                />
-              ) : (
-                <ExecutiveSummaryCardV5
-                  scalePunteggi={scalePunteggi}
-                  ruoloRichiesto={candidato.funzione || 'Ufficio vendite'}
-                  profiloTipo={profiloTipo}
-                  eta={candidato.eta}
-                  stressZone={stressZone}
-                />
-              )}
+              {/* Executive Summary V5 */}
+              <ExecutiveSummaryCardV5Updated
+                traitsV5={traitsV5}
+                esserePct={esserePct}
+                farePct={farePct}
+                averePct={averePct}
+                profiloTipoV5={profiloTipoV5}
+                reliabilityIndex={reliabilityIndex}
+                syndromesDetected={syndromes}
+                scalePunteggi={scalePunteggi}
+                profiloTipo={profiloTipo}
+                ruoloRichiesto={candidato.funzione || 'Ufficio vendite'}
+                eta={candidato.eta}
+                stressZone={stressZone}
+                assessmentVersion={isV5 ? 'v5' : 'v4'}
+              />
 
               {/* TABS per organizzare i contenuti */}
               <Tabs defaultValue="matching" className="w-full">
@@ -431,25 +419,15 @@ export default function CandidatoDettaglio() {
                   </TabsTrigger>
                 </TabsList>
           
-                {/* TAB: Matching Ruolo - V4 o V5 */}
+                {/* TAB: Matching Ruolo V5 */}
                 <TabsContent value="matching" className="mt-6 space-y-6">
-                  {isV5 && traitsV5 ? (
-                    <RoleMatchingCardV5
-                      ruoloRichiesto={candidato.funzione || 'Ufficio vendite'}
-                      traitsV5={traitsV5}
-                      candidateAge={candidato.eta ?? undefined}
-                      showFullDetails={true}
-                      showAllRoles={true}
-                    />
-                  ) : (
-                    <RoleMatchingCard
-                      ruoloRichiesto={candidato.funzione || 'Ufficio vendite'}
-                      scalePunteggi={scalePunteggi}
-                      profiloTipo={profiloTipo}
-                      showFullDetails={true}
-                      showNarrativeSections={true}
-                    />
-                  )}
+                  <RoleMatchingCardV5
+                    ruoloRichiesto={candidato.funzione || 'Ufficio vendite'}
+                    traitsV5={traitsV5 || {}}
+                    candidateAge={candidato.eta ?? undefined}
+                    showFullDetails={true}
+                    showAllRoles={true}
+                  />
                   
                   {/* Sintesi Finale */}
                   <SintesiFinaleCard
