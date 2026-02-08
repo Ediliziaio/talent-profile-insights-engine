@@ -228,13 +228,22 @@ export function calcolaAttendibilita(risposte: RispostaInputV5[]): {
   unexpectedCount: number;
 } {
   let unexpectedCount = 0;
+  let answeredControlQuestions = 0;
   
   for (const questionId of CONTROL_QUESTIONS) {
     const risposta = risposte.find(r => r.domanda_id === questionId);
-    // Risposta attesa: A
-    if (risposta && risposta.valore !== 'A') {
-      unexpectedCount++;
+    if (risposta) {
+      answeredControlQuestions++;
+      // Risposta attesa: A
+      if (risposta.valore !== 'A') {
+        unexpectedCount++;
+      }
     }
+  }
+  
+  // Candidati legacy (pre-V5) senza domande di controllo: CAUTION di default
+  if (answeredControlQuestions === 0) {
+    return { index: 'CAUTION', unexpectedCount: 0 };
   }
   
   // Soglie allineate al Manuale Definitivo V2.0
