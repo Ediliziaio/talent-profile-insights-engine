@@ -111,6 +111,21 @@ function getTopTraits(
   return sortedTraits;
 }
 
+// Export helper per uso in altri componenti (InterviewSheetPDF)
+export function getTopStrengths(
+  traits: Record<TraitCode, number>,
+  count: number = 3
+): { trait: TraitCode; value: number }[] {
+  return getTopTraits(traits, 'highest', count).map(t => ({ trait: t.tratto, value: t.punteggio }));
+}
+
+export function getTopWeaknesses(
+  traits: Record<TraitCode, number>,
+  count: number = 3
+): { trait: TraitCode; value: number }[] {
+  return getTopTraits(traits, 'lowest', count).map(t => ({ trait: t.tratto, value: t.punteggio }));
+}
+
 export function StrengthsWeaknessesCardV5({
   candidatoNome,
   candidatoSesso,
