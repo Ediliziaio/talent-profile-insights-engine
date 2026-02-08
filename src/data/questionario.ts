@@ -274,12 +274,13 @@ export const DOMANDE: DomandaV5[] = [
   { id: 236, testo: "Preferisci i metodi collaudati rispetto alle novità?", scala_primaria: 'RC', polarita: '+', blocco_tematico: 10, ordine: 236 },
   { id: 237, testo: "Ti senti a tuo agio con le procedure standard?", scala_primaria: 'RC', polarita: '+', blocco_tematico: 10, ordine: 237 },
 
-  // DOMANDE DI CONTROLLO (238-242) - Risposta attesa: A
-  { id: 238, testo: "Stai rispondendo a questo questionario con attenzione?", scala_primaria: 'CTRL', polarita: 'C', blocco_tematico: 10, ordine: 238 },
-  { id: 239, testo: "Hai letto questa domanda prima di rispondere?", scala_primaria: 'CTRL', polarita: 'C', blocco_tematico: 10, ordine: 239 },
-  { id: 240, testo: "È vero che oggi non è ieri?", scala_primaria: 'CTRL', polarita: 'C', blocco_tematico: 10, ordine: 240 },
-  { id: 241, testo: "Sei una persona che esiste fisicamente?", scala_primaria: 'CTRL', polarita: 'C', blocco_tematico: 10, ordine: 241 },
-  { id: 242, testo: "Stai compilando questo questionario in questo momento?", scala_primaria: 'CTRL', polarita: 'C', blocco_tematico: 10, ordine: 242 },
+  // DOMANDE DI CONTROLLO (238-242) - Risposta attesa: A (Manuale V2)
+  // Queste domande sono "trappole" - quasi tutti dovrebbero rispondere A
+  { id: 238, testo: "A volte hai dovuto dire una bugia?", scala_primaria: 'CTRL', polarita: 'C', blocco_tematico: 10, ordine: 238 },
+  { id: 239, testo: "Hai mai conosciuto una persona antipatica?", scala_primaria: 'CTRL', polarita: 'C', blocco_tematico: 10, ordine: 239 },
+  { id: 240, testo: "Qualche volta ti capita di pensare a cose che poi non dici?", scala_primaria: 'CTRL', polarita: 'C', blocco_tematico: 10, ordine: 240 },
+  { id: 241, testo: "Qualche volta hai l'impressione di parlare troppo?", scala_primaria: 'CTRL', polarita: 'C', blocco_tematico: 10, ordine: 241 },
+  { id: 242, testo: "Qualche volta ti capita di avere pensieri critici riguardo a qualcuno?", scala_primaria: 'CTRL', polarita: 'C', blocco_tematico: 10, ordine: 242 },
 ];
 
 // Export totale domande per compatibilità
