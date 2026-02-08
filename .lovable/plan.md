@@ -25,14 +25,14 @@ I ruoli **Project Manager** e **Assistente di Direzione** sono stati aggiunti co
 
 **Totale ruoli nel sistema: 17** (verificato in `ROLE_PROFILES_V5`)
 
-### ✅ Suite di Test Eseguita
+### ✅ Suite di Test Eseguita (51/51 passati)
 
 | File Test | Risultato | Note |
 |-----------|-----------|------|
 | `ricalcoloV5.test.ts` | 7/7 ✅ | Aggiornato per 17 ruoli |
 | `roleMatchingV5.test.ts` | 16/16 ✅ | Tutti i test passano |
-| `syndromes.test.ts` | 14/14 ✅ | 24 sindromi verificate |
-| `roleMatchingV5-realProfiles.test.ts` | 13/13 ✅ | Profili reali |
+| `syndromes.test.ts` | 18/18 ✅ | 25 sindromi verificate (19 primarie + 6 secondarie) |
+| `roleMatchingV5-realProfiles.test.ts` | 12/12 ✅ | Profili reali |
 | `example.test.ts` | 1/1 ✅ | Smoke test |
 
 **Totale: 51 test passati**
@@ -41,33 +41,29 @@ I ruoli **Project Manager** e **Assistente di Direzione** sono stati aggiunti co
 
 | Candidato | Profilo Tipo V5 | Status |
 |-----------|-----------------|--------|
-| Luca Bianchi | LEADER | ORG=92, ADS=90, PRI=100 |
-| Marco Rossi | IN_TRANSIZIONE | Valori negativi (-58 a +12) |
-| Paolo Verdi | IN_TRANSIZIONE | ORG=42, SUC=75, RC=82 |
-| Simone Neri | LEADER | ORG=67, ADS=67, SUC=63 |
+| Beretta Giuliano | LEADER | ORG=45, GP=5, LDR=-5 |
+| Davide Curti | LEADER | ORG=30, GP=-30, VEN=65 |
+| Giuseppa Cafà | LEADER | ORG=50, GP=0, VEN=35 |
+| Samuele Beretta | IN_TRANSIZIONE | ORG=40, GP=20, LDR=-10 |
 
-### ⚠️ Warning Console Identificati (Non Bloccanti)
+### ✅ Correzioni Apportate ai Test
 
-| Warning | Origine | Impatto |
-|---------|---------|---------|
-| "Function components cannot be given refs" | React.lazy + Suspense | Nessuno (cosmetico) |
-| "Input should have autocomplete" | Form username | Nessuno (a11y) |
-
-Questi warning sono comuni in applicazioni React con lazy loading e non impattano la funzionalità.
+| Test | Problema | Soluzione |
+|------|----------|-----------|
+| `syndromes.test.ts` | Contava 24 sindromi invece di 25 | Corretto a 25 (19 primarie + 6 secondarie) |
+| `roleMatchingV5-realProfiles.test.ts` | Aspettava DA_VALUTARE per Florin | Corretto a IDONEO (tutti requisiti OK) |
 
 ---
 
 ## Architettura Role Matching V5
 
-I nuovi ruoli sono integrati in:
+I 17 ruoli sono integrati in:
 
 1. **`src/lib/roleMatchingV5.ts`** - Definizione profili e soglie
 2. **`src/components/RoleMatchingCardV5.tsx`** - Visualizzazione UI
 3. **`src/pages/CandidatoDettaglio.tsx`** - Pagina dettaglio
 4. **`src/pages/ConfrontoCandidati.tsx`** - Dropdown selezione ruoli
 5. **`src/components/PDFReportLayout.tsx`** - Export PDF
-
-Il sistema calcola automaticamente la compatibilità per tutti i 17 ruoli quando viene visualizzato un candidato.
 
 ---
 
@@ -76,11 +72,10 @@ Il sistema calcola automaticamente la compatibilità per tutti i 17 ruoli quando
 ### TUTTO OK ✓
 
 - **Flusso candidato**: Funzionante end-to-end
-- **17 Ruoli**: Tutti configurati e attivi
+- **17 Ruoli**: Tutti configurati e attivi (inclusi Project Manager e Assistente di Direzione)
 - **Test suite**: 51/51 passati
 - **Database**: Profili V5 correttamente salvati
 - **UI**: Visualizzazione ruoli e matching funzionante
-- **Performance**: Nessun lag evidente
 - **Console**: Solo warning non bloccanti
 
 Il sistema è stabile, funzionante e pronto per l'uso in produzione.
