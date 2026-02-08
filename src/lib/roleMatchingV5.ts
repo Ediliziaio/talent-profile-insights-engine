@@ -1,7 +1,7 @@
 /**
  * Sistema di Matching Ruoli V5 - Assessment Psicometrico
  * 
- * Matching per 9 mansioni basato sui 15 tratti V5:
+ * Matching per 17 mansioni basato sui 15 tratti V5:
  * - Responsabile Amministrativo
  * - Venditore/Commerciale
  * - Customer Care
@@ -11,6 +11,14 @@
  * - Responsabile Tecnico
  * - Buyer/Acquisti
  * - Responsabile Produzione/Logistica
+ * - Direttore Commerciale
+ * - Capocantiere
+ * - Commerciale Edilizia
+ * - HR Recruiter
+ * - Impiegato Amministrativo
+ * - Operaio/Installatore
+ * - Project Manager
+ * - Assistente di Direzione
  * 
  * Include disqualifier e soglie tratti dal Manuale V5
  */
