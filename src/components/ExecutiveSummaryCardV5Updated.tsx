@@ -25,13 +25,32 @@ import {
   FitVerdictV5,
   RoleMatchResultV5 
 } from '@/lib/roleMatchingV5';
-import { 
-  calculateRoleMatching, 
-  getVerdictLabel, 
-  FitVerdict 
-} from '@/lib/roleMatching';
 import { getProfiloDetailedDescription } from '@/lib/profiloDetailedDescriptions';
-import { calculateSuccessProbability } from '@/lib/fitScoring';
+
+// Helper: Calcola probabilità successo dai tratti V5
+function calculateSuccessProbabilityFromTraits(
+  traitsV5: Record<string, number> | undefined,
+  compatibilitaPct: number,
+  stressZone: boolean
+): number {
+  if (!traitsV5) return 50;
+  
+  let base = compatibilitaPct;
+  
+  // Bonus/malus da tratti chiave
+  const pro = traitsV5.PRO ?? 0;
+  const esp = traitsV5.ESP ?? 0;
+  const aut = traitsV5.AUT ?? 0;
+  const org = traitsV5.ORG ?? 0;
+  
+  if (pro > 30) base += 5;
+  if (esp > 30) base += 3;
+  if (aut > 30) base += 3;
+  if (org > 30) base += 2;
+  if (stressZone) base -= 15;
+  
+  return Math.max(20, Math.min(95, Math.round(base)));
+}
 import { getActiveSyndromes, TraitScores, SyndromeResult } from '@/lib/syndromes';
 import { getProfiloTipoV5Label } from '@/lib/scoringV5';
 
@@ -74,16 +93,11 @@ export function ExecutiveSummaryCardV5Updated({
   className
 }: ExecutiveSummaryCardV5UpdatedProps) {
   
-  // Determina se usare V5 nativo
-  const isV5 = assessmentVersion === 'v5' && traitsV5 && Object.keys(traitsV5).length > 0;
-  
-  // Calcola matching in base alla versione
+  // Calcola matching V5
   let matching: RoleMatchResultV5 | null = null;
-  let matchingV4: ReturnType<typeof calculateRoleMatching> | null = null;
   let syndromes: SyndromeResult[] = [];
   
-  if (isV5 && traitsV5) {
-    // V5 nativo
+  if (traitsV5 && Object.keys(traitsV5).length > 0) {
     const traitScores: TraitScores = {
       ORG: traitsV5.ORG ?? 0,
       AUT: traitsV5.AUT ?? 0,
@@ -103,24 +117,15 @@ export function ExecutiveSummaryCardV5Updated({
     };
     matching = calculateRoleMatchingV5(ruoloRichiesto, traitScores, eta ?? undefined);
     syndromes = syndromesDetected || getActiveSyndromes(traitScores, eta ?? undefined);
-  } else if (scalePunteggi) {
-    // Fallback V4
-    matchingV4 = calculateRoleMatching(ruoloRichiesto, scalePunteggi);
   }
   
-  // Determina valori da mostrare
-  const verdict = isV5 ? matching?.verdict : matchingV4?.verdict;
-  const compatibilitaPct = isV5 ? matching?.compatibilitaPct : matchingV4?.compatibilitaPct;
-  const motivazione = isV5 ? matching?.motivazione : matchingV4?.motivazione;
+  // Valori da mostrare
+  const verdict = matching?.verdict;
+  const compatibilitaPct = matching?.compatibilitaPct ?? 0;
+  const motivazione = matching?.motivazione ?? '';
   
-  // Probabilità successo
-  const successProbability = scalePunteggi ? calculateSuccessProbability({
-    scalePunteggi,
-    ruolo: ruoloRichiesto,
-    eta: eta || undefined,
-    stressZone,
-    profiloTipo: profiloTipo || undefined,
-  }) : 0;
+  // Calcola probabilità successo deterministicamente
+  const successProbability = calculateSuccessProbabilityFromTraits(traitsV5, matching?.compatibilitaPct ?? 0, stressZone);
   
   // Profilo info
   const profiloInfo = profiloTipo ? getProfiloDetailedDescription(profiloTipo) : null;
@@ -181,7 +186,7 @@ export function ExecutiveSummaryCardV5Updated({
   
   // Fascia Guru check (RC tra -14 e +14 = creativi ma dispersivi)
   const rcValue = traitsV5?.RC ?? null;
-  const isFasciaGuru = isV5 && rcValue !== null && rcValue >= -14 && rcValue <= 14;
+  const isFasciaGuru = traitsV5 && rcValue !== null && rcValue >= -14 && rcValue <= 14;
   
   return (
     <Card className={cn(
@@ -191,9 +196,7 @@ export function ExecutiveSummaryCardV5Updated({
     )}>
       {/* Version badge */}
       <div className="absolute top-2 right-2">
-        <Badge variant="outline" className="text-xs">
-          {isV5 ? 'V5' : 'V4'}
-        </Badge>
+        <Badge variant="outline" className="text-xs">V5</Badge>
       </div>
       
       {/* Header con Verdetto */}
@@ -212,7 +215,7 @@ export function ExecutiveSummaryCardV5Updated({
               <h2 className={cn("text-lg sm:text-2xl md:text-3xl font-bold leading-tight", config?.textColor || 'text-foreground')}>
                 {config?.label || 'N/D'}
               </h2>
-              {isV5 && profiloTipoV5 && (
+              {profiloTipoV5 && (
                 <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 flex items-center gap-1">
                   <Sparkles className="h-3 w-3" />
                   {getProfiloTipoV5Label(profiloTipoV5)}
@@ -267,7 +270,7 @@ export function ExecutiveSummaryCardV5Updated({
         </div>
         
         {/* Macro-aree V5 */}
-        {isV5 && esserePct !== undefined && farePct !== undefined && averePct !== undefined && (
+        {esserePct !== undefined && farePct !== undefined && averePct !== undefined && (
           <div className="grid grid-cols-3 gap-2 p-3 rounded-lg bg-muted/50">
             <div className="text-center">
               <div className="text-lg font-bold text-blue-600">{esserePct.toFixed(0)}%</div>
@@ -287,8 +290,8 @@ export function ExecutiveSummaryCardV5Updated({
           </div>
         )}
         
-        {/* Attendibilità V5 */}
-        {isV5 && reliabilityIndex && (
+        {/* Attendibilità */}
+        {reliabilityIndex && (
           <div className="flex items-center justify-between p-2 rounded-lg bg-muted/30">
             <span className="text-xs text-muted-foreground">Attendibilità Test</span>
             <Badge 
@@ -308,7 +311,7 @@ export function ExecutiveSummaryCardV5Updated({
             <div className="flex items-center justify-center gap-1 text-green-600 mb-0.5">
               <CheckCircle2 className="h-3.5 w-3.5" />
               <span className="font-bold text-sm sm:text-lg">
-                {isV5 ? matching?.requisitiSoddisfatti.length || 0 : matchingV4?.requisitiSoddisfatti?.length || 0}
+                {matching?.requisitiSoddisfatti.length || 0}
               </span>
             </div>
             <p className="text-[9px] sm:text-xs text-muted-foreground">OK</p>
@@ -318,7 +321,7 @@ export function ExecutiveSummaryCardV5Updated({
             <div className="flex items-center justify-center gap-1 text-red-600 mb-0.5">
               <XCircle className="h-3.5 w-3.5" />
               <span className="font-bold text-sm sm:text-lg">
-                {isV5 ? matching?.requisitiMancanti.length || 0 : matchingV4?.requisitiMancanti?.length || 0}
+                {matching?.requisitiMancanti.length || 0}
               </span>
             </div>
             <p className="text-[9px] sm:text-xs text-muted-foreground">Manca</p>

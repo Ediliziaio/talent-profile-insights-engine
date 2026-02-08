@@ -75,7 +75,7 @@ import {
   CheckCircle2, Clock, TrendingUp, UserCheck, Mail, Phone, X
 } from 'lucide-react';
 import { Candidato, Azienda, AccessoAzienda, ProfiloCandidato, RUOLI_AZIENDALI, FUNZIONI } from '@/types/database';
-import { getProfiloTipoLabel } from '@/lib/scoring';
+import { getProfiloTipoV5Label } from '@/lib/scoringV5';
 import { format, subDays, subMonths, startOfDay, endOfDay, parseISO } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -1457,7 +1457,7 @@ export default function Candidati() {
                                 <TableCell>
                                   {candidato.test_completato && candidato.profili_candidato?.profilo_tipo ? (
                                     <Badge variant={getBadgeVariant(candidato.profili_candidato.profilo_tipo)} className="text-xs">
-                                      {getProfiloTipoLabel(candidato.profili_candidato.profilo_tipo as any)}
+                                      {getProfiloTipoV5Label(candidato.profili_candidato.profilo_tipo as any)}
                                     </Badge>
                                   ) : (
                                     <span className="text-muted-foreground text-xs">-</span>
