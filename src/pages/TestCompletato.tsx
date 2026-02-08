@@ -42,7 +42,10 @@ export default function TestCompletato() {
             </ul>
           </div>
         </CardContent>
-        <CardFooter className="flex justify-center">
+        <CardFooter className="flex flex-col gap-3 justify-center">
+          <p className="text-xs text-muted-foreground text-center">
+            Puoi chiudere questa pagina. I tuoi risultati sono stati salvati.
+          </p>
           <Button variant="outline" onClick={signOut}>
             Esci dalla piattaforma
           </Button>

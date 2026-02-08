@@ -9,6 +9,7 @@ interface AnswerButtonProps {
   selected: boolean;
   onClick: () => void;
   variant?: 'desktop' | 'mobile';
+  isSaving?: boolean;
 }
 
 export function AnswerButton({ 
@@ -17,7 +18,8 @@ export function AnswerButton({
   shortLabel,
   selected, 
   onClick,
-  variant = 'desktop'
+  variant = 'desktop',
+  isSaving = false
 }: AnswerButtonProps) {
   if (variant === 'mobile') {
     return (
@@ -33,8 +35,9 @@ export function AnswerButton({
         )}
       >
         <div className={cn(
-          "w-7 h-7 rounded-full flex items-center justify-center shrink-0 font-bold text-xs",
-          selected ? "bg-white/20" : "bg-primary/10 text-primary"
+          "w-7 h-7 rounded-full flex items-center justify-center shrink-0 font-bold text-xs transition-all",
+          selected ? "bg-white/20" : "bg-primary/10 text-primary",
+          isSaving && selected && "animate-pulse"
         )}>
           {selected ? <Check className="h-3.5 w-3.5" /> : value}
         </div>
@@ -57,8 +60,9 @@ export function AnswerButton({
       )}
     >
       <div className={cn(
-        "w-6 h-6 rounded-full flex items-center justify-center shrink-0 font-bold text-xs",
-        selected ? "bg-white/20" : "bg-primary/10 text-primary"
+        "w-6 h-6 rounded-full flex items-center justify-center shrink-0 font-bold text-xs transition-all",
+        selected ? "bg-white/20" : "bg-primary/10 text-primary",
+        isSaving && selected && "animate-pulse"
       )}>
         {selected ? <Check className="h-3 w-3" /> : value}
       </div>

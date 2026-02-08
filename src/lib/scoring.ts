@@ -214,17 +214,6 @@ function determinaProfiloTipo(
   return 'SUPPORTO_OPERATIVO';
 }
 
-export function getScaleForRadarChart(punteggi: Record<string, number>): ScalaPunteggio[] {
-  const orderedScales: ScalaCode[] = ['SV', 'MO', 'CF', 'EF', 'EC', 'QN', 'QR', 'SP', 'PA'];
-  
-  return orderedScales.map(scala => ({
-    scala,
-    label: SCALE_LABELS[scala],
-    punteggio: punteggi[scala] || 100
-  }));
-}
-
-
 export function getProfiloTipoLabel(tipo: ProfiloTipo): string {
   const labels: Record<ProfiloTipo, string> = {
     'LEADER_NATURALE': 'Leader Naturale',

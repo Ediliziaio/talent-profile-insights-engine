@@ -16,7 +16,7 @@ import {
   PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, 
   Legend, LineChart, Line, CartesianGrid, AreaChart, Area
 } from 'recharts';
-import { format, subDays, subMonths, startOfDay, parseISO, isAfter } from 'date-fns';
+import { format, subDays, subMonths, parseISO, isAfter } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { useIsMobile } from '@/hooks/use-mobile';
 
