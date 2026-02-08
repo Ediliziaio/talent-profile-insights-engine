@@ -157,53 +157,43 @@ I profili V5 estesi sono correttamente configurati in `profiloTipoV5Extended.ts`
 }
 ```
 
-### 3. Aggiornare Test (già fatto)
-
-Il test `ricalcoloV5.test.ts` è già stato aggiornato per aspettare 15 ruoli.
-Dopo l'aggiunta dei 2 nuovi ruoli, dovrà essere aggiornato a 17.
-
 ---
 
-## File da Modificare
+## ✅ COMPLETATO
 
-| File | Modifica | Linee |
-|------|----------|-------|
-| `src/lib/roleMatchingV5.ts` | Aggiungere Project Manager e Assistente di Direzione | Dopo riga 692 |
-| `src/test/ricalcoloV5.test.ts` | Aggiornare da 15 a 17 | Riga 274 |
+I due ruoli mancanti sono stati aggiunti con successo:
 
----
+| Ruolo | Status | File Modificato |
+|-------|--------|-----------------|
+| Project Manager | ✅ Aggiunto | `roleMatchingV5.ts` |
+| Assistente di Direzione | ✅ Aggiunto | `roleMatchingV5.ts` |
 
-## Sezione Tecnica
+### Test Aggiornati
 
-### Posizione Inserimento (roleMatchingV5.ts)
+| File | Ruoli Aspettati | Status |
+|------|-----------------|--------|
+| `ricalcoloV5.test.ts` | 17 | ✅ Passa |
+| `roleMatchingV5.test.ts` | 17 | ✅ Passa |
 
-I nuovi ruoli verranno inseriti prima della chiusura dell'oggetto `ROLE_PROFILES_V5` (riga 692), dopo `'Operaio/Installatore'`.
+### I 17 Ruoli Professionali Finali
 
-### Schema Dati Rispettato
-
-Entrambi i ruoli seguono lo schema `RoleProfileV5`:
-- `id`: identificatore univoco
-- `nome`: nome display
-- `categoria`: una delle categorie esistenti
-- `descrizione`: breve descrizione ruolo
-- `requisiti`: array di TraitRequirement con soglie
-- `disqualifiers`: array di RoleDisqualifier con funzioni
-- `profiloIdeale`: stringa descrittiva
-- `trattiFondamentali`: array di TraitCode
-- `domandeColloquio`: array di domande suggerite
-
-### Soglie Tratti Basate su Manuale V5
-
-Le soglie sono state definite seguendo i pattern esistenti e le indicazioni del manuale:
-- Project Manager: focus su ORG (50), GP (40), LDR (35) - simile a Responsabile Produzione/Logistica
-- Assistente di Direzione: focus su ORG (55), ADS (50), PRI (45) - enfasi su riservatezza
-
----
-
-## Risultato Finale Atteso
-
-Dopo l'implementazione:
-- **17 ruoli professionali** nel sistema
-- Test `ricalcoloV5.test.ts` aggiornato per validare 17 ruoli
-- Copertura completa rispetto al manuale V5
+| # | Ruolo | Categoria |
+|---|-------|-----------|
+| 1 | Responsabile Amministrativo | amministrativo |
+| 2 | Venditore/Commerciale | commerciale |
+| 3 | Customer Care | commerciale |
+| 4 | Direttore Generale | direzione |
+| 5 | HR Manager | direzione |
+| 6 | Marketing Manager | commerciale |
+| 7 | Responsabile Tecnico | tecnico |
+| 8 | Buyer/Acquisti | amministrativo |
+| 9 | Responsabile Produzione/Logistica | operativo |
+| 10 | Direttore Commerciale | direzione |
+| 11 | Capocantiere | operativo |
+| 12 | Commerciale Edilizia | commerciale |
+| 13 | HR Recruiter | amministrativo |
+| 14 | Impiegato Amministrativo | amministrativo |
+| 15 | Operaio/Installatore | operativo |
+| 16 | Project Manager | tecnico |
+| 17 | Assistente di Direzione | amministrativo |
 
