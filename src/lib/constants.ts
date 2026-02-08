@@ -5,6 +5,7 @@
 
 // ============ QUESTIONARIO ============
 export const QUESTIONS_PER_PAGE = 20;
+export const TOTAL_QUESTIONS = 242;
 
 export const ANSWER_OPTIONS = [
   { value: 'A' as const, label: 'Sì, sempre', shortLabel: 'Sì, sempre' },

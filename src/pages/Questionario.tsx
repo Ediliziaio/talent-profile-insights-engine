@@ -7,11 +7,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { AnswerButton } from '@/components/AnswerButton';
 import { useToast } from '@/hooks/use-toast';
-import { DOMANDE } from '@/data/questionario';
-import { calcolaProfilo, RispostaInput } from '@/lib/scoring';
+import { DOMANDE, DomandaV5 } from '@/data/questionario';
+import { calcolaProfiloV5, RispostaInputV5 } from '@/lib/scoringV5';
+import { getActiveSyndromes, formatSyndromesForDB, TraitScores } from '@/lib/syndromes';
 import { QUESTIONS_PER_PAGE, ANSWER_OPTIONS, type AnswerValue } from '@/lib/constants';
 import { Brain, ChevronLeft, ChevronRight, Send, Loader2 } from 'lucide-react';
-import { Candidato } from '@/types/database';
+import { Candidato, RispostaValueV5 } from '@/types/database';
+import { Json } from '@/integrations/supabase/types';
 import { cn } from '@/lib/utils';
 import { QuestionarioSkeleton } from '@/components/skeletons';
 
@@ -136,13 +138,45 @@ export default function Questionario() {
 
     setIsSubmitting(true);
     try {
-      const risposteArray: RispostaInput[] = Object.entries(risposte).map(([id, valore]) => ({
+      // Prepara risposte per scoring V5
+      const risposteArray: RispostaInputV5[] = Object.entries(risposte).map(([id, valore]) => ({
         domanda_id: parseInt(id),
-        valore,
+        valore: valore as RispostaValueV5,
       }));
-      const profilo = calcolaProfilo(risposteArray);
+      
+      // Converti DOMANDE per il calcolo V5
+      const domandeV5 = DOMANDE.map(d => ({
+        id: d.id,
+        scala_primaria: d.scala_primaria,
+        polarita: d.polarita,
+      }));
+      
+      // Calcola profilo V5
+      const profilo = calcolaProfiloV5(risposteArray, domandeV5);
+      
+      // Rileva sindromi comportamentali
+      const traitScores: TraitScores = {
+        ORG: profilo.traits_v5.ORG,
+        AUT: profilo.traits_v5.AUT,
+        GP: profilo.traits_v5.GP,
+        ADS: profilo.traits_v5.ADS,
+        DET: profilo.traits_v5.DET,
+        VEN: profilo.traits_v5.VEN,
+        HRM: profilo.traits_v5.HRM,
+        LDR: profilo.traits_v5.LDR,
+        PRO: profilo.traits_v5.PRO,
+        COM: profilo.traits_v5.COM,
+        ESP: profilo.traits_v5.ESP,
+        RC: profilo.traits_v5.RC,
+        FIN: profilo.traits_v5.FIN,
+        SUC: profilo.traits_v5.SUC,
+        PRI: profilo.traits_v5.PRI,
+      };
+      const syndromes = getActiveSyndromes(traitScores);
+      const syndromesForDB = formatSyndromesForDB(syndromes);
 
-      const risultatiData = Object.entries(profilo.scale_punteggi).map(([scala, punteggio]) => ({
+      // Salva risultati per ogni tratto V5
+      const risultatiData = Object.entries(profilo.traits_v5).map(([scala, punteggio]) => ({
         candidato_id: candidato.id,
         scala,
         punteggio_normalizzato: punteggio,
@@ -155,20 +189,39 @@ export default function Questionario() {
 
       if (risultatiError) throw risultatiError;
 
+      // Salva profilo V5 completo
+      const hasCriticalSyndromes = syndromes.some(s => ['S01', 'S02', 'S03', 'S04'].includes(s.code));
+      
+      const profiloData = {
+        candidato_id: candidato.id,
+        // Macro-aree V5
+        essere_pct: profilo.essere_pct,
+        fare_pct: profilo.fare_pct,
+        avere_pct: profilo.avere_pct,
+        // Tratti V5
+        traits_v5: profilo.traits_v5 as Json,
+        // Profilo tipo V5
+        profilo_tipo_v5: profilo.profilo_tipo_v5,
+        // Attendibilità
+        reliability_index: profilo.reliability_index,
+        // Sindromi rilevate
+        syndromes_detected: syndromesForDB as Json,
+        // Punti di forza e debolezza
+        out_points: profilo.valleys as Json,
+        strength_points: profilo.strengths as Json,
+        // Legacy (per compatibilità)
+        scale_punteggi: profilo.traits_v5 as Json,
+        leadership_pct: profilo.avere_pct,
+        maturita_pct: profilo.essere_pct,
+        potenziale_pct: profilo.fare_pct,
+        stress_zone: hasCriticalSyndromes,
+        // Versione assessment
+        assessment_version: 'v5',
+      };
+
       const { error: profiloError } = await supabase
         .from('profili_candidato')
-        .insert({
-          candidato_id: candidato.id,
-          leadership_pct: profilo.leadership_pct,
-          maturita_pct: profilo.maturita_pct,
-          potenziale_pct: profilo.potenziale_pct,
-          schematicita: profilo.schematicita,
-          stress_zone: profilo.stress_zone,
-          profilo_tipo: profilo.profilo_tipo,
-          out_points: profilo.out_points,
-          strength_points: profilo.strength_points,
-          scale_punteggi: profilo.scale_punteggi,
-        });
+        .insert([profiloData]);
 
       if (profiloError) throw profiloError;
 

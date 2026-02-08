@@ -55,12 +55,24 @@ export interface AccessoAzienda {
   updated_at: string;
 }
 
+// Legacy V4 Domanda interface (per retrocompatibilità)
 export interface Domanda {
   id: number;
   testo: string;
   scala_primaria: ScalaCode;
   scala_secondaria: ScalaCode | null;
   polarita: '+' | '-';
+  blocco_tematico: number | null;
+  ordine: number | null;
+}
+
+// V5 Domanda interface con supporto polarità speciali
+export interface DomandaV5 {
+  id: number;
+  testo: string;
+  scala_primaria: TraitCode;
+  scala_secondaria?: TraitCode | null;
+  polarita: PolaritaV5;
   blocco_tematico: number | null;
   ordine: number | null;
 }
