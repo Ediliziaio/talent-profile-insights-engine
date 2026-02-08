@@ -22,8 +22,6 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { 
-  calculateRoleMatchingV5,
-  calculateAllRolesCompatibilityV5,
   getVerdictLabelV5, 
   getVerdictBadgeVariantV5,
   getVerdictColorV5,
@@ -32,6 +30,10 @@ import {
   AllRolesCompatibilityV5,
   ROLE_PROFILES_V5,
 } from '@/lib/roleMatchingV5';
+import {
+  calculateRoleMatchingV5Cached,
+  calculateAllRolesCompatibilityV5Cached,
+} from '@/lib/roleMatchingV5Cache';
 import { TraitScores, SyndromeResult } from '@/lib/syndromes';
 import { TraitCode, TRAIT_LABELS } from '@/types/database';
 import { ProfiloTipoV5 } from '@/types/database';
@@ -72,9 +74,9 @@ export function RoleMatchingCardV5({
     PRI: traitsV5.PRI ?? 0,
   };
 
-  // Calcola matching per ruolo richiesto e tutti i ruoli
-  const result = calculateRoleMatchingV5(ruoloRichiesto, traitScores, candidateAge);
-  const allRoles = calculateAllRolesCompatibilityV5(ruoloRichiesto, traitScores, candidateAge);
+  // Calcola matching per ruolo richiesto e tutti i ruoli (con cache)
+  const result = calculateRoleMatchingV5Cached(ruoloRichiesto, traitScores, candidateAge);
+  const allRoles = calculateAllRolesCompatibilityV5Cached(ruoloRichiesto, traitScores, candidateAge);
   const roleProfile = ROLE_PROFILES_V5[ruoloRichiesto];
 
   // Raggruppa disqualifier per severity
