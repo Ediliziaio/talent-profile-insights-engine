@@ -13,11 +13,11 @@ import { forwardRef } from 'react';
 import { ProfiloTipo, SCALE_LABELS, ScalaCode } from '@/types/database';
 import { getProfiloDetailedDescription } from '@/lib/profiloDetailedDescriptions';
 import { 
-  calculateAllRolesCompatibilityV5, 
   getVerdictLabelV5,
   ROLE_PROFILES_V5,
   FitVerdictV5 
 } from '@/lib/roleMatchingV5';
+import { calculateAllRolesCompatibilityV5Cached } from '@/lib/roleMatchingV5Cache';
 import { TraitScores } from '@/lib/syndromes';
 import { calculateStressZoneSeverity, getStressZoneSeverityLabel } from '@/lib/stressZone';
 import { generateInterpretazione, getZonaInterpretazione } from '@/lib/interpretazioneProfile';

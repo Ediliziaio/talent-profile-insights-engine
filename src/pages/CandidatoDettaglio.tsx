@@ -44,7 +44,7 @@ import {
   ProfiloDescription 
 } from '@/lib/profiloDescriptions';
 import { calculateStressZoneSeverity, StressZoneSeverity, getStressZoneSeverityLabel } from '@/lib/stressZone';
-import { calculateRoleMatchingV5 } from '@/lib/roleMatchingV5';
+import { calculateRoleMatchingV5Cached } from '@/lib/roleMatchingV5Cache';
 import { getActiveSyndromes, SyndromeResult, TraitScores } from '@/lib/syndromes';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
@@ -310,7 +310,7 @@ export default function CandidatoDettaglio() {
                       profiloTipo={profiloTipoV5}
                       reliabilityIndex={reliabilityIndex}
                       syndromes={syndromes}
-                      roleMatch={calculateRoleMatchingV5(
+                      roleMatch={calculateRoleMatchingV5Cached(
                         candidato.funzione || 'Ufficio vendite',
                         traitsV5 as Record<TraitCode, number>,
                         candidato.eta ?? undefined

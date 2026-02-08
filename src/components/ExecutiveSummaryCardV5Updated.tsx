@@ -19,12 +19,12 @@ import {
 import { cn } from '@/lib/utils';
 import { ProfiloTipo, ProfiloTipoV5, TraitCode, ReliabilityIndex } from '@/types/database';
 import { 
-  calculateRoleMatchingV5, 
   getVerdictLabelV5, 
   getVerdictBadgeVariantV5,
   FitVerdictV5,
   RoleMatchResultV5 
 } from '@/lib/roleMatchingV5';
+import { calculateRoleMatchingV5Cached } from '@/lib/roleMatchingV5Cache';
 import { getProfiloDetailedDescription } from '@/lib/profiloDetailedDescriptions';
 import { getProfiloTipoV5Extended, PROFILI_TIPO_V5_EXTENDED } from '@/lib/profiloTipoV5Extended';
 
@@ -116,7 +116,7 @@ export function ExecutiveSummaryCardV5Updated({
       SUC: traitsV5.SUC ?? 0,
       PRI: traitsV5.PRI ?? 0,
     };
-    matching = calculateRoleMatchingV5(ruoloRichiesto, traitScores, eta ?? undefined);
+    matching = calculateRoleMatchingV5Cached(ruoloRichiesto, traitScores, eta ?? undefined);
     syndromes = syndromesDetected || getActiveSyndromes(traitScores, eta ?? undefined);
   }
   

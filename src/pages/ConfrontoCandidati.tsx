@@ -31,11 +31,12 @@ import { cn } from '@/lib/utils';
 import { Tables } from '@/integrations/supabase/types';
 import { TRAIT_LABELS, TraitCode } from '@/types/database';
 import { 
-  calculateRoleMatchingV5, 
   getVerdictLabelV5, 
   getVerdictBadgeVariantV5,
-  RUOLI_V5 
+  RUOLI_V5,
+  RoleMatchResultV5,
 } from '@/lib/roleMatchingV5';
+import { calculateRoleMatchingV5Cached } from '@/lib/roleMatchingV5Cache';
 import { TraitScores } from '@/lib/syndromes';
 
 type Candidato = Tables<'candidati'>;
@@ -118,10 +119,10 @@ export default function ConfrontoCandidati() {
     setSearchParams({ ids: newIds.join(',') });
   };
 
-  // Calcola matching per ogni candidato
+  // Calcola matching per ogni candidato (con cache)
   const matchResults = useMemo(() => {
     if (!candidatiSelezionati) return {};
-    const results: Record<string, ReturnType<typeof calculateRoleMatchingV5>> = {};
+    const results: Record<string, RoleMatchResultV5> = {};
     
     for (const c of candidatiSelezionati) {
       if (c.profili_candidato?.traits_v5) {
@@ -133,7 +134,7 @@ export default function ConfrontoCandidati() {
           COM: traits.COM ?? 0, ESP: traits.ESP ?? 0, RC: traits.RC ?? 0,
           FIN: traits.FIN ?? 0, SUC: traits.SUC ?? 0, PRI: traits.PRI ?? 0,
         };
-        results[c.id] = calculateRoleMatchingV5(ruoloConfronto, traitScores, c.eta ?? undefined);
+        results[c.id] = calculateRoleMatchingV5Cached(ruoloConfronto, traitScores, c.eta ?? undefined);
       }
     }
     return results;

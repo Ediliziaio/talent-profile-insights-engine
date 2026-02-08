@@ -22,7 +22,8 @@ import {
 import { cn } from '@/lib/utils';
 import { ProfiloTipo, SCALE_LABELS } from '@/types/database';
 import { getProfiloDetailedDescription } from '@/lib/profiloDetailedDescriptions';
-import { calculateAllRolesCompatibilityV5, getVerdictLabelV5, FitVerdictV5, ROLE_PROFILES_V5 } from '@/lib/roleMatchingV5';
+import { getVerdictLabelV5, FitVerdictV5, ROLE_PROFILES_V5 } from '@/lib/roleMatchingV5';
+import { calculateAllRolesCompatibilityV5Cached } from '@/lib/roleMatchingV5Cache';
 import { TraitScores } from '@/lib/syndromes';
 
 interface SintesiFinaleCardProps {
