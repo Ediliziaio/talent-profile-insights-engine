@@ -10,6 +10,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useToast } from '@/hooks/use-toast';
 import { Brain, User, Building2, Briefcase, Mail, Phone, Loader2 } from 'lucide-react';
 import { RUOLI_CANDIDATO, FUNZIONI } from '@/types/database';
+import { formAnagraficoSchema } from '@/lib/validationSchemas';
 
 interface CandidateSession {
   azienda: {
@@ -19,17 +20,20 @@ interface CandidateSession {
   sessionToken: string;
 }
 
+type FieldErrors = Partial<Record<string, string>>;
+
 export default function FormAnagrafico() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [candidateSession, setCandidateSession] = useState<CandidateSession | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   const [formData, setFormData] = useState({
     cognome: '',
     nome: '',
     eta: '',
-    sesso: '',
+    sesso: '' as '' | 'M' | 'F',
     ruolo_attuale: '',
     funzione: '',
     email: '',
@@ -37,7 +41,6 @@ export default function FormAnagrafico() {
   });
 
   useEffect(() => {
-    // Check for candidate session in sessionStorage
     const sessionData = sessionStorage.getItem('candidate_session');
     if (!sessionData) {
       toast({
@@ -59,38 +62,33 @@ export default function FormAnagrafico() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFieldErrors({});
     
     if (!candidateSession) {
-      toast({
-        title: 'Errore',
-        description: 'Sessione non valida',
-        variant: 'destructive',
-      });
+      toast({ title: 'Errore', description: 'Sessione non valida', variant: 'destructive' });
       return;
     }
 
-    // Validate required fields
-    if (!formData.cognome || !formData.nome || !formData.eta || !formData.sesso || 
-        !formData.ruolo_attuale || !formData.funzione || !formData.email || !formData.telefono) {
-      toast({
-        title: 'Errore',
-        description: 'Compila tutti i campi obbligatori',
-        variant: 'destructive',
+    // Validazione Zod
+    const result = formAnagraficoSchema.safeParse(formData);
+    if (!result.success) {
+      const errors: FieldErrors = {};
+      result.error.errors.forEach((err) => {
+        const field = err.path[0] as string;
+        if (!errors[field]) errors[field] = err.message;
       });
+      setFieldErrors(errors);
       return;
     }
 
     setLoading(true);
 
     try {
-      // Call the register-candidate edge function
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/register-candidate`,
         {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             azienda_id: candidateSession.azienda.id,
             ...formData,
@@ -98,21 +96,19 @@ export default function FormAnagrafico() {
         }
       );
 
-      const result = await response.json();
+      const responseData = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || 'Errore nella registrazione');
+        throw new Error(responseData.error || 'Errore nella registrazione');
       }
 
-      // If we got a session, set it
-      if (result.session) {
+      if (responseData.session) {
         await supabase.auth.setSession({
-          access_token: result.session.access_token,
-          refresh_token: result.session.refresh_token,
+          access_token: responseData.session.access_token,
+          refresh_token: responseData.session.refresh_token,
         });
       }
 
-      // Clear candidate session
       sessionStorage.removeItem('candidate_session');
 
       toast({
@@ -120,16 +116,10 @@ export default function FormAnagrafico() {
         description: 'Puoi ora procedere con il test',
       });
 
-      // Navigate to privacy/consent page
       navigate('/test/privacy');
-
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Errore nella registrazione';
-      toast({
-        title: 'Errore',
-        description: message,
-        variant: 'destructive',
-      });
+      toast({ title: 'Errore', description: message, variant: 'destructive' });
     } finally {
       setLoading(false);
     }
@@ -142,6 +132,11 @@ export default function FormAnagrafico() {
       </div>
     );
   }
+
+  const FieldError = ({ field }: { field: string }) => {
+    if (!fieldErrors[field]) return null;
+    return <p className="text-sm text-destructive mt-1">{fieldErrors[field]}</p>;
+  };
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-3 sm:p-4 safe-area-bottom">
@@ -172,10 +167,10 @@ export default function FormAnagrafico() {
                   id="cognome"
                   value={formData.cognome}
                   onChange={(e) => setFormData({ ...formData, cognome: e.target.value })}
-                  required
                   placeholder="Rossi"
                   className="h-11 text-base"
                 />
+                <FieldError field="cognome" />
               </div>
               <div className="space-y-1.5 sm:space-y-2">
                 <Label htmlFor="nome" className="text-sm">Nome *</Label>
@@ -183,10 +178,10 @@ export default function FormAnagrafico() {
                   id="nome"
                   value={formData.nome}
                   onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
-                  required
                   placeholder="Mario"
                   className="h-11 text-base"
                 />
+                <FieldError field="nome" />
               </div>
             </div>
 
@@ -197,20 +192,20 @@ export default function FormAnagrafico() {
                 <Input
                   id="eta"
                   type="number"
-                  min="18"
+                  min="16"
                   max="99"
                   value={formData.eta}
                   onChange={(e) => setFormData({ ...formData, eta: e.target.value })}
-                  required
                   placeholder="35"
                   className="h-11 text-base"
                 />
+                <FieldError field="eta" />
               </div>
               <div className="space-y-1.5 sm:space-y-2">
                 <Label className="text-sm">Sesso *</Label>
                 <RadioGroup
                   value={formData.sesso}
-                  onValueChange={(value) => setFormData({ ...formData, sesso: value })}
+                  onValueChange={(value) => setFormData({ ...formData, sesso: value as 'M' | 'F' })}
                   className="flex gap-3 sm:gap-4 pt-1.5 sm:pt-2"
                 >
                   <div className="flex items-center space-x-2 min-h-[44px]">
@@ -222,6 +217,7 @@ export default function FormAnagrafico() {
                     <Label htmlFor="sesso-f" className="cursor-pointer text-sm sm:text-base">Femminile</Label>
                   </div>
                 </RadioGroup>
+                <FieldError field="sesso" />
               </div>
             </div>
 
@@ -245,6 +241,7 @@ export default function FormAnagrafico() {
                     ))}
                   </SelectContent>
                 </Select>
+                <FieldError field="ruolo_attuale" />
               </div>
               <div className="space-y-1.5 sm:space-y-2">
                 <Label className="text-sm">Funzione *</Label>
@@ -261,6 +258,7 @@ export default function FormAnagrafico() {
                     ))}
                   </SelectContent>
                 </Select>
+                <FieldError field="funzione" />
               </div>
             </div>
 
@@ -276,10 +274,10 @@ export default function FormAnagrafico() {
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  required
                   placeholder="mario.rossi@email.com"
                   className="h-11 text-base"
                 />
+                <FieldError field="email" />
               </div>
               <div className="space-y-1.5 sm:space-y-2">
                 <Label htmlFor="telefono" className="flex items-center gap-2 text-sm">
@@ -291,10 +289,10 @@ export default function FormAnagrafico() {
                   type="tel"
                   value={formData.telefono}
                   onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
-                  required
                   placeholder="+39 333 1234567"
                   className="h-11 text-base"
                 />
+                <FieldError field="telefono" />
               </div>
             </div>
 

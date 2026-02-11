@@ -7,8 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { AnswerButton } from '@/components/AnswerButton';
 import { useToast } from '@/hooks/use-toast';
-import { DOMANDE, DomandaV5 } from '@/data/questionario';
-import { calcolaProfiloV5, RispostaInputV5 } from '@/lib/scoringV5';
+import { DOMANDE } from '@/data/questionario';
+import { calcolaProfiloV5, determinaProfiloTipoV5, RispostaInputV5 } from '@/lib/scoringV5';
 import { getActiveSyndromes, formatSyndromesForDB, TraitScores } from '@/lib/syndromes';
 import { QUESTIONS_PER_PAGE, ANSWER_OPTIONS, type AnswerValue } from '@/lib/constants';
 import { Brain, ChevronLeft, ChevronRight, Send, Loader2 } from 'lucide-react';
@@ -172,8 +172,21 @@ export default function Questionario() {
         SUC: profilo.traits_v5.SUC,
         PRI: profilo.traits_v5.PRI,
       };
-      const syndromes = getActiveSyndromes(traitScores);
+      const syndromes = getActiveSyndromes(traitScores, candidato.eta ?? undefined);
       const syndromesForDB = formatSyndromesForDB(syndromes);
+
+      // Ricalcola profilo tipo con sindromi (fix: calcolaProfiloV5 non passa sindromi)
+      const activeSyndromeCodes = syndromes
+        .filter(s => s.isActive)
+        .map(s => s.code);
+      const hasCriticalSyndromes = activeSyndromeCodes
+        .some(c => ['S01', 'S02', 'S03', 'S04'].includes(c));
+      const profiloTipoCorretto = determinaProfiloTipoV5(
+        profilo.traits_v5,
+        { essere_pct: profilo.essere_pct, fare_pct: profilo.fare_pct, avere_pct: profilo.avere_pct },
+        hasCriticalSyndromes,
+        activeSyndromeCodes
+      );
 
       // Salva risultati per ogni tratto V5
       const risultatiData = Object.entries(profilo.traits_v5).map(([scala, punteggio]) => ({
@@ -190,8 +203,6 @@ export default function Questionario() {
       if (risultatiError) throw risultatiError;
 
       // Salva profilo V5 completo
-      const hasCriticalSyndromes = syndromes.some(s => ['S01', 'S02', 'S03', 'S04'].includes(s.code));
-      
       const profiloData = {
         candidato_id: candidato.id,
         // Macro-aree V5
@@ -200,8 +211,8 @@ export default function Questionario() {
         avere_pct: profilo.avere_pct,
         // Tratti V5
         traits_v5: profilo.traits_v5 as Json,
-        // Profilo tipo V5
-        profilo_tipo_v5: profilo.profilo_tipo_v5,
+        // Profilo tipo V5 (con sindromi)
+        profilo_tipo_v5: profiloTipoCorretto,
         // Attendibilità
         reliability_index: profilo.reliability_index,
         // Sindromi rilevate
