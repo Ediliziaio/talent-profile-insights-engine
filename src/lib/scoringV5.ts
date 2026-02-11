@@ -346,48 +346,63 @@ export function analizzaTraits(traits: Record<TraitCode, number>): {
 
 /**
  * Determina il profilo tipo V5
+ * Criteri allineati al Manuale Definitivo V2.0:
+ * - LEADER: 5+ tratti sopra +45 E nessuna S01-S04
+ * - STRATEGIST: ORG>50 E AUT>40 E (ADS>40 o DET>40) E no S01-S04
+ * - EXECUTOR: ORG>=30 E GP>=30 E PRO>=20 (SS4) E no S01-S05
+ * - SPECIALIST: ADS>44 E ORG>40 E RC 20-45 E (VEN<30 o ESP<15)
+ * - GROWTH_POTENTIAL: Media tratti 15-35 E no S01-S05
+ * - IN_TRANSIZIONE: GP<21 oppure S15 E no S01-S03
+ * - CRITICAL: Qualsiasi S01-S04
  */
 export function determinaProfiloTipoV5(
   traits: Record<TraitCode, number>,
   macroAree: { essere_pct: number; fare_pct: number; avere_pct: number },
-  hasCriticalSyndromes: boolean = false
+  hasCriticalSyndromes: boolean = false,
+  activeSyndromeCodes: string[] = []
 ): ProfiloTipoV5 {
-  const { essere_pct, fare_pct, avere_pct } = macroAree;
-  
   // CRITICAL: almeno una S01-S04
   if (hasCriticalSyndromes) {
     return 'CRITICAL';
   }
-  
-  // LEADER: tutte le aree >= 60%
-  if (essere_pct >= 60 && fare_pct >= 60 && avere_pct >= 60) {
+
+  // LEADER: 5+ tratti sopra +45 E nessuna S01-S04
+  const mainTraits: TraitCode[] = ['ORG', 'AUT', 'GP', 'ADS', 'DET', 'VEN', 'HRM', 'LDR', 'PRO', 'COM', 'ESP'];
+  const traitsAbove45 = mainTraits.filter(t => traits[t] > 45).length;
+  if (traitsAbove45 >= 5) {
     return 'LEADER';
   }
-  
-  // STRATEGIST: ESSERE >= 60% e FARE < 50%
-  if (essere_pct >= 60 && fare_pct < 50) {
+
+  // STRATEGIST: ORG>50 E AUT>40 E (ADS>40 o DET>40) E no S01-S04
+  if (traits.ORG > 50 && traits.AUT > 40 && (traits.ADS > 40 || traits.DET > 40)) {
     return 'STRATEGIST';
   }
-  
-  // EXECUTOR: FARE >= 60% e ESSERE < 50%
-  if (fare_pct >= 60 && essere_pct < 50) {
+
+  // EXECUTOR: SS4 attivo (ORG>=30, GP>=30, PRO>=20) E no S01-S05
+  const hasS05 = activeSyndromeCodes.includes('S05');
+  if (traits.ORG >= 30 && traits.GP >= 30 && traits.PRO >= 20 && !hasS05) {
     return 'EXECUTOR';
   }
-  
-  // SPECIALIST: una area >= 70%, altre < 50%
-  const aree = [essere_pct, fare_pct, avere_pct];
-  const maxArea = Math.max(...aree);
-  const otherAreas = aree.filter(a => a !== maxArea);
-  if (maxArea >= 70 && otherAreas.every(a => a < 50)) {
+
+  // SPECIALIST: ADS>44 E ORG>40 E RC 20-45 E (VEN<30 o ESP<15)
+  if (traits.ADS > 44 && traits.ORG > 40 && traits.RC >= 20 && traits.RC <= 45 && (traits.VEN < 30 || traits.ESP < 15)) {
     return 'SPECIALIST';
   }
-  
-  // GROWTH_POTENTIAL: tutte 40-60%, no sindromi gravi
-  if (aree.every(a => a >= 40 && a <= 60)) {
+
+  // GROWTH_POTENTIAL: Media tratti 15-35 E no S01-S05
+  const traitValues = mainTraits.map(t => traits[t]);
+  const media = traitValues.reduce((a, b) => a + b, 0) / traitValues.length;
+  if (media >= 15 && media <= 35 && !hasS05) {
     return 'GROWTH_POTENTIAL';
   }
-  
-  // IN_TRANSIZIONE: pattern misto
+
+  // IN_TRANSIZIONE: GP<21 oppure S15 E no S01-S03
+  const hasS15 = activeSyndromeCodes.includes('S15');
+  if (traits.GP < 21 || hasS15) {
+    return 'IN_TRANSIZIONE';
+  }
+
+  // Fallback
   return 'IN_TRANSIZIONE';
 }
 
@@ -491,18 +506,18 @@ export function getFasciaInterpretativa(trait: TraitCode, score: number): {
     ORG: { eccellente: 65, buono: 40, discreto: 30, mediocre: 0 },
     AUT: { eccellente: 60, buono: 35, discreto: 20, mediocre: 0 },
     GP: { eccellente: 65, buono: 30, discreto: 21, mediocre: 0 },
-    ADS: { eccellente: 44, buono: 30, discreto: 20, mediocre: 0 },
-    DET: { eccellente: 44, buono: 35, discreto: 20, mediocre: 0 },
-    VEN: { eccellente: 70, buono: 50, discreto: 30, mediocre: 0 },
-    HRM: { eccellente: 30, buono: 15, discreto: 0, mediocre: -15 },
-    LDR: { eccellente: 44, buono: 20, discreto: 0, mediocre: -20 },
+    ADS: { eccellente: 55, buono: 30, discreto: 20, mediocre: 0 },
+    DET: { eccellente: 55, buono: 35, discreto: 20, mediocre: 0 },
+    VEN: { eccellente: 60, buono: 40, discreto: 30, mediocre: 0 },
+    HRM: { eccellente: 40, buono: 20, discreto: 10, mediocre: -15 },
+    LDR: { eccellente: 55, buono: 44, discreto: 30, mediocre: -20 },
     PRO: { eccellente: 40, buono: 20, discreto: 10, mediocre: 0 },
-    COM: { eccellente: 30, buono: 15, discreto: 0, mediocre: -15 },
-    ESP: { eccellente: 60, buono: 30, discreto: 15, mediocre: 0 },
+    COM: { eccellente: 40, buono: 25, discreto: 0, mediocre: -15 },
+    ESP: { eccellente: 50, buono: 30, discreto: 15, mediocre: 0 },
     RC: { eccellente: 45, buono: 30, discreto: 15, mediocre: -14 },  // RC ha interpretazione speciale
-    FIN: { eccellente: 30, buono: 15, discreto: 0, mediocre: -15 },
-    SUC: { eccellente: 69, buono: 30, discreto: 0, mediocre: -30 },
-    PRI: { eccellente: 70, buono: 45, discreto: 20, mediocre: 0 },
+    FIN: { eccellente: 50, buono: 30, discreto: 0, mediocre: -15 },
+    SUC: { eccellente: 69, buono: 50, discreto: 0, mediocre: -30 },
+    PRI: { eccellente: 60, buono: 40, discreto: 20, mediocre: 0 },
     CTRL: { eccellente: 0, buono: 0, discreto: 0, mediocre: 0 },  // CTRL non ha interpretazione
   };
   

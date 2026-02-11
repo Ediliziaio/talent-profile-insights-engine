@@ -328,16 +328,17 @@ export const ROLE_PROFILES_V5: Record<string, RoleProfileV5> = {
     nome: 'Marketing Manager',
     categoria: 'commerciale',
     descrizione: 'Strategia marketing, brand, comunicazione, analisi mercato',
+    // Soglie allineate al Manuale V2.0: ORG>=30, AUT>=25, VEN>=25, ESP>=15
     requisiti: [
-      { trait: 'ESP', soglia: 45, tipo: 'min', isCritical: true, label: 'Espansività ≥ 45' },
-      { trait: 'AUT', soglia: 40, tipo: 'min', isCritical: true, label: 'Automotivazione ≥ 40' },
-      { trait: 'PRO', soglia: 40, tipo: 'min', isCritical: true, label: 'Proattività ≥ 40' },
-      { trait: 'ORG', soglia: 30, tipo: 'min', isCritical: false, label: 'Organizzazione ≥ 30' },
+      { trait: 'ORG', soglia: 30, tipo: 'min', isCritical: true, label: 'Organizzazione ≥ 30' },
+      { trait: 'AUT', soglia: 25, tipo: 'min', isCritical: true, label: 'Automotivazione ≥ 25' },
+      { trait: 'VEN', soglia: 25, tipo: 'min', isCritical: false, label: 'Attitudine Vendita ≥ 25' },
+      { trait: 'ESP', soglia: 15, tipo: 'min', isCritical: false, label: 'Espansività ≥ 15' },
     ],
     disqualifiers: [
       {
-        condition: (t) => t.ESP < 30,
-        reason: 'Espansività insufficiente per ruolo di comunicazione',
+        condition: (_, s) => s.some(syn => ['S01', 'S02', 'S03', 'S04', 'S06', 'S15'].includes(syn.code) && syn.isActive),
+        reason: 'Sindrome critica o problematica per ruolo marketing',
         severity: 'blocking'
       },
       {
@@ -424,11 +425,16 @@ export const ROLE_PROFILES_V5: Record<string, RoleProfileV5> = {
     nome: 'Responsabile Produzione/Logistica',
     categoria: 'operativo',
     descrizione: 'Gestione flussi produttivi, logistica, efficienza operativa',
+    // Soglie allineate al Manuale V2.0: ORG>44, GP>=21, ADS>44, DET>=30, PRO>=10, COM>=-10, RC>-19, PRI>=39
     requisiti: [
-      { trait: 'ORG', soglia: 50, tipo: 'min', isCritical: true, label: 'Organizzazione ≥ 50' },
-      { trait: 'ADS', soglia: 45, tipo: 'min', isCritical: true, label: 'Autodisciplina ≥ 45' },
-      { trait: 'GP', soglia: 35, tipo: 'min', isCritical: true, label: 'Gestione Pressioni ≥ 35' },
-      { trait: 'LDR', soglia: 30, tipo: 'min', isCritical: false, label: 'Leadership ≥ 30' },
+      { trait: 'ORG', soglia: 44, tipo: 'min', isCritical: true, label: 'Organizzazione > 44' },
+      { trait: 'GP', soglia: 21, tipo: 'min', isCritical: true, label: 'Gestione Pressioni ≥ 21' },
+      { trait: 'ADS', soglia: 44, tipo: 'min', isCritical: true, label: 'Autodisciplina > 44' },
+      { trait: 'DET', soglia: 30, tipo: 'min', isCritical: false, label: 'Determinazione ≥ 30' },
+      { trait: 'PRO', soglia: 10, tipo: 'min', isCritical: false, label: 'Proattività ≥ 10' },
+      { trait: 'COM', soglia: -10, tipo: 'min', isCritical: false, label: 'Comprensione ≥ -10' },
+      { trait: 'RC', soglia: -19, tipo: 'min', isCritical: true, label: 'RC > -19' },
+      { trait: 'PRI', soglia: 39, tipo: 'min', isCritical: false, label: 'Principi ≥ 39' },
     ],
     disqualifiers: [
       {
@@ -439,6 +445,16 @@ export const ROLE_PROFILES_V5: Record<string, RoleProfileV5> = {
       {
         condition: (t) => t.GP < 21,
         reason: 'PSP: non regge la pressione operativa',
+        severity: 'blocking'
+      },
+      {
+        condition: (t) => t.RC <= -19,
+        reason: 'RC troppo bassa: dispersivo nella gestione operativa',
+        severity: 'blocking'
+      },
+      {
+        condition: (_, s) => s.some(syn => ['S01', 'S02', 'S03', 'S04', 'S05', 'S06', 'S08'].includes(syn.code) && syn.isActive),
+        reason: 'Sindrome critica o problematica per ruolo produttivo',
         severity: 'blocking'
       },
     ],
@@ -588,27 +604,29 @@ export const ROLE_PROFILES_V5: Record<string, RoleProfileV5> = {
     nome: 'HR Recruiter',
     categoria: 'amministrativo',
     descrizione: 'Selezione del personale, screening CV, colloqui, valutazione candidati',
+    // Soglie allineate al Manuale V2.0: COM>=20, ESP>=20, PRO>=20, DET>=30, ORG>=30, VEN>=20
     requisiti: [
-      { trait: 'COM', soglia: 50, tipo: 'min', isCritical: true, label: 'Comprensione ≥ 50' },
-      { trait: 'PRO', soglia: 40, tipo: 'min', isCritical: true, label: 'Proattività ≥ 40' },
-      { trait: 'ORG', soglia: 35, tipo: 'min', isCritical: true, label: 'Organizzazione ≥ 35' },
-      { trait: 'ESP', soglia: 35, tipo: 'min', isCritical: false, label: 'Espansività ≥ 35' },
-      { trait: 'HRM', soglia: 30, tipo: 'min', isCritical: false, label: 'HR Management ≥ 30' },
+      { trait: 'COM', soglia: 20, tipo: 'min', isCritical: true, label: 'Comprensione ≥ 20' },
+      { trait: 'ESP', soglia: 20, tipo: 'min', isCritical: true, label: 'Espansività ≥ 20' },
+      { trait: 'PRO', soglia: 20, tipo: 'min', isCritical: true, label: 'Proattività ≥ 20' },
+      { trait: 'DET', soglia: 30, tipo: 'min', isCritical: false, label: 'Determinazione ≥ 30' },
+      { trait: 'ORG', soglia: 30, tipo: 'min', isCritical: false, label: 'Organizzazione ≥ 30' },
+      { trait: 'VEN', soglia: 20, tipo: 'min', isCritical: false, label: 'Attitudine Vendita ≥ 20' },
     ],
     disqualifiers: [
       {
-        condition: (t) => t.COM < 30,
+        condition: (t) => t.COM < 10,
         reason: 'Comprensione insufficiente: non leggerà le persone',
         severity: 'blocking'
       },
       {
-        condition: (t) => t.PRO < 20,
+        condition: (t) => t.PRO < 10,
         reason: 'Troppo passivo per cercare attivamente talenti',
         severity: 'blocking'
       },
       {
-        condition: (_, s) => s.some(syn => ['S01', 'S04', 'S16'].includes(syn.code) && syn.isActive),
-        reason: 'Demotivante: allontanerà i candidati migliori',
+        condition: (_, s) => s.some(syn => ['S01', 'S02', 'S03', 'S04', 'S05', 'S06', 'S08'].includes(syn.code) && syn.isActive),
+        reason: 'Sindrome critica o problematica per ruolo HR',
         severity: 'blocking'
       },
     ],
@@ -627,21 +645,33 @@ export const ROLE_PROFILES_V5: Record<string, RoleProfileV5> = {
     nome: 'Impiegato Amministrativo',
     categoria: 'amministrativo',
     descrizione: 'Attività amministrative, contabilità ordinaria, gestione documenti',
+    // Soglie allineate al Manuale V2.0: ORG>=30, ADS>=30, PRO>=10, RC>-19, PRI>=30
     requisiti: [
-      { trait: 'ORG', soglia: 40, tipo: 'min', isCritical: true, label: 'Organizzazione ≥ 40' },
-      { trait: 'ADS', soglia: 40, tipo: 'min', isCritical: true, label: 'Autodisciplina ≥ 40' },
-      { trait: 'PRO', soglia: 20, tipo: 'min', isCritical: false, label: 'Proattività ≥ 20' },
-      { trait: 'RC', soglia: 65, tipo: 'max', isCritical: false, label: 'RC ≤ 65 (minima flessibilità)' },
+      { trait: 'ORG', soglia: 30, tipo: 'min', isCritical: true, label: 'Organizzazione ≥ 30' },
+      { trait: 'ADS', soglia: 30, tipo: 'min', isCritical: true, label: 'Autodisciplina ≥ 30' },
+      { trait: 'PRO', soglia: 10, tipo: 'min', isCritical: false, label: 'Proattività ≥ 10' },
+      { trait: 'RC', soglia: -19, tipo: 'min', isCritical: true, label: 'RC > -19' },
+      { trait: 'PRI', soglia: 30, tipo: 'min', isCritical: false, label: 'Principi ≥ 30' },
     ],
     disqualifiers: [
       {
-        condition: (t) => t.ORG < 25,
+        condition: (t) => t.ORG < 20,
         reason: 'Organizzazione insufficiente per lavoro amministrativo',
         severity: 'blocking'
       },
       {
-        condition: (t) => t.ADS < 25,
+        condition: (t) => t.ADS < 20,
         reason: 'Autodisciplina troppo bassa per lavoro ripetitivo',
+        severity: 'blocking'
+      },
+      {
+        condition: (t) => t.RC <= -19,
+        reason: 'RC troppo bassa: dispersivo per ruolo amministrativo',
+        severity: 'blocking'
+      },
+      {
+        condition: (_, s) => s.some(syn => ['S01', 'S02', 'S03', 'S04', 'S05', 'S06', 'S14'].includes(syn.code) && syn.isActive),
+        reason: 'Sindrome critica o problematica per ruolo amministrativo',
         severity: 'blocking'
       },
       {
@@ -665,21 +695,21 @@ export const ROLE_PROFILES_V5: Record<string, RoleProfileV5> = {
     nome: 'Operaio/Installatore',
     categoria: 'operativo',
     descrizione: 'Lavoro manuale, installazione, posa, manutenzione',
+    // Soglie allineate al Manuale V2.0: ORG>=30, GP>=30, PRO>=20
     requisiti: [
-      { trait: 'ADS', soglia: 35, tipo: 'min', isCritical: true, label: 'Autodisciplina ≥ 35' },
       { trait: 'ORG', soglia: 30, tipo: 'min', isCritical: true, label: 'Organizzazione ≥ 30' },
-      { trait: 'GP', soglia: 25, tipo: 'min', isCritical: false, label: 'Gestione Pressioni ≥ 25' },
-      { trait: 'PRO', soglia: 15, tipo: 'min', isCritical: false, label: 'Proattività ≥ 15' },
+      { trait: 'GP', soglia: 30, tipo: 'min', isCritical: true, label: 'Gestione Pressioni ≥ 30' },
+      { trait: 'PRO', soglia: 20, tipo: 'min', isCritical: false, label: 'Proattività ≥ 20' },
     ],
     disqualifiers: [
       {
-        condition: (t) => t.ADS < 20,
-        reason: 'Autodisciplina insufficiente per lavoro manuale costante',
+        condition: (_, s) => s.some(syn => ['S01', 'S02'].includes(syn.code) && syn.isActive),
+        reason: 'Sindrome critica: non idoneo',
         severity: 'blocking'
       },
       {
-        condition: (_, s) => s.some(syn => ['S01', 'S04'].includes(syn.code) && syn.isActive),
-        reason: 'Demotivante: creerà problemi nel team operativo',
+        condition: (_, s) => s.some(syn => syn.code === 'S06' && syn.isActive),
+        reason: 'Potenziali problemi di etica (S06 varianti a/b/c)',
         severity: 'blocking'
       },
       {
