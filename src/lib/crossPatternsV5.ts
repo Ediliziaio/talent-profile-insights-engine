@@ -269,6 +269,24 @@ export const CROSS_PATTERNS: CrossPattern[] = [
     testo: "[Nome] non chiude mai le situazioni. GP è il tratto più alto: significa che evita i confronti, rimanda le decisioni difficili, e non affronta i problemi di petto. Se è anche basso in DET, il quadro peggiora: ha paura di dire le cose e non chiude mai le trattative. Per ruoli commerciali o di responsabilità, questo è un blocco critico.",
     priorita: 1
   },
+
+  {
+    id: 'il_martello',
+    nome: 'Il Martello',
+    tipo: 'critico',
+    condition: (t) => t.DET > 44 && t.COM < 0,
+    testo: "[Nome] dice tutto ma non ascolta nessuno. Ha una determinazione altissima che diventa arma contundente nelle relazioni. Comunica in una sola direzione: la sua. Non accoglie obiezioni, non considera alternative, non ascolta feedback. Ottiene risultati nel breve termine ma distrugge le relazioni nel lungo termine. Le persone intorno si sentono bulldozerate, non ascoltate, non rispettate.",
+    priorita: 1
+  },
+
+  {
+    id: 'fuori_rotta_complessivo',
+    nome: 'Fuori Rotta Complessivo',
+    tipo: 'critico',
+    condition: (t) => t.FIN < 15 && t.SUC < 30 && t.PRI < 20,
+    testo: "[Nome] ha tutti e tre gli indicatori di prosperità al di sotto delle soglie critiche: finanze deboli, successo limitato e principi disallineati. Questo non è un singolo punto debole ma un pattern sistemico: la direzione complessiva della vita professionale è fuori rotta. Serve un intervento profondo che parta dai principi fondamentali prima ancora delle competenze tecniche.",
+    priorita: 1
+  },
 ];
 
 // Helper per trovare tutti i pattern attivi per un profilo
