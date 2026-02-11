@@ -1077,3 +1077,34 @@ export function getVerdictColorV5(verdict: FitVerdictV5): string {
  * Lista dei ruoli V5 disponibili
  */
 export const RUOLI_V5 = Object.keys(ROLE_PROFILES_V5);
+
+// ============================================
+// MAPPING FUNZIONE DB → RUOLO V5
+// ============================================
+
+const FUNZIONE_TO_RUOLO_MAP: Record<string, string> = {
+  'Direzione generale': 'Direttore Generale',
+  'Ufficio vendite': 'Venditore/Commerciale',
+  'Vendite': 'Venditore/Commerciale',
+  'Amministrazione': 'Responsabile Amministrativo',
+  'Produzione': 'Responsabile Produzione/Logistica',
+  'Logistica': 'Responsabile Produzione/Logistica',
+  'Ufficio marketing': 'Marketing Manager',
+  'Marketing': 'Marketing Manager',
+  'Risorse umane': 'HR Manager',
+  'HR': 'HR Manager',
+  'Customer care': 'Customer Care',
+  'Assistenza clienti': 'Customer Care',
+  'Acquisti': 'Buyer/Acquisti',
+  'Ufficio tecnico': 'Responsabile Tecnico',
+  'Cantiere': 'Capocantiere',
+  'Edilizia': 'Commerciale Edilizia',
+};
+
+/**
+ * Mappa il valore `funzione` dal database alla chiave corrispondente in ROLE_PROFILES_V5.
+ * Se non trova corrispondenza, restituisce il valore originale (che verrà gestito come "ruolo non configurato").
+ */
+export function mapFunzioneToRuoloV5(funzione: string): string {
+  return FUNZIONE_TO_RUOLO_MAP[funzione] || funzione;
+}

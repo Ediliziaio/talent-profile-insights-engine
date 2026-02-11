@@ -12,6 +12,7 @@ import {
   getVerdictColorV5,
   ROLE_PROFILES_V5,
   RUOLI_V5,
+  mapFunzioneToRuoloV5,
 } from '@/lib/roleMatchingV5';
 import { TraitScores } from '@/lib/syndromes';
 
@@ -242,6 +243,70 @@ describe('RoleMatchingV5 - Helper UI', () => {
   it('getVerdictColorV5 dovrebbe ritornare colori corretti', () => {
     expect(getVerdictColorV5('IDONEO')).toContain('green');
     expect(getVerdictColorV5('NON_IDONEO')).toContain('red');
+  });
+});
+
+// ============================================
+// TEST FLAG validatoManualeV2
+// ============================================
+
+describe('RoleMatchingV5 - Flag validatoManualeV2', () => {
+  it('tutti i ruoli dovrebbero avere il campo validatoManualeV2', () => {
+    for (const ruolo of RUOLI_V5) {
+      expect(ROLE_PROFILES_V5[ruolo].validatoManualeV2).toBeDefined();
+    }
+  });
+
+  it('8 ruoli dovrebbero essere validati dal Manuale V2.0', () => {
+    const validati = RUOLI_V5.filter(r => ROLE_PROFILES_V5[r].validatoManualeV2);
+    expect(validati.length).toBe(8);
+  });
+
+  it('9 ruoli dovrebbero essere NON validati (interni)', () => {
+    const nonValidati = RUOLI_V5.filter(r => !ROLE_PROFILES_V5[r].validatoManualeV2);
+    expect(nonValidati.length).toBe(9);
+  });
+
+  it('ruoli specifici validati correttamente', () => {
+    expect(ROLE_PROFILES_V5['Venditore/Commerciale'].validatoManualeV2).toBe(true);
+    expect(ROLE_PROFILES_V5['Customer Care'].validatoManualeV2).toBe(true);
+    expect(ROLE_PROFILES_V5['Responsabile Amministrativo'].validatoManualeV2).toBe(true);
+  });
+
+  it('ruoli specifici NON validati correttamente', () => {
+    expect(ROLE_PROFILES_V5['Direttore Generale'].validatoManualeV2).toBe(false);
+    expect(ROLE_PROFILES_V5['HR Manager'].validatoManualeV2).toBe(false);
+    expect(ROLE_PROFILES_V5['Project Manager'].validatoManualeV2).toBe(false);
+  });
+});
+
+// ============================================
+// TEST MAPPING FUNZIONE → RUOLO
+// ============================================
+
+describe('RoleMatchingV5 - mapFunzioneToRuoloV5', () => {
+  it('dovrebbe mappare valori DB alle chiavi corrette', () => {
+    expect(mapFunzioneToRuoloV5('Direzione generale')).toBe('Direttore Generale');
+    expect(mapFunzioneToRuoloV5('Ufficio vendite')).toBe('Venditore/Commerciale');
+    expect(mapFunzioneToRuoloV5('Vendite')).toBe('Venditore/Commerciale');
+    expect(mapFunzioneToRuoloV5('Amministrazione')).toBe('Responsabile Amministrativo');
+    expect(mapFunzioneToRuoloV5('Produzione')).toBe('Responsabile Produzione/Logistica');
+    expect(mapFunzioneToRuoloV5('Ufficio marketing')).toBe('Marketing Manager');
+  });
+
+  it('dovrebbe restituire il valore originale se già corretto', () => {
+    expect(mapFunzioneToRuoloV5('Direttore Generale')).toBe('Direttore Generale');
+    expect(mapFunzioneToRuoloV5('Venditore/Commerciale')).toBe('Venditore/Commerciale');
+  });
+
+  it('dovrebbe restituire il valore originale se non mappato', () => {
+    expect(mapFunzioneToRuoloV5('Ruolo Sconosciuto')).toBe('Ruolo Sconosciuto');
+  });
+
+  it('il matching dovrebbe funzionare con valori mappati', () => {
+    const mappedRole = mapFunzioneToRuoloV5('Ufficio vendite');
+    const result = calculateRoleMatchingV5(mappedRole, idealSalesperson);
+    expect(result.verdict).toBe('IDONEO');
   });
 });
 
