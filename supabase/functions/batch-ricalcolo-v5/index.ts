@@ -108,10 +108,10 @@ function calcolaProfiloV5(risposte: RispostaInputV5[], domande: DomandaV5[]): Pr
     
     const trait = domanda.scala_primaria;
     const polarita = domanda.polarita;
-    const valore = risposta.valore;
     
-    // Skip 'D' (preferisco non rispondere)
-    if (valore === 'D') continue;
+    // D = B nel calcolo (Manuale V2.0)
+    const valore = risposta.valore === 'D' ? 'B' : risposta.valore;
+    if (valore !== 'A' && valore !== 'B' && valore !== 'C') continue;
     
     // Calculate score based on polarity - SCALA 0-10
     let score: number;
@@ -190,16 +190,13 @@ function calcolaProfiloV5(risposte: RispostaInputV5[], domande: DomandaV5[]): Pr
     reliability_index = 'ZERO';
   }
   
-  // Calculate macro-area percentages
-  const calcMacroArea = (traitCodes: TraitCode[]): number => {
-    const sum = traitCodes.reduce((acc, t) => acc + traits_v5[t], 0);
-    const avg = sum / traitCodes.length;
-    return Math.round(((avg + 100) / 200) * 100);
-  };
-  
-  const essere_pct = calcMacroArea(MACRO_AREA_TRAITS.ESSERE);
-  const fare_pct = calcMacroArea(MACRO_AREA_TRAITS.FARE);
-  const avere_pct = calcMacroArea(MACRO_AREA_TRAITS.AVERE);
+  // Calculate macro-area percentages (Formula Manuale V2.0)
+  // ESSERE% = ((ORG + AUT + GP + 300) / 600) * 100
+  const essere_pct = Math.round(((traits_v5.ORG + traits_v5.AUT + traits_v5.GP + 300) / 600) * 1000) / 10;
+  // FARE% = ((ADS + DET + VEN + HRM + 400) / 800) * 100
+  const fare_pct = Math.round(((traits_v5.ADS + traits_v5.DET + traits_v5.VEN + traits_v5.HRM + 400) / 800) * 1000) / 10;
+  // AVERE% = ((LDR + PRO + COM + ESP + 400) / 800) * 100
+  const avere_pct = Math.round(((traits_v5.LDR + traits_v5.PRO + traits_v5.COM + traits_v5.ESP + 400) / 800) * 1000) / 10;
   
   // Calculate strengths (>=60) and valleys (<=-40)
   const strengths: TraitCode[] = [];
@@ -210,30 +207,10 @@ function calcolaProfiloV5(risposte: RispostaInputV5[], domande: DomandaV5[]): Pr
     if (traits_v5[trait] <= -40) valleys.push(trait);
   }
   
-  // Determine profile type V5
-  let profilo_tipo_v5: string;
-  
-  const hasCriticalSyndromes = valleys.some(t => ['GP', 'AUT', 'LDR'].includes(t)) && valleys.length >= 2;
-  
-  if (hasCriticalSyndromes) {
-    profilo_tipo_v5 = 'CRITICAL';
-  } else if (essere_pct >= 60 && fare_pct >= 60 && avere_pct >= 60) {
-    profilo_tipo_v5 = 'LEADER';
-  } else if (essere_pct >= 60 && fare_pct < 50) {
-    profilo_tipo_v5 = 'STRATEGIST';
-  } else if (fare_pct >= 60 && essere_pct < 50) {
-    profilo_tipo_v5 = 'EXECUTOR';
-  } else if (
-    (essere_pct >= 70 && fare_pct < 50 && avere_pct < 50) ||
-    (fare_pct >= 70 && essere_pct < 50 && avere_pct < 50) ||
-    (avere_pct >= 70 && essere_pct < 50 && fare_pct < 50)
-  ) {
-    profilo_tipo_v5 = 'SPECIALIST';
-  } else if (essere_pct >= 40 && essere_pct <= 60 && fare_pct >= 40 && fare_pct <= 60 && avere_pct >= 40 && avere_pct <= 60) {
-    profilo_tipo_v5 = 'GROWTH_POTENTIAL';
-  } else {
-    profilo_tipo_v5 = 'IN_TRANSIZIONE';
-  }
+  // Determine profile type V5 (Manuale V2.0 - basato su tratti individuali e sindromi)
+  // Nota: la determinazione finale del profilo tipo viene fatta DOPO il calcolo sindromi
+  // qui calcoliamo un profilo provvisorio che sarà aggiornato dopo
+  const profilo_tipo_v5_provisional = 'IN_TRANSIZIONE'; // placeholder
   
   return {
     traits_v5,
@@ -241,10 +218,51 @@ function calcolaProfiloV5(risposte: RispostaInputV5[], domande: DomandaV5[]): Pr
     fare_pct,
     avere_pct,
     reliability_index,
-    profilo_tipo_v5,
+    profilo_tipo_v5: profilo_tipo_v5_provisional,
     strengths,
     valleys
   };
+}
+
+/**
+ * Determina profilo tipo V5 (Manuale V2.0)
+ * Basato su tratti individuali e sindromi, NON macro-aree
+ */
+function determinaProfiloTipoV5(
+  traits: TraitsV5,
+  syndromes: SyndromeDetected[]
+): string {
+  const activeCodes = syndromes.map(s => s.code);
+  const hasCritical = activeCodes.some(c => ['S01', 'S02', 'S03', 'S04'].includes(c));
+  
+  // CRITICAL: almeno una S01-S04
+  if (hasCritical) return 'CRITICAL';
+  
+  // LEADER: 5+ tratti sopra +45 E nessuna S01-S04
+  const mainTraits: (keyof TraitsV5)[] = ['ORG', 'AUT', 'GP', 'ADS', 'DET', 'VEN', 'HRM', 'LDR', 'PRO', 'COM', 'ESP'];
+  const traitsAbove45 = mainTraits.filter(t => traits[t] > 45).length;
+  if (traitsAbove45 >= 5) return 'LEADER';
+  
+  // STRATEGIST: ORG>50 E AUT>40 E (ADS>40 o DET>40)
+  if (traits.ORG > 50 && traits.AUT > 40 && (traits.ADS > 40 || traits.DET > 40)) return 'STRATEGIST';
+  
+  // EXECUTOR: SS4 (ORG>=30, GP>=30, PRO>=20) E no S01-S05
+  const hasS05 = activeCodes.includes('S05');
+  if (traits.ORG >= 30 && traits.GP >= 30 && traits.PRO >= 20 && !hasS05) return 'EXECUTOR';
+  
+  // SPECIALIST: ADS>44 E ORG>40 E RC 20-45 E (VEN<30 o ESP<15)
+  if (traits.ADS > 44 && traits.ORG > 40 && traits.RC >= 20 && traits.RC <= 45 && (traits.VEN < 30 || traits.ESP < 15)) return 'SPECIALIST';
+  
+  // GROWTH_POTENTIAL: Media tratti 15-35 E no S01-S05
+  const traitValues = mainTraits.map(t => traits[t]);
+  const media = traitValues.reduce((a, b) => a + b, 0) / traitValues.length;
+  if (media >= 15 && media <= 35 && !hasS05) return 'GROWTH_POTENTIAL';
+  
+  // IN_TRANSIZIONE: GP<21 oppure S15 E no S01-S03
+  const hasS15 = activeCodes.includes('S15');
+  if (traits.GP < 21 || hasS15) return 'IN_TRANSIZIONE';
+  
+  return 'IN_TRANSIZIONE';
 }
 
 // ============================================
@@ -498,11 +516,23 @@ function getActiveSyndromes(traits: TraitsV5, eta?: number): SyndromeDetected[] 
     });
   }
   
-  // S19 - RC GRAVE (Manuale V2)
-  if (traits.RC <= -29) {
+  // S19 - RC MOLTO ALTA (Manuale V2.0 - RC >= 45)
+  if (traits.RC >= 45) {
     syndromes.push({
       code: 'S19',
-      name: 'RC GRAVE',
+      name: 'RC MOLTO ALTA',
+      severity: 'YELLOW',
+      description: 'Rigidità elevata. Resiste ai cambiamenti.',
+      category: 'primary',
+      triggeredBy: ['RC']
+    });
+  }
+  
+  // S20 - RC MOLTO BASSA (Manuale V2.0 - RC < -29)
+  if (traits.RC < -29) {
+    syndromes.push({
+      code: 'S20',
+      name: 'RC MOLTO BASSA',
       severity: 'ORANGE',
       description: 'Altamente dispersiva, impulsiva. Vulcano di idee ma non ne completa nessuna.',
       category: 'primary',
@@ -573,17 +603,7 @@ function getActiveSyndromes(traits: TraitsV5, eta?: number): SyndromeDetected[] 
     });
   }
   
-  // SS6 - RC ELEVATA
-  if (traits.RC >= 45) {
-    syndromes.push({
-      code: 'SS6',
-      name: 'RC ELEVATA',
-      severity: 'YELLOW',
-      description: 'Rigidità elevata. Resiste ai cambiamenti.',
-      category: 'secondary',
-      triggeredBy: ['RC']
-    });
-  }
+  // SS6 removed — was duplicate of S19 (RC MOLTO ALTA) per Manuale V2.0
   
   return syndromes;
 }
@@ -661,8 +681,11 @@ Deno.serve(async (req) => {
         // Calculate V5 profile
         const profilo = calcolaProfiloV5(risposte as RispostaInputV5[], domande as DomandaV5[]);
         
-        // Calculate syndromes (now with all 24)
+        // Calculate syndromes (now with all 25: S01-S20 + SS1-SS5)
         const syndromes = getActiveSyndromes(profilo.traits_v5, candidato.eta || undefined);
+        
+        // Determine profile type V5 based on traits + syndromes (Manuale V2.0)
+        const profilo_tipo_v5 = determinaProfiloTipoV5(profilo.traits_v5, syndromes);
         
         // Check if profile exists
         const { data: existing } = await supabase
@@ -677,7 +700,7 @@ Deno.serve(async (req) => {
           fare_pct: profilo.fare_pct,
           avere_pct: profilo.avere_pct,
           reliability_index: profilo.reliability_index,
-          profilo_tipo_v5: profilo.profilo_tipo_v5,
+          profilo_tipo_v5,
           syndromes_detected: syndromes,
           assessment_version: 'v5',
           strength_points: profilo.strengths,
@@ -715,7 +738,7 @@ Deno.serve(async (req) => {
             candidatoId: candidato.id,
             nome: `${candidato.nome} ${candidato.cognome}`,
             success: true,
-            profilo_tipo_v5: profilo.profilo_tipo_v5,
+            profilo_tipo_v5,
             essere_pct: profilo.essere_pct,
             fare_pct: profilo.fare_pct,
             avere_pct: profilo.avere_pct,
