@@ -100,6 +100,12 @@ export function RoleMatchingCardV5({
             <CardDescription className="mt-1">
               {roleProfile?.descrizione || 'Analisi basata sui 15 tratti V5'}
             </CardDescription>
+            {roleProfile && !roleProfile.validatoManualeV2 && (
+              <div className="flex items-center gap-1.5 mt-1.5 text-xs text-amber-600 dark:text-amber-400">
+                <HelpCircle className="h-3.5 w-3.5 shrink-0" />
+                <span>Soglie definite internamente (non validate dal Manuale V2.0)</span>
+              </div>
+            )}
           </div>
           <div className="flex flex-col items-center sm:items-end gap-1">
             <Badge 
