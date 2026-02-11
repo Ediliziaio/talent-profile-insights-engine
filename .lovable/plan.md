@@ -1,146 +1,101 @@
 
+# Piano Completo: Test E2E, Batch Ricalcolo, Flag Ruoli Non Validati, Pulizia e Stabilizzazione
 
-# Piano di Pulizia, Fix e Stabilizzazione - TalentProfile V5
+## STATO ATTUALE - Risultati delle verifiche
 
-## 1. CODICE NON UTILIZZATO DA RIMUOVERE
+### Batch Ricalcolo V5: COMPLETATO
+Il batch ricalcolo e stato eseguito con successo:
+- **15 profili aggiornati** con la nuova logica V2.0 (sindromi corrette, profili tipo, fasce interpretative)
+- **1 fallimento** (Enrico Goldoni): nessuna risposta nel database - non e un bug
+- Profili tipo ora corretti: LEADER, STRATEGIST, EXECUTOR, GROWTH_POTENTIAL, IN_TRANSIZIONE, CRITICAL
+- Marco Rossi correttamente classificato come **CRITICAL** (S01 + S04 attive)
 
-### Componenti Inutilizzati (0 import esterni)
+### Test E2E Flusso Candidato: Verificato
+Il flusso `/auth` -> `/test/anagrafica` -> `/test/privacy` -> `/test/questionario` -> `/test/completato` e completo e funzionante:
+- Auth: 3 tab (Candidato, Azienda, Registra) con validazione Zod campo per campo
+- FormAnagrafico: Validazione Zod con `formAnagraficoSchema` e `FieldError` inline gia implementati
+- ConsensoPrivacy: Checkbox GDPR + CTA "Accetto e Proseguo" - OK
+- Questionario: 242 domande, upsert risposte, progress bar, sticky footer, skeleton loading - OK
+- TestCompletato: Conferma + pulsante "Esci" - OK
+- Console: 0 errori runtime (solo warning postMessage irrilevanti)
 
-| File | Righe | Verifica |
-|------|-------|----------|
-| Nessun componente orfano trovato | - | Tutti i componenti hanno almeno 1 import attivo |
-
-### Import Inutili da Pulire
-
-| File | Import da Rimuovere | Motivo |
-|------|---------------------|--------|
-| `src/pages/Questionario.tsx` | `DomandaV5` (riga 10) | Importato ma mai usato nel file |
+### Analisi Pulizia Codice
+- Nessun componente orfano trovato
+- Nessun import inutile residuo (DomandaV5 gia rimosso nella sessione precedente)
+- Nessun file legacy da eliminare
 
 ---
 
-## 2. FIX FUNZIONALI (BUG IDENTIFICATI)
+## MODIFICHE DA IMPLEMENTARE
 
-### Bug CRITICO: Profilo Tipo V5 calcolato SENZA sindromi
+### 1. Flag `validato_manuale_v2` per i Ruoli (Priorita MEDIA)
 
-**File:** `src/lib/scoringV5.ts` (riga 456) e `src/pages/Questionario.tsx` (riga 204)
+**File:** `src/lib/roleMatchingV5.ts`
 
-**Problema:** La funzione `calcolaProfiloV5()` chiama `determinaProfiloTipoV5(finalTraits, macroAree)` senza passare `hasCriticalSyndromes` e `activeSyndromeCodes`. Di conseguenza:
-- Candidati con S01-S04 NON vengono classificati come CRITICAL
-- La logica EXECUTOR (che controlla S05) non funziona
-- La logica IN_TRANSIZIONE (che controlla S15) non funziona
+Aggiungere un campo `validatoManualeV2: boolean` all'interfaccia `RoleProfileV5` per distinguere i ruoli ufficiali del Manuale V2.0 da quelli "inventati".
 
-**Fix:** In `Questionario.tsx`, dopo aver calcolato le sindromi (riga 175), ricalcolare il profilo tipo usando `determinaProfiloTipoV5` con i dati completi delle sindromi e usare il risultato corretto per il salvataggio:
+**Ruoli validati dal Manuale V2.0** (8 ruoli):
+- Responsabile Amministrativo
+- Venditore/Commerciale
+- Customer Care
+- Marketing Manager (nel manuale come "Addetto Marketing")
+- Responsabile Produzione/Logistica
+- HR Recruiter
+- Impiegato Amministrativo
+- Operaio/Installatore
 
-```typescript
-// Dopo riga 176:
-const activeSyndromeCodes = syndromes
-  .filter(s => s.isActive)
-  .map(s => s.code);
-const hasCriticalSyndromes = activeSyndromeCodes
-  .some(c => ['S01','S02','S03','S04'].includes(c));
+**Ruoli NON validati** (9 ruoli - soglie definite internamente):
+- Direttore Generale
+- HR Manager
+- Responsabile Tecnico
+- Buyer/Acquisti
+- Direttore Commerciale
+- Capocantiere
+- Commerciale Edilizia
+- Project Manager
+- Assistente di Direzione
 
-// Ricalcola profilo tipo con sindromi
-const profiloTipoCorretto = determinaProfiloTipoV5(
-  profilo.traits_v5,
-  { essere_pct: profilo.essere_pct, fare_pct: profilo.fare_pct, avere_pct: profilo.avere_pct },
-  hasCriticalSyndromes,
-  activeSyndromeCodes
-);
+**Implementazione:**
+1. Aggiungere `validatoManualeV2: boolean` a `RoleProfileV5`
+2. Settare `validatoManualeV2: true` per gli 8 ruoli del manuale
+3. Settare `validatoManualeV2: false` per i 9 ruoli extra
+4. Mostrare un badge "Non validato" nella UI del RoleMatchingCardV5 per i ruoli non validati
 
-// Usa profiloTipoCorretto nel profiloData invece di profilo.profilo_tipo_v5
+### 2. Badge visuale nella UI (Priorita BASSA)
+
+**File:** `src/components/RoleMatchingCardV5.tsx`
+
+Nella sezione header del card, aggiungere un piccolo badge informativo quando il ruolo non e validato dal manuale:
+
+```
+[info icon] Soglie definite internamente (non validate dal Manuale V2.0)
 ```
 
-### Bug MEDIO: Sindrome S12 senza eta candidato
-
-**File:** `src/pages/Questionario.tsx` (riga 175)
-
-**Problema:** `getActiveSyndromes(traitScores)` viene chiamata senza passare `candidato.eta`. La sindrome S12 richiede `eta > 39` per attivarsi, ma senza il parametro non si attivera mai.
-
-**Fix:** Passare l'eta del candidato:
-```typescript
-const syndromes = getActiveSyndromes(traitScores, candidato.eta ?? undefined);
-```
-
-### Bug BASSO: FormAnagrafico senza validazione Zod
-
-**File:** `src/pages/FormAnagrafico.tsx` (righe 72-81)
-
-**Problema:** La validazione usa controlli manuali (`!formData.cognome || !formData.nome...`) invece dello schema Zod centralizzato `formAnagraficoSchema` gia definito in `validationSchemas.ts`. Questo bypassa validazioni come:
-- Lunghezza massima nome/cognome (100 char)
-- Formato telefono (regex)
-- Range eta (16-99)
-
-**Fix:** Sostituire la validazione manuale con `formAnagraficoSchema.safeParse(formData)` e mostrare errori campo per campo, come gia fatto in `Auth.tsx`.
+Questo avvisa l'HR che le soglie di quel ruolo non hanno validazione psicometrica ufficiale.
 
 ---
 
-## 3. MIGLIORAMENTI UX
+## RIEPILOGO FINALE
 
-### 3.1 FormAnagrafico: Feedback errori campo per campo
+### Cose gia completate (nessuna azione necessaria)
+- Batch ricalcolo V5: 15/16 profili aggiornati
+- Validazione Zod campo per campo su FormAnagrafico
+- Profilo tipo V5 calcolato con sindromi (fix critico gia applicato)
+- Sindrome S12 con eta candidato (fix gia applicato)
+- Import DomandaV5 rimosso (pulizia gia fatta)
+- Console pulita: 0 errori
 
-Attualmente mostra un unico toast generico "Compila tutti i campi obbligatori". Dopo l'integrazione Zod, ogni campo mostrera il suo errore specifico sotto l'input (come gia avviene in Auth.tsx).
-
-### 3.2 Questionario: Nessun miglioramento necessario
-
-L'analisi conferma che il questionario ha gia:
-- Transizioni fluide (`animate-in fade-in-50 slide-in-from-bottom-1`)
-- Feedback immediato su salvataggio (`isSaving` con `animate-pulse`)
-- Auto-scroll al cambio pagina
-- Sticky footer con navigazione
-- Touch targets >= 56px su mobile
-- Progress bar con percentuale
-- Skeleton loading durante caricamento
-
-### 3.3 Flusso Candidato: Nessun vicolo cieco
-
-Verificato il percorso completo:
-- `/auth` -> Login con feedback errori
-- `/test/anagrafica` -> Form con redirect se sessione scaduta
-- `/test/privacy` -> Checkbox + CTA sempre visibile
-- `/test/questionario` -> 242 domande con persistenza automatica
-- `/test/completato` -> Conferma + pulsante "Esci"
-
----
-
-## 4. RIEPILOGO MODIFICHE
-
-### File da Modificare
-
+### Cose da implementare ora
 | File | Modifica | Priorita |
 |------|----------|----------|
-| `src/pages/Questionario.tsx` | Ricalcolare profilo tipo con sindromi, passare eta a getActiveSyndromes, rimuovere import DomandaV5 | CRITICA |
-| `src/pages/FormAnagrafico.tsx` | Integrare validazione Zod con errori campo per campo | MEDIA |
+| `src/lib/roleMatchingV5.ts` | Aggiungere `validatoManualeV2` a interfaccia e a tutti i 17 ruoli | MEDIA |
+| `src/components/RoleMatchingCardV5.tsx` | Badge informativo per ruoli non validati | BASSA |
 
-### Nessun File da Eliminare
-
-Tutti i componenti e le librerie sono attivamente utilizzati. La pulizia dei file legacy (scoring.ts) e stata gia completata nelle sessioni precedenti.
-
-### Gia Corretto / Funzionante
-
-| Area | Stato |
-|------|-------|
-| Questionario 242 domande | OK |
-| Persistenza risposte (upsert) | OK |
-| Skeleton loading tutte le pagine | OK |
-| Error handling + ErrorBoundary | OK |
-| Mobile UX (touch targets, safe areas) | OK |
-| Transizioni e animazioni | OK |
-| Console pulita | OK (0 errori) |
-| Lazy loading pagine pesanti | OK |
-
----
-
-## 5. DETTAGLI TECNICI
-
-### Impatto del bug profilo tipo
-
-Senza sindromi, `determinaProfiloTipoV5` usa i parametri di default `hasCriticalSyndromes = false` e `activeSyndromeCodes = []`. Questo significa che:
-- Un candidato con HRM<0, PRO<0, COM<0, ESP<0 (S01 - Isolamento Relazionale Completo) verrebbe classificato come LEADER se ha 5+ tratti sopra 45, invece che CRITICAL
-- Un candidato con GP<0, PRO<10, COM<=0 (S05) potrebbe essere classificato come EXECUTOR quando non dovrebbe
-
-### Ordine di implementazione
-
-1. Fix Questionario.tsx (bug critico profilo tipo + eta + import)
-2. Fix FormAnagrafico.tsx (validazione Zod)
-3. Verifica e2e del flusso completo
-
+### Conferma Test
+- Flusso candidato E2E: OK (Auth -> Anagrafica -> Privacy -> Questionario -> Completato)
+- Validazione Zod FormAnagrafico: OK (campo per campo con FieldError)
+- Questionario 242 domande: OK (caricamento, selezione, salvataggio, navigazione)
+- Batch ricalcolo: OK (15/16 profili aggiornati)
+- Console: 0 errori runtime
+- Mobile UX: OK (touch targets 44px+, safe areas, sticky footer)
+- Skeleton loading: OK (tutte le pagine)
