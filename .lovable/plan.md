@@ -1,101 +1,90 @@
 
-# Piano Completo: Test E2E, Batch Ricalcolo, Flag Ruoli Non Validati, Pulizia e Stabilizzazione
+# Piano: Mapping Funzione-Ruolo + Verifica Badge + Test
 
-## STATO ATTUALE - Risultati delle verifiche
+## Problema Critico Scoperto
 
-### Batch Ricalcolo V5: COMPLETATO
-Il batch ricalcolo e stato eseguito con successo:
-- **15 profili aggiornati** con la nuova logica V2.0 (sindromi corrette, profili tipo, fasce interpretative)
-- **1 fallimento** (Enrico Goldoni): nessuna risposta nel database - non e un bug
-- Profili tipo ora corretti: LEADER, STRATEGIST, EXECUTOR, GROWTH_POTENTIAL, IN_TRANSIZIONE, CRITICAL
-- Marco Rossi correttamente classificato come **CRITICAL** (S01 + S04 attive)
+Il campo `candidato.funzione` nel database contiene valori come "Direzione generale", "Ufficio vendite", "Amministrazione", ecc. Ma `ROLE_PROFILES_V5` usa chiavi come "Direttore Generale", "Venditore/Commerciale", "Responsabile Amministrativo".
 
-### Test E2E Flusso Candidato: Verificato
-Il flusso `/auth` -> `/test/anagrafica` -> `/test/privacy` -> `/test/questionario` -> `/test/completato` e completo e funzionante:
-- Auth: 3 tab (Candidato, Azienda, Registra) con validazione Zod campo per campo
-- FormAnagrafico: Validazione Zod con `formAnagraficoSchema` e `FieldError` inline gia implementati
-- ConsensoPrivacy: Checkbox GDPR + CTA "Accetto e Proseguo" - OK
-- Questionario: 242 domande, upsert risposte, progress bar, sticky footer, skeleton loading - OK
-- TestCompletato: Conferma + pulsante "Esci" - OK
-- Console: 0 errori runtime (solo warning postMessage irrilevanti)
+Questo mismatch causa:
+- Il matching restituisce sempre "Ruolo non configurato" (50%, DA_VALUTARE) per TUTTI i candidati
+- Il badge "Soglie definite internamente" non appare mai (perche `roleProfile` e sempre `undefined`)
+- Le domande colloquio specifiche per ruolo non vengono mai mostrate
 
-### Analisi Pulizia Codice
-- Nessun componente orfano trovato
-- Nessun import inutile residuo (DomandaV5 gia rimosso nella sessione precedente)
-- Nessun file legacy da eliminare
+### Valori nel database vs chiavi ROLE_PROFILES_V5
 
----
+| `candidato.funzione` (DB) | Chiave ROLE_PROFILES_V5 attesa |
+|---|---|
+| Direzione generale | Direttore Generale |
+| Ufficio vendite | Venditore/Commerciale |
+| Vendite | Venditore/Commerciale |
+| Amministrazione | Responsabile Amministrativo |
+| Produzione | Responsabile Produzione/Logistica |
+| Logistica | Responsabile Produzione/Logistica |
+| Ufficio marketing | Marketing Manager |
 
-## MODIFICHE DA IMPLEMENTARE
+## Soluzione
 
-### 1. Flag `validato_manuale_v2` per i Ruoli (Priorita MEDIA)
+### 1. Aggiungere funzione di mapping (`src/lib/roleMatchingV5.ts`)
 
-**File:** `src/lib/roleMatchingV5.ts`
+Creare una funzione `mapFunzioneToRuoloV5(funzione: string): string` che mappa i valori del campo `funzione` alle chiavi di `ROLE_PROFILES_V5`:
 
-Aggiungere un campo `validatoManualeV2: boolean` all'interfaccia `RoleProfileV5` per distinguere i ruoli ufficiali del Manuale V2.0 da quelli "inventati".
+```typescript
+const FUNZIONE_TO_RUOLO_MAP: Record<string, string> = {
+  'Direzione generale': 'Direttore Generale',
+  'Ufficio vendite': 'Venditore/Commerciale',
+  'Vendite': 'Venditore/Commerciale',
+  'Amministrazione': 'Responsabile Amministrativo',
+  'Produzione': 'Responsabile Produzione/Logistica',
+  'Logistica': 'Responsabile Produzione/Logistica',
+  'Ufficio marketing': 'Marketing Manager',
+};
 
-**Ruoli validati dal Manuale V2.0** (8 ruoli):
-- Responsabile Amministrativo
-- Venditore/Commerciale
-- Customer Care
-- Marketing Manager (nel manuale come "Addetto Marketing")
-- Responsabile Produzione/Logistica
-- HR Recruiter
-- Impiegato Amministrativo
-- Operaio/Installatore
-
-**Ruoli NON validati** (9 ruoli - soglie definite internamente):
-- Direttore Generale
-- HR Manager
-- Responsabile Tecnico
-- Buyer/Acquisti
-- Direttore Commerciale
-- Capocantiere
-- Commerciale Edilizia
-- Project Manager
-- Assistente di Direzione
-
-**Implementazione:**
-1. Aggiungere `validatoManualeV2: boolean` a `RoleProfileV5`
-2. Settare `validatoManualeV2: true` per gli 8 ruoli del manuale
-3. Settare `validatoManualeV2: false` per i 9 ruoli extra
-4. Mostrare un badge "Non validato" nella UI del RoleMatchingCardV5 per i ruoli non validati
-
-### 2. Badge visuale nella UI (Priorita BASSA)
-
-**File:** `src/components/RoleMatchingCardV5.tsx`
-
-Nella sezione header del card, aggiungere un piccolo badge informativo quando il ruolo non e validato dal manuale:
-
-```
-[info icon] Soglie definite internamente (non validate dal Manuale V2.0)
+export function mapFunzioneToRuoloV5(funzione: string): string {
+  return FUNZIONE_TO_RUOLO_MAP[funzione] || funzione;
+}
 ```
 
-Questo avvisa l'HR che le soglie di quel ruolo non hanno validazione psicometrica ufficiale.
+### 2. Usare il mapping in `CandidatoDettaglio.tsx`
 
----
+In tutte le 5 occorrenze dove viene usato `candidato.funzione` come `ruoloRichiesto`, wrappare con `mapFunzioneToRuoloV5()`:
 
-## RIEPILOGO FINALE
+```typescript
+// Prima:
+ruoloRichiesto={candidato.funzione || 'Ufficio vendite'}
 
-### Cose gia completate (nessuna azione necessaria)
-- Batch ricalcolo V5: 15/16 profili aggiornati
-- Validazione Zod campo per campo su FormAnagrafico
-- Profilo tipo V5 calcolato con sindromi (fix critico gia applicato)
-- Sindrome S12 con eta candidato (fix gia applicato)
-- Import DomandaV5 rimosso (pulizia gia fatta)
-- Console pulita: 0 errori
+// Dopo:
+ruoloRichiesto={mapFunzioneToRuoloV5(candidato.funzione || 'Venditore/Commerciale')}
+```
 
-### Cose da implementare ora
-| File | Modifica | Priorita |
-|------|----------|----------|
-| `src/lib/roleMatchingV5.ts` | Aggiungere `validatoManualeV2` a interfaccia e a tutti i 17 ruoli | MEDIA |
-| `src/components/RoleMatchingCardV5.tsx` | Badge informativo per ruoli non validati | BASSA |
+### 3. Usare il mapping in `RoleMatchingCardV5.tsx` (nessuna modifica necessaria)
 
-### Conferma Test
-- Flusso candidato E2E: OK (Auth -> Anagrafica -> Privacy -> Questionario -> Completato)
-- Validazione Zod FormAnagrafico: OK (campo per campo con FieldError)
-- Questionario 242 domande: OK (caricamento, selezione, salvataggio, navigazione)
-- Batch ricalcolo: OK (15/16 profili aggiornati)
-- Console: 0 errori runtime
-- Mobile UX: OK (touch targets 44px+, safe areas, sticky footer)
-- Skeleton loading: OK (tutte le pagine)
+Il componente riceve gia il ruolo mappato come prop, quindi il badge funzionera automaticamente.
+
+### 4. Aggiornare i test (`src/test/roleMatchingV5.test.ts`)
+
+Aggiungere test per:
+- Il flag `validatoManualeV2` esiste su tutti i ruoli
+- 8 ruoli hanno `validatoManualeV2: true`
+- 9 ruoli hanno `validatoManualeV2: false`
+- La funzione `mapFunzioneToRuoloV5` mappa correttamente
+- Il matching funziona con i valori mappati
+
+### 5. Usare il mapping anche in `ExecutiveSummaryCardV5Updated.tsx` e `SintesiFinaleCard.tsx`
+
+Ovunque venga passato `candidato.funzione` come ruolo per il matching, applicare il mapping.
+
+## Risultato Atteso
+
+Dopo le modifiche:
+- Aprendo un candidato con funzione "Direzione generale", il matching usera il profilo "Direttore Generale"
+- Il badge "Soglie definite internamente (non validate dal Manuale V2.0)" apparira in amber sotto il titolo
+- Le domande colloquio specifiche per DG verranno mostrate
+- I requisiti e disqualifiers saranno valutati correttamente
+
+## File da Modificare
+
+| File | Modifica |
+|------|----------|
+| `src/lib/roleMatchingV5.ts` | Aggiungere `FUNZIONE_TO_RUOLO_MAP` e `mapFunzioneToRuoloV5()` |
+| `src/pages/CandidatoDettaglio.tsx` | Usare `mapFunzioneToRuoloV5()` in tutte le 5 occorrenze |
+| `src/test/roleMatchingV5.test.ts` | Aggiungere test per flag e mapping |
