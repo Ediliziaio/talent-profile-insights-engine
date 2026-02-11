@@ -62,6 +62,8 @@ export interface RoleProfileV5 {
   profiloIdeale: string;
   trattiFondamentali: TraitCode[];
   domandeColloquio: string[];
+  /** true = soglie validate dal Manuale V2.0, false = soglie definite internamente */
+  validatoManualeV2: boolean;
 }
 
 export interface RoleMatchResultV5 {
@@ -143,6 +145,7 @@ export const ROLE_PROFILES_V5: Record<string, RoleProfileV5> = {
       'Racconti di un errore contabile grave e come lo ha risolto.',
       'Come gestisce le priorità quando tutto sembra urgente?',
     ],
+    validatoManualeV2: true,
   },
 
   'Venditore/Commerciale': {
@@ -200,6 +203,7 @@ export const ROLE_PROFILES_V5: Record<string, RoleProfileV5> = {
       'Come reagisce quando un cliente le dice no per la quinta volta?',
       'Qual è il suo record di fatturato? Come lo ha raggiunto?',
     ],
+    validatoManualeV2: true,
   },
 
   'Customer Care': {
@@ -244,6 +248,7 @@ export const ROLE_PROFILES_V5: Record<string, RoleProfileV5> = {
       'Come fa a mantenere la calma dopo la decima telefonata difficile?',
       'Cosa fa quando il cliente ha ragione e l\'azienda ha torto?',
     ],
+    validatoManualeV2: true,
   },
 
   'Direttore Generale': {
@@ -289,6 +294,7 @@ export const ROLE_PROFILES_V5: Record<string, RoleProfileV5> = {
       'Qual è stata la sua più grande vittoria aziendale?',
       'Come gestisce la pressione degli stakeholder?',
     ],
+    validatoManualeV2: false,
   },
 
   'HR Manager': {
@@ -326,6 +332,7 @@ export const ROLE_PROFILES_V5: Record<string, RoleProfileV5> = {
       'Racconti di un talento che ha sviluppato e fatto crescere.',
       'Come affronta le decisioni impopolari (licenziamenti, tagli)?',
     ],
+    validatoManualeV2: false,
   },
 
   'Marketing Manager': {
@@ -359,6 +366,7 @@ export const ROLE_PROFILES_V5: Record<string, RoleProfileV5> = {
       'Come misura il successo delle sue attività marketing?',
       'Come gestisce stakeholder che vogliono cambiare tutto?',
     ],
+    validatoManualeV2: true,
   },
 
   'Responsabile Tecnico': {
@@ -391,6 +399,7 @@ export const ROLE_PROFILES_V5: Record<string, RoleProfileV5> = {
       'Come gestisce le deadline tecniche aggressive?',
       'Come si tiene aggiornato sulle nuove tecnologie?',
     ],
+    validatoManualeV2: false,
   },
 
   'Buyer/Acquisti': {
@@ -423,6 +432,7 @@ export const ROLE_PROFILES_V5: Record<string, RoleProfileV5> = {
       'Come bilancia qualità e risparmio?',
       'Come gestisce un fornitore storico che alza i prezzi?',
     ],
+    validatoManualeV2: false,
   },
 
   'Responsabile Produzione/Logistica': {
@@ -470,6 +480,7 @@ export const ROLE_PROFILES_V5: Record<string, RoleProfileV5> = {
       'Racconti di come ha migliorato l\'efficienza di un processo.',
       'Come motiva un team operativo sotto pressione?',
     ],
+    validatoManualeV2: true,
   },
 
   // ============================================
@@ -519,6 +530,7 @@ export const ROLE_PROFILES_V5: Record<string, RoleProfileV5> = {
       'Come gestisce un venditore che non performa?',
       'Qual è la sua strategia per entrare in un nuovo mercato?',
     ],
+    validatoManualeV2: false,
   },
 
   'Capocantiere': {
@@ -563,6 +575,7 @@ export const ROLE_PROFILES_V5: Record<string, RoleProfileV5> = {
       'Come fa rispettare le regole a maestranze difficili?',
       'Come gestisce più subappaltatori contemporaneamente?',
     ],
+    validatoManualeV2: false,
   },
 
   'Commerciale Edilizia': {
@@ -602,6 +615,7 @@ export const ROLE_PROFILES_V5: Record<string, RoleProfileV5> = {
       'Come bilancia esigenze tecniche e commerciali?',
       'Come gestisce il post-vendita e i reclami?',
     ],
+    validatoManualeV2: false,
   },
 
   'HR Recruiter': {
@@ -643,6 +657,7 @@ export const ROLE_PROFILES_V5: Record<string, RoleProfileV5> = {
       'Come gestisce un candidato che rifiuta l\'offerta?',
       'Quali domande chiave fa sempre in un colloquio?',
     ],
+    validatoManualeV2: true,
   },
 
   'Impiegato Amministrativo': {
@@ -693,6 +708,7 @@ export const ROLE_PROFILES_V5: Record<string, RoleProfileV5> = {
       'Come gestisce le scadenze multiple?',
       'Cosa le piace del lavoro amministrativo?',
     ],
+    validatoManualeV2: true,
   },
 
   'Operaio/Installatore': {
@@ -731,6 +747,7 @@ export const ROLE_PROFILES_V5: Record<string, RoleProfileV5> = {
       'Cosa fa quando trova un problema imprevisto?',
       'Come si trova a lavorare in squadra?',
     ],
+    validatoManualeV2: true,
   },
 
   'Project Manager': {
@@ -770,6 +787,7 @@ export const ROLE_PROFILES_V5: Record<string, RoleProfileV5> = {
       'Come affronta uno stakeholder che cambia i requisiti a metà progetto?',
       'Qual è il suo approccio per gestire team cross-funzionali?',
     ],
+    validatoManualeV2: false,
   },
 
   'Assistente di Direzione': {
@@ -809,6 +827,7 @@ export const ROLE_PROFILES_V5: Record<string, RoleProfileV5> = {
       'Come fa a far rispettare le priorità del dirigente?',
       'Come gestisce le chiamate e le visite indesiderate?',
     ],
+    validatoManualeV2: false,
   },
 };
 
