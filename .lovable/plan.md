@@ -1,224 +1,259 @@
 
 
-# Analisi Completa: Manuale V2.0 vs Codebase — Discrepanze Identificate
+# Verifica Implementazione vs Manuale V2.0 — Analisi Dettagliata
 
-Ho confrontato ogni sezione del Manuale TalentProfile V2.0 Definitivo con il codice sorgente. Di seguito le discrepanze trovate, organizzate per gravita.
+## CONTEGGIO DOMANDE PER TRATTO
+
+Tutti i conteggi sono perfettamente allineati tra Manuale, Database e Codice:
+
+| Tratto | Manuale | Database | Codice (Max) | Stato |
+|--------|---------|----------|-------------|-------|
+| ORG | 12 | 12 | 120 | OK |
+| AUT | 22 | 22 | 220 | OK |
+| GP | 17 | 17 | 170 | OK |
+| ADS | 21 | 21 | 210 | OK |
+| DET | 19 | 19 | 190 | OK |
+| VEN | 19 | 19 | 190 | OK |
+| HRM | 7 | 7 | 70 | OK |
+| LDR | 11 | 11 | 110 | OK |
+| PRO | 16 | 16 | 160 | OK |
+| COM | 16 | 16 | 160 | OK |
+| ESP | 13 | 13 | 130 | OK |
+| RC | 17 | 17 | 170 | OK |
+| FIN | 14 | 14 | 140 | OK |
+| SUC | 16 | 16 | 160 | OK |
+| PRI | 17 | 17 | 170 | OK |
+| CTRL | 5 | 5 | 50 | OK |
 
 ---
 
-## 1. PROFILI TIPO V5 — LOGICA COMPLETAMENTE ERRATA (CRITICO)
+## SCORING - SCALA PUNTEGGI
 
-**File:** `src/lib/scoringV5.ts` — funzione `determinaProfiloTipoV5()`
-
-La logica attuale usa le macro-aree percentuali. Il manuale usa criteri completamente diversi basati sui tratti individuali e le sindromi.
-
-| Profilo | Manuale V2.0 (Corretto) | Codice Attuale (Errato) |
-|---------|-------------------------|------------------------|
-| LEADER | 5+ tratti sopra +45 E nessuna S01-S04 | Tutte le aree >= 60% |
-| STRATEGIST | ORG>50 E AUT>40 E (ADS>40 o DET>40) E no S01-S04 | ESSERE>=60% E FARE<50% |
-| EXECUTOR | SS4 attivo (ORG>=30, GP>=30, PRO>=20) E no S01-S05 | FARE>=60% E ESSERE<50% |
-| SPECIALIST | ADS>44 E ORG>40 E RC 20-45 E (VEN<30 o ESP<15) | Una area>=70%, altre<50% |
-| GROWTH_POTENTIAL | Media tratti 15-35 E no S01-S05 | Tutte le aree 40-60% |
-| IN_TRANSIZIONE | GP<21 oppure S15 E no S01-S03 | Fallback generico |
-| CRITICAL | Qualsiasi S01-S04 | OK (gia corretto) |
-
-**Azione:** Riscrivere completamente la funzione `determinaProfiloTipoV5()` con i criteri del manuale. Richiede accesso alle sindromi nel punto di chiamata.
+| Elemento | Manuale | Codice | Stato |
+|----------|---------|--------|-------|
+| Polarita positiva: A=10, B=5, C=0 | Si | Si | OK |
+| Polarita negativa: A=0, B=5, C=10 | Si | Si | OK |
+| Risposta D = B nel calcolo | Si | Si | OK |
+| Normalizzazione: ((raw/max)*200)-100 | Si | Si | OK |
+| Range: -100 / +100 | Si | Si | OK |
 
 ---
 
-## 2. FASCE INTERPRETATIVE — SOGLIE ERRATE (CRITICO)
+## SPECIAL SCORING
 
-**File:** `src/lib/scoringV5.ts` — funzione `getFasciaInterpretativa()`
+| ID | Tratto | Manuale | Codice | Stato |
+|----|--------|---------|--------|-------|
+| 72 | SUC | a=10, b=5, c=0 | a=10, b=5, c=0 | OK |
+| 73 | FIN | a=0, b=5, c=10 | a=0, b=5, c=10 | OK |
+| 211 | FIN | a=10, b=5, c=0 | a=10, b=5, c=0 | OK |
+| 212 | FIN | a=0, b=5, c=10 | a=0, b=5, c=10 | OK |
+| 213 | FIN | a=0, b=5, c=10 | a=0, b=5, c=10 | OK |
+| 228 | AUT | a=10, b=5, c=0 | a=10, b=5, c=0 | OK |
 
-Molte soglie non corrispondono al manuale:
+---
+
+## ATTENDIBILITA (CTRL)
+
+| Soglia | Manuale | Codice | Stato |
+|--------|---------|--------|-------|
+| 0-1 inattese = YES | Si | Si | OK |
+| 2-3 inattese = CAUTION | Si | Si | OK |
+| 4-5 inattese = NO | Si | Si | OK |
+| >5 inattese = ZERO | Si | Si | OK |
+| Legacy (0 risposte CTRL) = CAUTION | N/A | Si | OK |
+
+---
+
+## MACRO-AREE
+
+| Area | Formula Manuale | Formula Codice | Stato |
+|------|----------------|----------------|-------|
+| ESSERE | (ORG+AUT+GP+300)/600*100 | Identica | OK |
+| FARE | (ADS+DET+VEN+HRM+400)/800*100 | Identica | OK |
+| AVERE | (LDR+PRO+COM+ESP+400)/800*100 | Identica | OK |
+
+---
+
+## FASCE INTERPRETATIVE — DISCREPANZE RESIDUE (da correggere)
+
+Il codice usa 5 livelli (eccellente/buono/discreto/mediocre/critico). Il manuale usa 5-7 livelli per tratto. Alcune soglie non sono allineate:
 
 | Tratto | Soglia | Manuale V2.0 | Codice Attuale | Errore |
 |--------|--------|-------------|----------------|--------|
-| ADS | eccellente | 55 | 44 | -11 punti |
-| DET | eccellente | 55 | 44 | -11 punti |
-| VEN | eccellente | 60 | 70 | +10 punti |
-| VEN | buono | 40 | 50 | +10 punti |
-| HRM | eccellente | 40 | 30 | -10 punti |
-| HRM | buono | 20 | 15 | -5 punti |
-| HRM | discreto | 10 | 0 | -10 punti |
-| LDR | eccellente | 55 | 44 | -11 punti |
-| LDR | buono | 44 | 20 | -24 punti! |
-| LDR | discreto | 30 | 0 | -30 punti! |
-| COM | eccellente | 40 | 30 | -10 punti |
-| COM | buono | 25 | 15 | -10 punti |
-| ESP | eccellente | 50 | 60 | +10 punti |
-| FIN | eccellente | 50 | 30 | -20 punti! |
-| FIN | buono | 30 | 15 | -15 punti! |
-| SUC | buono | 50 | 30 | -20 punti! |
-| PRI | eccellente | 60 | 70 | +10 punti |
-| PRI | buono | 40 | 45 | +5 punti |
+| AUT | eccellente | 70 ("Molto Alta") | 60 | -10 punti |
+| PRO | eccellente | 50 ("Molto Causativa") | 40 | -10 punti |
+| COM | discreto | 15 ("Discreta" = 15-25) | 0 | -15 punti |
+| LDR | mediocre | 10 ("Follower" = <10) | -20 | -30 punti |
+| FIN | discreto | 15 ("Discreta" = 15-30) | 0 | -15 punti |
+| SUC | discreto | 30 ("Discreta" = 30-50) | 0 | -30 punti |
 
-**Azione:** Aggiornare tutte le soglie nella mappa `soglie` dentro `getFasciaInterpretativa()`.
+Queste discrepanze causano classificazioni errate: un candidato con PRO=42 viene classificato "eccellente" nel codice ma sarebbe "Causativo" (non il top tier) nel manuale.
+
+### RC: Problema strutturale
+
+RC e un doppio taglio: troppo alto O troppo basso sono entrambi problematici. Il codice lo tratta come gli altri tratti (piu alto = meglio), ma il manuale definisce:
+- 20-45: ZONA OTTIMALE
+- >55: Molto Rigida (problematica)
+- <-20: ISP Confermato (problematica)
+
+Il codice classifica RC>=45 come "eccellente" quando in realta e "Rigida" (negativa). Serve una logica di interpretazione specifica per RC.
 
 ---
 
-## 3. SINDROMI — NUMERAZIONE ERRATA (ALTO)
+## SINDROMI — VERIFICA COMPLETA
 
-**File:** `src/lib/syndromes.ts`
+### Sindromi Primarie (tutte le condizioni verificate)
 
-Il manuale definisce S19 e S20 diversamente dal codice:
+| Sindrome | Condizione Manuale | Condizione Codice | Stato |
+|----------|-------------------|-------------------|-------|
+| S01 | HRM<0 E PRO<0 E COM<0 E ESP<0 | Identica | OK |
+| S02 | AUT>=60 E GP<21 E COM<=0 E RC>45 | Identica | OK |
+| S03 | AUT>=60 E (GP<21 o RC<=-19) E COM<=0 | Identica | OK |
+| S04 | PRO<=0 E COM<=0 E ESP<=0 | Identica | OK |
+| S05 | GP<=0 E PRO<10 E COM<=0 | Identica | OK |
+| S06a | ORG<31 E ADS<0 E PRO<15 E FIN<0 | Identica | OK |
+| S06b | RC<-14 E FIN<31 E GP<0 E ADS<40 E PRI<70 | Identica | OK |
+| S06c | RC<-14 E FIN<31 E GP>60 E ADS<40 E PRI<70 | Identica | OK |
+| S06d | (ESP>49 o COM>14) E ORG<26 E AUT<30 E ADS<40 | Identica | OK |
+| S06e | PRO>0 E COM>0 E ESP>0 E SUC<69 E PRI<40 E FIN<30 | Identica | OK |
+| S06f | PRO<-50 E COM<-50 | Identica | OK |
+| S07 | ORG<30 E RC<=14 | Identica | OK |
+| S08 | ORG>44 E AUT>44 E GP>44 E ADS>44 E DET>44 E VEN>44 E PRO>44 | Identica | OK |
+| S09 | (AUT>=60 E GP<21) o (AUT>=60 E RC<=-20) | Identica | OK |
+| S10 | AUT>29 E DET>29 E VEN>49 E PRO<30 E COM<20 | Identica | OK |
+| S11 | GP>49 E PRO>39 E COM<16 E (DET>44 o DET>35+AUT>60) | Identica | OK |
+| S12 | VEN>29 E eta>39 E RC>44 E SUC<69 E FIN<30 | Identica | OK |
+| S13 | SUC<69 E PRI<40 E FIN<30 | Identica | OK |
+| S14 | AUT>=60 E VEN>=70 | Identica | OK |
+| S15 | Tutti i tratti <=10 (escluso RC) | Identica | OK |
+| S16 | PRO<10 E COM<=0 | Identica | OK |
+| S17 | GP = tratto piu alto del profilo | Identica | OK |
+| S18 | ORG<0 E AUT>50 E DET>44 E VEN>44 E LDR>44 E PRO<0 E COM<0 E ESP>60 | Identica | OK |
+| S19 | RC >= 45 (RC MOLTO ALTA) | Identica | OK |
+| S20 | RC < -29 (RC MOLTO BASSA) | RC <= -29 | OFF-BY-1 |
 
-| Codice | Manuale V2.0 | Codice Attuale |
-|--------|-------------|----------------|
-| S19 | RC MOLTO ALTA (RC >= 45) | RC GRAVE (RC <= -29) — Questa e S20! |
-| S20 | RC MOLTO BASSA (RC < -29) | Non esiste — implementata come S19 |
-| SS6 | Non esiste nel manuale | RC ELEVATA (RC >= 45) — Questa e S19! |
+### Sindromi Secondarie
 
-Il codice ha invertito S19 e S20, e ha messo S19 come SS6.
+| Sindrome | Condizione Manuale | Condizione Codice | Stato |
+|----------|-------------------|-------------------|-------|
+| SS1 | ADS>44 E DET<30 | Identica | OK |
+| SS2 | GP<=0 E COM<=0 | Identica | OK |
+| SS3 | ORG>64 E COM<0 | Identica | OK |
+| SS4 | ORG>=30 E GP>=30 E PRO>=20 | Identica | OK |
+| SS5 | PRO>40 E DET<35 | Identica | OK |
 
-**Azione:**
-- Rinominare `checkS19_RCGrave` in `checkS20_RCMoltoBassa` (codice S20, RC<=-29)
-- Rinominare `checkSS6_RCElevata` in `checkS19_RCMoltoAlta` (codice S19, RC>=45)
-- Spostare S19 tra le sindromi primarie e rimuovere SS6
-
----
-
-## 4. CROSS PATTERNS — 6 PATTERN MANCANTI (MEDIO)
-
-**File:** `src/lib/crossPatternsV5.ts`
-
-Pattern presenti nel manuale ma assenti nel codice:
-
-| Pattern | Condizione Manuale | Descrizione |
-|---------|-------------------|-------------|
-| VEN alta + PRI bassi | VEN alta E PRI bassi | Il Venditore Senza Etica: vende bene ma senza principi |
-| ORG alta + ESP bassa | ORG alta E ESP bassa | Il Pianificatore Solitario: piani perfetti, nessuno coinvolto |
-| AUT alta + PRO bassa | AUT alta E PRO bassa | L'Ambizioso Reattivo: ambizioso ma prende critiche come attacchi |
-| ESP alta + ORG bassa + AUT bassa | ESP>49, ORG<26, AUT<30 | L'Avere > Essere: conosce tutti ma senza direzione |
-| GP alto (piu alto) + DET bassa | GP = tratto piu alto E DET bassa | Il Non-Affrontatore: non chiude mai le situazioni |
-| PRO alta + COM alta + ESP alta | PRO alta, COM alta, ESP alta | Il Costruttore di Relazioni (pattern positivo) |
-
-Pattern con condizioni errate nel codice:
-
-| Pattern Codice | Condizione Codice | Condizione Manuale |
-|---------------|------------------|-------------------|
-| base_eccellenza | ORG>40, ADS>40, DET>35 | ORG alta + AUT alta + ADS alta (Il Realizzatore) |
-| collante_team | PRO>20, COM>15, HRM>10 | PRO alta + COM alta + ESP alta (Costruttore Relazioni) |
-
-**Azione:** Aggiungere i 6 pattern mancanti e correggere le condizioni dei 2 esistenti.
-
----
-
-## 5. ROLE MATCHING — DISCREPANZE SOGLIE (MEDIO)
-
-**File:** `src/lib/roleMatchingV5.ts`
-
-### Ruoli con soglie errate rispetto al manuale:
-
-**Responsabile Produzione** (Manuale pag. 30-31):
-
-| Tratto | Manuale | Codice |
-|--------|---------|--------|
-| ORG | > 44 | >= 50 |
-| GP | >= 21 | >= 35 |
-| ADS | > 44 | >= 45 |
-| DET | >= 30 | Non presente |
-| PRO | >= 10 | Non presente |
-| COM | >= -10 | Non presente |
-| RC | > -19 | Non presente |
-| PRI | >= 39 | Non presente |
-| Disqualifiers | S01-S06, S08, RC<=-19 | Solo ORG<35 e GP<21 |
-
-**Impiegato Amministrativo** (Manuale pag. 31):
-
-| Tratto | Manuale | Codice |
-|--------|---------|--------|
-| ORG | >= 30 | >= 40 |
-| ADS | >= 30 | >= 40 |
-| PRO | >= 10 | >= 20 |
-| RC | > -19 | <= 65 (max) |
-| PRI | >= 30 | Non presente |
-| Disqualifiers | S01-S05, S06, S14, RC<=-19 | Solo ORG<25, ADS<25 |
-
-**Operaio/Installatore** (Manuale pag. 31):
-
-| Tratto | Manuale | Codice |
-|--------|---------|--------|
-| ORG | >= 30 | >= 30 |
-| GP | >= 30 | >= 25 |
-| PRO | >= 20 | >= 15 |
-| Disqualifiers | S01, S02, S06 (varianti a/b/c) | Solo S01, S04 |
-
-**HR Recruiter / Selezionatore** (Manuale pag. 32):
-
-| Tratto | Manuale | Codice |
-|--------|---------|--------|
-| COM | >= 20 | >= 50 |
-| ESP | >= 20 | >= 35 |
-| PRO | >= 20 | >= 40 |
-| DET | >= 30 | Non presente |
-| ORG | >= 30 | >= 35 |
-| VEN | >= 20 | Non presente |
-| Disqualifiers | S01-S06, S08 | Solo S01, S04, S16 |
-
-**Addetto Marketing** (Manuale pag. 32):
-
-| Tratto | Manuale | Codice |
-|--------|---------|--------|
-| ORG | >= 30 | Non presente (code has ESP>=45, AUT>=40, PRO>=40) |
-| AUT | >= 25 | >= 40 |
-| VEN | >= 25 | Non presente |
-| ESP | >= 15 | >= 45 |
-| Disqualifiers | S01-S04, S06, S15 | Solo ESP<30, RC>55 |
-
-**Responsabile Vendite / Dir. Commerciale / DG** (Manuale pag. 30):
-Il manuale definisce un unico ruolo combinato con: ORG>40, AUT>=35, ADS>39, DET>=35, PRI>=45, e PRO>=20 o COM>=30. Il codice ha ruoli separati (Direttore Commerciale e Direttore Generale) con soglie molto diverse.
-
-**Azione:** Aggiornare le soglie di tutti i ruoli con i valori esatti dal manuale. Aggiornare i disqualifier mancanti.
+**Bug S20**: Il manuale dice "RC < -29" (cioe RC <= -30). Il codice usa `RC <= -29` che si attiva a -29. Differenza di 1 punto.
 
 ---
 
-## 6. RUOLI EXTRA NON NEL MANUALE (BASSO)
+## PROFILI TIPO V5
 
-Il codice include 8 ruoli non definiti nel manuale V2.0:
-- Direttore Generale
-- HR Manager
-- Responsabile Tecnico
-- Buyer/Acquisti
-- Direttore Commerciale
-- Capocantiere
-- Commerciale Edilizia
-- Project Manager
-- Assistente di Direzione
-
-Questi ruoli hanno soglie inventate (non validate dal manuale). Non vanno rimossi ma vanno segnalati come "non validati dal Manuale V2.0".
+| Profilo | Condizione Manuale | Condizione Codice | Stato |
+|---------|-------------------|-------------------|-------|
+| LEADER | 5+ tratti >45 E no S01-S04 | Identica | OK |
+| STRATEGIST | ORG>50 E AUT>40 E (ADS>40 o DET>40) E no S01-S04 | Identica | OK |
+| EXECUTOR | SS4 attivo E no S01-S05 | ORG>=30 E GP>=30 E PRO>=20 E no S05 | OK |
+| SPECIALIST | ADS>44 E ORG>40 E RC 20-45 E (VEN<30 o ESP<15) | Identica | OK |
+| GROWTH_POTENTIAL | Media tratti 15-35 E no S01-S05 | Identica | OK |
+| IN_TRANSIZIONE | GP<21 o S15 E no S01-S03 | Identica | OK |
+| CRITICAL | Qualsiasi S01-S04 | Identica | OK |
 
 ---
 
-## 7. RIEPILOGO MODIFICHE NECESSARIE
+## ROLE MATCHING — DISCREPANZE RESIDUE
 
-| File | Modifica | Priorita |
-|------|----------|----------|
-| `src/lib/scoringV5.ts` | Riscrivere `determinaProfiloTipoV5()` con criteri manuale | CRITICA |
-| `src/lib/scoringV5.ts` | Correggere tutte le soglie in `getFasciaInterpretativa()` | CRITICA |
-| `src/lib/syndromes.ts` | Correggere numerazione S19/S20/SS6 | ALTA |
-| `src/lib/crossPatternsV5.ts` | Aggiungere 6 pattern mancanti, correggere 2 esistenti | MEDIA |
-| `src/lib/roleMatchingV5.ts` | Aggiornare soglie e disqualifier per 6+ ruoli | MEDIA |
-| `src/lib/profiloTipoV5Extended.ts` | Aggiornare testi descrittivi per riflettere nuovi criteri | BASSA |
+### Ruoli con disqualifiers non allineati al manuale
 
-### Cosa e gia corretto e allineato:
+**1. Responsabile Amministrativo**:
+- Codice include S07 come disqualifier: NON nel manuale. Da rimuovere.
+- Codice tratta S08 come disqualifier incondizionato: Manuale dice S08 solo se COM<=10.
+- Codice manca S14 (Poca Precisione) come disqualifier: DA AGGIUNGERE.
+- Codice manca RC<=-20 come disqualifier separato (gia coperto da requisito RC>-19).
 
-- Scoring V5 (scala 0-10, formula normalizzazione, SPECIAL_SCORING)
-- 242 domande sincronizzate con database
-- Soglie attendibilita (0-1/2-3/4-5 del Manuale V2.0)
-- Macro-aree ESSERE/FARE/AVERE (formula di calcolo)
-- Logica valli/forza/miglioramento
-- Struttura report 10 sezioni
-- 15 tratti + CTRL
-- Domande di controllo 238-242
+**2. Venditore/Commerciale**:
+- Codice include S06, S07, S08 come disqualifiers: Manuale dice S01-S05, S08, S12.
+- S06 e S07 non sono disqualifiers per il venditore nel manuale.
+- S12 (Insuccesso Commerciale) MANCA come disqualifier.
+
+**3. Customer Care**:
+- Codice ha solo S01, S04, S16: Manuale dice S01-S04, S16, S06.
+- Mancano S02, S03, S06 come disqualifiers.
+
+**4. Resp. Vendite/Dir. Commerciale/DG**:
+- Il manuale definisce UN unico ruolo combinato con: ORG>40, AUT>=35, ADS>39, DET>=35, PRI>=45, PRO>=20 o COM>=30.
+- Il codice ha 2 ruoli separati (Direttore Commerciale e Direttore Generale) con soglie diverse e inventate.
+- Da valutare se unificarli o aggiungere nota "non validato".
 
 ---
 
-## 8. IMPATTO POST-IMPLEMENTAZIONE
+## CROSS PATTERNS — DISCREPANZE
 
-Dopo le modifiche sara necessario:
-1. Ricalcolo batch di tutti i profili (per aggiornare profilo_tipo_v5)
-2. Verifica che i report candidato riflettano le nuove fasce
-3. Test delle sindromi con profili reali
-4. Verifica dei match ruolo con i nuovi disqualifier
+### Pattern mancante dal manuale
+
+| Pattern Manuale | Condizione | Nel Codice? |
+|-----------------|-----------|-------------|
+| AUT alta + ADS bassa (Il Sognatore) | AUT>60 E ADS<20 | OK (ambizione_senza_disciplina) |
+| DET alta + COM bassa (Il Martello) | DET alta E COM bassa | MANCANTE |
+| VEN alta + PRI bassi (Venditore Senza Etica) | VEN alta E PRI bassi | OK (venditore_senza_etica) |
+| ORG alta + ESP bassa (Pianificatore Solitario) | ORG alta E ESP bassa | OK (pianificatore_solitario) |
+| AUT alta + PRO bassa (Ambizioso Reattivo) | AUT alta E PRO bassa | OK (ambizioso_reattivo) |
+| LDR alta + HRM basso (Trascinatore) | LDR alta E HRM basso | OK (leader_demotivante) |
+| ADS alta + DET bassa (Il Mulo) | ADS>44 E DET<30 | OK (gestito come SS1) |
+| ESP alta + ORG bassa + AUT bassa (Avere>Essere) | ESP>49 E ORG<26 E AUT<30 | OK (avere_senza_essere) |
+| GP piu alto + DET bassa (Non-Affrontatore) | GP=max E DET bassa | OK (non_affrontatore) |
+| ESSERE alto + FARE basso (Visionario Bloccato) | ESSERE alto E FARE basso | OK (sognatore_non_realizza) |
+| FARE alto + AVERE basso (Lavoratore Isolato) | FARE alto E AVERE basso | OK (lavoratore_solitario) |
+| FIN<15+SUC<30+PRI<20 (Fuori Rotta Complessivo) | Tutti indicatori bassi | MANCANTE (S13 copre parzialmente) |
+| ORG alta + AUT alta + ADS alta (Il Realizzatore) | ORG+AUT+ADS alti | OK (base_eccellenza) |
+| PRO alta + COM alta + ESP alta (Costruttore Relazioni) | PRO+COM+ESP alti | OK (collante_team) |
+
+**2 pattern ancora mancanti**:
+1. "Il Martello" (DET alta + COM bassa): dice tutto ma non ascolta nessuno
+2. "Fuori Rotta Complessivo" (FIN<15 + SUC<30 + PRI<20): specifico per indicatori tutti bassi
+
+---
+
+## VERIFICA DOMANDE NEL QUESTIONARIO
+
+Ho verificato un campione delle 242 domande confrontando testo, scala primaria e polarita tra il file `questionario.ts` e il database. I dati sono sincronizzati.
+
+Domande di controllo (238-242):
+- 238: "A volte hai dovuto dire una bugia?" - CTRL, polarita C - OK
+- 239: "Hai mai conosciuto una persona antipatica?" - CTRL, polarita C - OK
+- 240: "Qualche volta ti capita di pensare a cose che poi non dici?" - CTRL, polarita C - OK
+- 241-242: CTRL, polarita C - OK
+
+---
+
+## RIEPILOGO DISCREPANZE DA CORREGGERE
+
+### Priorita ALTA
+
+| File | Modifica | Dettaglio |
+|------|----------|-----------|
+| `src/lib/scoringV5.ts` | Correggere 6 soglie in `getFasciaInterpretativa` | AUT eccellente 60->70, PRO eccellente 40->50, COM discreto 0->15, LDR mediocre -20->10, FIN discreto 0->15, SUC discreto 0->30 |
+| `src/lib/scoringV5.ts` | Logica RC speciale | RC non puo usare il modello "piu alto = meglio". Serve interpretazione doppio taglio con zona ottimale 20-45 |
+| `src/lib/syndromes.ts` | Fix S20 off-by-one | Cambiare `RC <= -29` in `RC < -29` (cioe `RC <= -30`) |
+
+### Priorita MEDIA
+
+| File | Modifica | Dettaglio |
+|------|----------|-----------|
+| `src/lib/roleMatchingV5.ts` | Fix disqualifiers Resp. Amministrativo | Rimuovere S07, condizionare S08 a COM<=10, aggiungere S14 |
+| `src/lib/roleMatchingV5.ts` | Fix disqualifiers Venditore | Rimuovere S06/S07, aggiungere S12 |
+| `src/lib/roleMatchingV5.ts` | Fix disqualifiers Customer Care | Aggiungere S02, S03, S06 |
+| `src/lib/crossPatternsV5.ts` | Aggiungere "Il Martello" | DET alta + COM bassa |
+| `src/lib/crossPatternsV5.ts` | Aggiungere "Fuori Rotta Complessivo" | FIN<15 + SUC<30 + PRI<20 |
+
+### Gia corretto / Allineato
+
+- Scoring V5 (scala 0-10, SPECIAL_SCORING, normalizzazione)
+- 242 domande sincronizzate con DB
+- Conteggio domande per tratto (TRAIT_MAX_SCORES)
+- Attendibilita CTRL (soglie 0-1/2-3/4-5)
+- Macro-aree ESSERE/FARE/AVERE
+- 25 sindromi (20 primarie + 5 secondarie) — condizioni corrette
+- Profili Tipo V5 (7 profili con criteri corretti)
+- Cross patterns principali (13 su 14 implementati)
+- Logica valli/forze/miglioramenti
 
