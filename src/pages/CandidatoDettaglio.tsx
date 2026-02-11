@@ -45,6 +45,7 @@ import {
 } from '@/lib/profiloDescriptions';
 import { calculateStressZoneSeverity, StressZoneSeverity, getStressZoneSeverityLabel } from '@/lib/stressZone';
 import { calculateRoleMatchingV5Cached } from '@/lib/roleMatchingV5Cache';
+import { mapFunzioneToRuoloV5 } from '@/lib/roleMatchingV5';
 import { getActiveSyndromes, SyndromeResult, TraitScores } from '@/lib/syndromes';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
@@ -274,7 +275,7 @@ export default function CandidatoDettaglio() {
                     email={candidato.email}
                     telefono={candidato.telefono}
                     azienda={candidato.aziende?.nome}
-                    ruoloRichiesto={candidato.funzione || 'Ufficio vendite'}
+                    ruoloRichiesto={mapFunzioneToRuoloV5(candidato.funzione || 'Venditore/Commerciale')}
                     profiloTipo={profiloTipo}
                     scalePunteggi={scalePunteggi}
                     stressZone={stressZone}
@@ -311,7 +312,7 @@ export default function CandidatoDettaglio() {
                       reliabilityIndex={reliabilityIndex}
                       syndromes={syndromes}
                       roleMatch={calculateRoleMatchingV5Cached(
-                        candidato.funzione || 'Ufficio vendite',
+                        candidato.funzione ? mapFunzioneToRuoloV5(candidato.funzione) : 'Venditore/Commerciale',
                         traitsV5 as Record<TraitCode, number>,
                         candidato.eta ?? undefined
                       )}
@@ -404,7 +405,7 @@ export default function CandidatoDettaglio() {
                 syndromesDetected={syndromes}
                 scalePunteggi={scalePunteggi}
                 profiloTipo={profiloTipo}
-                ruoloRichiesto={candidato.funzione || 'Ufficio vendite'}
+                ruoloRichiesto={mapFunzioneToRuoloV5(candidato.funzione || 'Venditore/Commerciale')}
                 eta={candidato.eta}
                 stressZone={stressZone}
                 assessmentVersion={isV5 ? 'v5' : 'v4'}
@@ -464,7 +465,7 @@ export default function CandidatoDettaglio() {
                 {/* TAB: Matching Ruolo V5 */}
                 <TabsContent value="matching" className="mt-6 space-y-6">
                   <RoleMatchingCardV5
-                    ruoloRichiesto={candidato.funzione || 'Ufficio vendite'}
+                    ruoloRichiesto={mapFunzioneToRuoloV5(candidato.funzione || 'Venditore/Commerciale')}
                     traitsV5={traitsV5 || {}}
                     candidateAge={candidato.eta ?? undefined}
                     showFullDetails={true}
@@ -476,7 +477,7 @@ export default function CandidatoDettaglio() {
                     candidatoNome={candidato.nome}
                     candidatoCognome={candidato.cognome}
                     eta={candidato.eta}
-                    ruoloRichiesto={candidato.funzione || 'Ufficio vendite'}
+                    ruoloRichiesto={mapFunzioneToRuoloV5(candidato.funzione || 'Venditore/Commerciale')}
                     profiloTipo={profiloTipo}
                     scalePunteggi={scalePunteggi}
                     stressZone={stressZone}
