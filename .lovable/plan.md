@@ -1,213 +1,224 @@
 
-# Piano di Pulizia, Fix e Ottimizzazione UX - TalentProfile V5
 
-## Analisi Eseguita
+# Analisi Completa: Manuale V2.0 vs Codebase — Discrepanze Identificate
 
-Ho analizzato l'intero codebase, il database, i log console, le network requests e il flusso utente. Di seguito il piano dettagliato per la pulizia, correzione bug e miglioramenti UX.
-
----
-
-## 1. CODICE NON UTILIZZATO DA RIMUOVERE
-
-### File Legacy Completamente Inutilizzati
-
-| File | Motivo | Impatto |
-|------|--------|---------|
-| `src/lib/scoring.ts` | Codice V4 legacy. La funzione `calcolaProfilo()` non e importata da nessun file. Solo `scoring.ts` stesso usa le sue funzioni. | Rimuovere completamente (~220 righe) |
-
-**Verifica effettuata**: Ho cercato `from '@/lib/scoring'` e `calcolaProfilo(` nel codebase - nessun import esterno trovato.
-
-### Import Inutili da Pulire
-
-| File | Import da Rimuovere | Note |
-|------|---------------------|------|
-| `src/pages/Candidati.tsx` | `DateRangePicker` (riga 11) | Gia importato tramite CandidatiFilters |
-| `src/lib/scoring.ts` | Intero file | Legacy V4, nessun utilizzo |
+Ho confrontato ogni sezione del Manuale TalentProfile V2.0 Definitivo con il codice sorgente. Di seguito le discrepanze trovate, organizzate per gravita.
 
 ---
 
-## 2. FIX FUNZIONALI (BUG IDENTIFICATI)
+## 1. PROFILI TIPO V5 — LOGICA COMPLETAMENTE ERRATA (CRITICO)
 
-### Bug Critici
+**File:** `src/lib/scoringV5.ts` — funzione `determinaProfiloTipoV5()`
 
-#### 2.1 Warning Console: postMessage Origin
-**Problema**: 4 warning sulla console relativi a `postMessage` con origin mismatch.
-**Causa**: Comunicazione iframe Lovable, non e un bug del progetto.
-**Azione**: Nessuna azione richiesta, warning di sistema.
+La logica attuale usa le macro-aree percentuali. Il manuale usa criteri completamente diversi basati sui tratti individuali e le sindromi.
 
-#### 2.2 Gestione Candidati Senza Risposte di Controllo (Legacy)
-**Problema**: I candidati legacy (pre-V5) hanno solo 200 risposte, non le 5 domande di controllo (238-242).
-**Impatto**: La funzione `calcolaAttendibilita()` conta come "inattese" le risposte mancanti.
-**Fix proposto**: Modificare la logica per gestire candidati con <242 risposte:
+| Profilo | Manuale V2.0 (Corretto) | Codice Attuale (Errato) |
+|---------|-------------------------|------------------------|
+| LEADER | 5+ tratti sopra +45 E nessuna S01-S04 | Tutte le aree >= 60% |
+| STRATEGIST | ORG>50 E AUT>40 E (ADS>40 o DET>40) E no S01-S04 | ESSERE>=60% E FARE<50% |
+| EXECUTOR | SS4 attivo (ORG>=30, GP>=30, PRO>=20) E no S01-S05 | FARE>=60% E ESSERE<50% |
+| SPECIALIST | ADS>44 E ORG>40 E RC 20-45 E (VEN<30 o ESP<15) | Una area>=70%, altre<50% |
+| GROWTH_POTENTIAL | Media tratti 15-35 E no S01-S05 | Tutte le aree 40-60% |
+| IN_TRANSIZIONE | GP<21 oppure S15 E no S01-S03 | Fallback generico |
+| CRITICAL | Qualsiasi S01-S04 | OK (gia corretto) |
 
-```typescript
-// In scoringV5.ts - calcolaAttendibilita()
-export function calcolaAttendibilita(risposte: RispostaInputV5[]): {
-  index: ReliabilityIndex;
-  unexpectedCount: number;
-} {
-  let unexpectedCount = 0;
-  let answeredControlQuestions = 0;
-  
-  for (const questionId of CONTROL_QUESTIONS) {
-    const risposta = risposte.find(r => r.domanda_id === questionId);
-    if (risposta) {
-      answeredControlQuestions++;
-      if (risposta.valore !== 'A') {
-        unexpectedCount++;
-      }
-    }
-  }
-  
-  // Se nessuna domanda di controllo risposta (legacy), ritorna CAUTION
-  if (answeredControlQuestions === 0) {
-    return { index: 'CAUTION', unexpectedCount: 0 };
-  }
-  
-  // Soglie Manuale V2.0 (basate sulle domande effettivamente risposte)
-  if (unexpectedCount <= 1) {
-    return { index: 'YES', unexpectedCount };
-  } else if (unexpectedCount <= 3) {
-    return { index: 'CAUTION', unexpectedCount };
-  } else if (unexpectedCount <= 5) {
-    return { index: 'NO', unexpectedCount };
-  } else {
-    return { index: 'ZERO', unexpectedCount };
-  }
-}
-```
-
-#### 2.3 Validazione Form Anagrafico
-**Problema**: La validazione client-side nel form anagrafico non usa gli schemi Zod centralizzati.
-**File**: `src/pages/FormAnagrafico.tsx`
-**Fix**: Integrare `formAnagraficoSchema` da `validationSchemas.ts` con react-hook-form.
+**Azione:** Riscrivere completamente la funzione `determinaProfiloTipoV5()` con i criteri del manuale. Richiede accesso alle sindromi nel punto di chiamata.
 
 ---
 
-## 3. MIGLIORAMENTI UX ESPERIENZIALE
+## 2. FASCE INTERPRETATIVE — SOGLIE ERRATE (CRITICO)
 
-### 3.1 Feedback Visivo Durante Salvataggio Risposte
-**Stato attuale**: Il componente `AnswerButton` ha `animate-pulse` su `isSaving`, ma la transizione potrebbe essere piu evidente.
-**Miglioramento**: Aggiungere micro-feedback con checkmark animato dopo salvataggio.
+**File:** `src/lib/scoringV5.ts` — funzione `getFasciaInterpretativa()`
 
-### 3.2 Progress Bar Questionario
-**Stato attuale**: Barra di progresso funzionante.
-**Miglioramento**: Aggiungere colore gradient piu evidente e label con stima tempo rimanente.
+Molte soglie non corrispondono al manuale:
 
-### 3.3 Transizioni tra Pagine
-**Stato attuale**: `animate-in fade-in-50 slide-in-from-bottom-1` sulle card domande.
-**Verifica**: Transizioni fluide gia implementate.
+| Tratto | Soglia | Manuale V2.0 | Codice Attuale | Errore |
+|--------|--------|-------------|----------------|--------|
+| ADS | eccellente | 55 | 44 | -11 punti |
+| DET | eccellente | 55 | 44 | -11 punti |
+| VEN | eccellente | 60 | 70 | +10 punti |
+| VEN | buono | 40 | 50 | +10 punti |
+| HRM | eccellente | 40 | 30 | -10 punti |
+| HRM | buono | 20 | 15 | -5 punti |
+| HRM | discreto | 10 | 0 | -10 punti |
+| LDR | eccellente | 55 | 44 | -11 punti |
+| LDR | buono | 44 | 20 | -24 punti! |
+| LDR | discreto | 30 | 0 | -30 punti! |
+| COM | eccellente | 40 | 30 | -10 punti |
+| COM | buono | 25 | 15 | -10 punti |
+| ESP | eccellente | 50 | 60 | +10 punti |
+| FIN | eccellente | 50 | 30 | -20 punti! |
+| FIN | buono | 30 | 15 | -15 punti! |
+| SUC | buono | 50 | 30 | -20 punti! |
+| PRI | eccellente | 60 | 70 | +10 punti |
+| PRI | buono | 40 | 45 | +5 punti |
 
-### 3.4 Loading States
-**Stato attuale**: Skeleton loading implementati per tutte le pagine principali.
-**Verifica**: `QuestionarioSkeleton`, `CandidatiSkeleton`, `DashboardSkeleton` funzionanti.
-
-### 3.5 Sticky Footer Questionario
-**Stato attuale**: Footer sticky con navigazione implementato.
-**Verifica**: Funziona correttamente con `safe-area-bottom` per dispositivi con notch.
-
----
-
-## 4. VERIFICHE FINALI
-
-### Smoke Test Percorso Candidato
-1. `/auth` - Login candidato
-2. `/test/anagrafica` - Form dati anagrafici
-3. `/test/privacy` - Consenso privacy
-4. `/test/questionario` - 242 domande (12+ pagine)
-5. `/test/completato` - Conferma completamento
-
-### Responsiveness
-- Mobile first design verificato
-- Touch targets >= 44px su tutti i bottoni
-- Layout grid responsive (2 cols mobile, 4 cols desktop)
-
-### Performance
-- Lazy loading implementato per tutte le pagine pesanti
-- React Query con cache 5 minuti
-- useMemo su operazioni di sorting/filtering pesanti
+**Azione:** Aggiornare tutte le soglie nella mappa `soglie` dentro `getFasciaInterpretativa()`.
 
 ---
 
-## 5. RIEPILOGO MODIFICHE
+## 3. SINDROMI — NUMERAZIONE ERRATA (ALTO)
 
-### File da Eliminare
+**File:** `src/lib/syndromes.ts`
 
-| File | Righe | Motivo |
-|------|-------|--------|
-| `src/lib/scoring.ts` | 221 | Legacy V4, nessun utilizzo |
+Il manuale definisce S19 e S20 diversamente dal codice:
 
-### File da Modificare
+| Codice | Manuale V2.0 | Codice Attuale |
+|--------|-------------|----------------|
+| S19 | RC MOLTO ALTA (RC >= 45) | RC GRAVE (RC <= -29) — Questa e S20! |
+| S20 | RC MOLTO BASSA (RC < -29) | Non esiste — implementata come S19 |
+| SS6 | Non esiste nel manuale | RC ELEVATA (RC >= 45) — Questa e S19! |
+
+Il codice ha invertito S19 e S20, e ha messo S19 come SS6.
+
+**Azione:**
+- Rinominare `checkS19_RCGrave` in `checkS20_RCMoltoBassa` (codice S20, RC<=-29)
+- Rinominare `checkSS6_RCElevata` in `checkS19_RCMoltoAlta` (codice S19, RC>=45)
+- Spostare S19 tra le sindromi primarie e rimuovere SS6
+
+---
+
+## 4. CROSS PATTERNS — 6 PATTERN MANCANTI (MEDIO)
+
+**File:** `src/lib/crossPatternsV5.ts`
+
+Pattern presenti nel manuale ma assenti nel codice:
+
+| Pattern | Condizione Manuale | Descrizione |
+|---------|-------------------|-------------|
+| VEN alta + PRI bassi | VEN alta E PRI bassi | Il Venditore Senza Etica: vende bene ma senza principi |
+| ORG alta + ESP bassa | ORG alta E ESP bassa | Il Pianificatore Solitario: piani perfetti, nessuno coinvolto |
+| AUT alta + PRO bassa | AUT alta E PRO bassa | L'Ambizioso Reattivo: ambizioso ma prende critiche come attacchi |
+| ESP alta + ORG bassa + AUT bassa | ESP>49, ORG<26, AUT<30 | L'Avere > Essere: conosce tutti ma senza direzione |
+| GP alto (piu alto) + DET bassa | GP = tratto piu alto E DET bassa | Il Non-Affrontatore: non chiude mai le situazioni |
+| PRO alta + COM alta + ESP alta | PRO alta, COM alta, ESP alta | Il Costruttore di Relazioni (pattern positivo) |
+
+Pattern con condizioni errate nel codice:
+
+| Pattern Codice | Condizione Codice | Condizione Manuale |
+|---------------|------------------|-------------------|
+| base_eccellenza | ORG>40, ADS>40, DET>35 | ORG alta + AUT alta + ADS alta (Il Realizzatore) |
+| collante_team | PRO>20, COM>15, HRM>10 | PRO alta + COM alta + ESP alta (Costruttore Relazioni) |
+
+**Azione:** Aggiungere i 6 pattern mancanti e correggere le condizioni dei 2 esistenti.
+
+---
+
+## 5. ROLE MATCHING — DISCREPANZE SOGLIE (MEDIO)
+
+**File:** `src/lib/roleMatchingV5.ts`
+
+### Ruoli con soglie errate rispetto al manuale:
+
+**Responsabile Produzione** (Manuale pag. 30-31):
+
+| Tratto | Manuale | Codice |
+|--------|---------|--------|
+| ORG | > 44 | >= 50 |
+| GP | >= 21 | >= 35 |
+| ADS | > 44 | >= 45 |
+| DET | >= 30 | Non presente |
+| PRO | >= 10 | Non presente |
+| COM | >= -10 | Non presente |
+| RC | > -19 | Non presente |
+| PRI | >= 39 | Non presente |
+| Disqualifiers | S01-S06, S08, RC<=-19 | Solo ORG<35 e GP<21 |
+
+**Impiegato Amministrativo** (Manuale pag. 31):
+
+| Tratto | Manuale | Codice |
+|--------|---------|--------|
+| ORG | >= 30 | >= 40 |
+| ADS | >= 30 | >= 40 |
+| PRO | >= 10 | >= 20 |
+| RC | > -19 | <= 65 (max) |
+| PRI | >= 30 | Non presente |
+| Disqualifiers | S01-S05, S06, S14, RC<=-19 | Solo ORG<25, ADS<25 |
+
+**Operaio/Installatore** (Manuale pag. 31):
+
+| Tratto | Manuale | Codice |
+|--------|---------|--------|
+| ORG | >= 30 | >= 30 |
+| GP | >= 30 | >= 25 |
+| PRO | >= 20 | >= 15 |
+| Disqualifiers | S01, S02, S06 (varianti a/b/c) | Solo S01, S04 |
+
+**HR Recruiter / Selezionatore** (Manuale pag. 32):
+
+| Tratto | Manuale | Codice |
+|--------|---------|--------|
+| COM | >= 20 | >= 50 |
+| ESP | >= 20 | >= 35 |
+| PRO | >= 20 | >= 40 |
+| DET | >= 30 | Non presente |
+| ORG | >= 30 | >= 35 |
+| VEN | >= 20 | Non presente |
+| Disqualifiers | S01-S06, S08 | Solo S01, S04, S16 |
+
+**Addetto Marketing** (Manuale pag. 32):
+
+| Tratto | Manuale | Codice |
+|--------|---------|--------|
+| ORG | >= 30 | Non presente (code has ESP>=45, AUT>=40, PRO>=40) |
+| AUT | >= 25 | >= 40 |
+| VEN | >= 25 | Non presente |
+| ESP | >= 15 | >= 45 |
+| Disqualifiers | S01-S04, S06, S15 | Solo ESP<30, RC>55 |
+
+**Responsabile Vendite / Dir. Commerciale / DG** (Manuale pag. 30):
+Il manuale definisce un unico ruolo combinato con: ORG>40, AUT>=35, ADS>39, DET>=35, PRI>=45, e PRO>=20 o COM>=30. Il codice ha ruoli separati (Direttore Commerciale e Direttore Generale) con soglie molto diverse.
+
+**Azione:** Aggiornare le soglie di tutti i ruoli con i valori esatti dal manuale. Aggiornare i disqualifier mancanti.
+
+---
+
+## 6. RUOLI EXTRA NON NEL MANUALE (BASSO)
+
+Il codice include 8 ruoli non definiti nel manuale V2.0:
+- Direttore Generale
+- HR Manager
+- Responsabile Tecnico
+- Buyer/Acquisti
+- Direttore Commerciale
+- Capocantiere
+- Commerciale Edilizia
+- Project Manager
+- Assistente di Direzione
+
+Questi ruoli hanno soglie inventate (non validate dal manuale). Non vanno rimossi ma vanno segnalati come "non validati dal Manuale V2.0".
+
+---
+
+## 7. RIEPILOGO MODIFICHE NECESSARIE
 
 | File | Modifica | Priorita |
 |------|----------|----------|
-| `src/lib/scoringV5.ts` | Fix attendibilita candidati legacy | ALTA |
-| `src/pages/FormAnagrafico.tsx` | Integrare validazione Zod | MEDIA |
-| `src/pages/Candidati.tsx` | Rimuovere import duplicato DateRangePicker | BASSA |
+| `src/lib/scoringV5.ts` | Riscrivere `determinaProfiloTipoV5()` con criteri manuale | CRITICA |
+| `src/lib/scoringV5.ts` | Correggere tutte le soglie in `getFasciaInterpretativa()` | CRITICA |
+| `src/lib/syndromes.ts` | Correggere numerazione S19/S20/SS6 | ALTA |
+| `src/lib/crossPatternsV5.ts` | Aggiungere 6 pattern mancanti, correggere 2 esistenti | MEDIA |
+| `src/lib/roleMatchingV5.ts` | Aggiornare soglie e disqualifier per 6+ ruoli | MEDIA |
+| `src/lib/profiloTipoV5Extended.ts` | Aggiornare testi descrittivi per riflettere nuovi criteri | BASSA |
 
-### Nessuna Modifica Necessaria
+### Cosa e gia corretto e allineato:
 
-| Area | Stato |
-|------|-------|
-| Questionario 242 domande | OK - sincronizzato con DB |
-| Soglie attendibilita | OK - allineate a Manuale V2.0 |
-| Funzioni dropdown | OK - 9 funzioni presenti |
-| Skeleton loading | OK - implementati |
-| Error handling | OK - ErrorBoundary + retry logic |
-| Mobile UX | OK - touch targets, safe areas |
-
----
-
-## 6. DETTAGLI TECNICI
-
-### Struttura Domande V5
-
-Il file `src/data/questionario.ts` contiene tutte le 242 domande sincronizzate:
-- Blocco 1-200: Questionario base
-- Blocco 201-237: Approfondimenti VEN, FIN, SUC, AUT, PRI
-- Blocco 238-242: Domande di controllo (CTRL)
-
-### Scoring V5 Verificato
-
-La funzione `calcolaProfiloV5()` in `scoringV5.ts`:
-- Usa scala 0-10 (A=10, B=5, C=0)
-- Gestisce polarita SPECIAL per domande 72, 73, 211-213, 228
-- Normalizza a range -100/+100
-- Calcola macro-aree ESSERE/FARE/AVERE
-- Determina profilo tipo V5
-
-### Edge Function Sincronizzata
-
-`batch-ricalcolo-v5` e stato aggiornato per usare:
-- Scala 0-10 invece di 0-2
-- SPECIAL_SCORING per domande speciali
-- TRAIT_MAX_SCORES per normalizzazione corretta
-- Soglie attendibilita V2.0
+- Scoring V5 (scala 0-10, formula normalizzazione, SPECIAL_SCORING)
+- 242 domande sincronizzate con database
+- Soglie attendibilita (0-1/2-3/4-5 del Manuale V2.0)
+- Macro-aree ESSERE/FARE/AVERE (formula di calcolo)
+- Logica valli/forza/miglioramento
+- Struttura report 10 sezioni
+- 15 tratti + CTRL
+- Domande di controllo 238-242
 
 ---
 
-## 7. CONFERMA TEST FINALE
+## 8. IMPATTO POST-IMPLEMENTAZIONE
 
-Prima di confermare "TUTTO OK", eseguiro:
+Dopo le modifiche sara necessario:
+1. Ricalcolo batch di tutti i profili (per aggiornare profilo_tipo_v5)
+2. Verifica che i report candidato riflettano le nuove fasce
+3. Test delle sindromi con profili reali
+4. Verifica dei match ruolo con i nuovi disqualifier
 
-1. **Test Questionario**: Navigazione completa 242 domande
-2. **Test Scoring**: Verifica calcolo punteggi V5
-3. **Test Attendibilita**: Verifica soglie 0-1/2-3/4-5
-4. **Test Mobile**: Verifica responsiveness e touch targets
-5. **Console Check**: Verifica assenza errori JavaScript
-
----
-
-## OUTPUT ATTESO
-
-Dopo implementazione:
-
-| Metrica | Prima | Dopo |
-|---------|-------|------|
-| File legacy | 1 | 0 |
-| Import inutili | 1 | 0 |
-| Bug attendibilita legacy | 1 | 0 |
-| Warning console (progetto) | 0 | 0 |
-| Copertura validazione | Parziale | Completa |
-
-**Stima impatto bundle**: -3KB circa (rimozione scoring.ts legacy)
