@@ -26,10 +26,10 @@ export const CROSS_PATTERNS: CrossPattern[] = [
   
   {
     id: 'base_eccellenza',
-    nome: 'Base di Eccellenza',
+    nome: 'Il Realizzatore',
     tipo: 'positivo',
-    condition: (t) => t.ORG > 40 && t.ADS > 40 && t.DET > 35,
-    testo: "[Nome] ha le tre colonne portanti dell'efficacia professionale: sa cosa fare (ORG), lo fa (ADS), e lo dice (DET). Questa combinazione è rara e preziosa. Le persone così non hanno bisogno di supervisione: danno risultati in autonomia. Sono i pilastri su cui costruire un'organizzazione solida. Il manager ideale deve solo indicare la direzione e togliersi di mezzo.",
+    condition: (t) => t.ORG > 40 && t.AUT > 40 && t.ADS > 40,
+    testo: "[Nome] ha le tre colonne portanti dell'efficacia professionale: sa dove vuole andare (ORG), ci crede (AUT), e lavora con metodo (ADS). Questa combinazione è rara e preziosa. Le persone così non hanno bisogno di supervisione: danno risultati in autonomia. Sono i pilastri su cui costruire un'organizzazione solida. Il manager ideale deve solo indicare la direzione e togliersi di mezzo.",
     priorita: 1
   },
   
@@ -44,10 +44,10 @@ export const CROSS_PATTERNS: CrossPattern[] = [
   
   {
     id: 'collante_team',
-    nome: 'Collante del Team',
+    nome: 'Il Costruttore di Relazioni',
     tipo: 'positivo',
-    condition: (t) => t.PRO > 20 && t.COM > 15 && t.HRM > 10,
-    testo: "[Nome] è il collante naturale di qualsiasi team. Quando c'è tensione, stempera. Quando qualcuno è in difficoltà, aiuta. Quando serve comprensione, la offre. Quando serve far crescere qualcuno, sa come farlo. Queste persone rendono l'ambiente di lavoro migliore per tutti e il loro valore va ben oltre le loro prestazioni individuali.",
+    condition: (t) => t.PRO > 20 && t.COM > 15 && t.ESP > 15,
+    testo: "[Nome] è il costruttore naturale di relazioni. Quando c'è tensione, stempera. Quando qualcuno è in difficoltà, aiuta. Quando serve comprensione, la offre. Ha una rete estesa e sa coinvolgere. Queste persone rendono l'ambiente di lavoro migliore per tutti e il loro valore va ben oltre le loro prestazioni individuali.",
     priorita: 3
   },
   
@@ -215,7 +215,60 @@ export const CROSS_PATTERNS: CrossPattern[] = [
     condition: (t) => t.VEN > 40 && t.DET > 40 && t.COM < -15,
     testo: "[Nome] sa parlare e sa essere diretta, ma non sa ascoltare. La sua comunicazione è potente ma unidirezionale: trasmette ma non riceve. Questo la rende efficace nel breve termine (convince, chiude, vende) ma devastante nel lungo termine (le relazioni si deteriorano, i collaboratori si demotivano, i clienti non tornano).",
     priorita: 2
-  }
+  },
+
+  // ==========================================
+  // PATTERN MANCANTI DAL MANUALE V2.0
+  // ==========================================
+
+  {
+    id: 'venditore_senza_etica',
+    nome: 'Il Venditore Senza Etica',
+    tipo: 'critico',
+    condition: (t) => t.VEN > 40 && t.PRI < 30,
+    testo: "[Nome] vende bene ma senza principi solidi. Questa combinazione è pericolosa: raggiunge gli obiettivi ma con metodi discutibili. Può promettere ciò che non può mantenere, gonfiare i numeri, o sacrificare la relazione di lungo termine per la chiusura immediata. Il rischio per l'azienda è reputazionale e legale.",
+    priorita: 1
+  },
+
+  {
+    id: 'pianificatore_solitario',
+    nome: 'Il Pianificatore Solitario',
+    tipo: 'critico',
+    condition: (t) => t.ORG > 50 && t.ESP < 15,
+    testo: "[Nome] crea piani perfetti che nessuno conosce. Organizza tutto nei minimi dettagli ma non comunica, non coinvolge, non condivide. Il risultato: piani eccellenti che restano nel cassetto perché nessuno sa che esistono. Per sbloccare questa persona, serve forzare la condivisione sistematica del suo lavoro.",
+    priorita: 2
+  },
+
+  {
+    id: 'ambizioso_reattivo',
+    nome: "L'Ambizioso Reattivo",
+    tipo: 'critico',
+    condition: (t) => t.AUT > 50 && t.PRO < 10,
+    testo: "[Nome] è ambizioso ma prende le critiche come attacchi personali. Ha grandi aspirazioni ma reagisce male al feedback negativo. Invece di usare le osservazioni per crescere, le vive come minacce alla sua identità. Questo crea un muro invisibile tra la persona e chi potrebbe aiutarla a migliorare.",
+    priorita: 2
+  },
+
+  {
+    id: 'avere_senza_essere',
+    nome: "L'Avere Senza Essere",
+    tipo: 'critico',
+    condition: (t) => t.ESP > 49 && t.ORG < 26 && t.AUT < 30,
+    testo: "[Nome] conosce tutti ma non sa dove sta andando. Ha una rete estesa, è conosciuta e apprezzata - ma senza direzione e senza ambizione. Il suo network è un asset inutilizzato perché manca il contenuto: visione, pianificazione, drive. Le relazioni restano superficiali perché non portano a nulla di concreto.",
+    priorita: 2
+  },
+
+  {
+    id: 'non_affrontatore',
+    nome: 'Il Non-Affrontatore',
+    tipo: 'critico',
+    condition: (t, _macro, _eta) => {
+      const mainTraits: (keyof typeof t)[] = ['ORG', 'AUT', 'GP', 'ADS', 'DET', 'VEN', 'HRM', 'LDR', 'PRO', 'COM', 'ESP'];
+      const maxTrait = Math.max(...mainTraits.map(k => t[k]));
+      return t.GP === maxTrait && t.GP > 0 && t.DET < 30;
+    },
+    testo: "[Nome] non chiude mai le situazioni. GP è il tratto più alto: significa che evita i confronti, rimanda le decisioni difficili, e non affronta i problemi di petto. Se è anche basso in DET, il quadro peggiora: ha paura di dire le cose e non chiude mai le trattative. Per ruoli commerciali o di responsabilità, questo è un blocco critico.",
+    priorita: 1
+  },
 ];
 
 // Helper per trovare tutti i pattern attivi per un profilo

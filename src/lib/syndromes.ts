@@ -320,14 +320,29 @@ function checkS18_Ego(ctx: SyndromeCheckContext): SyndromeResult {
   };
 }
 
-// S19: RC GRAVE (Manuale V2 - RC < -29)
-function checkS19_RCGrave(ctx: SyndromeCheckContext): SyndromeResult {
+// S19: RC MOLTO ALTA (Manuale V2.0 - RC >= 45)
+function checkS19_RCMoltoAlta(ctx: SyndromeCheckContext): SyndromeResult {
+  const { RC } = ctx.traits;
+  const isActive = RC >= 45;
+  
+  return {
+    code: 'S19',
+    name: 'RC MOLTO ALTA',
+    severity: 'YELLOW',
+    description: 'Rigidità elevata. Resiste ai cambiamenti, si giustifica. Gestire con numeri e fatti concreti.',
+    isActive,
+    category: 'primary'
+  };
+}
+
+// S20: RC MOLTO BASSA (Manuale V2.0 - RC <= -29)
+function checkS20_RCMoltoBassa(ctx: SyndromeCheckContext): SyndromeResult {
   const { RC } = ctx.traits;
   const isActive = RC <= -29;
   
   return {
-    code: 'S19',
-    name: 'RC GRAVE',
+    code: 'S20',
+    name: 'RC MOLTO BASSA',
     severity: 'ORANGE',
     description: 'Altamente dispersiva, impulsiva. Vulcano di idee ma non ne completa nessuna. Cambia continuamente direzione.',
     isActive,
@@ -409,19 +424,7 @@ function checkSS5_Zerbino(ctx: SyndromeCheckContext): SyndromeResult {
   };
 }
 
-function checkSS6_RCElevata(ctx: SyndromeCheckContext): SyndromeResult {
-  const { RC } = ctx.traits;
-  const isActive = RC >= 45;
-  
-  return {
-    code: 'SS6',
-    name: 'RC ELEVATA',
-    severity: 'YELLOW',
-    description: 'Rigidità elevata. Resiste ai cambiamenti, si giustifica. Gestire con numeri.',
-    isActive,
-    category: 'secondary'
-  };
-}
+// SS6 removed — was duplicate of S19 (RC MOLTO ALTA) per Manuale V2.0
 
 // ============================================
 // FUNZIONE PRINCIPALE
@@ -466,14 +469,14 @@ export function checkAllSyndromes(
     checkS16_BruttoCarattere(ctx),
     checkS17_GPPiuAlto(ctx),
     checkS18_Ego(ctx),
-    checkS19_RCGrave(ctx),
+    checkS19_RCMoltoAlta(ctx),
+    checkS20_RCMoltoBassa(ctx),
     // Secondarie
     checkSS1_FaCoseMaNonLeFaFare(ctx),
     checkSS2_DisaccordoImportante(ctx),
     checkSS3_Perfezionista(ctx),
     checkSS4_Esecutore(ctx),
     checkSS5_Zerbino(ctx),
-    checkSS6_RCElevata(ctx),
   ];
   
   return allSyndromes;
