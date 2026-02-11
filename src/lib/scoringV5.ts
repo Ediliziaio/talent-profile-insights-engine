@@ -504,24 +504,34 @@ export function getFasciaInterpretativa(trait: TraitCode, score: number): {
   // Soglie specifiche per tratto (dal Manuale V5)
   const soglie: Record<TraitCode, { eccellente: number; buono: number; discreto: number; mediocre: number }> = {
     ORG: { eccellente: 65, buono: 40, discreto: 30, mediocre: 0 },
-    AUT: { eccellente: 60, buono: 35, discreto: 20, mediocre: 0 },
+    AUT: { eccellente: 70, buono: 35, discreto: 20, mediocre: 0 },
     GP: { eccellente: 65, buono: 30, discreto: 21, mediocre: 0 },
     ADS: { eccellente: 55, buono: 30, discreto: 20, mediocre: 0 },
     DET: { eccellente: 55, buono: 35, discreto: 20, mediocre: 0 },
     VEN: { eccellente: 60, buono: 40, discreto: 30, mediocre: 0 },
     HRM: { eccellente: 40, buono: 20, discreto: 10, mediocre: -15 },
-    LDR: { eccellente: 55, buono: 44, discreto: 30, mediocre: -20 },
-    PRO: { eccellente: 40, buono: 20, discreto: 10, mediocre: 0 },
-    COM: { eccellente: 40, buono: 25, discreto: 0, mediocre: -15 },
+    LDR: { eccellente: 55, buono: 44, discreto: 30, mediocre: 10 },
+    PRO: { eccellente: 50, buono: 20, discreto: 10, mediocre: 0 },
+    COM: { eccellente: 40, buono: 25, discreto: 15, mediocre: -15 },
     ESP: { eccellente: 50, buono: 30, discreto: 15, mediocre: 0 },
-    RC: { eccellente: 45, buono: 30, discreto: 15, mediocre: -14 },  // RC ha interpretazione speciale
-    FIN: { eccellente: 50, buono: 30, discreto: 0, mediocre: -15 },
-    SUC: { eccellente: 69, buono: 50, discreto: 0, mediocre: -30 },
+    RC: { eccellente: 45, buono: 30, discreto: 15, mediocre: -14 },  // RC ha interpretazione speciale (zona ottimale 20-45)
+    FIN: { eccellente: 50, buono: 30, discreto: 15, mediocre: -15 },
+    SUC: { eccellente: 69, buono: 50, discreto: 30, mediocre: -30 },
     PRI: { eccellente: 60, buono: 40, discreto: 20, mediocre: 0 },
     CTRL: { eccellente: 0, buono: 0, discreto: 0, mediocre: 0 },  // CTRL non ha interpretazione
   };
   
   const s = soglie[trait];
+  
+  // RC ha interpretazione speciale: zona ottimale 20-45, troppo alto O troppo basso è problematico
+  if (trait === 'RC') {
+    if (score >= 20 && score <= 45) return { fascia: 'eccellente', descrizione: 'Zona Ottimale' };
+    if (score > 45 && score <= 55) return { fascia: 'discreto', descrizione: 'Rigida' };
+    if (score > 55) return { fascia: 'critico', descrizione: 'Molto Rigida' };
+    if (score >= -14 && score < 20) return { fascia: 'buono', descrizione: 'Flessibile' };
+    if (score >= -20 && score < -14) return { fascia: 'mediocre', descrizione: 'Molto Flessibile' };
+    return { fascia: 'critico', descrizione: 'ISP Confermato' };
+  }
   
   if (score >= s.eccellente) return { fascia: 'eccellente', descrizione: 'Eccellente' };
   if (score >= s.buono) return { fascia: 'buono', descrizione: 'Buono' };

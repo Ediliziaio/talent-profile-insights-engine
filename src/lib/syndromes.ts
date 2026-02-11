@@ -338,7 +338,7 @@ function checkS19_RCMoltoAlta(ctx: SyndromeCheckContext): SyndromeResult {
 // S20: RC MOLTO BASSA (Manuale V2.0 - RC <= -29)
 function checkS20_RCMoltoBassa(ctx: SyndromeCheckContext): SyndromeResult {
   const { RC } = ctx.traits;
-  const isActive = RC <= -29;
+  const isActive = RC < -29;
   
   return {
     code: 'S20',

@@ -121,8 +121,13 @@ export const ROLE_PROFILES_V5: Record<string, RoleProfileV5> = {
         severity: 'warning'
       },
       {
-        condition: (_, s) => s.some(syn => ['S01', 'S02', 'S03', 'S04', 'S05', 'S06', 'S07', 'S08'].includes(syn.code) && syn.isActive),
+        condition: (_, s) => s.some(syn => ['S01', 'S02', 'S03', 'S04', 'S05', 'S06', 'S14'].includes(syn.code) && syn.isActive),
         reason: 'Sindrome critica o problematica per ruolo amministrativo',
+        severity: 'blocking'
+      },
+      {
+        condition: (t, s) => s.some(syn => syn.code === 'S08' && syn.isActive) && t.COM <= 10,
+        reason: 'S08 (Ghost) con comprensione bassa: prestazioni inferiori al grafico',
         severity: 'blocking'
       },
       {
@@ -172,7 +177,7 @@ export const ROLE_PROFILES_V5: Record<string, RoleProfileV5> = {
         severity: 'blocking'
       },
       {
-        condition: (_, s) => s.some(syn => ['S01', 'S02', 'S03', 'S04', 'S05', 'S06', 'S07', 'S08'].includes(syn.code) && syn.isActive),
+        condition: (_, s) => s.some(syn => ['S01', 'S02', 'S03', 'S04', 'S05', 'S08', 'S12'].includes(syn.code) && syn.isActive),
         reason: 'Sindrome critica o problematica per ruolo commerciale',
         severity: 'blocking'
       },
@@ -227,8 +232,8 @@ export const ROLE_PROFILES_V5: Record<string, RoleProfileV5> = {
         severity: 'blocking'
       },
       {
-        condition: (_, s) => s.some(syn => ['S01', 'S04', 'S16'].includes(syn.code) && syn.isActive),
-        reason: 'Sindrome demotivante o brutto carattere: trasmetterà negatività ai clienti',
+        condition: (_, s) => s.some(syn => ['S01', 'S02', 'S03', 'S04', 'S06', 'S16'].includes(syn.code) && syn.isActive),
+        reason: 'Sindrome demotivante o problematica per ruolo customer care',
         severity: 'blocking'
       },
     ],
