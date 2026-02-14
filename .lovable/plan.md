@@ -1,68 +1,52 @@
 
 
-# Grafico a Candele Verticali per il Profilo Comportamentale
+# Fix e Miglioramenti Grafico a Candele
 
-## Cosa cambia
+## Problemi trovati
 
-Il grafico attuale (barre orizzontali con nomi a sinistra) viene sostituito da un grafico a **candele verticali** con i nomi dei tratti sull'asse X orizzontale. Ogni "candela" parte dal centro (valore 0) e si estende verso l'alto (positivo) o verso il basso (negativo).
+### 1. Le soglie rosse NON appaiono
+Il componente `<customized>` (riga 414, minuscolo) non funziona in Recharts. Il componente corretto e' `<Customized>` (C maiuscola) importato da `recharts`. Questo spiega perche' le soglie rosse e le etichette dei gruppi (ESSERE, FARE, AVERE, INDICATORI) non sono visibili nel grafico.
 
-## Design UX
+### 2. I valori possono andare sotto lo zero
+Si', il grafico GIA' supporta valori negativi (asse Y da -80 a +80). Questo candidato specifico ha tutti valori positivi, ma se un candidato avesse tratti negativi, le barre si estenderebbero verso il basso dalla linea zero.
 
-- **15 barre verticali** raggruppate per area (Essere, Fare, Avere, Indicatori) con colori distinti per gruppo
-- **Asse X**: nomi abbreviati dei tratti (ORG, AUT, GP, ecc.) con etichette complete visibili al passaggio del mouse
-- **Asse Y**: scala da -100 a +100, con linea zero evidenziata
-- **Zone colorate di sfondo**: verde (sopra +15), giallo (tra -15 e +15), rosso (sotto -15) per orientamento immediato
-- **Soglie ruolo**: marker rossi orizzontali (triangoli o linee) sulla barra corrispondente, visibili solo sui tratti che hanno requisiti per il ruolo selezionato
-- **Icone check/X**: sopra ogni barra che ha una soglia, per indicare se il requisito e' soddisfatto
-- **Tooltip ricco**: al passaggio mostra nome completo del tratto, valore numerico, etichetta qualitativa (Alto/Buono/Medio/Basso/Critico), e stato soglia
-- **Separatori visivi** tra i gruppi di area con label colorate (ESSERE, FARE, AVERE, INDICATORI)
-- **Responsive**: su mobile le etichette ruotano a 45 gradi e le barre si restringono
+## Modifiche
+
+### File: `src/components/TraitCandleChart.tsx`
+
+**Fix critico - Importare e usare `Customized` correttamente:**
+- Aggiungere `Customized` nell'import da `recharts`
+- Cambiare `<customized component={...} />` in `<Customized component={...} />`
+- Rimuovere il commento `@ts-ignore`
+
+**Miglioramenti UX:**
+1. **Etichette X piu' leggibili**: mostrare abbreviazioni piu' descrittive (es. "Org", "Aut", "GP") con font leggermente piu' grande
+2. **Gradient sulle barre**: aggiungere opacita' progressiva per dare profondita' visiva
+3. **Soglie rosse ben visibili**: linea tratteggiata rossa orizzontale sulla barra + triangoli indicatori
+4. **Icone check/X sopra le barre**: visibili a colpo d'occhio senza bisogno di hover
+5. **Hover effect**: barra si illumina leggermente al passaggio del mouse
 
 ## Dettaglio tecnico
 
-### File: `src/components/TraitCandleChart.tsx` (nuovo)
-Nuovo componente che usa Recharts (`BarChart` verticale standard, non layout="vertical"):
-- `XAxis` con `dataKey="code"` (codici tratto) e tick personalizzati
-- `YAxis` con domain `[-80, 80]` e tickFormatter per il segno +/-
-- `Bar` con `Cell` colorati per gruppo area
-- `ReferenceArea` per le zone verde/giallo/rosso
-- `ReferenceLine` a y=0
-- Soglie ruolo rese come `ReferenceDot` o marker SVG custom sulla barra corrispondente
-- Tooltip personalizzato con tutte le info
-- Legenda in basso con zone + soglie
+La modifica principale e' alla riga 414 del file:
 
-Le props restano le stesse di `TraitBarChart`:
-```
-traits: Record<string, number>
-thresholds?: TraitThreshold[]
-showThresholdIndicator?: boolean
-showValueLabels?: boolean
+```typescript
+// PRIMA (non funziona):
+{/* @ts-ignore */}
+<customized component={...} />
+
+// DOPO (funziona):
+<Customized component={...} />
 ```
 
-### File: `src/components/ProfiloUnificatoTab.tsx`
-- Sostituire `import { TraitBarChart }` con `import { TraitCandleChart }`
-- Alla riga 258, sostituire `<TraitBarChart ... />` con `<TraitCandleChart ... />`
-- Stesse props: `traits`, `thresholds`, `showThresholdIndicator`, `showValueLabels`
+Questo sblocca sia le etichette dei gruppi in alto (ESSERE, FARE, AVERE, INDICATORI) sia i marker delle soglie rosse con le icone check/X.
 
-### File: `src/components/TraitBarChart.tsx`
-Nessuna modifica: il componente resta disponibile per altri usi (es. PDF, confronto candidati).
+Nessun altro file necessita di modifiche - il `ProfiloUnificatoTab` gia' passa correttamente `thresholds` e `showThresholdIndicator` al componente.
 
-## Risultato visivo
+## Risultato atteso
 
-```text
-          ESSERE    |    FARE       |   AVERE      | INDICATORI
-  +80 ──────────────────────────────────────────────────────────
-       ██           |         ██    |              |
-  +40  ██    ██     |    ██   ██    |  ██   ██     |    ██
-       ██    ██     |    ██   ██ ▲  |  ██   ██     |    ██
-    0 ─██────██─────|────██───██────|──██───██─────|────██──────
-       ██         ██|              ██|         ██   |  ██
-  -40        ──   ██|    ──        ██|         ██   |  ██  ──
-                    |               |              |
-  -80 ──────────────────────────────────────────────────────────
-      ORG  AUT  GP   ADS DET VEN HRM LDR PRO COM ESP  RC FIN SUC PRI
+- Le soglie rosse appariranno come linee orizzontali sulla barra del tratto corrispondente
+- Le icone check (verde) e X (rossa) appariranno sopra ogni barra con soglia
+- Le etichette "ESSERE", "FARE", "AVERE", "INDICATORI" appariranno in alto raggruppate
+- Cambiando ruolo nel selettore, tutto si aggiornera' in tempo reale
 
-      ▲ = soglia minima ruolo    ██ verde = sopra soglia    ██ rosso = sotto soglia
-```
-
-Ogni barra ha il colore del suo gruppo (blu/ambra/viola/grigio) e le soglie appaiono come marcatori rossi.
