@@ -233,6 +233,7 @@ export const RUOLI_AZIENDALI = [
 // Funzioni aziendali aggiornate
 export const FUNZIONI = [
   'Direzione generale',
+  'Direzione commerciale',
   'Ufficio risorse umane',
   'Ufficio marketing',
   'Ufficio vendite',
@@ -240,5 +241,15 @@ export const FUNZIONI = [
   'Ufficio acquisti',
   'Produzione',
   'Logistica',
-  'Amministrazione'
+  'Amministrazione',
+  'Customer care',
+  'Selezione personale',
+  'Segreteria/Assistenza dir.',
+  'Project management',
+  'Impiegato amministrativo',
+  'Imprenditore',
+  'Consulenza',
+  'Coordinamento',
+  'Formazione',
+  'Qualità/Compliance',
 ];

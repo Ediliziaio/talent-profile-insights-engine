@@ -1,7 +1,7 @@
 /**
  * Sistema di Matching Ruoli V5 - Assessment Psicometrico
  * 
- * Matching per 17 mansioni basato sui 15 tratti V5:
+ * Matching per 19 mansioni basato sui 15 tratti V5:
  * - Responsabile Amministrativo
  * - Venditore/Commerciale
  * - Customer Care
@@ -12,13 +12,15 @@
  * - Buyer/Acquisti
  * - Responsabile Produzione/Logistica
  * - Direttore Commerciale
- * - Capocantiere
- * - Commerciale Edilizia
  * - HR Recruiter
  * - Impiegato Amministrativo
- * - Operaio/Installatore
  * - Project Manager
  * - Assistente di Direzione
+ * - Imprenditore/Titolare
+ * - Consulente Strategico
+ * - Team Leader/Coordinatore
+ * - Formatore/Coach
+ * - Responsabile Qualità/Compliance
  * 
  * Include disqualifier e soglie tratti dal Manuale V5
  */
@@ -533,87 +535,228 @@ export const ROLE_PROFILES_V5: Record<string, RoleProfileV5> = {
     validatoManualeV2: false,
   },
 
-  'Capocantiere': {
-    id: 'capocantiere',
-    nome: 'Capocantiere',
-    categoria: 'operativo',
-    descrizione: 'Gestione cantiere edile, coordinamento maestranze, sicurezza, tempistiche',
+  'Imprenditore/Titolare': {
+    id: 'imprenditore',
+    nome: 'Imprenditore/Titolare',
+    categoria: 'direzione',
+    descrizione: 'Visione strategica, assunzione rischio, costruzione team, decisionalità a 360°',
     requisiti: [
-      { trait: 'ORG', soglia: 50, tipo: 'min', isCritical: true, label: 'Organizzazione ≥ 50' },
-      { trait: 'GP', soglia: 45, tipo: 'min', isCritical: true, label: 'Gestione Pressioni ≥ 45' },
-      { trait: 'LDR', soglia: 40, tipo: 'min', isCritical: true, label: 'Leadership ≥ 40' },
-      { trait: 'ADS', soglia: 40, tipo: 'min', isCritical: true, label: 'Autodisciplina ≥ 40' },
+      { trait: 'LDR', soglia: 45, tipo: 'min', isCritical: true, label: 'Leadership ≥ 45' },
+      { trait: 'PRO', soglia: 40, tipo: 'min', isCritical: true, label: 'Proattività ≥ 40' },
+      { trait: 'GP', soglia: 40, tipo: 'min', isCritical: true, label: 'Gestione Pressioni ≥ 40' },
+      { trait: 'AUT', soglia: 40, tipo: 'min', isCritical: true, label: 'Automotivazione ≥ 40' },
       { trait: 'DET', soglia: 35, tipo: 'min', isCritical: false, label: 'Determinazione ≥ 35' },
+      { trait: 'VEN', soglia: 20, tipo: 'min', isCritical: false, label: 'Attitudine Vendita ≥ 20' },
     ],
     disqualifiers: [
       {
-        condition: (t) => t.ORG < 35,
-        reason: 'Organizzazione insufficiente per gestire un cantiere',
+        condition: (t) => t.LDR < 30,
+        reason: 'Leadership insufficiente per ruolo imprenditoriale',
         severity: 'blocking'
       },
       {
-        condition: (t) => t.GP < 30,
-        reason: 'Non regge la pressione tipica del cantiere',
+        condition: (t) => t.GP < 25,
+        reason: 'Non regge la pressione imprenditoriale',
         severity: 'blocking'
       },
       {
-        condition: (t) => t.LDR < 25,
-        reason: 'Incapace di comandare le maestranze',
+        condition: (t) => t.PRO < 20,
+        reason: 'Troppo passivo per guidare un\'impresa',
         severity: 'blocking'
       },
       {
-        condition: (_, s) => s.some(syn => ['S01', 'S04', 'S05'].includes(syn.code) && syn.isActive),
-        reason: 'Demotivante: causerà turnover e problemi di sicurezza',
+        condition: (_, s) => s.some(syn => ['S01', 'S02', 'S03', 'S04'].includes(syn.code) && syn.isActive),
+        reason: 'Sindrome critica: rischio elevato per ruolo imprenditoriale',
         severity: 'blocking'
       },
     ],
-    profiloIdeale: 'Comandante di cantiere. Polso fermo, organizzato, sa far rispettare tempi e sicurezza.',
-    trattiFondamentali: ['ORG', 'GP', 'LDR', 'ADS'],
+    profiloIdeale: 'Visionario pragmatico. Decide, rischia, costruisce, ispira. Alto su tutti gli assi.',
+    trattiFondamentali: ['LDR', 'PRO', 'GP', 'AUT', 'DET'],
     domandeColloquio: [
-      'Come gestisce ritardi dovuti a maltempo o imprevisti?',
-      'Racconti di un problema di sicurezza che ha risolto.',
-      'Come fa rispettare le regole a maestranze difficili?',
-      'Come gestisce più subappaltatori contemporaneamente?',
+      'Qual è la decisione più rischiosa che ha preso e come è andata?',
+      'Come costruisce e motiva il suo team?',
+      'Racconti di un fallimento e cosa ha imparato.',
+      'Come bilancia visione a lungo termine e operatività quotidiana?',
     ],
     validatoManualeV2: false,
   },
 
-  'Commerciale Edilizia': {
-    id: 'comm_edilizia',
-    nome: 'Commerciale Edilizia',
-    categoria: 'commerciale',
-    descrizione: 'Vendita prodotti/servizi edilizia, consulenza tecnico-commerciale',
+  'Consulente Strategico': {
+    id: 'consulente_strat',
+    nome: 'Consulente Strategico',
+    categoria: 'tecnico',
+    descrizione: 'Analisi strategica, consulenza direzionale, problem solving ad alto livello',
     requisiti: [
-      { trait: 'VEN', soglia: 45, tipo: 'min', isCritical: true, label: 'Attitudine Vendita ≥ 45' },
-      { trait: 'DET', soglia: 40, tipo: 'min', isCritical: true, label: 'Determinazione ≥ 40' },
-      { trait: 'ORG', soglia: 35, tipo: 'min', isCritical: true, label: 'Organizzazione ≥ 35' },
-      { trait: 'ESP', soglia: 35, tipo: 'min', isCritical: false, label: 'Espansività ≥ 35' },
-      { trait: 'ADS', soglia: 30, tipo: 'min', isCritical: false, label: 'Autodisciplina ≥ 30' },
+      { trait: 'ORG', soglia: 45, tipo: 'min', isCritical: true, label: 'Organizzazione ≥ 45' },
+      { trait: 'AUT', soglia: 40, tipo: 'min', isCritical: true, label: 'Automotivazione ≥ 40' },
+      { trait: 'PRO', soglia: 35, tipo: 'min', isCritical: true, label: 'Proattività ≥ 35' },
+      { trait: 'COM', soglia: 30, tipo: 'min', isCritical: false, label: 'Comprensione ≥ 30' },
+      { trait: 'GP', soglia: 30, tipo: 'min', isCritical: false, label: 'Gestione Pressioni ≥ 30' },
     ],
     disqualifiers: [
       {
-        condition: (t) => t.VEN < 30,
-        reason: 'Attitudine vendita insufficiente',
+        condition: (t) => t.ORG < 30,
+        reason: 'Organizzazione insufficiente per analisi complesse',
         severity: 'blocking'
       },
       {
-        condition: (t) => t.ORG < 20,
-        reason: 'Troppo disorganizzato per gestire progetti complessi',
+        condition: (t) => t.AUT < 25,
+        reason: 'Automotivazione insufficiente per lavoro autonomo',
         severity: 'blocking'
       },
       {
-        condition: (t) => t.GP < 21,
-        reason: 'PSP: non regge trattative lunghe e pressioni cliente',
+        condition: (_, s) => s.some(syn => ['S01', 'S02', 'S03', 'S04'].includes(syn.code) && syn.isActive),
+        reason: 'Sindrome critica: non può fornire consulenza affidabile',
+        severity: 'blocking'
+      },
+      {
+        condition: (t) => t.RC > 60,
+        reason: 'Troppo rigido per proporre soluzioni innovative',
+        severity: 'warning'
+      },
+    ],
+    profiloIdeale: 'Pensatore analitico autonomo. Vede pattern, propone soluzioni, comunica con chiarezza.',
+    trattiFondamentali: ['ORG', 'AUT', 'PRO', 'COM'],
+    domandeColloquio: [
+      'Racconti di un problema complesso che ha risolto con un approccio innovativo.',
+      'Come presenta raccomandazioni scomode al cliente?',
+      'Come gestisce l\'autonomia e l\'organizzazione del suo lavoro?',
+      'Qual è il suo approccio metodologico nell\'analisi strategica?',
+    ],
+    validatoManualeV2: false,
+  },
+
+  'Team Leader/Coordinatore': {
+    id: 'team_leader',
+    nome: 'Team Leader/Coordinatore',
+    categoria: 'direzione',
+    descrizione: 'Leadership intermedia, coordinamento team, gestione persone senza ruolo dirigenziale',
+    requisiti: [
+      { trait: 'LDR', soglia: 35, tipo: 'min', isCritical: true, label: 'Leadership ≥ 35' },
+      { trait: 'COM', soglia: 25, tipo: 'min', isCritical: true, label: 'Comprensione ≥ 25' },
+      { trait: 'HRM', soglia: 30, tipo: 'min', isCritical: true, label: 'HR Management ≥ 30' },
+      { trait: 'PRO', soglia: 30, tipo: 'min', isCritical: false, label: 'Proattività ≥ 30' },
+      { trait: 'GP', soglia: 30, tipo: 'min', isCritical: false, label: 'Gestione Pressioni ≥ 30' },
+    ],
+    disqualifiers: [
+      {
+        condition: (t) => t.LDR < 20,
+        reason: 'Leadership insufficiente per coordinare un team',
+        severity: 'blocking'
+      },
+      {
+        condition: (t) => t.HRM < 15,
+        reason: 'Incapace di gestire le dinamiche di gruppo',
+        severity: 'blocking'
+      },
+      {
+        condition: (t) => t.COM < 10,
+        reason: 'Comprensione troppo bassa per gestire persone',
+        severity: 'blocking'
+      },
+      {
+        condition: (_, s) => s.some(syn => ['S01', 'S04', 'S05'].includes(syn.code) && syn.isActive),
+        reason: 'Sindrome demotivante: danneggerà il morale del team',
         severity: 'blocking'
       },
     ],
-    profiloIdeale: 'Consulente tecnico-commerciale. Capisce il prodotto, lo sa vendere, segue il progetto.',
-    trattiFondamentali: ['VEN', 'DET', 'ORG', 'ADS'],
+    profiloIdeale: 'Leader di prossimità. Guida con l\'esempio, ascolta, coordina senza imporre.',
+    trattiFondamentali: ['LDR', 'COM', 'HRM', 'PRO'],
     domandeColloquio: [
-      'Come gestisce una trattativa che dura mesi?',
-      'Racconti di un progetto complesso che ha portato a casa.',
-      'Come bilancia esigenze tecniche e commerciali?',
-      'Come gestisce il post-vendita e i reclami?',
+      'Come motiva un collega in difficoltà?',
+      'Racconti di un conflitto nel team e come lo ha risolto.',
+      'Come bilancia le esigenze del team con gli obiettivi aziendali?',
+      'Come gestisce un membro del team che non collabora?',
+    ],
+    validatoManualeV2: false,
+  },
+
+  'Formatore/Coach': {
+    id: 'formatore',
+    nome: 'Formatore/Coach',
+    categoria: 'tecnico',
+    descrizione: 'Formazione, coaching, sviluppo competenze, trasmissione know-how',
+    requisiti: [
+      { trait: 'COM', soglia: 35, tipo: 'min', isCritical: true, label: 'Comprensione ≥ 35' },
+      { trait: 'HRM', soglia: 35, tipo: 'min', isCritical: true, label: 'HR Management ≥ 35' },
+      { trait: 'PRO', soglia: 30, tipo: 'min', isCritical: true, label: 'Proattività ≥ 30' },
+      { trait: 'ESP', soglia: 25, tipo: 'min', isCritical: false, label: 'Espansività ≥ 25' },
+      { trait: 'DET', soglia: 25, tipo: 'min', isCritical: false, label: 'Determinazione ≥ 25' },
+    ],
+    disqualifiers: [
+      {
+        condition: (t) => t.COM < 20,
+        reason: 'Comprensione insufficiente per capire i bisogni formativi',
+        severity: 'blocking'
+      },
+      {
+        condition: (t) => t.ESP < 10,
+        reason: 'Espansività troppo bassa per comunicare efficacemente',
+        severity: 'blocking'
+      },
+      {
+        condition: (t) => t.PRO < 15,
+        reason: 'Troppo passivo per stimolare l\'apprendimento',
+        severity: 'blocking'
+      },
+      {
+        condition: (_, s) => s.some(syn => ['S01', 'S04', 'S05', 'S06'].includes(syn.code) && syn.isActive),
+        reason: 'Sindrome problematica per ruolo formativo',
+        severity: 'blocking'
+      },
+    ],
+    profiloIdeale: 'Trasmettitore di sapere. Empatico, paziente, ispira crescita negli altri.',
+    trattiFondamentali: ['COM', 'HRM', 'PRO', 'ESP'],
+    domandeColloquio: [
+      'Come adatta il suo stile formativo a persone diverse?',
+      'Racconti di una persona che ha fatto crescere significativamente.',
+      'Come gestisce un partecipante demotivato o resistente?',
+      'Qual è il suo approccio per rendere coinvolgente un argomento complesso?',
+    ],
+    validatoManualeV2: false,
+  },
+
+  'Responsabile Qualità/Compliance': {
+    id: 'resp_qualita',
+    nome: 'Responsabile Qualità/Compliance',
+    categoria: 'amministrativo',
+    descrizione: 'Controllo qualità, conformità normativa, gestione processi e standard',
+    requisiti: [
+      { trait: 'ORG', soglia: 50, tipo: 'min', isCritical: true, label: 'Organizzazione ≥ 50' },
+      { trait: 'ADS', soglia: 45, tipo: 'min', isCritical: true, label: 'Autodisciplina ≥ 45' },
+      { trait: 'PRI', soglia: 50, tipo: 'min', isCritical: true, label: 'Principi ≥ 50' },
+      { trait: 'RC', soglia: 10, tipo: 'min', isCritical: false, label: 'RC ≥ 10 (rigore procedurale)' },
+      { trait: 'GP', soglia: 25, tipo: 'min', isCritical: false, label: 'Gestione Pressioni ≥ 25' },
+    ],
+    disqualifiers: [
+      {
+        condition: (t) => t.ORG < 35,
+        reason: 'Organizzazione insufficiente per gestire standard qualitativi',
+        severity: 'blocking'
+      },
+      {
+        condition: (t) => t.PRI < 35,
+        reason: 'Principi troppo bassi per garantire conformità',
+        severity: 'blocking'
+      },
+      {
+        condition: (t) => t.ADS < 30,
+        reason: 'Autodisciplina insufficiente per lavoro di compliance',
+        severity: 'blocking'
+      },
+      {
+        condition: (_, s) => s.some(syn => ['S01', 'S02', 'S06'].includes(syn.code) && syn.isActive),
+        reason: 'Sindrome critica o etica per ruolo di garanzia qualità',
+        severity: 'blocking'
+      },
+    ],
+    profiloIdeale: 'Guardiano degli standard. Rigoroso, metodico, non scende a compromessi sulla qualità.',
+    trattiFondamentali: ['ORG', 'ADS', 'PRI'],
+    domandeColloquio: [
+      'Come gestisce la resistenza al cambiamento quando introduce nuovi standard?',
+      'Racconti di una non-conformità grave che ha scoperto e gestito.',
+      'Come bilancia rigore normativo e operatività aziendale?',
+      'Come si tiene aggiornato sulle normative del settore?',
     ],
     validatoManualeV2: false,
   },
@@ -707,45 +850,6 @@ export const ROLE_PROFILES_V5: Record<string, RoleProfileV5> = {
       'Racconti di un errore che ha scoperto e corretto.',
       'Come gestisce le scadenze multiple?',
       'Cosa le piace del lavoro amministrativo?',
-    ],
-    validatoManualeV2: true,
-  },
-
-  'Operaio/Installatore': {
-    id: 'operaio',
-    nome: 'Operaio/Installatore',
-    categoria: 'operativo',
-    descrizione: 'Lavoro manuale, installazione, posa, manutenzione',
-    // Soglie allineate al Manuale V2.0: ORG>=30, GP>=30, PRO>=20
-    requisiti: [
-      { trait: 'ORG', soglia: 30, tipo: 'min', isCritical: true, label: 'Organizzazione ≥ 30' },
-      { trait: 'GP', soglia: 30, tipo: 'min', isCritical: true, label: 'Gestione Pressioni ≥ 30' },
-      { trait: 'PRO', soglia: 20, tipo: 'min', isCritical: false, label: 'Proattività ≥ 20' },
-    ],
-    disqualifiers: [
-      {
-        condition: (_, s) => s.some(syn => ['S01', 'S02'].includes(syn.code) && syn.isActive),
-        reason: 'Sindrome critica: non idoneo',
-        severity: 'blocking'
-      },
-      {
-        condition: (_, s) => s.some(syn => syn.code === 'S06' && syn.isActive),
-        reason: 'Potenziali problemi di etica (S06 varianti a/b/c)',
-        severity: 'blocking'
-      },
-      {
-        condition: (t) => t.RC > 70,
-        reason: 'Troppo rigido per adattarsi a situazioni diverse',
-        severity: 'warning'
-      },
-    ],
-    profiloIdeale: 'Esecutore affidabile. Fa il suo lavoro bene, rispetta tempi e istruzioni.',
-    trattiFondamentali: ['ADS', 'ORG'],
-    domandeColloquio: [
-      'Racconti del lavoro che ha fatto meglio.',
-      'Come gestisce istruzioni poco chiare?',
-      'Cosa fa quando trova un problema imprevisto?',
-      'Come si trova a lavorare in squadra?',
     ],
     validatoManualeV2: true,
   },
@@ -1002,7 +1106,7 @@ export function calculateRoleMatchingV5(
 }
 
 /**
- * Calcola la compatibilità con TUTTI i 9 ruoli V5
+ * Calcola la compatibilità con TUTTI i 19 ruoli V5
  */
 export function calculateAllRolesCompatibilityV5(
   ruoloRichiesto: string,
@@ -1097,8 +1201,15 @@ const FUNZIONE_TO_RUOLO_MAP: Record<string, string> = {
   'Assistenza clienti': 'Customer Care',
   'Acquisti': 'Buyer/Acquisti',
   'Ufficio tecnico': 'Responsabile Tecnico',
-  'Cantiere': 'Capocantiere',
-  'Edilizia': 'Commerciale Edilizia',
+  'Ufficio acquisti': 'Buyer/Acquisti',
+  'Ufficio risorse umane': 'HR Manager',
+  'Direzione commerciale': 'Direttore Commerciale',
+  'Imprenditore': 'Imprenditore/Titolare',
+  'Titolare': 'Imprenditore/Titolare',
+  'Consulenza': 'Consulente Strategico',
+  'Coordinamento': 'Team Leader/Coordinatore',
+  'Formazione': 'Formatore/Coach',
+  'Qualità': 'Responsabile Qualità/Compliance',
 };
 
 /**
