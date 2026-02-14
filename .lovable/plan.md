@@ -1,25 +1,23 @@
 
-# Fix: Rimuovere artefatti celesti dietro i Gauge
+
+# Fix: Arco di sfondo gauge ancora troppo visibile
 
 ## Problema
-L'arco di sfondo dei gauge usa `stroke="hsl(var(--muted))"` che su sfondo colorato (rosa per NON IDONEO, verde per IDONEO, ecc.) appare come una striscia celeste/azzurrina visibile dietro l'arco colorato. Sembra un artefatto visivo.
+Il colore `rgba(0,0,0,0.08)` per l'arco di sfondo risulta ancora troppo contrastato sugli sfondi colorati delle card (rosa/rosso per NON IDONEO). Si vede chiaramente un arco grigio dietro l'arco colorato.
 
 ## Soluzione
-Cambiare il colore dell'arco di sfondo da `hsl(var(--muted))` a un colore semitrasparente che si adatti a qualsiasi sfondo della card.
 
-### File: `src/components/AreaGaugeSVG.tsx` (riga 50)
-Cambiare lo stroke dell'arco di sfondo da:
-```
-stroke="hsl(var(--muted))"
-```
-a:
-```
-stroke="rgba(0,0,0,0.08)"
-```
+### `src/components/AreaGaugeSVG.tsx` (riga 50)
+Ridurre drasticamente l'opacita' dell'arco di sfondo da `rgba(0,0,0,0.08)` a `rgba(0,0,0,0.04)` (4% invece di 8%).
 
-Questo usa un nero con 8% di opacita' che risulta come un leggero grigio su qualsiasi sfondo (bianco, rosa, verde, ambra, blu), senza creare l'effetto "croce celeste".
+In alternativa, se anche 4% risulta visibile, possiamo passare il colore di sfondo come prop dalla HeroCard, oppure usare `currentColor` con opacita' molto bassa.
+
+La soluzione piu' semplice e' dimezzare l'opacita':
+```
+stroke="rgba(0,0,0,0.04)"
+```
 
 ### Impatto
-- Una sola riga di codice modificata
-- Funziona su tutti i colori di sfondo delle card (tutti i verdict)
-- Nessun impatto su logica o layout
+- Una sola modifica di valore
+- L'arco di sfondo diventa quasi invisibile ma mantiene un riferimento visivo leggero
+- Funziona su tutti gli sfondi colorati
