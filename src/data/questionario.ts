@@ -17,6 +17,7 @@ export interface DomandaV5 {
   polarita: PolaritaV5;
   blocco_tematico: number;
   ordine: number;
+  risposte_custom?: { a: string; b: string; c: string };
 }
 
 export const DOMANDE: DomandaV5[] = [
@@ -96,8 +97,8 @@ export const DOMANDE: DomandaV5[] = [
   { id: 69, testo: "Sei abituato a misurare le tue prestazioni con numeri e obiettivi?", scala_primaria: 'ADS', polarita: '+', blocco_tematico: 3, ordine: 69 },
   { id: 70, testo: "Credi che seguire dei metodi collaudati sia la strada migliore?", scala_primaria: 'RC', polarita: '+', blocco_tematico: 3, ordine: 70 },
   { id: 71, testo: "Nella tua vita hai dovuto affrontare situazioni finanziarie molto difficili?", scala_primaria: 'FIN', polarita: '-', blocco_tematico: 3, ordine: 71 },
-  { id: 72, testo: "A che età hai iniziato a guadagnare denaro?", scala_primaria: 'SUC', polarita: 'S', blocco_tematico: 3, ordine: 72 },
-  { id: 73, testo: "Che percentuale del tuo reddito annuo riesci a mettere da parte?", scala_primaria: 'FIN', polarita: 'S', blocco_tematico: 3, ordine: 73 },
+  { id: 72, testo: "A che età hai iniziato a guadagnare denaro?", scala_primaria: 'SUC', polarita: 'S', blocco_tematico: 3, ordine: 72, risposte_custom: { a: 'Prima dei 21 anni', b: 'Tra i 21 e i 23 anni', c: 'Dopo i 23 anni' } },
+  { id: 73, testo: "Che percentuale del tuo reddito annuo riesci a mettere da parte?", scala_primaria: 'FIN', polarita: 'S', blocco_tematico: 3, ordine: 73, risposte_custom: { a: 'Meno del 5%', b: 'Tra il 5% e il 15%', c: 'Più del 15%' } },
   { id: 74, testo: "Le persone spesso si accendono e si entusiasmano per le tue parole?", scala_primaria: 'VEN', polarita: '+', blocco_tematico: 3, ordine: 74 },
   { id: 75, testo: "A volte hai la sensazione di essere osservato o che si stia parlando di te?", scala_primaria: 'GP', polarita: '-', blocco_tematico: 3, ordine: 75 },
 
@@ -113,7 +114,7 @@ export const DOMANDE: DomandaV5[] = [
   { id: 84, testo: "In una cena con sconosciuti sei il primo che va a presentarsi?", scala_primaria: 'ESP', polarita: '+', blocco_tematico: 4, ordine: 84 },
   { id: 85, testo: "A volte ti senti l'unico che si assume la responsabilità?", scala_primaria: 'HRM', polarita: '+', blocco_tematico: 4, ordine: 85 },
   { id: 86, testo: "Lavorare con un ritmo rapido e costante è vantaggioso?", scala_primaria: 'ADS', polarita: '+', blocco_tematico: 4, ordine: 86 },
-  { id: 87, testo: "Ti senti troppo giovane o troppo vecchio per migliorare?", scala_primaria: 'AUT', polarita: '-', blocco_tematico: 4, ordine: 87 },
+  { id: 87, testo: "Ti capita di pensare che ormai sia troppo tardi per migliorare?", scala_primaria: 'AUT', polarita: '-', blocco_tematico: 4, ordine: 87 },
   { id: 88, testo: "Credi che gli accordi possano cambiare se cambiano le situazioni?", scala_primaria: 'COM', polarita: '+', blocco_tematico: 4, ordine: 88 },
   { id: 89, testo: "È importante far rispettare la propria privacy?", scala_primaria: 'ESP', polarita: '-', blocco_tematico: 4, ordine: 89 },
   { id: 90, testo: "Riesci a stare anche per ore senza parlare con nessuno?", scala_primaria: 'ESP', polarita: '-', blocco_tematico: 4, ordine: 90 },
@@ -225,7 +226,7 @@ export const DOMANDE: DomandaV5[] = [
   { id: 188, testo: "Difficilmente spendi per cose che non siano strettamente necessarie?", scala_primaria: 'FIN', polarita: '+', blocco_tematico: 8, ordine: 188 },
   { id: 189, testo: "Hai le idee molto chiare su quello che vorresti nella vita?", scala_primaria: 'AUT', polarita: '+', blocco_tematico: 8, ordine: 189 },
   { id: 190, testo: "Prima di comprare qualcosa fai molta attenzione a cosa ti serve?", scala_primaria: 'FIN', polarita: '+', blocco_tematico: 8, ordine: 190 },
-  { id: 191, testo: "Preferisci lavorare in maniera autonoma piuttosto che in team?", scala_primaria: 'COM', polarita: '-', blocco_tematico: 8, ordine: 191 },
+  { id: 191, testo: "Ti capita di preferire il lavoro in solitaria rispetto al lavoro di squadra?", scala_primaria: 'COM', polarita: '-', blocco_tematico: 8, ordine: 191 },
   { id: 192, testo: "Hai raggiunto risultati economici di rilievo nella tua vita?", scala_primaria: 'SUC', polarita: '+', blocco_tematico: 8, ordine: 192 },
   { id: 193, testo: "Credi che ognuno debba svolgere la sua parte di lavoro?", scala_primaria: 'PRI', polarita: '+', blocco_tematico: 8, ordine: 193 },
   { id: 194, testo: "Quando le cose vanno male pensi spesso a tutti i problemi?", scala_primaria: 'GP', polarita: '-', blocco_tematico: 8, ordine: 194 },
@@ -247,9 +248,9 @@ export const DOMANDE: DomandaV5[] = [
   { id: 208, testo: "Ti piace costruire una rete di contatti professionali?", scala_primaria: 'VEN', polarita: '+', blocco_tematico: 9, ordine: 208 },
   { id: 209, testo: "Sei bravo a presentare i vantaggi dei tuoi prodotti/servizi?", scala_primaria: 'VEN', polarita: '+', blocco_tematico: 9, ordine: 209 },
   { id: 210, testo: "Ti capita di fare acquisti impulsivi di cui poi ti penti?", scala_primaria: 'FIN', polarita: '-', blocco_tematico: 9, ordine: 210 },
-  { id: 211, testo: "Dedichi regolarmente del tempo alla gestione dei tuoi investimenti?", scala_primaria: 'FIN', polarita: 'S', blocco_tematico: 9, ordine: 211 },
-  { id: 212, testo: "Le tue riserve finanziarie sono...", scala_primaria: 'FIN', polarita: 'S', blocco_tematico: 9, ordine: 212 },
-  { id: 213, testo: "A quanti mesi ammonta la tua autonomia finanziaria attuale?", scala_primaria: 'FIN', polarita: 'S', blocco_tematico: 9, ordine: 213 },
+  { id: 211, testo: "Dedichi regolarmente del tempo alla gestione dei tuoi investimenti?", scala_primaria: 'FIN', polarita: 'S', blocco_tematico: 9, ordine: 211, risposte_custom: { a: 'Sì, regolarmente', b: 'Meno del dovuto', c: 'No, per niente' } },
+  { id: 212, testo: "Le tue riserve finanziarie coprono...", scala_primaria: 'FIN', polarita: 'S', blocco_tematico: 9, ordine: 212, risposte_custom: { a: 'Meno di 3 mesi di spese', b: 'Tra 3 e 6 mesi di spese', c: 'Più di 9 mesi di spese' } },
+  { id: 213, testo: "A quanti mesi ammonta la tua autonomia finanziaria attuale?", scala_primaria: 'FIN', polarita: 'S', blocco_tematico: 9, ordine: 213, risposte_custom: { a: 'Meno di 3 mesi', b: 'Tra 3 e 9 mesi', c: 'Più di 9 mesi' } },
   { id: 214, testo: "Monitori regolarmente le tue entrate e uscite?", scala_primaria: 'FIN', polarita: '+', blocco_tematico: 9, ordine: 214 },
   { id: 215, testo: "Hai mai avuto debiti che ti hanno causato stress?", scala_primaria: 'FIN', polarita: '-', blocco_tematico: 9, ordine: 215 },
   { id: 216, testo: "Ti senti sicuro delle tue decisioni finanziarie?", scala_primaria: 'FIN', polarita: '+', blocco_tematico: 9, ordine: 216 },
@@ -266,7 +267,7 @@ export const DOMANDE: DomandaV5[] = [
   // BLOCCO 10: DOMANDE 226-242 (SINCRONIZZATO CON DATABASE - INDICATORI E CONTROLLO)
   { id: 226, testo: "Sei disposto a fare sacrifici oggi per un futuro migliore?", scala_primaria: 'PRI', polarita: '+', blocco_tematico: 10, ordine: 226 },
   { id: 227, testo: "Credi che l'onestà sia sempre la migliore politica?", scala_primaria: 'PRI', polarita: '+', blocco_tematico: 10, ordine: 227 },
-  { id: 228, testo: "Rispetto alla media delle persone, quanto potenziale di successo ritieni di avere?", scala_primaria: 'AUT', polarita: 'S', blocco_tematico: 10, ordine: 228 },
+  { id: 228, testo: "Rispetto alla media delle persone, quanto potenziale di successo ritieni di avere?", scala_primaria: 'AUT', polarita: 'S', blocco_tematico: 10, ordine: 228, risposte_custom: { a: 'Molto più della media', b: 'Nella media', c: 'Un po\' meno della media' } },
   { id: 229, testo: "Ti consideri una persona che rispetta sempre gli impegni presi?", scala_primaria: 'PRI', polarita: '+', blocco_tematico: 10, ordine: 229 },
   { id: 230, testo: "Credi che la fiducia sia fondamentale in ogni relazione?", scala_primaria: 'PRI', polarita: '+', blocco_tematico: 10, ordine: 230 },
   { id: 231, testo: "Ti senti in dovere di restituire ciò che hai ricevuto?", scala_primaria: 'PRI', polarita: '+', blocco_tematico: 10, ordine: 231 },
