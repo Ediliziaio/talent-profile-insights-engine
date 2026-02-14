@@ -15,6 +15,7 @@ import {
   Cell,
   ReferenceLine,
   ReferenceArea,
+  Customized,
 } from 'recharts';
 import { CheckCircle2, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -410,8 +411,7 @@ export function TraitCandleChart({
             ))}
           </Bar>
 
-          {/* @ts-ignore - Recharts customized layer */}
-          <customized
+          <Customized
             component={(props: any) => (
               <CustomLayer {...props} data={chartData} showThresholdIndicator={showThresholdIndicator} />
             )}
