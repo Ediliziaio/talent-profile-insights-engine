@@ -13,7 +13,7 @@ import { HeroCardV3 } from '@/components/HeroCardV3';
 import { AlertBannerV3 } from '@/components/AlertBannerV3';
 import { CompatibilitaTabV3 } from '@/components/CompatibilitaTabV3';
 import { ProfiloTabV3 } from '@/components/ProfiloTabV3';
-import { InterpretazioneDati } from '@/components/InterpretazioneDati';
+import { ColloquioTabV3 } from '@/components/ColloquioTabV3';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -386,16 +386,20 @@ export default function CandidatoDettaglio() {
 
                 {/* TAB 4: Colloquio */}
                 <TabsContent value="colloquio" className="mt-4 space-y-6">
-                  <InterpretazioneDati
-                    scalePunteggi={scalePunteggi}
-                    schematicita={schematicita}
-                    stressZone={stressZone}
-                    stressZoneSeverity={stressZoneSeverity}
-                    outPoints={(profilo?.out_points as string[]) || []}
-                    strengthPoints={(profilo?.strength_points as string[]) || []}
-                    profiloTipo={profiloTipo || undefined}
-                    showOnlyColloquio={true}
-                  />
+                  {isV5 && traitsV5 ? (
+                    <ColloquioTabV3
+                      candidatoNome={candidato.nome}
+                      candidatoSesso={candidato.sesso}
+                      traits={traitsV5 as Record<TraitCode, number>}
+                      syndromes={syndromes}
+                    />
+                  ) : (
+                    <Card>
+                      <CardContent className="py-8 text-center text-muted-foreground">
+                        Dati V5 non disponibili per questo candidato.
+                      </CardContent>
+                    </Card>
+                  )}
                 </TabsContent>
               </Tabs>
 
