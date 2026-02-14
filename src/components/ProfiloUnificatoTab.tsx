@@ -25,7 +25,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TraitCode, TRAIT_LABELS, ProfiloTipoV5, ReliabilityIndex } from '@/types/database';
-import { TraitBarChart } from './TraitBarChart';
+import { TraitCandleChart } from './TraitCandleChart';
 import { getTraitNarrative, getGPSpecialNarrative, personalizzaTesto } from '@/lib/traitNarrativesV5';
 import { getProfiloTipoV5Extended } from '@/lib/profiloTipoV5Extended';
 import {
@@ -255,7 +255,7 @@ export function ProfiloUnificatoTab({
           </div>
         </CardHeader>
         <CardContent>
-          <TraitBarChart traits={traitsV5} thresholds={thresholds} showThresholdIndicator showValueLabels />
+          <TraitCandleChart traits={traitsV5} thresholds={thresholds} showThresholdIndicator showValueLabels />
         </CardContent>
       </Card>
 
