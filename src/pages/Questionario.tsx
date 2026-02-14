@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -292,26 +292,36 @@ export default function Questionario() {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-28 sm:pb-24 safe-area-bottom">
-      <div className="max-w-6xl mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-4 sm:space-y-6">
-        {/* Header */}
-        <div className="flex items-center gap-2 sm:gap-3 bg-primary text-primary-foreground rounded-lg p-3 sm:p-4">
-          <div className="p-1.5 sm:p-2 bg-white/20 rounded-lg shrink-0">
-            <Brain className="h-5 w-5 sm:h-6 sm:w-6" />
+    <div className="min-h-screen bg-background pb-24 sm:pb-24 safe-area-bottom">
+      <div className="max-w-6xl mx-auto px-2.5 sm:px-4 py-3 sm:py-6 space-y-2 sm:space-y-6">
+        {/* Header - compact on mobile */}
+        <div className="bg-primary text-primary-foreground rounded-lg overflow-hidden">
+          <div className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-4">
+            <div className="p-1.5 sm:p-2 bg-white/20 rounded-lg shrink-0">
+              <Brain className="h-4 w-4 sm:h-6 sm:w-6" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h1 className="font-bold text-sm sm:text-lg">Talent Profile</h1>
+              <p className="text-[11px] sm:text-sm opacity-90 truncate">
+                <span className="sm:hidden">Pag. {currentPage + 1}/{totalPages}</span>
+                <span className="hidden sm:inline">Pag. {currentPage + 1}/{totalPages} • Dom. {startIndex + 1}-{endIndex} di {DOMANDE.length}</span>
+              </p>
+            </div>
+            <div className="text-right shrink-0">
+              <span className="text-lg sm:text-2xl font-bold">{Math.round(progress)}%</span>
+            </div>
           </div>
-          <div className="flex-1 min-w-0">
-            <h1 className="font-bold text-base sm:text-lg">Talent Profile</h1>
-            <p className="text-xs sm:text-sm opacity-90 truncate">
-              Pag. {currentPage + 1}/{totalPages} • Dom. {startIndex + 1}-{endIndex} di {DOMANDE.length}
-            </p>
-          </div>
-          <div className="text-right shrink-0">
-            <span className="text-xl sm:text-2xl font-bold">{Math.round(progress)}%</span>
+          {/* Progress bar integrated in header */}
+          <div className="h-1.5 sm:h-3 bg-white/20">
+            <div 
+              className="h-full bg-white/60 transition-all duration-300" 
+              style={{ width: `${progress}%` }}
+            />
           </div>
         </div>
 
-        {/* Progress */}
-        <div className="h-3 sm:h-4 bg-muted rounded-full overflow-hidden">
+        {/* Separate progress bar on desktop only */}
+        <div className="hidden sm:block h-4 bg-muted rounded-full overflow-hidden">
           <div 
             className="h-full progress-gradient transition-all duration-300" 
             style={{ width: `${progress}%` }}
@@ -319,59 +329,63 @@ export default function Questionario() {
         </div>
 
         {/* Questions - Optimized Desktop Grid */}
-        <div className="space-y-3">
+        <div className="space-y-1.5 sm:space-y-3">
           {currentQuestions.map((domanda, idx) => (
-            <Card key={domanda.id} className={cn(
-              "transition-all duration-300 min-h-[72px]",
-              "animate-in fade-in-50 slide-in-from-bottom-1",
-              risposte[domanda.id] ? "border-accent/50 shadow-md" : ""
-            )} style={{ animationDelay: `${idx * 30}ms` }}>
-              <CardContent className="p-3 lg:p-4">
-                {/* Desktop: 4 column grid [50% | 16% | 17% | 17%] */}
-                <div className="hidden lg:grid lg:grid-cols-[1fr_auto_auto_auto] gap-3 items-center">
-                  {/* Column 1: Question - takes ~50% width */}
-                  <div className="flex gap-2 items-start">
-                    <span className="text-muted-foreground font-medium min-w-[2.5rem] text-sm">
+            <React.Fragment key={domanda.id}>
+              {/* Desktop: Card layout (unchanged) */}
+              <Card className={cn(
+                "hidden lg:block transition-all duration-300",
+                "animate-in fade-in-50 slide-in-from-bottom-1",
+                risposte[domanda.id] ? "border-accent/50 shadow-md" : ""
+              )} style={{ animationDelay: `${idx * 30}ms` }}>
+                <CardContent className="p-3 lg:p-4">
+                  <div className="lg:grid lg:grid-cols-[1fr_auto_auto_auto] gap-3 items-center">
+                    <div className="flex gap-2 items-start">
+                      <span className="text-muted-foreground font-medium min-w-[2.5rem] text-sm">
+                        {startIndex + idx + 1}.
+                      </span>
+                      <p className="font-medium text-sm lg:text-base leading-snug line-clamp-2">
+                        {domanda.testo}
+                      </p>
+                    </div>
+                    {(domanda.risposte_custom
+                      ? ANSWER_OPTIONS.map(option => ({
+                          ...option,
+                          label: domanda.risposte_custom![option.value.toLowerCase() as 'a' | 'b' | 'c'],
+                          shortLabel: domanda.risposte_custom![option.value.toLowerCase() as 'a' | 'b' | 'c'],
+                        }))
+                      : ANSWER_OPTIONS
+                    ).map(option => (
+                      <AnswerButton
+                        key={option.value}
+                        value={option.value}
+                        label={option.label}
+                        selected={risposte[domanda.id] === option.value}
+                        onClick={() => handleAnswer(domanda.id, option.value)}
+                        variant="desktop"
+                        isSaving={savingId === domanda.id}
+                      />
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Mobile: Compact list layout */}
+              <div className={cn(
+                "lg:hidden py-2.5 px-2 rounded-md transition-all duration-200",
+                "animate-in fade-in-50",
+                risposte[domanda.id] 
+                  ? "border-l-[3px] border-l-accent bg-accent/5" 
+                  : "border-l-[3px] border-l-transparent"
+              )} style={{ animationDelay: `${idx * 20}ms` }}>
+                <div className="space-y-2">
+                  <div className="flex gap-1.5 items-start">
+                    <span className="text-muted-foreground font-medium min-w-[1.5rem] text-xs mt-0.5">
                       {startIndex + idx + 1}.
                     </span>
-                    <p className="font-medium text-sm lg:text-base leading-snug line-clamp-2">
-                      {domanda.testo}
-                    </p>
+                    <p className="font-medium text-[13px] leading-snug">{domanda.testo}</p>
                   </div>
-
-                  {/* Answer buttons - Desktop */}
-                  {(domanda.risposte_custom
-                    ? ANSWER_OPTIONS.map(option => ({
-                        ...option,
-                        label: domanda.risposte_custom![option.value.toLowerCase() as 'a' | 'b' | 'c'],
-                        shortLabel: domanda.risposte_custom![option.value.toLowerCase() as 'a' | 'b' | 'c'],
-                      }))
-                    : ANSWER_OPTIONS
-                  ).map(option => (
-                    <AnswerButton
-                      key={option.value}
-                      value={option.value}
-                      label={option.label}
-                      selected={risposte[domanda.id] === option.value}
-                      onClick={() => handleAnswer(domanda.id, option.value)}
-                      variant="desktop"
-                      isSaving={savingId === domanda.id}
-                    />
-                  ))}
-                </div>
-
-                {/* Mobile: Stack layout */}
-                <div className="lg:hidden space-y-2.5">
-                  {/* Question */}
-                  <div className="flex gap-2 items-start">
-                    <span className="text-muted-foreground font-medium min-w-[1.75rem] text-sm">
-                      {startIndex + idx + 1}.
-                    </span>
-                    <p className="font-medium text-sm leading-relaxed">{domanda.testo}</p>
-                  </div>
-
-                  {/* Answer buttons - Mobile */}
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-3 gap-1.5 pl-5">
                     {(domanda.risposte_custom
                       ? ANSWER_OPTIONS.map(option => ({
                           ...option,
@@ -393,31 +407,34 @@ export default function Questionario() {
                     ))}
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+                {idx < currentQuestions.length - 1 && (
+                  <div className="h-px bg-border/50 mt-2.5 -mx-2" />
+                )}
+              </div>
+            </React.Fragment>
           ))}
         </div>
       </div>
 
       {/* Sticky Navigation Footer */}
-      <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur border-t py-3 sm:py-4 px-3 sm:px-4 z-50 safe-area-bottom">
+      <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur border-t py-2 sm:py-4 px-3 sm:px-4 z-50 safe-area-bottom">
         <div className="max-w-6xl mx-auto flex justify-between items-center gap-2 sm:gap-4">
           <Button
             variant="outline"
             onClick={() => setCurrentPage((p) => p - 1)}
             disabled={currentPage === 0}
-            className="h-12 px-3 sm:px-4 text-sm sm:text-base"
+            className="h-10 sm:h-12 px-3 sm:px-4 text-sm sm:text-base"
           >
             <ChevronLeft className="h-4 w-4 sm:mr-2" />
             <span className="hidden sm:inline">Indietro</span>
           </Button>
 
-          <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
-            <span className="font-medium">{Object.keys(risposte).length}/{DOMANDE.length}</span>
+          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+            <span className="font-semibold">{Object.keys(risposte).length}/{DOMANDE.length}</span>
           </div>
 
           {isLastPage && allAnswered ? (
-            <Button onClick={handleSubmit} disabled={isSubmitting} className="h-12 px-4 sm:px-6 text-sm sm:text-base bg-accent hover:bg-accent/90">
+            <Button onClick={handleSubmit} disabled={isSubmitting} className="h-10 sm:h-12 px-4 sm:px-6 text-sm sm:text-base bg-accent hover:bg-accent/90">
               {isSubmitting ? (
                 <Loader2 className="h-4 w-4 sm:mr-2 animate-spin" />
               ) : (
@@ -430,7 +447,7 @@ export default function Questionario() {
             <Button
               onClick={() => setCurrentPage((p) => p + 1)}
               disabled={!canGoNext}
-              className="h-12 px-3 sm:px-4 text-sm sm:text-base"
+              className="h-10 sm:h-12 px-3 sm:px-4 text-sm sm:text-base"
             >
               <span className="hidden sm:inline">Avanti</span>
               <ChevronRight className="h-4 w-4 sm:ml-2" />
