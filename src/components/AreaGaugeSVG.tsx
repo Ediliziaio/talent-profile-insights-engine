@@ -47,7 +47,7 @@ export function AreaGaugeSVG({ value, label, color, size = 100 }: AreaGaugeSVGPr
         <path
           d={bgPath}
           fill="none"
-          stroke="rgba(0,0,0,0.04)"
+          stroke="transparent"
           strokeWidth={strokeWidth}
           strokeLinecap="round"
         />
