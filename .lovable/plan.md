@@ -1,77 +1,39 @@
-# Sistema Role Matching V5 — 24 Ruoli Professionali
 
-## Stato: COMPLETATO ✅
 
-Tutti i 24 ruoli sono implementati, testati e verificati su candidati reali.
+# Aggiunta Bottone Elimina per Singolo Candidato
 
----
+## Situazione attuale
 
-## Elenco completo ruoli
+La funzionalita' di selezione multipla e cancellazione bulk esiste gia' (checkbox + bottone "Elimina (N)" nell'header). Manca pero' un bottone cestino per ogni riga della tabella, per eliminare rapidamente un singolo candidato senza dover prima selezionarlo.
 
-| # | Ruolo | Categoria | Validato Manuale V2 | Fase |
-|---|---|---|---|---|
-| 1 | Direttore Commerciale | commerciale | ✅ Sì | Iniziale |
-| 2 | Venditore / Sales Rep | commerciale | ✅ Sì | Iniziale |
-| 3 | Responsabile Marketing | commerciale | ✅ Sì | Iniziale |
-| 4 | Project Manager | gestionale | ✅ Sì | Iniziale |
-| 5 | Team Leader | gestionale | ✅ Sì | Iniziale |
-| 6 | HR Manager | risorse umane | ✅ Sì | Iniziale |
-| 7 | Responsabile Produzione | operativo | ✅ Sì | Iniziale |
-| 8 | Responsabile Qualità | operativo | ✅ Sì | Iniziale |
-| 9 | Responsabile Logistica | operativo | ✅ Sì | Iniziale |
-| 10 | Responsabile Amministrativo | amministrativo | ✅ Sì | Iniziale |
-| 11 | Consulente / Formatore | consulenza | ✅ Sì | Iniziale |
-| 12 | Imprenditore / Startupper | imprenditoriale | ✅ Sì | Iniziale |
-| 13 | Direttore Generale / CEO | direzionale | ❌ No | Iniziale |
-| 14 | CFO / Direttore Finanziario | direzionale | ❌ No | Iniziale |
-| 15 | Customer Service Manager | servizio clienti | ❌ No | Fase 2 (sostituzione edilizia) |
-| 16 | Export Manager | commerciale | ❌ No | Fase 2 |
-| 17 | HR Recruiter | risorse umane | ❌ No | Fase 2 |
-| 18 | Store Manager | retail | ❌ No | Fase 2 |
-| 19 | Buyer / Responsabile Acquisti | acquisti | ❌ No | Fase 2 |
-| 20 | Controller di Gestione | amministrativo | ❌ No | Fase 3 |
-| 21 | Data Analyst | tecnico | ❌ No | Fase 3 |
-| 22 | Account Manager | commerciale | ❌ No | Fase 3 |
-| 23 | Office Manager | amministrativo | ❌ No | Fase 3 |
-| 24 | Responsabile IT/Sistemi | tecnico | ❌ No | Fase 3 |
+## Modifiche previste
 
-**Totale**: 14 validati Manuale V2 + 10 non validati
+### File: `src/pages/Candidati.tsx`
 
----
+1. **Aggiungere stato per eliminazione singola**: nuovo stato `singleDeleteId` per tracciare quale candidato si vuole eliminare singolarmente.
 
-## Storico modifiche
+2. **Aggiungere icona Trash2 in ogni riga** (desktop e mobile):
+   - Desktop: nella colonna "Azioni", accanto al bottone "Vedi" o "Copia link", aggiungere un bottone con icona cestino (Trash2) che apre il dialog di conferma per quel singolo candidato.
+   - Mobile: nella card view, aggiungere lo stesso bottone cestino accanto ai bottoni esistenti.
 
-### Fase 1 — 17 ruoli iniziali
-- 12 ruoli validati Manuale V2 + 2 direzionali non validati + 3 ruoli edilizia (rimossi in Fase 2)
+3. **Aggiornare il dialog di conferma eliminazione**: gestire sia il caso bulk (selectedIds) che il caso singolo (singleDeleteId), mostrando il nome del candidato quando si elimina uno solo.
 
-### Fase 2 — Sostituzione ruoli edilizia
-- Rimossi: Capo Cantiere, Geometra/Direttore Lavori, Responsabile Sicurezza
-- Aggiunti: Customer Service Manager, Export Manager, HR Recruiter, Store Manager, Buyer/Responsabile Acquisti
-- Risultato: 19 ruoli
+4. **Aggiungere `analisi_candidato` alla cascata di eliminazione**: attualmente la `deleteMutation` cancella `profili_candidato`, `risultati`, `risposte` ma NON `analisi_candidato`. Aggiungere questa tabella alla cascata per evitare orfani.
 
-### Fase 3 — Espansione a 24 ruoli (ultima)
-- Aggiunti: Controller di Gestione, Data Analyst, Account Manager, Office Manager, Responsabile IT/Sistemi
-- Risultato: 24 ruoli
+### Dettaglio UI
 
----
+**Desktop - colonna Azioni:**
+- Il bottone cestino appare sempre su ogni riga, con stile `ghost` e colore rosso al hover
+- Posizionato dopo il bottone "Vedi" o "Copia link"
 
-## Verifica logica — Candidato Florin Ovidiu
+**Mobile - card view:**
+- Bottone cestino piccolo accanto ai bottoni esistenti
 
-Traits: ORG=75, ADS=52, AUT=45, GP=35, PRO=81, COM=31, HRM=71, FIN=14, PRI=35, VEN=11, ESP=8, DET=16
+**Dialog conferma:**
+- Singolo: "Stai per eliminare [Nome Cognome] e tutti i suoi dati."
+- Multiplo: "Stai per eliminare N candidati e tutti i loro dati." (comportamento attuale)
 
-| Ruolo | Compatibilità | Logica | Note |
-|---|---|---|---|
-| Controller di Gestione | < 100% | ✅ | FIN=14<30, PRI=35<40: penalizzato |
-| Data Analyst | 100% | ✅ | Tutti i requisiti soddisfatti |
-| Account Manager | < 100% | ✅ | COM<35, VEN<30, ESP<20, DET<25: penalizzato |
-| Office Manager | 100% | ✅ | Tutti soddisfatti |
-| Responsabile IT/Sistemi | 100% | ✅ | Tutti soddisfatti |
-
----
-
-## Note tecniche
-
-- **File principale**: `src/lib/roleMatchingV5.ts` (array `ROLE_PROFILES_V5`)
-- **Test**: `src/test/roleMatchingV5.test.ts` — 25/25 passati
-- **Batch ricalcolo**: eseguito con successo su tutti i candidati
-- **Funzioni mappate**: `FUNZIONE_TO_RUOLO_MAP` aggiornato con nuove voci
+## Cosa NON cambia
+- La logica di selezione multipla e bulk delete resta invariata
+- Nessuna modifica al database o alle RLS policies
+- Nessuna modifica ad altri componenti
