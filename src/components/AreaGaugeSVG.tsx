@@ -12,10 +12,10 @@ interface AreaGaugeSVGProps {
 
 export function AreaGaugeSVG({ value, label, color, size = 100 }: AreaGaugeSVGProps) {
   const clampedValue = Math.max(0, Math.min(100, value));
-  const radius = 40;
+  const radius = 38;
   const strokeWidth = 8;
   const cx = 50;
-  const cy = 50;
+  const cy = 46;
   
   // Semicircle arc from 180° to 0° (left to right)
   const startAngle = Math.PI;
@@ -42,7 +42,7 @@ export function AreaGaugeSVG({ value, label, color, size = 100 }: AreaGaugeSVGPr
 
   return (
     <div className="flex flex-col items-center">
-      <svg width={size} height={size * 0.6} viewBox="0 0 100 60">
+      <svg width={size} height={size * 0.7} viewBox="0 0 100 70">
         {/* Background arc */}
         <path
           d={bgPath}
@@ -64,7 +64,7 @@ export function AreaGaugeSVG({ value, label, color, size = 100 }: AreaGaugeSVGPr
         {/* Value text */}
         <text
           x={cx}
-          y={48}
+          y={56}
           textAnchor="middle"
           className="fill-foreground"
           fontSize="16"

@@ -19,6 +19,7 @@ interface TraitBarChartProps {
   traits: Record<string, number>;
   thresholds?: TraitThreshold[];
   showThresholdIndicator?: boolean;
+  showValueLabels?: boolean;
   compact?: boolean;
 }
 
@@ -59,12 +60,21 @@ const AREA_GROUPS: {
   },
 ];
 
+function getValueLabel(value: number): { text: string; className: string } {
+  if (value >= 50) return { text: 'Alto', className: 'text-green-600 dark:text-green-400' };
+  if (value >= 20) return { text: 'Buono', className: 'text-blue-600 dark:text-blue-400' };
+  if (value >= 0) return { text: 'Medio', className: 'text-muted-foreground' };
+  if (value >= -30) return { text: 'Basso', className: 'text-amber-600 dark:text-amber-400' };
+  return { text: 'Critico', className: 'text-red-600 dark:text-red-400' };
+}
+
 function TraitBar({
   trait,
   value,
   barColor,
   threshold,
   showThresholdIndicator,
+  showValueLabel,
   compact,
 }: {
   trait: TraitCode;
@@ -72,6 +82,7 @@ function TraitBar({
   barColor: string;
   threshold?: TraitThreshold;
   showThresholdIndicator?: boolean;
+  showValueLabel?: boolean;
   compact?: boolean;
 }) {
   // Scale from [-100, +100] to [0, 100] for display
@@ -128,6 +139,10 @@ function TraitBar({
       <span className={cn('font-mono shrink-0 tabular-nums', compact ? 'text-xs w-10' : 'text-sm w-12', 'text-right')}>
         {value > 0 ? '+' : ''}{value}
       </span>
+      {showValueLabel && (() => {
+        const label = getValueLabel(value);
+        return <span className={cn('text-xs font-medium shrink-0 w-12 text-right', label.className)}>{label.text}</span>;
+      })()}
       {showThresholdIndicator && meetsThreshold !== null && (
         meetsThreshold ? (
           <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
@@ -143,6 +158,7 @@ export function TraitBarChart({
   traits,
   thresholds,
   showThresholdIndicator = false,
+  showValueLabels = false,
   compact = false,
 }: TraitBarChartProps) {
   return (
@@ -166,6 +182,7 @@ export function TraitBarChart({
                   barColor={group.barColor}
                   threshold={threshold}
                   showThresholdIndicator={showThresholdIndicator}
+                  showValueLabel={showValueLabels}
                   compact={compact}
                 />
               );

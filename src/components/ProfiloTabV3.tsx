@@ -145,7 +145,7 @@ export function ProfiloTabV3({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <TraitBarChart traits={traits} />
+          <TraitBarChart traits={traits} showValueLabels={true} />
         </CardContent>
       </Card>
 
