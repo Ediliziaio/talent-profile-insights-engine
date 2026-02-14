@@ -1,64 +1,67 @@
 
 
-# Unificazione Tab Compatibilita' + Profilo e Fix Ruoli Alternativi
+# Sostituzione Ruoli Edilizia con Nuovi Ruoli Professionali
 
-## Problema 1: Due tab ridondanti
-Attualmente "Compatibilita'" e "Profilo" sono due tab separati. L'utente li vuole uniti in un unico flusso piu' naturale. La nuova struttura sara' un singolo tab **"Profilo e Compatibilita'"** (o semplicemente "Profilo") che presenta tutto insieme.
+## Cosa cambia
 
-## Problema 2: Ruoli alternativi incoerenti
-Due sistemi completamente diversi generano "ruoli consigliati":
-- **Compatibilita' tab**: usa `calculateAllRolesCompatibilityV5` che calcola la % di compatibilita' su 17 ruoli con soglie e disqualifier algoritmici
-- **Profilo tab**: usa `profiloTipoV5Extended.ruoliIdeali` che sono stringhe statiche scritte a mano per ogni profilo tipo (es. LEADER ha "Direzione Generale", "Direzione Commerciale"...)
+**Ruoli da RIMUOVERE (3):**
+- Capocantiere
+- Commerciale Edilizia  
+- Operaio/Installatore
 
-I nomi non corrispondono nemmeno (es. "Direzione Generale" vs "Direttore Generale") e i risultati sono calcolati con logiche diverse.
+**Ruoli da AGGIUNGERE (5):**
+1. **Imprenditore/Titolare** -- profilo alto su tutti gli assi: visione, rischio, decisione, costruzione team
+2. **Consulente Strategico** -- pensiero analitico, comunicazione, autonomia, non necessariamente commerciale
+3. **Team Leader/Coordinatore** -- leadership intermedia, gestione persone senza essere dirigente
+4. **Formatore/Coach** -- capacita' di trasmettere, empatia, proattivita', pazienza
+5. **Responsabile Qualita'/Compliance** -- rigore, principi, organizzazione, attenzione al dettaglio
 
-**Soluzione**: usare SOLO il sistema algoritmico (`calculateAllRolesCompatibilityV5`) come fonte unica di verita' per i ruoli consigliati, sostituendo le liste statiche nel profilo tipo con i risultati calcolati dinamicamente sui tratti reali del candidato.
+Il totale passa da 17 a 19 ruoli.
 
-## Piano di implementazione
+## Dettagli tecnici
 
-### 1. Unire i due tab in uno solo
+### File: `src/lib/roleMatchingV5.ts`
 
-**`src/pages/CandidatoDettaglio.tsx`**:
-- Ridurre i tab da 4 a 3: **Profilo** (unione), **Gestione**, **Colloquio**
-- Il nuovo tab "Profilo" conterra' nell'ordine:
-  1. Grafico barre con soglie ruolo (da Compatibilita')
-  2. Conteggio requisiti soddisfatti (da Compatibilita')
-  3. Segnalazioni sindromi (da Compatibilita')
-  4. Grafico barre comportamentale senza soglie (da Profilo)
-  5. Narrativa "Chi e' [Nome]" (da Profilo)
-  6. Punti di Forza e Aree di Lavoro (da Profilo)
-  7. Ruoli alternativi (unificati - solo algoritmici)
-  8. Profilo Tipo accordion (da Profilo)
-  9. Attendibilita' accordion (da Compatibilita')
+**Rimozioni:**
+- Eliminare le 3 entry da `ROLE_PROFILES_V5`: `'Capocantiere'`, `'Commerciale Edilizia'`, `'Operaio/Installatore'`
+- Rimuovere mapping `'Cantiere'` e `'Edilizia'` da `FUNZIONE_TO_RUOLO_MAP`
+- Aggiornare commento header (da 17 a 19 ruoli)
 
-### 2. Creare nuovo componente unificato
+**Aggiunte -- struttura per ogni nuovo ruolo:**
 
-**Nuovo file: `src/components/ProfiloUnificatoTab.tsx`**
-- Riceve tutte le props di entrambi i tab attuali
-- Organizza le sezioni in un flusso logico dall'alto al basso
-- Nella sezione "Ruoli alternativi": usa esclusivamente `calculateAllRolesCompatibilityV5Cached` per generare la lista
-- Nella sezione "Profilo Tipo": rimuove `ruoliIdeali` statici e li sostituisce con i top 3-5 ruoli calcolati algoritmicamente
+| Ruolo | Categoria | Tratti fondamentali | Soglie chiave |
+|---|---|---|---|
+| Imprenditore/Titolare | direzione | LDR, PRO, GP, AUT, DET | LDR>=45, PRO>=40, GP>=40, AUT>=40, DET>=35, VEN>=20 |
+| Consulente Strategico | tecnico | ORG, COM, PRO, AUT | ORG>=45, COM>=30, PRO>=35, AUT>=40, GP>=30 |
+| Team Leader/Coordinatore | direzione | LDR, COM, HRM, PRO | LDR>=35, COM>=25, HRM>=30, PRO>=30, GP>=30 |
+| Formatore/Coach | tecnico | COM, ESP, PRO, HRM | COM>=35, ESP>=25, PRO>=30, HRM>=35, DET>=25 |
+| Resp. Qualita'/Compliance | amministrativo | ORG, ADS, PRI, RC | ORG>=50, ADS>=45, PRI>=50, RC>=10, GP>=25 |
 
-### 3. Aggiornare CandidatoDettaglio
+Ogni ruolo avra': requisiti, disqualifiers, profilo ideale, tratti fondamentali, domande colloquio, `validatoManualeV2: false`.
 
-**`src/pages/CandidatoDettaglio.tsx`**:
-- Rimuovere import di `CompatibilitaTabV3` e `ProfiloTabV3`
-- Importare il nuovo `ProfiloUnificatoTab`
-- Aggiornare i tab da 4 a 3
-- Passare tutte le props necessarie
+**Mapping aggiuntivi in `FUNZIONE_TO_RUOLO_MAP`:**
+- `'Imprenditore'` -> `'Imprenditore/Titolare'`
+- `'Titolare'` -> `'Imprenditore/Titolare'`
+- `'Consulenza'` -> `'Consulente Strategico'`
+- `'Coordinamento'` -> `'Team Leader/Coordinatore'`
+- `'Formazione'` -> `'Formatore/Coach'`
+- `'Qualita'` -> `'Responsabile Qualita/Compliance'`
+- `'Ufficio acquisti'` -> `'Buyer/Acquisti'`
+- `'Ufficio risorse umane'` -> `'HR Manager'`
 
-### 4. Pulizia
+### File: `src/types/database.ts`
 
-- I file `CompatibilitaTabV3.tsx` e `ProfiloTabV3.tsx` restano nel codebase come riferimento ma non vengono piu' importati (si possono eliminare in un secondo momento)
+Aggiornare array `FUNZIONI` aggiungendo le nuove voci corrispondenti e rimuovendo quelle edilizia.
 
-## Risultato finale
+### File: `src/test/roleMatchingV5.test.ts`
 
-| Prima (4 tab) | Dopo (3 tab) |
-|---|---|
-| Compatibilita' | **Profilo** (unificato) |
-| Profilo | Gestione |
-| Gestione | Colloquio |
-| Colloquio | |
+Aggiornare il test che verifica il conteggio ruoli (da 17 a 19) e i test sui ruoli validati/non validati (i nuovi sono tutti non validati).
 
-I ruoli consigliati saranno sempre calcolati algoritmicamente in base ai tratti reali del candidato, eliminando la discrepanza con le liste statiche del profilo tipo.
+### Ricalcolo batch
 
+Dopo le modifiche, eseguire `batch-ricalcolo-v5` per aggiornare i profili candidato con il nuovo set di ruoli.
+
+## Cosa NON cambia
+- Nessuna modifica a soglie dei ruoli esistenti
+- Nessuna modifica alla logica di scoring o sindromi
+- Nessuna modifica al database schema
