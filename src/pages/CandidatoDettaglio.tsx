@@ -301,19 +301,19 @@ export default function CandidatoDettaglio() {
               {/* 4 TAB */}
               <Tabs defaultValue="compatibilita" className="w-full">
                 <TabsList className="flex w-full mb-4 overflow-x-auto">
-                  <TabsTrigger value="compatibilita" className="flex-1 gap-1.5 text-[11px] sm:text-sm">
+                  <TabsTrigger value="compatibilita" className="flex-1 gap-1.5 text-xs sm:text-sm">
                     <Target className="h-4 w-4 hidden sm:block" />
                     <span>Compatibilità</span>
                   </TabsTrigger>
-                  <TabsTrigger value="profilo" className="flex-1 gap-1.5 text-[11px] sm:text-sm">
+                  <TabsTrigger value="profilo" className="flex-1 gap-1.5 text-xs sm:text-sm">
                     <BookOpen className="h-4 w-4 hidden sm:block" />
                     <span>Profilo</span>
                   </TabsTrigger>
-                  <TabsTrigger value="gestione" className="flex-1 gap-1.5 text-[11px] sm:text-sm">
+                  <TabsTrigger value="gestione" className="flex-1 gap-1.5 text-xs sm:text-sm">
                     <UserCog className="h-4 w-4 hidden sm:block" />
                     <span>Gestione</span>
                   </TabsTrigger>
-                  <TabsTrigger value="colloquio" className="flex-1 gap-1.5 text-[11px] sm:text-sm">
+                  <TabsTrigger value="colloquio" className="flex-1 gap-1.5 text-xs sm:text-sm">
                     <MessageSquare className="h-4 w-4 hidden sm:block" />
                     <span>Colloquio</span>
                   </TabsTrigger>
