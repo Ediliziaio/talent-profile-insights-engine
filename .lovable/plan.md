@@ -1,38 +1,55 @@
 
 
-# Unificazione grafici Profilo + Requisiti ruolo
+# Correzioni: Soglie dinamiche + Completezza ruoli
 
-## Cosa cambia
+## Problemi trovati
 
-### File: `src/components/ProfiloUnificatoTab.tsx`
+### Problema 1: Le soglie rosse NON si aggiornano cambiando ruolo
+Nel dettaglio candidato (`CandidatoDettaglio.tsx`, riga 111), il ruolo richiesto e' calcolato una sola volta dalla `funzione` salvata nel database:
+```
+const ruoloRichiesto = mapFunzioneToRuoloV5(candidato?.funzione || 'Venditore/Commerciale');
+```
+Non c'e' nessun selettore per cambiare il ruolo "al volo" e vedere le soglie di un ruolo diverso. Le soglie rosse nel grafico unificato rimangono sempre quelle del ruolo originale.
 
-1. **Rimuovere la sezione "Soddisfatti X/Y requisiti fondamentali"** (righe 240-251): il banner con il conteggio e la percentuale viene eliminato completamente.
+### Problema 2: Mancano ruoli nella selezione funzione
+La lista `FUNZIONI` nel form anagrafico ha 19 voci. Alcune non hanno mappatura verso i 24 ruoli professionali (es. "Selezione personale", "Project management" passano senza mappatura e non trovano un profilo ruolo). Inoltre, alcuni ruoli come "Capocantiere", "Commerciale Edilizia", "Operaio/Installatore" non hanno alcuna voce corrispondente nella lista FUNZIONI.
 
-2. **Unificare le due card in una sola**: la card "Requisiti per [ruolo]" (sezione 1) e "Profilo Comportamentale di [Nome]" (sezione 4) diventano un'unica card con titolo "Profilo Comportamentale di [Nome]". Il grafico mostrera' tutti i 15 tratti con le barre colorate E le linee rosse di soglia del ruolo, con le icone check/X per ogni tratto che ha una soglia.
+---
 
-3. **La card unificata usera'**: `TraitBarChart` con `thresholds` (soglie del ruolo) + `showThresholdIndicator` + `showValueLabels`, cosi' si vedono contemporaneamente i valori del candidato, le etichette testuali e le soglie minime rosse.
+## Soluzioni
 
-### File: `src/components/TraitBarChart.tsx`
+### 1. Aggiungere selettore ruolo nel dettaglio candidato
 
-Nessuna modifica necessaria: il componente supporta gia' sia `thresholds`+`showThresholdIndicator` che `showValueLabels` contemporaneamente. Basta passare entrambe le prop.
+**File: `src/pages/CandidatoDettaglio.tsx`**
+- Aggiungere uno stato `selectedRuolo` inizializzato dal `ruoloRichiesto` attuale
+- Passare `selectedRuolo` (invece di `ruoloRichiesto`) come prop a `ProfiloUnificatoTab` e `ColloquioTabV3`
+- In questo modo, cambiando il ruolo dal selettore, le soglie rosse nel grafico si aggiornano automaticamente (il componente `ProfiloUnificatoTab` gia' calcola le soglie dalla prop `ruoloRichiesto`)
 
-### Verifica soglie ruoli
+**File: `src/components/ProfiloUnificatoTab.tsx`**
+- Aggiungere un `Select` con tutti i 24 `RUOLI_V5` nell'header della card "Profilo Comportamentale"
+- Quando l'utente cambia ruolo nel selettore, le soglie rosse e le icone check/X si aggiornano in tempo reale
+- Il ruolo attuale del candidato viene mostrato come default
 
-Le soglie minime sono definite in `ROLE_PROFILES_V5` in `roleMatchingV5.ts` e sono gia' allineate al Manuale V2.0 (come indicato nei commenti del codice). Ogni ruolo ha i suoi `requisiti[]` con soglia e tipo (`min`/`max`). I tratti che NON hanno requisito per quel ruolo semplicemente non mostreranno la linea rossa -- comportamento corretto.
+### 2. Completare la lista FUNZIONI e la mappatura
 
-## Risultato visivo
+**File: `src/types/database.ts`**
+- Aggiungere le funzioni mancanti alla lista `FUNZIONI`:
+  - "Cantiere/Edilizia" (per Capocantiere e Commerciale Edilizia)
+  - "Installazione/Manutenzione" (per Operaio/Installatore)
 
-Una sola card "Profilo Comportamentale di [Nome]" con:
-- Tutte le 15 barre dei tratti raggruppate per area (Essere, Fare, Avere, Indicatori)
-- Linee rosse verticali sulle barre dove il ruolo richiede una soglia minima
-- Icone verdi (check) / rosse (X) per indicare se la soglia e' soddisfatta
-- Etichette testuali (Alto, Buono, Medio, Basso, Critico)
-- Legenda in basso
+**File: `src/lib/roleMatchingV5.ts`**
+- Aggiungere le mappature mancanti a `FUNZIONE_TO_RUOLO_MAP`:
+  - "Selezione personale" -> "HR Recruiter"
+  - "Project management" -> "Project Manager"
+  - "Cantiere/Edilizia" -> "Capocantiere"
+  - "Installazione/Manutenzione" -> "Operaio/Installatore"
+  - "Impiegato amministrativo" -> "Impiegato Amministrativo"
 
-## Cosa NON cambia
-- Sezione sindromi (3)
-- Narrativa "Chi e' [Nome]" (5)
-- Punti di Forza e Aree di Lavoro (6)
-- Ruoli alternativi (7)
-- Profilo Tipo e Attendibilita' (8, 9)
-- Nessuna modifica al database o alle soglie dei ruoli
+---
+
+## Risultato atteso
+
+1. Nella pagina dettaglio candidato, un selettore permette di cambiare ruolo e le soglie rosse nel grafico si aggiornano istantaneamente
+2. Il form anagrafico offre tutte le funzioni necessarie per coprire i 24 ruoli professionali
+3. Ogni funzione selezionabile mappa correttamente a un profilo ruolo con soglie definite
+
