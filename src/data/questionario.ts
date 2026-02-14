@@ -104,7 +104,7 @@ export const DOMANDE: DomandaV5[] = [
 
   // BLOCCO 4: DOMANDE 76-100
   { id: 76, testo: "Ti ritieni una persona creativa?", scala_primaria: 'AUT', polarita: '+', blocco_tematico: 4, ordine: 76 },
-  { id: 77, testo: "Il tuo lavoro ti richiede di essere spesso in contatto con i clienti?", scala_primaria: 'VEN', polarita: '+', blocco_tematico: 4, ordine: 77 },
+  { id: 77, testo: "Ti capita spesso di dover interagire con persone esterne al tuo team di lavoro?", scala_primaria: 'VEN', polarita: '+', blocco_tematico: 4, ordine: 77 },
   { id: 78, testo: "Tecnicamente parlando ti consideri parte del 20% più esperto del tuo settore?", scala_primaria: 'SUC', polarita: '+', blocco_tematico: 4, ordine: 78 },
   { id: 79, testo: "Stai costruendo una riserva finanziaria per il tuo futuro?", scala_primaria: 'FIN', polarita: '+', blocco_tematico: 4, ordine: 79 },
   { id: 80, testo: "Hai aderito a un piano di accumulo per il futuro (PAC, Fondo Pensione, ecc.)?", scala_primaria: 'FIN', polarita: '+', blocco_tematico: 4, ordine: 80 },
@@ -113,7 +113,7 @@ export const DOMANDE: DomandaV5[] = [
   { id: 83, testo: "Hai già incontrato la \"grande opportunità\" della tua vita?", scala_primaria: 'SUC', polarita: '+', blocco_tematico: 4, ordine: 83 },
   { id: 84, testo: "In una cena con sconosciuti sei il primo che va a presentarsi?", scala_primaria: 'ESP', polarita: '+', blocco_tematico: 4, ordine: 84 },
   { id: 85, testo: "A volte ti senti l'unico che si assume la responsabilità?", scala_primaria: 'HRM', polarita: '+', blocco_tematico: 4, ordine: 85 },
-  { id: 86, testo: "Lavorare con un ritmo rapido e costante è vantaggioso?", scala_primaria: 'ADS', polarita: '+', blocco_tematico: 4, ordine: 86 },
+  { id: 86, testo: "Lavori abitualmente con un ritmo rapido e costante?", scala_primaria: 'ADS', polarita: '+', blocco_tematico: 4, ordine: 86 },
   { id: 87, testo: "Ti capita di pensare che ormai sia troppo tardi per migliorare?", scala_primaria: 'AUT', polarita: '-', blocco_tematico: 4, ordine: 87 },
   { id: 88, testo: "Credi che gli accordi possano cambiare se cambiano le situazioni?", scala_primaria: 'COM', polarita: '+', blocco_tematico: 4, ordine: 88 },
   { id: 89, testo: "È importante far rispettare la propria privacy?", scala_primaria: 'ESP', polarita: '-', blocco_tematico: 4, ordine: 89 },
@@ -191,7 +191,7 @@ export const DOMANDE: DomandaV5[] = [
   { id: 155, testo: "Abbandoni un incarico se non riesci a portarlo a termine?", scala_primaria: 'ADS', polarita: '-', blocco_tematico: 7, ordine: 155 },
   { id: 156, testo: "Quando comunichi le tue idee, metti pressione su chi hai davanti?", scala_primaria: 'VEN', polarita: '+', blocco_tematico: 7, ordine: 156 },
   { id: 157, testo: "Ti capitano spesso guai o inconvenienti per colpa di altri?", scala_primaria: 'PRO', polarita: '-', blocco_tematico: 7, ordine: 157 },
-  { id: 158, testo: "Fare bene le cose è un dovere, quindi correggere gli errori è utile?", scala_primaria: 'HRM', polarita: '+', blocco_tematico: 7, ordine: 158 },
+  { id: 158, testo: "Quando noti un errore, lo correggi subito anche se non è compito tuo?", scala_primaria: 'HRM', polarita: '+', blocco_tematico: 7, ordine: 158 },
   { id: 159, testo: "Sei molto interessato ai bisogni e alle esigenze degli altri?", scala_primaria: 'COM', polarita: '+', blocco_tematico: 7, ordine: 159 },
   { id: 160, testo: "Tieni banco durante cene, feste e riunioni in generale?", scala_primaria: 'VEN', polarita: '+', blocco_tematico: 7, ordine: 160 },
   { id: 161, testo: "Hai le idee chiare su come comportarsi in ogni occasione?", scala_primaria: 'RC', polarita: '+', blocco_tematico: 7, ordine: 161 },
