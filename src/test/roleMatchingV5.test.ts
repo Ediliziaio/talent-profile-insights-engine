@@ -120,8 +120,8 @@ const criticalProfile: TraitScores = {
 // ============================================
 
 describe('RoleMatchingV5 - Configurazione', () => {
-  it('dovrebbe avere 19 ruoli configurati', () => {
-    expect(RUOLI_V5.length).toBe(19);
+  it('dovrebbe avere 24 ruoli configurati', () => {
+    expect(RUOLI_V5.length).toBe(24);
   });
 
   it('ogni ruolo dovrebbe avere struttura completa', () => {
@@ -197,9 +197,9 @@ describe('RoleMatchingV5 - Matching Singolo', () => {
 // ============================================
 
 describe('RoleMatchingV5 - Matching Completo', () => {
-  it('dovrebbe calcolare compatibilità per tutti i 19 ruoli', () => {
+  it('dovrebbe calcolare compatibilità per tutti i 24 ruoli', () => {
     const result = calculateAllRolesCompatibilityV5('Venditore/Commerciale', idealSalesperson);
-    expect(result.tuttiRuoli.length).toBe(19);
+    expect(result.tuttiRuoli.length).toBe(24);
   });
 
   it('dovrebbe identificare ruolo ideale se diverso dal richiesto', () => {
@@ -262,9 +262,9 @@ describe('RoleMatchingV5 - Flag validatoManualeV2', () => {
     expect(validati.length).toBe(7);
   });
 
-  it('12 ruoli dovrebbero essere NON validati (interni)', () => {
+  it('17 ruoli dovrebbero essere NON validati (interni)', () => {
     const nonValidati = RUOLI_V5.filter(r => !ROLE_PROFILES_V5[r].validatoManualeV2);
-    expect(nonValidati.length).toBe(12);
+    expect(nonValidati.length).toBe(17);
   });
 
   it('ruoli specifici validati correttamente', () => {
