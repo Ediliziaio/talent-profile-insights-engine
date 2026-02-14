@@ -1448,6 +1448,11 @@ const FUNZIONE_TO_RUOLO_MAP: Record<string, string> = {
   'IT': 'Responsabile IT/Sistemi',
   'Sistemi informativi': 'Responsabile IT/Sistemi',
   'IT/Sistemi informativi': 'Responsabile IT/Sistemi',
+  'Selezione personale': 'HR Recruiter',
+  'Project management': 'Project Manager',
+  'Cantiere/Edilizia': 'Capocantiere',
+  'Installazione/Manutenzione': 'Operaio/Installatore',
+  'Impiegato amministrativo': 'Impiegato Amministrativo',
 };
 
 /**

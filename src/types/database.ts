@@ -256,4 +256,7 @@ export const FUNZIONI = [
   'Data analysis',
   'Account management',
   'IT/Sistemi informativi',
+  'Selezione personale',
+  'Cantiere/Edilizia',
+  'Installazione/Manutenzione',
 ];

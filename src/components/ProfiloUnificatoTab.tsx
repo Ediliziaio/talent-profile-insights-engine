@@ -13,9 +13,11 @@
  * 9. Attendibilità accordion
  */
 
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import {
   CheckCircle2, AlertTriangle, Star, Shield, Target, ArrowRight,
@@ -28,6 +30,7 @@ import { getTraitNarrative, getGPSpecialNarrative, personalizzaTesto } from '@/l
 import { getProfiloTipoV5Extended } from '@/lib/profiloTipoV5Extended';
 import {
   ROLE_PROFILES_V5,
+  RUOLI_V5,
   getVerdictBadgeVariantV5,
 } from '@/lib/roleMatchingV5';
 import { calculateRoleMatchingV5Cached, calculateAllRolesCompatibilityV5Cached } from '@/lib/roleMatchingV5Cache';
@@ -188,6 +191,8 @@ export function ProfiloUnificatoTab({
   macroAree,
   profiloTipoV5,
 }: ProfiloUnificatoTabProps) {
+  const [selectedRuolo, setSelectedRuolo] = useState(ruoloRichiesto);
+
   // ─── Role matching (algorithmic) ───
   const traitScores: TraitScores = {
     ORG: traitsV5.ORG ?? 0, AUT: traitsV5.AUT ?? 0, GP: traitsV5.GP ?? 0,
@@ -197,9 +202,9 @@ export function ProfiloUnificatoTab({
     FIN: traitsV5.FIN ?? 0, SUC: traitsV5.SUC ?? 0, PRI: traitsV5.PRI ?? 0,
   };
 
-  const result = calculateRoleMatchingV5Cached(ruoloRichiesto, traitScores, candidateAge);
-  const allRoles = calculateAllRolesCompatibilityV5Cached(ruoloRichiesto, traitScores, candidateAge);
-  const roleProfile = ROLE_PROFILES_V5[ruoloRichiesto];
+  const result = calculateRoleMatchingV5Cached(selectedRuolo, traitScores, candidateAge);
+  const allRoles = calculateAllRolesCompatibilityV5Cached(selectedRuolo, traitScores, candidateAge);
+  const roleProfile = ROLE_PROFILES_V5[selectedRuolo];
 
   const thresholds = roleProfile?.requisiti.map(r => ({
     trait: r.trait,
@@ -227,10 +232,27 @@ export function ProfiloUnificatoTab({
       {/* ═══ 1. Profilo Comportamentale unificato con soglie ruolo ═══ */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
-            <Heart className="h-4 w-4" />
-            Profilo Comportamentale di {candidatoNome}
-          </CardTitle>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Heart className="h-4 w-4" />
+              Profilo Comportamentale di {candidatoNome}
+            </CardTitle>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground whitespace-nowrap">Soglie per:</span>
+              <Select value={selectedRuolo} onValueChange={setSelectedRuolo}>
+                <SelectTrigger className="w-[220px] h-8 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {RUOLI_V5.map((ruolo) => (
+                    <SelectItem key={ruolo} value={ruolo} className="text-xs">
+                      {ruolo}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           <TraitBarChart traits={traitsV5} thresholds={thresholds} showThresholdIndicator showValueLabels />
