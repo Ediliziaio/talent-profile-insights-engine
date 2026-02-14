@@ -1,43 +1,43 @@
 
 
-# Riformulazione Domande VEN (Blocco 9) - Da "Vendita" a "Persuasione"
+# Aggiornamento plan.md + Correzioni Linguistiche Residue
 
-## Il Problema
+## 1. Aggiornamento plan.md
 
-Le domande 201-209 usano un linguaggio troppo specifico per il ruolo commerciale: "vendita", "clienti", "trattativa", "proposte commerciali", "prodotti/servizi". Un candidato per ruoli di amministrazione, produzione o altro si sente estraneo a queste domande.
+Aggiornare il file `.lovable/plan.md` per riflettere che la riformulazione VEN e completata, e documentare anche le precedenti modifiche (risposte custom, riformulazione Q87/Q191).
 
-Il tratto VEN misura in realta la **capacita di persuasione, influenza e comunicazione efficace** -- competenze trasversali a qualsiasi ruolo. Le domande vanno riformulate per catturare lo stesso costrutto psicologico con parole universali.
+Il nuovo contenuto del plan documentera:
+- Step completato: Riformulazione VEN (201-209)
+- Step completato: Risposte custom SPECIAL (72, 73, 211, 212, 213, 228)
+- Step completato: Riformulazione Q87 e Q191
 
-## Riformulazioni Proposte
+## 2. Analisi Linguistica Completa
 
-| ID | Scala | Pol. | Testo Attuale | Testo Nuovo | Cosa Misura |
+Ho verificato tutte le 242 domande. Risultato:
+
+### Domande gia corrette (234 su 242)
+Tutte le domande standard (+/-) sono formulate come comportamenti personali e si abbinano naturalmente a "Si, sempre / A volte / No, mai". Le 6 domande SPECIAL hanno risposte custom adeguate.
+
+### Domande con potenziali criticita (3 domande)
+
+| ID | Testo Attuale | Problema | Proposta di Riformulazione | Scala | Pol. |
 |---|---|---|---|---|---|
-| 201 | VEN | + | "Chiudi spesso una vendita o un accordo con successo?" | "Riesci spesso a convincere gli altri ad accettare le tue proposte?" | Capacita di chiusura/persuasione |
-| 202 | VEN | - | "Ti capita di sentirti a disagio quando devi chiedere il prezzo per il tuo lavoro?" | "Ti capita di sentirti a disagio quando devi far valere il tuo punto di vista?" | Difficolta nell'assertivita |
-| 203 | VEN | + | "Riesci a mantenere relazioni con clienti nel lungo periodo?" | "Riesci a mantenere relazioni professionali solide nel lungo periodo?" | Fidelizzazione relazionale |
-| 204 | VEN | + | "Ti senti a tuo agio nel gestire obiezioni durante una trattativa?" | "Ti senti a tuo agio nel gestire le obiezioni quando presenti un'idea?" | Gestione delle resistenze |
-| 205 | VEN | + | "Sei bravo a identificare i bisogni dei tuoi clienti?" | "Sei bravo a capire cosa vogliono veramente le persone con cui interagisci?" | Ascolto attivo / empatia strategica |
-| 206 | PRI | + | "Ti capita di rinunciare a una vendita per mantenere la tua integrità?" | "Ti capita di rinunciare a un vantaggio personale per mantenere la tua integrita?" | Integrita etica (nota: scala PRI, non VEN) |
-| 207 | VEN | + | "Riesci a creare urgenza nelle tue proposte commerciali?" | "Riesci a motivare gli altri ad agire rapidamente sulle tue proposte?" | Capacita di attivazione |
-| 209 | VEN | + | "Sei bravo a presentare i vantaggi dei tuoi prodotti/servizi?" | "Sei bravo a presentare le tue idee in modo convincente?" | Comunicazione persuasiva |
+| 77 | "Il tuo lavoro ti richiede di essere spesso in contatto con i clienti?" | Troppo specifica per ruoli commerciali (stessa logica VEN). "Clienti" esclude operai, amministrativi, ecc. | "Ti capita spesso di dover interagire con persone esterne al tuo team di lavoro?" | VEN | + |
+| 86 | "Lavorare con un ritmo rapido e costante e vantaggioso?" | Domanda retorica/opinativa. "Si, sempre" applicato a "e vantaggioso?" suona forzato. | "Lavori abitualmente con un ritmo rapido e costante?" | ADS | + |
+| 158 | "Fare bene le cose e un dovere, quindi correggere gli errori e utile?" | Doppia affermazione retorica. Quasi tutti rispondono "Si". | "Quando noti un errore, lo correggi subito anche se non e compito tuo?" | HRM | + |
 
-**Domanda 208** ("Ti piace costruire una rete di contatti professionali?") resta invariata: e gia formulata in modo universale.
-
-## Impatto sullo Scoring
-
-**ZERO.** Tutte le polarita (+/-) restano identiche. Lo scoring V5 usa solo la scala e la polarita, non il testo. Nessuna modifica a `scoringV5.ts`, `ricalcoloV5.ts` o edge functions.
+Tutte le polarita restano invariate. Lo scoring non cambia.
 
 ## Dettaglio Tecnico
 
 ### File da modificare
 
-**`src/data/questionario.ts`** -- Aggiornare il campo `testo` per le domande 201, 202, 203, 204, 205, 206, 207, 209 (8 domande).
+1. **`.lovable/plan.md`** -- Riscrivere con lo stato aggiornato di tutti gli interventi completati
+2. **`src/data/questionario.ts`** -- Aggiornare il `testo` per le domande 77, 86 e 158
 
-### Aggiornamento database
+### Database
+Eseguire SQL UPDATE sulla tabella `domande` per sincronizzare i testi delle domande 77, 86 e 158.
 
-Eseguire una migrazione SQL per aggiornare la colonna `testo` nella tabella `domande` per gli stessi 8 ID, in modo che il database resti sincronizzato con il codice frontend.
-
-### Ordine di esecuzione
-1. Aggiornare i testi in `questionario.ts`
-2. Eseguire la migrazione SQL sulla tabella `domande`
+### Impatto sullo scoring
+ZERO. Le polarita e le scale restano identiche.
 
