@@ -1,65 +1,43 @@
 
 
-# Miglioramento UX della Sezione Risultati Candidato
+# Miglioramento UX Sezione Risultati Candidato
 
 ## Problemi Identificati
 
-### 1. Gauge semicircolari tagliati (ESSERE, FARE, AVERE)
-Il componente `AreaGaugeSVG` ha il viewBox impostato su `0 0 100 60` con il centro dell'arco a `cy=50`. Questo lascia solo 10 unita sopra il centro per un arco di raggio 40, e lo strokeWidth di 8px con strokeLinecap "round" provoca il clipping visivo ai bordi. Inoltre, il Card padre ha la classe `overflow-hidden` che taglia qualsiasi elemento che sporge.
+### 1. Gauge semicircolari ancora tagliati
+Nonostante le modifiche precedenti (cy=46, radius=38, viewBox "0 0 100 70"), gli archi sono ancora visivamente tagliati ai bordi superiori. Il problema e' che con radius=38 e strokeWidth=8 con strokeLinecap="round", il bordo visivo superiore dell'arco si trova a circa y=4, lasciando solo 4px di margine dal bordo del viewBox. I cap rotondi aggiungono ulteriore estensione che viene tagliata.
 
-### 2. Grafici Compatibilita e Profilo "identici"
-Entrambe le tab usano lo stesso componente `TraitBarChart` con gli stessi dati dei tratti. La differenza e che la tab Compatibilita mostra le soglie del ruolo (linee rosse e check/X), mentre la tab Profilo no. Ma visivamente appaiono molto simili, dando l'impressione che "non cambino".
+### 2. HRM Score - Chiarimento
+Il punteggio HRM=71 di Ovidiu e' tecnicamente corretto secondo il manuale: le 7 domande HRM misurano assunzione di responsabilita', correzione errori, stabilizzazione ambientale e attenzione nell'insegnamento, non sociabilita' o preferenza per il lavoro di gruppo. Il suo profilo (HRM=71, ESP=0, LDR=-9) indica un "contributor responsabile" che si fa carico di tutto ma non vuole guidare o stare al centro dell'attenzione. Non e' un bug ma un aspetto interpretativo del tratto.
 
-### 3. Aspetto visivo generale migliorabile
-- I gauge sono piccoli e poco leggibili
-- Manca separazione visiva tra le sezioni
-- Il layout dei gauge potrebbe essere piu elegante
+## Interventi
 
-## Interventi Proposti
+### 1. Fix definitivo AreaGaugeSVG
+Ridisegnare le coordinate SVG con piu' margine:
+- Ridurre il raggio da 38 a 34 per dare piu' respiro
+- Spostare il centro da cy=46 a cy=48
+- Il punto piu' alto dell'arco diventa: 48-34 = 14 (anziche' 8), con stroke a y=10 - ampio margine dal bordo
+- Aggiornare le posizioni del testo di conseguenza (y da 56 a 58)
 
-### 1. Fix AreaGaugeSVG - Risolvere il clipping
-Riscrivere le coordinate SVG per centrare correttamente l'arco nel viewBox:
-- Cambiare viewBox da `0 0 100 60` a `0 0 100 70`
-- Spostare il centro dell'arco da `cy=50` a `cy=46` per dare piu respiro in alto
-- Aggiornare l'altezza SVG a `size * 0.7` per mantenere le proporzioni
-- Spostare il testo percentuale di conseguenza
-- Questo risolve completamente il taglio degli archi
-
-### 2. Migliorare la HeroCardV3 - Layout gauge piu elegante
-- Aumentare la dimensione dei gauge su desktop da 90px a 100px per maggiore leggibilita
-- Aggiungere un sottile separatore verticale tra la sezione verdetto e i gauge su desktop
-- Dare ai gauge un contenitore con sfondo leggermente diverso per risalto visivo
-
-### 3. Differenziare i grafici tra le tab
-- **Tab Compatibilita**: Mantenere il `TraitBarChart` con soglie, ma aggiungere un banner riassuntivo colorato sopra il grafico che mostra quanti requisiti sono soddisfatti con indicatore visivo prominente
-- **Tab Profilo**: Sostituire o arricchire il grafico con etichette descrittive inline per ogni barra (es. "Alto", "Nella media", "Da sviluppare") cosi il grafico appare visivamente diverso e piu informativo
+### 2. Miglioramento layout HeroCard
+- Rimuovere `overflow-hidden` dal Card principale che potrebbe contribuire al clipping
+- Migliorare il padding del contenitore gauge per garantire nessun taglio
 
 ## Dettaglio Tecnico
 
 ### File da modificare
 
 **`src/components/AreaGaugeSVG.tsx`**
-- Cambiare viewBox: `"0 0 100 70"` 
-- Aggiornare `cy` da 50 a 46
-- Aggiornare altezza SVG: `height={size * 0.7}`
-- Spostare il testo percentuale da `y={48}` a `y={56}`
-- Questo risolve il clipping senza cambiare l'aspetto visivo
+- Cambiare `radius` da 38 a 34
+- Cambiare `cy` da 46 a 48
+- Cambiare `y` del testo percentuale da 56 a 58
+- Questo garantisce 10px+ di margine dal bordo superiore del viewBox
 
 **`src/components/HeroCardV3.tsx`**
-- Aumentare gauge size desktop: da `90` a `100`
-- Aggiungere un divider verticale `border-l` su desktop tra verdetto e gauge
-- Applicare un leggero sfondo al contenitore gauge: `bg-white/50 dark:bg-white/5 rounded-xl p-3`
-
-**`src/components/TraitBarChart.tsx`**
-- Aggiungere prop opzionale `showValueLabels` per mostrare etichette descrittive ("Alto", "Medio", "Basso") accanto ai valori numerici
-- Nella tab Profilo, attivare questa prop per differenziare visivamente il grafico
-
-**`src/components/ProfiloTabV3.tsx`**
-- Passare `showValueLabels={true}` al TraitBarChart per differenziarlo dalla versione in Compatibilita
+- Rimuovere `overflow-hidden` dal Card per eliminare qualsiasi clipping residuo dovuto al CSS
+- Il Card continua a funzionare correttamente senza overflow-hidden
 
 ### Impatto
-- Solo modifiche CSS/SVG e prop aggiuntive
-- Nessun impatto su logica, scoring o dati
-- Desktop e mobile entrambi migliorati
-- Retrocompatibile al 100%
-
+- Solo modifiche SVG/CSS, nessun impatto su logica o dati
+- Risolve definitivamente il problema del taglio dei gauge
+- Desktop e mobile entrambi corretti
