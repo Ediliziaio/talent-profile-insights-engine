@@ -1,74 +1,68 @@
 
-# Fix: Completare lista FUNZIONI e correggere mappature ruoli
 
-## Problemi trovati
+# Grafico a Candele Verticali per il Profilo Comportamentale
 
-### 1. Duplicato "Selezione personale"
-La voce "Selezione personale" appare DUE VOLTE nella lista FUNZIONI (righe 246 e 259 di `database.ts`). Va rimosso il duplicato.
+## Cosa cambia
 
-### 2. Conflitto mappatura "Segreteria/Assistenza dir."
-La funzione "Segreteria/Assistenza dir." mappa a "Office Manager", ma il ruolo "Assistente di Direzione" non ha nessuna funzione dedicata nel form. Servono due voci separate:
-- "Segreteria/Assistenza dir." -> Office Manager (mappatura esistente, corretta)
-- Aggiungere "Assistente di direzione" -> Assistente di Direzione (nuova voce)
+Il grafico attuale (barre orizzontali con nomi a sinistra) viene sostituito da un grafico a **candele verticali** con i nomi dei tratti sull'asse X orizzontale. Ogni "candela" parte dal centro (valore 0) e si estende verso l'alto (positivo) o verso il basso (negativo).
 
-### 3. Lista FUNZIONI non ordinata
-Le voci sono in ordine sparso. Meglio ordinarle alfabeticamente per una migliore usabilita'.
+## Design UX
 
----
+- **15 barre verticali** raggruppate per area (Essere, Fare, Avere, Indicatori) con colori distinti per gruppo
+- **Asse X**: nomi abbreviati dei tratti (ORG, AUT, GP, ecc.) con etichette complete visibili al passaggio del mouse
+- **Asse Y**: scala da -100 a +100, con linea zero evidenziata
+- **Zone colorate di sfondo**: verde (sopra +15), giallo (tra -15 e +15), rosso (sotto -15) per orientamento immediato
+- **Soglie ruolo**: marker rossi orizzontali (triangoli o linee) sulla barra corrispondente, visibili solo sui tratti che hanno requisiti per il ruolo selezionato
+- **Icone check/X**: sopra ogni barra che ha una soglia, per indicare se il requisito e' soddisfatto
+- **Tooltip ricco**: al passaggio mostra nome completo del tratto, valore numerico, etichetta qualitativa (Alto/Buono/Medio/Basso/Critico), e stato soglia
+- **Separatori visivi** tra i gruppi di area con label colorate (ESSERE, FARE, AVERE, INDICATORI)
+- **Responsive**: su mobile le etichette ruotano a 45 gradi e le barre si restringono
 
-## Modifiche
+## Dettaglio tecnico
 
-### File: `src/types/database.ts`
-- Rimuovere il duplicato "Selezione personale" (riga 259)
-- Aggiungere "Assistente di direzione" come nuova voce
-- Ordinare la lista alfabeticamente
+### File: `src/components/TraitCandleChart.tsx` (nuovo)
+Nuovo componente che usa Recharts (`BarChart` verticale standard, non layout="vertical"):
+- `XAxis` con `dataKey="code"` (codici tratto) e tick personalizzati
+- `YAxis` con domain `[-80, 80]` e tickFormatter per il segno +/-
+- `Bar` con `Cell` colorati per gruppo area
+- `ReferenceArea` per le zone verde/giallo/rosso
+- `ReferenceLine` a y=0
+- Soglie ruolo rese come `ReferenceDot` o marker SVG custom sulla barra corrispondente
+- Tooltip personalizzato con tutte le info
+- Legenda in basso con zone + soglie
 
-Lista finale FUNZIONI (27 voci, ordinate):
+Le props restano le stesse di `TraitBarChart`:
 ```
-Account management, Amministrazione, Assistente di direzione, Cantiere/Edilizia,
-Consulenza, Controllo di gestione, Coordinamento, Customer care, Data analysis,
-Direzione commerciale, Direzione generale, Formazione, Impiegato amministrativo,
-Imprenditore, Installazione/Manutenzione, IT/Sistemi informativi, Logistica,
-Produzione, Project management, Qualita'/Compliance, Segreteria/Assistenza dir.,
-Selezione personale, Ufficio acquisti, Ufficio marketing, Ufficio risorse umane,
-Ufficio tecnico, Ufficio vendite
+traits: Record<string, number>
+thresholds?: TraitThreshold[]
+showThresholdIndicator?: boolean
+showValueLabels?: boolean
 ```
 
-### File: `src/lib/roleMatchingV5.ts`
-- Aggiungere mappatura: `'Assistente di direzione': 'Assistente di Direzione'`
+### File: `src/components/ProfiloUnificatoTab.tsx`
+- Sostituire `import { TraitBarChart }` con `import { TraitCandleChart }`
+- Alla riga 258, sostituire `<TraitBarChart ... />` con `<TraitCandleChart ... />`
+- Stesse props: `traits`, `thresholds`, `showThresholdIndicator`, `showValueLabels`
 
-### Verifica copertura completa
+### File: `src/components/TraitBarChart.tsx`
+Nessuna modifica: il componente resta disponibile per altri usi (es. PDF, confronto candidati).
 
-Dopo le modifiche, ogni voce FUNZIONI mappera' a un ruolo ROLE_PROFILES_V5:
+## Risultato visivo
 
-| Funzione | Ruolo V5 |
-|---|---|
-| Account management | Account Manager |
-| Amministrazione | Responsabile Amministrativo |
-| Assistente di direzione | Assistente di Direzione |
-| Cantiere/Edilizia | Capocantiere |
-| Consulenza | Consulente Strategico |
-| Controllo di gestione | Controller di Gestione |
-| Coordinamento | Team Leader/Coordinatore |
-| Customer care | Customer Care |
-| Data analysis | Data Analyst |
-| Direzione commerciale | Direttore Commerciale |
-| Direzione generale | Direttore Generale |
-| Formazione | Formatore/Coach |
-| Impiegato amministrativo | Impiegato Amministrativo |
-| Imprenditore | Imprenditore/Titolare |
-| Installazione/Manutenzione | Operaio/Installatore |
-| IT/Sistemi informativi | Responsabile IT/Sistemi |
-| Logistica | Responsabile Produzione/Logistica |
-| Produzione | Responsabile Produzione/Logistica |
-| Project management | Project Manager |
-| Qualita'/Compliance | Responsabile Qualita'/Compliance |
-| Segreteria/Assistenza dir. | Office Manager |
-| Selezione personale | HR Recruiter |
-| Ufficio acquisti | Buyer/Acquisti |
-| Ufficio marketing | Marketing Manager |
-| Ufficio risorse umane | HR Manager |
-| Ufficio tecnico | Responsabile Tecnico |
-| Ufficio vendite | Venditore/Commerciale |
+```text
+          ESSERE    |    FARE       |   AVERE      | INDICATORI
+  +80 ──────────────────────────────────────────────────────────
+       ██           |         ██    |              |
+  +40  ██    ██     |    ██   ██    |  ██   ██     |    ██
+       ██    ██     |    ██   ██ ▲  |  ██   ██     |    ██
+    0 ─██────██─────|────██───██────|──██───██─────|────██──────
+       ██         ██|              ██|         ██   |  ██
+  -40        ──   ██|    ──        ██|         ██   |  ██  ──
+                    |               |              |
+  -80 ──────────────────────────────────────────────────────────
+      ORG  AUT  GP   ADS DET VEN HRM LDR PRO COM ESP  RC FIN SUC PRI
 
-Tutti i 24 ruoli sono coperti (Produzione e Logistica condividono lo stesso ruolo).
+      ▲ = soglia minima ruolo    ██ verde = sopra soglia    ██ rosso = sotto soglia
+```
+
+Ogni barra ha il colore del suo gruppo (blu/ambra/viola/grigio) e le soglie appaiono come marcatori rossi.
