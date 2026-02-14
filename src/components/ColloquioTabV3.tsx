@@ -284,8 +284,8 @@ export function ColloquioTabV3({ candidatoNome, candidatoSesso, traits, syndrome
                         isAlta ? 'border-destructive/30 bg-destructive/5' : 'border-amber-200 bg-amber-50/50'
                       }`}
                     >
-                      <CollapsibleTrigger className="w-full">
-                        <div className="flex items-center justify-between px-4 py-3">
+                      <CollapsibleTrigger asChild>
+                        <div className="flex items-center justify-between px-4 py-3 cursor-pointer" role="button" tabIndex={0}>
                           <div className="flex items-center gap-3">
                             <Badge
                               className={`text-[10px] font-extrabold ${
