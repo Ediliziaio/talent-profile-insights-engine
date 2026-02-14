@@ -1,88 +1,119 @@
 
 
-# Piano di Implementazione: Test V3, Cleanup e Nuove Feature Gestione
+# Redesign Tab Colloquio V3
 
-## 1. Fix navigazione e test end-to-end
+## Problema attuale
 
-La pagina `/candidati/:id` esiste gia con la nuova struttura V3 (Hero Card, Alert Banner, 4 tab). Il 404 nel browser test e dovuto all'autenticazione mancante nella sessione del browser tool, non a un bug del codice. La struttura della pagina e corretta.
+Il tab Colloquio usa ancora la logica V4 legacy (`colloquioQuestions.ts` legge da `scalePunteggi` su scala 0-200 con codici SV, CF, QR, MO, EF, EC, PA, SC). Per un candidato V5, questi dati sono vuoti o irrilevanti, quindi il tab mostra poche o nessuna domanda.
 
-**Azioni:**
-- Nessuna modifica necessaria alla struttura della pagina
-- Verificare visivamente dal preview dell'utente (che ha la sessione autenticata)
+Inoltre mancano:
+- La sezione "Segnali d'allarme / Segnali positivi" (sempre visibile)
+- Le aree tematiche corrette dal manuale V3
+- La regola Zero Gergo nelle motivazioni
 
-## 2. Verifica responsive mobile
+## Soluzione
 
-La pagina usa gia classi responsive (`flex-col md:flex-row`, `text-xs sm:text-sm`, etc.). I gauge SVG hanno dimensione fissa 90px che funziona su mobile. Il `TraitBarChart` e il `TabsList` usano `flex w-full` per adattarsi.
+Creare un nuovo componente `ColloquioTabV3.tsx` che:
+1. Legge dai tratti V5 (-100/+100) invece che dalle scale V4
+2. Genera domande per area tematica con le soglie corrette dal manuale
+3. Include la sezione segnali d'allarme/positivi
+4. Applica la regola Zero Gergo ovunque
 
-**Azioni:**
-- Nessuna modifica strutturale necessaria, il layout e gia responsive
+## Logica di attivazione aree (dal Manuale V3)
 
-## 3. Cleanup componenti legacy
+| Condizione V5 | Area tematica | Priorita |
+|---|---|---|
+| GP < 21 | Pressioni e benessere | ALTA |
+| ORG < 30 | Organizzazione e metodo | ALTA |
+| DET < 25 | Comunicazione diretta | MEDIA |
+| PRO < 10 | Gestione delle critiche | ALTA |
+| RC > 45 oppure RC < -14 | Apertura al cambiamento | ALTA |
+| VEN < 15 | Capacita di coinvolgimento | MEDIA |
+| COM < 0 | Relazioni con gli altri | MEDIA |
+| AUT < 25 | Motivazione e obiettivi | MEDIA |
+| SUC < -20 | Risultati e percorso | MEDIA |
 
-I componenti da eliminare hanno ancora dipendenze attive in altri file:
+## Domande per area (dal Manuale V3)
 
-| Componente | Usato in |
-|---|---|
-| `FitIndicator` | `Candidati.tsx`, `CandidatoDrawer.tsx`, `FitScoreDisplay.tsx` |
-| `CandleChart` | `CandidatoDrawer.tsx` |
-| `StressZoneHero` | `InterpretazioneDati.tsx` |
-| `ProfileCircles` | Nessuno (gia rimosso da CandidatoDettaglio) |
-| `SintesiFinaleCard` | Nessuno (gia rimosso) |
-| `ExecutiveSummaryCardV5Updated` | Nessuno (gia rimosso) |
-| `MacroAreasChartV5` | Nessuno (gia rimosso) |
+**Pressioni e benessere:**
+- "Come stai davvero in questo periodo? C'e qualcosa che ti pesa?"
+- "C'e qualcuno nel tuo ambiente che ti causa preoccupazione?"
+- "Come reagisci quando qualcosa non va secondo i piani?"
+- "Quali strategie usi per recuperare dopo periodi difficili?"
 
-**Azioni:**
-- Eliminare direttamente `ProfileCircles.tsx`, `SintesiFinaleCard.tsx`, `ExecutiveSummaryCardV5Updated.tsx`, `MacroAreasChartV5.tsx` (nessun import attivo)
-- Per `FitIndicator`: mantenere per ora, e ancora usato nella lista candidati e nel drawer
-- Per `CandleChart`: mantenere per ora, usato nel drawer
-- Per `StressZoneHero`: mantenere per ora, usato in InterpretazioneDati
+**Organizzazione e metodo:**
+- "Come organizzi una settimana tipo di lavoro?"
+- "Quando arrivano 3 urgenze contemporaneamente, come decidi?"
+- "Quanti progetti segui in questo momento? Come tieni traccia?"
 
-## 4. Quadro Psicologico e Piano Crescita 4 Fasi (Tab Gestione)
+**Comunicazione diretta:**
+- "Raccontami l'ultima volta che hai detto qualcosa di scomodo a un superiore."
+- "Come gestisci un collaboratore che non fa il suo lavoro?"
+- "Quando non sei d'accordo, come lo comunichi?"
 
-Creare un nuovo componente `GestioneAvanzataV3.tsx` da inserire nel tab Gestione dopo `ManagementGuideV5` e `ActionPlanCardV5`.
+**Gestione delle critiche:**
+- "L'ultima volta che qualcuno ti ha criticata: cosa hai provato?"
+- "Quando qualcosa va storto, qual e la tua prima reazione?"
 
-### 4a. Quadro Psicologico
+**Apertura al cambiamento:**
+- "Come reagisci quando i piani cambiano all'improvviso?"
+- "Preferisci ambienti stabili o dinamici? Perche?"
 
-Tre card collassabili:
-- **Radice del Problema**: identifica il tratto piu basso e spiega come impatta gli altri tratti (logica: prendi il tratto con valore minimo, genera testo narrativo che collega cause ed effetti)
-- **Risorsa Nascosta**: identifica il tratto piu alto e spiega come puo compensare le debolezze (logica: tratto con valore massimo, testo su come usarlo)
-- **Circolo Vizioso**: identifica pattern cross-trait negativi usando la logica gia presente in `crossPatternsV5.ts` (filtra pattern critici attivi)
+**Relazioni con gli altri:**
+- "Come costruisci relazioni professionali con persone nuove?"
+- "Hai lavorato con qualcuno molto diverso da te? Come e andata?"
 
-### 4b. Piano di Crescita a 4 Fasi
+**Capacita di coinvolgimento:**
+- "Vendimi questo ruolo: perche dovremmo scegliere te?"
+- "Come hai convinto qualcuno di un'idea a cui era contrario?"
 
-Layout timeline con 4 blocchi:
-- **Fase 1 (0-3 mesi)**: Stabilizzazione - focus sul tratto piu critico, azioni immediate
-- **Fase 2 (3-6 mesi)**: Sviluppo base - lavorare sui 2 tratti piu bassi sotto soglia
-- **Fase 3 (6-12 mesi)**: Consolidamento - obiettivi intermedi misurabili
-- **Fase 4 (12-24 mesi)**: Maturita - ricompilazione test, verifica progressi
+## Segnali (costanti, sempre visibili)
 
-Ogni fase avra: titolo, periodo, obiettivo, 2-3 azioni concrete, KPI suggerito.
+**Segnali d'allarme:**
+- Parla male di colleghi o superiori precedenti
+- Non sa dare numeri concreti sui risultati
+- Dice "si" a tutto senza approfondire
+- Si agita quando chiedi dettagli specifici
+- Racconta solo successi, mai fallimenti
+- Non fa domande alla fine del colloquio
 
-**Nota temporale finale**: "I tratti della personalita non cambiano in settimane. Ogni misurazione va fatta su base semestrale."
+**Segnali positivi:**
+- Racconta fallimenti e cosa ha imparato
+- Da numeri concreti senza esitazione
+- Ammette aree di miglioramento
+- Fa domande sulla cultura aziendale
+- Parla bene dei colleghi precedenti
+- Ha un piano chiaro per il futuro
 
----
+## Design (dal mockup JSX)
 
-## Dettaglio Tecnico
+- Card bianca con bordo sottile, border-radius 14px
+- Ogni area: badge priorita (ALTA rosso #DC2626, MEDIA ambra #D97706) + nome area + conteggio domande
+- Domande con checkbox interattivi e numerazione
+- Sezione segnali: grid 2 colonne, sfondo rosso-50 per allarme, verde-50 per positivi
+- Pulsante "Copia tutte" per ogni gruppo di domande (mantenuto dall'attuale)
+
+## Dettaglio tecnico
 
 ### File da creare
-- `src/components/GestioneAvanzataV3.tsx` - Quadro Psicologico + Piano Crescita 4 Fasi
+- `src/components/ColloquioTabV3.tsx` - Nuovo componente completo
 
 ### File da modificare
-- `src/pages/CandidatoDettaglio.tsx` - Aggiungere `GestioneAvanzataV3` nel tab Gestione
+- `src/pages/CandidatoDettaglio.tsx` - Sostituire `InterpretazioneDati` con `ColloquioTabV3` nel tab Colloquio
 
-### File da eliminare
-- `src/components/ProfileCircles.tsx`
-- `src/components/SintesiFinaleCard.tsx`
-- `src/components/ExecutiveSummaryCardV5Updated.tsx`
-- `src/components/MacroAreasChartV5.tsx`
+### Props del componente
+```text
+candidatoNome: string
+candidatoSesso: string
+traits: Record<TraitCode, number>   // V5 traits
+syndromes: SyndromeResult[]         // per contestualizzare le domande
+```
 
-### Dipendenze esistenti riutilizzate
-- `crossPatternsV5.ts` per il Circolo Vizioso
-- `traitNarrativesV5.ts` per i testi personalizzati (nome + genere)
-- `TRAIT_LABELS` per tradurre codici in nomi italiani (regola zero gergo)
+### Componenti riutilizzati
+- `Checkbox` da shadcn/ui (gia presente)
+- `Card`, `Badge`, `Button` da shadcn/ui
+- `Collapsible` da shadcn/ui (per espandere/collassare le aree)
 
 ### Ordine di esecuzione
-1. Eliminare i 4 componenti orfani
-2. Creare `GestioneAvanzataV3.tsx`
-3. Integrare nel tab Gestione di `CandidatoDettaglio.tsx`
-
+1. Creare `ColloquioTabV3.tsx` con logica V5 e design dal mockup
+2. Aggiornare `CandidatoDettaglio.tsx` per usare il nuovo componente
