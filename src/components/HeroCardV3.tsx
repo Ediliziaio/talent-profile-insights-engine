@@ -15,6 +15,7 @@ import { getProfiloTipoV5Label } from '@/lib/scoringV5';
 import { TraitScores } from '@/lib/syndromes';
 import { personalizzaTesto } from '@/lib/traitNarrativesV5';
 import { AreaGaugeSVG } from './AreaGaugeSVG';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface HeroCardV3Props {
   traitsV5?: Record<string, number>;
@@ -119,6 +120,7 @@ export function HeroCardV3({
   className,
 }: HeroCardV3Props) {
   // Calculate matching
+  const isMobile = useIsMobile();
   let matching: RoleMatchResultV5 | null = null;
   if (traitsV5 && Object.keys(traitsV5).length > 0) {
     const traitScores: TraitScores = {
@@ -180,9 +182,9 @@ export function HeroCardV3({
           {/* Right 40%: Gauges */}
           {esserePct !== undefined && farePct !== undefined && averePct !== undefined && (
             <div className="flex items-center justify-around md:justify-end gap-3 sm:gap-4 md:gap-6">
-              <AreaGaugeSVG value={esserePct} label="ESSERE" color="#3B82F6" size={70} />
-              <AreaGaugeSVG value={farePct} label="FARE" color="#F59E0B" size={70} />
-              <AreaGaugeSVG value={averePct} label="AVERE" color="#8B5CF6" size={70} />
+              <AreaGaugeSVG value={esserePct} label="ESSERE" color="#3B82F6" size={isMobile ? 70 : 90} />
+              <AreaGaugeSVG value={farePct} label="FARE" color="#F59E0B" size={isMobile ? 70 : 90} />
+              <AreaGaugeSVG value={averePct} label="AVERE" color="#8B5CF6" size={isMobile ? 70 : 90} />
             </div>
           )}
         </div>
