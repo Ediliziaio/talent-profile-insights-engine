@@ -1,7 +1,7 @@
 /**
  * Sistema di Matching Ruoli V5 - Assessment Psicometrico
  * 
- * Matching per 19 mansioni basato sui 15 tratti V5:
+ * Matching per 24 mansioni basato sui 15 tratti V5:
  * - Responsabile Amministrativo
  * - Venditore/Commerciale
  * - Customer Care
@@ -21,6 +21,11 @@
  * - Team Leader/Coordinatore
  * - Formatore/Coach
  * - Responsabile Qualità/Compliance
+ * - Controller di Gestione
+ * - Data Analyst
+ * - Account Manager
+ * - Office Manager
+ * - Responsabile IT/Sistemi
  * 
  * Include disqualifier e soglie tratti dal Manuale V5
  */
@@ -933,6 +938,231 @@ export const ROLE_PROFILES_V5: Record<string, RoleProfileV5> = {
     ],
     validatoManualeV2: false,
   },
+
+  // ============================================
+  // NUOVI RUOLI V5 - Espansione a 24
+  // ============================================
+
+  'Controller di Gestione': {
+    id: 'controller_gestione',
+    nome: 'Controller di Gestione',
+    categoria: 'amministrativo',
+    descrizione: 'Analisi finanziaria, controllo costi, budgeting, reportistica direzionale',
+    requisiti: [
+      { trait: 'ORG', soglia: 45, tipo: 'min', isCritical: true, label: 'Organizzazione ≥ 45' },
+      { trait: 'ADS', soglia: 40, tipo: 'min', isCritical: true, label: 'Autodisciplina ≥ 40' },
+      { trait: 'FIN', soglia: 30, tipo: 'min', isCritical: true, label: 'Orientamento Finanze ≥ 30' },
+      { trait: 'PRI', soglia: 40, tipo: 'min', isCritical: false, label: 'Principi ≥ 40' },
+      { trait: 'GP', soglia: 25, tipo: 'min', isCritical: false, label: 'Gestione Pressioni ≥ 25' },
+    ],
+    disqualifiers: [
+      {
+        condition: (t) => t.ORG < 30,
+        reason: 'Organizzazione insufficiente per analisi finanziarie complesse',
+        severity: 'blocking'
+      },
+      {
+        condition: (t) => t.ADS < 25,
+        reason: 'Autodisciplina insufficiente per rigore nei numeri',
+        severity: 'blocking'
+      },
+      {
+        condition: (_, s) => s.some(syn => ['S01', 'S02', 'S06'].includes(syn.code) && syn.isActive),
+        reason: 'Sindrome critica o etica per ruolo finanziario',
+        severity: 'blocking'
+      },
+      {
+        condition: (t) => t.FIN < 10,
+        reason: 'Scarso orientamento finanziario per ruolo di controlling',
+        severity: 'warning'
+      },
+    ],
+    profiloIdeale: 'Analista rigoroso. Ama i numeri, la precisione, il controllo dei flussi economici.',
+    trattiFondamentali: ['ORG', 'ADS', 'FIN', 'PRI'],
+    domandeColloquio: [
+      'Come struttura un report di controllo gestione mensile?',
+      'Racconti di un\'anomalia nei dati che ha scoperto e come l\'ha gestita.',
+      'Come gestisce le scadenze di chiusura quando mancano dati?',
+      'Come comunica i risultati finanziari alla direzione?',
+    ],
+    validatoManualeV2: false,
+  },
+
+  'Data Analyst': {
+    id: 'data_analyst',
+    nome: 'Data Analyst',
+    categoria: 'tecnico',
+    descrizione: 'Analisi dati, reportistica, interpretazione trend, supporto decisionale',
+    requisiti: [
+      { trait: 'ORG', soglia: 40, tipo: 'min', isCritical: true, label: 'Organizzazione ≥ 40' },
+      { trait: 'ADS', soglia: 40, tipo: 'min', isCritical: true, label: 'Autodisciplina ≥ 40' },
+      { trait: 'AUT', soglia: 30, tipo: 'min', isCritical: true, label: 'Automotivazione ≥ 30' },
+      { trait: 'GP', soglia: 25, tipo: 'min', isCritical: false, label: 'Gestione Pressioni ≥ 25' },
+      { trait: 'PRO', soglia: 20, tipo: 'min', isCritical: false, label: 'Proattività ≥ 20' },
+    ],
+    disqualifiers: [
+      {
+        condition: (t) => t.ORG < 25,
+        reason: 'Organizzazione insufficiente per gestire dataset complessi',
+        severity: 'blocking'
+      },
+      {
+        condition: (t) => t.ADS < 25,
+        reason: 'Autodisciplina insufficiente per lavoro analitico metodico',
+        severity: 'blocking'
+      },
+      {
+        condition: (_, s) => s.some(syn => ['S01', 'S02', 'S04'].includes(syn.code) && syn.isActive),
+        reason: 'Sindrome critica per ruolo analitico',
+        severity: 'blocking'
+      },
+      {
+        condition: (t) => t.PRO < 10,
+        reason: 'Proattività bassa: rischio passività nell\'analisi',
+        severity: 'warning'
+      },
+    ],
+    profiloIdeale: 'Metodico e curioso. Trova pattern nei dati, trasforma numeri in insight actionable.',
+    trattiFondamentali: ['ORG', 'ADS', 'AUT', 'GP'],
+    domandeColloquio: [
+      'Racconti di un\'analisi che ha cambiato una decisione aziendale.',
+      'Come verifica la qualità e l\'affidabilità dei dati?',
+      'Come comunica insight complessi a stakeholder non tecnici?',
+      'Qual è il suo approccio quando i dati sono incompleti o contraddittori?',
+    ],
+    validatoManualeV2: false,
+  },
+
+  'Account Manager': {
+    id: 'account_manager',
+    nome: 'Account Manager',
+    categoria: 'commerciale',
+    descrizione: 'Gestione portafoglio clienti, fidelizzazione, upselling, relazione a lungo termine',
+    requisiti: [
+      { trait: 'COM', soglia: 35, tipo: 'min', isCritical: true, label: 'Comprensione ≥ 35' },
+      { trait: 'VEN', soglia: 30, tipo: 'min', isCritical: true, label: 'Attitudine Vendita ≥ 30' },
+      { trait: 'ESP', soglia: 20, tipo: 'min', isCritical: false, label: 'Espansività ≥ 20' },
+      { trait: 'HRM', soglia: 25, tipo: 'min', isCritical: false, label: 'HR Management ≥ 25' },
+      { trait: 'PRO', soglia: 25, tipo: 'min', isCritical: false, label: 'Proattività ≥ 25' },
+      { trait: 'DET', soglia: 25, tipo: 'min', isCritical: false, label: 'Determinazione ≥ 25' },
+    ],
+    disqualifiers: [
+      {
+        condition: (t) => t.COM < 15,
+        reason: 'Comprensione insufficiente per gestire relazioni clienti',
+        severity: 'blocking'
+      },
+      {
+        condition: (_, s) => s.some(syn => ['S01', 'S02', 'S03', 'S05'].includes(syn.code) && syn.isActive),
+        reason: 'Sindrome critica per ruolo relazionale-commerciale',
+        severity: 'blocking'
+      },
+      {
+        condition: (t) => t.VEN < 15,
+        reason: 'Attitudine vendita bassa per sviluppare il portafoglio',
+        severity: 'warning'
+      },
+      {
+        condition: (t) => t.ESP < 5,
+        reason: 'Espansività troppo bassa per costruire relazioni durature',
+        severity: 'warning'
+      },
+    ],
+    profiloIdeale: 'Relazionale e strategico. Fidelizza, anticipa bisogni, fa crescere il cliente nel tempo.',
+    trattiFondamentali: ['COM', 'VEN', 'ESP', 'HRM'],
+    domandeColloquio: [
+      'Racconti di un cliente che ha fidelizzato con successo. Come ha fatto?',
+      'Come gestisce un cliente insoddisfatto che minaccia di andarsene?',
+      'Come bilancia le esigenze del cliente con quelle dell\'azienda?',
+      'Qual è la sua strategia per fare upselling senza essere invadente?',
+    ],
+    validatoManualeV2: false,
+  },
+
+  'Office Manager': {
+    id: 'office_manager',
+    nome: 'Office Manager',
+    categoria: 'amministrativo',
+    descrizione: 'Gestione ufficio, coordinamento servizi, supervisione procedure quotidiane',
+    requisiti: [
+      { trait: 'ORG', soglia: 40, tipo: 'min', isCritical: true, label: 'Organizzazione ≥ 40' },
+      { trait: 'ADS', soglia: 35, tipo: 'min', isCritical: true, label: 'Autodisciplina ≥ 35' },
+      { trait: 'COM', soglia: 30, tipo: 'min', isCritical: false, label: 'Comprensione ≥ 30' },
+      { trait: 'HRM', soglia: 25, tipo: 'min', isCritical: false, label: 'HR Management ≥ 25' },
+      { trait: 'PRO', soglia: 20, tipo: 'min', isCritical: false, label: 'Proattività ≥ 20' },
+    ],
+    disqualifiers: [
+      {
+        condition: (t) => t.ORG < 25,
+        reason: 'Organizzazione insufficiente per gestire un ufficio',
+        severity: 'blocking'
+      },
+      {
+        condition: (_, s) => s.some(syn => ['S01', 'S04', 'S16'].includes(syn.code) && syn.isActive),
+        reason: 'Sindrome problematica per ruolo di gestione ufficio',
+        severity: 'blocking'
+      },
+      {
+        condition: (t) => t.COM < 15,
+        reason: 'Comprensione bassa per gestire persone e fornitori',
+        severity: 'warning'
+      },
+    ],
+    profiloIdeale: 'Punto di riferimento dell\'ufficio. Organizza, coordina, risolve. Tutti contano su di lei/lui.',
+    trattiFondamentali: ['ORG', 'ADS', 'COM', 'HRM'],
+    domandeColloquio: [
+      'Come organizza le priorità quotidiane dell\'ufficio?',
+      'Racconti di un\'emergenza organizzativa e come l\'ha gestita.',
+      'Come gestisce le richieste multiple da diversi reparti?',
+      'Come garantisce che le procedure vengano rispettate?',
+    ],
+    validatoManualeV2: false,
+  },
+
+  'Responsabile IT/Sistemi': {
+    id: 'resp_it',
+    nome: 'Responsabile IT/Sistemi',
+    categoria: 'tecnico',
+    descrizione: 'Gestione infrastruttura IT, sistemi informativi, problem solving tecnico',
+    requisiti: [
+      { trait: 'ORG', soglia: 45, tipo: 'min', isCritical: true, label: 'Organizzazione ≥ 45' },
+      { trait: 'ADS', soglia: 40, tipo: 'min', isCritical: true, label: 'Autodisciplina ≥ 40' },
+      { trait: 'GP', soglia: 30, tipo: 'min', isCritical: true, label: 'Gestione Pressioni ≥ 30' },
+      { trait: 'PRO', soglia: 30, tipo: 'min', isCritical: false, label: 'Proattività ≥ 30' },
+      { trait: 'AUT', soglia: 30, tipo: 'min', isCritical: false, label: 'Automotivazione ≥ 30' },
+    ],
+    disqualifiers: [
+      {
+        condition: (t) => t.ORG < 30,
+        reason: 'Organizzazione insufficiente per gestire infrastruttura IT',
+        severity: 'blocking'
+      },
+      {
+        condition: (t) => t.ADS < 25,
+        reason: 'Autodisciplina insufficiente per ruolo IT strutturato',
+        severity: 'blocking'
+      },
+      {
+        condition: (_, s) => s.some(syn => ['S01', 'S02', 'S04'].includes(syn.code) && syn.isActive),
+        reason: 'Sindrome critica per ruolo tecnico-gestionale',
+        severity: 'blocking'
+      },
+      {
+        condition: (t) => t.GP < 15,
+        reason: 'Gestione pressioni bassa: rischio sotto emergenze tecniche',
+        severity: 'warning'
+      },
+    ],
+    profiloIdeale: 'Problem solver tecnico. Gestisce sistemi, previene guasti, risolve sotto pressione.',
+    trattiFondamentali: ['ORG', 'ADS', 'GP', 'PRO'],
+    domandeColloquio: [
+      'Racconti di un\'emergenza IT critica e come l\'ha risolta.',
+      'Come pianifica la manutenzione preventiva dei sistemi?',
+      'Come gestisce le richieste urgenti da diversi reparti?',
+      'Come valuta e propone nuove soluzioni tecnologiche?',
+    ],
+    validatoManualeV2: false,
+  },
 };
 
 // ============================================
@@ -1106,7 +1336,7 @@ export function calculateRoleMatchingV5(
 }
 
 /**
- * Calcola la compatibilità con TUTTI i 19 ruoli V5
+ * Calcola la compatibilità con TUTTI i 24 ruoli V5
  */
 export function calculateAllRolesCompatibilityV5(
   ruoloRichiesto: string,
@@ -1210,6 +1440,14 @@ const FUNZIONE_TO_RUOLO_MAP: Record<string, string> = {
   'Coordinamento': 'Team Leader/Coordinatore',
   'Formazione': 'Formatore/Coach',
   'Qualità': 'Responsabile Qualità/Compliance',
+  'Qualità/Compliance': 'Responsabile Qualità/Compliance',
+  'Controllo di gestione': 'Controller di Gestione',
+  'Data analysis': 'Data Analyst',
+  'Account management': 'Account Manager',
+  'Segreteria/Assistenza dir.': 'Office Manager',
+  'IT': 'Responsabile IT/Sistemi',
+  'Sistemi informativi': 'Responsabile IT/Sistemi',
+  'IT/Sistemi informativi': 'Responsabile IT/Sistemi',
 };
 
 /**

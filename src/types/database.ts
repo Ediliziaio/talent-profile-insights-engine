@@ -252,4 +252,8 @@ export const FUNZIONI = [
   'Coordinamento',
   'Formazione',
   'Qualità/Compliance',
+  'Controllo di gestione',
+  'Data analysis',
+  'Account management',
+  'IT/Sistemi informativi',
 ];
