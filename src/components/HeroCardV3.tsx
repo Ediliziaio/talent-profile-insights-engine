@@ -181,11 +181,14 @@ export function HeroCardV3({
 
           {/* Right 40%: Gauges */}
           {esserePct !== undefined && farePct !== undefined && averePct !== undefined && (
-            <div className="flex items-center justify-around md:justify-end gap-3 sm:gap-4 md:gap-6">
-              <AreaGaugeSVG value={esserePct} label="ESSERE" color="#3B82F6" size={isMobile ? 70 : 90} />
-              <AreaGaugeSVG value={farePct} label="FARE" color="#F59E0B" size={isMobile ? 70 : 90} />
-              <AreaGaugeSVG value={averePct} label="AVERE" color="#8B5CF6" size={isMobile ? 70 : 90} />
-            </div>
+            <>
+              <div className="hidden md:block border-l border-border/50 self-stretch" />
+              <div className="flex items-center justify-around md:justify-end gap-3 sm:gap-4 md:gap-6 bg-white/50 dark:bg-white/5 rounded-xl p-2 md:p-3">
+                <AreaGaugeSVG value={esserePct} label="ESSERE" color="#3B82F6" size={isMobile ? 70 : 100} />
+                <AreaGaugeSVG value={farePct} label="FARE" color="#F59E0B" size={isMobile ? 70 : 100} />
+                <AreaGaugeSVG value={averePct} label="AVERE" color="#8B5CF6" size={isMobile ? 70 : 100} />
+              </div>
+            </>
           )}
         </div>
       </CardContent>
