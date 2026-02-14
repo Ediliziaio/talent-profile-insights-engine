@@ -224,31 +224,18 @@ export function ProfiloUnificatoTab({
 
   return (
     <div className="space-y-6">
-      {/* ═══ 1. Requisiti ruolo (grafico con soglie) ═══ */}
+      {/* ═══ 1. Profilo Comportamentale unificato con soglie ruolo ═══ */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
-            <Target className="h-4 w-4" />
-            Requisiti per {ruoloRichiesto}
+            <Heart className="h-4 w-4" />
+            Profilo Comportamentale di {candidatoNome}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <TraitBarChart traits={traitsV5} thresholds={thresholds} showThresholdIndicator />
+          <TraitBarChart traits={traitsV5} thresholds={thresholds} showThresholdIndicator showValueLabels />
         </CardContent>
       </Card>
-
-      {/* ═══ 2. Conteggio requisiti ═══ */}
-      <div className="flex items-center justify-between p-4 rounded-xl bg-muted/50 border">
-        <div className="flex items-center gap-3">
-          <CheckCircle2 className="h-5 w-5 text-green-500" />
-          <span className="font-medium">
-            Soddisfatti {result.requisitiSoddisfatti.length}/{totalRequisiti} requisiti fondamentali
-          </span>
-        </div>
-        <Badge variant={getVerdictBadgeVariantV5(result.verdict)} className="text-sm px-3 py-1">
-          {result.compatibilitaPct}%
-        </Badge>
-      </div>
 
       {/* ═══ 3. Segnalazioni sindromi ═══ */}
       {activeSyndromes.length > 0 && (
@@ -301,18 +288,6 @@ export function ProfiloUnificatoTab({
         </Card>
       )}
 
-      {/* ═══ 4. Profilo comportamentale (senza soglie) ═══ */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
-            <Heart className="h-4 w-4" />
-            Profilo Comportamentale di {candidatoNome}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <TraitBarChart traits={traits} showValueLabels />
-        </CardContent>
-      </Card>
 
       {/* ═══ 5. Narrativa "Chi è [Nome]" ═══ */}
       <Card>
