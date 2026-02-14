@@ -121,6 +121,7 @@ export default function Candidati() {
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [singleDeleteId, setSingleDeleteId] = useState<string | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [generatedCredentials, setGeneratedCredentials] = useState<{
     username: string;
@@ -411,6 +412,7 @@ export default function Candidati() {
   const deleteMutation = useMutation({
     mutationFn: async (ids: string[]) => {
       for (const id of ids) {
+        await supabase.from('analisi_candidato').delete().eq('candidato_id', id);
         await supabase.from('profili_candidato').delete().eq('candidato_id', id);
         await supabase.from('risultati').delete().eq('candidato_id', id);
         await supabase.from('risposte').delete().eq('candidato_id', id);
@@ -420,10 +422,11 @@ export default function Candidati() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['candidati'] });
-      const count = selectedIds.size;
+      const count = singleDeleteId ? 1 : selectedIds.size;
       setSelectedIds(new Set());
+      setSingleDeleteId(null);
       setIsDeleteDialogOpen(false);
-      toast({ title: 'Candidati eliminati', description: `${count} candidati rimossi` });
+      toast({ title: 'Candidati eliminati', description: `${count} candidat${count === 1 ? 'o rimosso' : 'i rimossi'}` });
     },
     onError: (error: Error) => {
       toast({ title: 'Errore', description: error.message, variant: 'destructive' });
@@ -1291,7 +1294,18 @@ export default function Candidati() {
                                       <Copy className="h-4 w-4" />
                                     )}
                                   </Button>
-                                )}
+                                    )}
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                                  onClick={() => {
+                                    setSingleDeleteId(candidato.id);
+                                    setIsDeleteDialogOpen(true);
+                                  }}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
                               </div>
                             </div>
                             
@@ -1499,6 +1513,17 @@ export default function Candidati() {
                                         Vedi
                                       </Button>
                                     )}
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                                      onClick={() => {
+                                        setSingleDeleteId(candidato.id);
+                                        setIsDeleteDialogOpen(true);
+                                      }}
+                                    >
+                                      <Trash2 className="h-3 w-3" />
+                                    </Button>
                                   </div>
                                 </TableCell>
                               </TableRow>
@@ -1522,19 +1547,31 @@ export default function Candidati() {
           </div>
 
           {/* Delete Confirmation Dialog */}
-          <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <AlertDialog open={isDeleteDialogOpen} onOpenChange={(open) => {
+            setIsDeleteDialogOpen(open);
+            if (!open) setSingleDeleteId(null);
+          }}>
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>Conferma eliminazione</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Stai per eliminare {selectedIds.size} candidati e tutti i loro dati. 
-                  Questa azione non può essere annullata.
+                  {singleDeleteId ? (
+                    (() => {
+                      const c = candidati?.find(c => c.id === singleDeleteId);
+                      return `Stai per eliminare ${c?.cognome} ${c?.nome} e tutti i suoi dati. Questa azione non può essere annullata.`;
+                    })()
+                  ) : (
+                    `Stai per eliminare ${selectedIds.size} candidati e tutti i loro dati. Questa azione non può essere annullata.`
+                  )}
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Annulla</AlertDialogCancel>
                 <AlertDialogAction
-                  onClick={() => deleteMutation.mutate(Array.from(selectedIds))}
+                  onClick={() => {
+                    const ids = singleDeleteId ? [singleDeleteId] : Array.from(selectedIds);
+                    deleteMutation.mutate(ids);
+                  }}
                   className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                 >
                   {deleteMutation.isPending ? 'Eliminazione...' : 'Elimina'}
