@@ -292,7 +292,7 @@ export default function Questionario() {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-24 sm:pb-24 safe-area-bottom">
+    <div className="min-h-screen bg-background pb-32 sm:pb-24 safe-area-bottom">
       <div className="max-w-6xl mx-auto px-2.5 sm:px-4 py-3 sm:py-6 space-y-2 sm:space-y-6">
         {/* Header - compact on mobile */}
         <div className="bg-primary text-primary-foreground rounded-lg overflow-hidden">
