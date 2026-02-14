@@ -142,7 +142,7 @@ export function HeroCardV3({
 
   return (
     <Card
-      className={cn('overflow-hidden', className)}
+      className={cn(className)}
       style={{ borderLeft: `4px solid ${config.borderColor}` }}
     >
       <CardContent className={cn('p-3 sm:p-5 md:p-6', config.bgClass)}>

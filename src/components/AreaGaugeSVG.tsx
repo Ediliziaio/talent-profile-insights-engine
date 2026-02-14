@@ -12,10 +12,10 @@ interface AreaGaugeSVGProps {
 
 export function AreaGaugeSVG({ value, label, color, size = 100 }: AreaGaugeSVGProps) {
   const clampedValue = Math.max(0, Math.min(100, value));
-  const radius = 38;
+  const radius = 34;
   const strokeWidth = 8;
   const cx = 50;
-  const cy = 46;
+  const cy = 48;
   
   // Semicircle arc from 180° to 0° (left to right)
   const startAngle = Math.PI;
@@ -64,7 +64,7 @@ export function AreaGaugeSVG({ value, label, color, size = 100 }: AreaGaugeSVGPr
         {/* Value text */}
         <text
           x={cx}
-          y={56}
+          y={58}
           textAnchor="middle"
           className="fill-foreground"
           fontSize="16"
