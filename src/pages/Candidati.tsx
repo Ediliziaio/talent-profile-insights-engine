@@ -958,12 +958,13 @@ export default function Candidati() {
                       <div className="space-y-1">
                         <Label className="text-xs text-muted-foreground">Password</Label>
                         <div className="flex gap-1">
-                          <Input value={accessoAzienda.password_plain} readOnly className="font-mono text-sm h-8" />
+                          <Input value={accessoAzienda.password_plain || '••••••••••••'} readOnly className="font-mono text-sm h-8" />
                           <Button
                             variant="outline"
                             size="icon"
                             className="h-8 w-8 shrink-0"
-                            onClick={() => copyToClipboard(accessoAzienda.password_plain, 'az-password')}
+                            onClick={() => accessoAzienda.password_plain && copyToClipboard(accessoAzienda.password_plain, 'az-password')}
+                            disabled={!accessoAzienda.password_plain}
                           >
                             {copiedId === 'az-password' ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
                           </Button>
@@ -975,7 +976,7 @@ export default function Candidati() {
                           size="sm"
                           className="w-full h-8"
                           onClick={() => {
-                            const text = `Credenziali:\nUsername: ${accessoAzienda.username}\nPassword: ${accessoAzienda.password_plain}\nLink: ${window.location.origin}/auth`;
+                            const text = `Credenziali:\nUsername: ${accessoAzienda.username}\nPassword: ${accessoAzienda.password_plain || '(rigenera per ottenere la password)'}\nLink: ${window.location.origin}/auth`;
                             copyToClipboard(text, 'az-all');
                           }}
                         >

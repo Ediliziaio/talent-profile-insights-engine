@@ -442,7 +442,7 @@ export default function Aziende() {
     try {
       const { data, error } = await supabase
         .from('accessi_azienda')
-        .select('username, password_plain')
+        .select('username')
         .eq('azienda_id', azienda.id)
         .eq('attivo', true)
         .maybeSingle();
@@ -465,7 +465,7 @@ export default function Aziende() {
         aziendaNome: azienda.nome,
         email,
         username: data.username,
-        password: data.password_plain,
+        password: '••••••••••••',
       });
     } catch (error: any) {
       toast({
@@ -515,7 +515,7 @@ export default function Aziende() {
       
       setRegeneratedCredentials({
         email,
-        password: result.accesso.password_plain,
+        password: result.plainPassword || result.accesso.password_plain,
       });
 
       toast({
