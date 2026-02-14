@@ -1369,7 +1369,7 @@ export default function Candidati() {
                             <SortableHeader field="fit_score">Fit</SortableHeader>
                             <TableHead>Profilo</TableHead>
                             <SortableHeader field="created_at">Data</SortableHeader>
-                            <TableHead className="text-right w-24">Azioni</TableHead>
+                            <TableHead className="text-right w-32">Azioni</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
