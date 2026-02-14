@@ -1453,6 +1453,7 @@ const FUNZIONE_TO_RUOLO_MAP: Record<string, string> = {
   'Cantiere/Edilizia': 'Capocantiere',
   'Installazione/Manutenzione': 'Operaio/Installatore',
   'Impiegato amministrativo': 'Impiegato Amministrativo',
+  'Assistente di direzione': 'Assistente di Direzione',
 };
 
 /**
