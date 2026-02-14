@@ -143,14 +143,14 @@ export function HeroCardV3({
       className={cn('overflow-hidden', className)}
       style={{ borderLeft: `4px solid ${config.borderColor}` }}
     >
-      <CardContent className={cn('p-5 sm:p-6', config.bgClass)}>
-        <div className="flex flex-col md:flex-row md:items-center gap-6">
+      <CardContent className={cn('p-3 sm:p-5 md:p-6', config.bgClass)}>
+        <div className="flex flex-col md:flex-row md:items-center gap-4 sm:gap-6">
           {/* Left 60%: Verdict */}
-          <div className="flex-1 space-y-3">
-            <div className="flex items-center gap-3">
-              <span className="text-3xl">{config.emoji}</span>
+          <div className="flex-1 space-y-2 sm:space-y-3">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <span className="text-2xl sm:text-3xl">{config.emoji}</span>
               <div>
-                <h2 className={cn('text-2xl sm:text-3xl font-bold', config.textClass)}>
+                <h2 className={cn('text-xl sm:text-2xl md:text-3xl font-bold', config.textClass)}>
                   {config.label}
                 </h2>
                 <p className="text-sm text-muted-foreground">
@@ -179,25 +179,10 @@ export function HeroCardV3({
 
           {/* Right 40%: Gauges */}
           {esserePct !== undefined && farePct !== undefined && averePct !== undefined && (
-            <div className="flex items-center justify-around md:justify-end gap-4 md:gap-6">
-              <AreaGaugeSVG
-                value={esserePct}
-                label="ESSERE"
-                color="#3B82F6"
-                size={90}
-              />
-              <AreaGaugeSVG
-                value={farePct}
-                label="FARE"
-                color="#F59E0B"
-                size={90}
-              />
-              <AreaGaugeSVG
-                value={averePct}
-                label="AVERE"
-                color="#8B5CF6"
-                size={90}
-              />
+            <div className="flex items-center justify-around md:justify-end gap-3 sm:gap-4 md:gap-6">
+              <AreaGaugeSVG value={esserePct} label="ESSERE" color="#3B82F6" size={70} />
+              <AreaGaugeSVG value={farePct} label="FARE" color="#F59E0B" size={70} />
+              <AreaGaugeSVG value={averePct} label="AVERE" color="#8B5CF6" size={70} />
             </div>
           )}
         </div>

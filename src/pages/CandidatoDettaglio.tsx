@@ -143,22 +143,22 @@ export default function CandidatoDettaglio() {
   return (
     <ProtectedRoute allowedRoles={['superadmin', 'azienda']}>
       <NotionLayout>
-        <div className="space-y-4 pb-24 md:pb-8">
+        <div className="space-y-4 pb-28 md:pb-8">
           {/* HEADER compatto */}
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate('/candidati')}>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+            <Button variant="ghost" size="icon" onClick={() => navigate('/candidati')} className="hidden sm:flex">
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <div className="flex-1">
-              <h1 className="text-2xl font-bold">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-xl sm:text-2xl font-bold truncate">
                 {candidato.cognome} {candidato.nome}
               </h1>
-              <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap mt-0.5">
-                {candidato.aziende?.nome && <span>{candidato.aziende.nome}</span>}
+              <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-muted-foreground flex-wrap mt-0.5">
+                {candidato.aziende?.nome && <span className="truncate max-w-[120px] sm:max-w-none">{candidato.aziende.nome}</span>}
                 {candidato.funzione && (
                   <>
                     <span>•</span>
-                    <span>{candidato.funzione}</span>
+                    <span className="truncate max-w-[100px] sm:max-w-none">{candidato.funzione}</span>
                   </>
                 )}
                 {candidato.eta && (
@@ -175,10 +175,11 @@ export default function CandidatoDettaglio() {
                 )}
               </div>
             </div>
-            {/* Action buttons */}
-            <div className="flex items-center gap-2 flex-wrap">
-              {profilo && (
-                <>
+            {/* Action buttons - Desktop: all visible, Mobile: inside dropdown */}
+            {profilo && (
+              <>
+                {/* Desktop buttons */}
+                <div className="hidden sm:flex items-center gap-2 flex-wrap">
                   <PDFReportButton
                     candidatoNome={candidato.nome}
                     candidatoCognome={candidato.cognome}
@@ -229,7 +230,6 @@ export default function CandidatoDettaglio() {
                       )}
                     />
                   )}
-                  {/* More menu (Risposte) */}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="outline" size="icon">
@@ -246,11 +246,28 @@ export default function CandidatoDettaglio() {
                   <PDFExportButton
                     targetRef={reportRef}
                     fileName={`${candidato.cognome}_${candidato.nome}`}
-                    className="hidden sm:flex"
                   />
-                </>
-              )}
-            </div>
+                </div>
+
+                {/* Mobile: single "..." menu with all actions */}
+                <div className="flex sm:hidden">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <MoreHorizontal className="h-4 w-4 mr-1" />
+                        Azioni
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-56">
+                      <DropdownMenuItem onClick={() => setShowRisposte(!showRisposte)}>
+                        <FileText className="h-4 w-4 mr-2" />
+                        {showRisposte ? 'Nascondi Risposte' : 'Risposte Dettagliate'}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </>
+            )}
           </div>
 
           {profilo ? (
@@ -283,21 +300,21 @@ export default function CandidatoDettaglio() {
 
               {/* 4 TAB */}
               <Tabs defaultValue="compatibilita" className="w-full">
-                <TabsList className="flex w-full mb-4">
-                  <TabsTrigger value="compatibilita" className="flex-1 gap-1.5 text-xs sm:text-sm">
-                    <Target className="h-4 w-4" />
+                <TabsList className="flex w-full mb-4 overflow-x-auto">
+                  <TabsTrigger value="compatibilita" className="flex-1 gap-1.5 text-[11px] sm:text-sm">
+                    <Target className="h-4 w-4 hidden sm:block" />
                     <span>Compatibilità</span>
                   </TabsTrigger>
-                  <TabsTrigger value="profilo" className="flex-1 gap-1.5 text-xs sm:text-sm">
-                    <BookOpen className="h-4 w-4" />
+                  <TabsTrigger value="profilo" className="flex-1 gap-1.5 text-[11px] sm:text-sm">
+                    <BookOpen className="h-4 w-4 hidden sm:block" />
                     <span>Profilo</span>
                   </TabsTrigger>
-                  <TabsTrigger value="gestione" className="flex-1 gap-1.5 text-xs sm:text-sm">
-                    <UserCog className="h-4 w-4" />
+                  <TabsTrigger value="gestione" className="flex-1 gap-1.5 text-[11px] sm:text-sm">
+                    <UserCog className="h-4 w-4 hidden sm:block" />
                     <span>Gestione</span>
                   </TabsTrigger>
-                  <TabsTrigger value="colloquio" className="flex-1 gap-1.5 text-xs sm:text-sm">
-                    <MessageSquare className="h-4 w-4" />
+                  <TabsTrigger value="colloquio" className="flex-1 gap-1.5 text-[11px] sm:text-sm">
+                    <MessageSquare className="h-4 w-4 hidden sm:block" />
                     <span>Colloquio</span>
                   </TabsTrigger>
                 </TabsList>
@@ -430,14 +447,14 @@ export default function CandidatoDettaglio() {
         </div>
 
         {/* Mobile fixed back button */}
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t border-border md:hidden z-40">
+        <div className="fixed bottom-0 left-0 right-0 p-3 bg-background/95 backdrop-blur-sm border-t border-border md:hidden z-40">
           <Button
             variant="outline"
-            className="w-full h-12 text-base font-medium"
+            className="w-full h-10 text-sm font-medium"
             onClick={() => navigate('/candidati')}
           >
-            <ArrowLeft className="h-5 w-5 mr-2" />
-            Torna alla lista candidati
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Torna alla lista
           </Button>
         </div>
       </NotionLayout>
