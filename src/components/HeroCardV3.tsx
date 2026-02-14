@@ -146,7 +146,7 @@ export function HeroCardV3({
       style={{ borderLeft: `4px solid ${config.borderColor}` }}
     >
       <CardContent className={cn('p-3 sm:p-5 md:p-6', config.bgClass)}>
-        <div className="flex flex-col md:flex-row md:items-center gap-4 sm:gap-6">
+        <div className="flex flex-col md:flex-row md:items-center gap-4 sm:gap-6 overflow-visible">
           {/* Left 60%: Verdict */}
           <div className="flex-1 space-y-2 sm:space-y-3">
             <div className="flex items-center gap-2 sm:gap-3">
@@ -183,7 +183,7 @@ export function HeroCardV3({
           {esserePct !== undefined && farePct !== undefined && averePct !== undefined && (
             <>
               <div className="hidden md:block border-l border-border/50 self-stretch" />
-              <div className="flex items-center justify-around md:justify-end gap-3 sm:gap-4 md:gap-6 bg-white/50 dark:bg-white/5 rounded-xl p-2 md:p-3">
+              <div className="flex items-center justify-around md:justify-end gap-3 sm:gap-4 md:gap-6 bg-white/50 dark:bg-white/5 rounded-xl p-2 md:p-3 overflow-visible">
                 <AreaGaugeSVG value={esserePct} label="ESSERE" color="#3B82F6" size={isMobile ? 70 : 100} />
                 <AreaGaugeSVG value={farePct} label="FARE" color="#F59E0B" size={isMobile ? 70 : 100} />
                 <AreaGaugeSVG value={averePct} label="AVERE" color="#8B5CF6" size={isMobile ? 70 : 100} />

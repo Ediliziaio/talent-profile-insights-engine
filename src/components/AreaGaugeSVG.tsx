@@ -41,8 +41,8 @@ export function AreaGaugeSVG({ value, label, color, size = 100 }: AreaGaugeSVGPr
     : '';
 
   return (
-    <div className="flex flex-col items-center">
-      <svg width={size} height={size * 0.7} viewBox="0 0 100 70">
+    <div className="flex flex-col items-center overflow-visible">
+      <svg width={size} height={size * 0.7} viewBox="0 0 100 70" overflow="visible">
         {/* Background arc */}
         <path
           d={bgPath}
