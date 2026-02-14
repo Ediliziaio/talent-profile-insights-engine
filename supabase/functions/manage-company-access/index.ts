@@ -145,14 +145,13 @@ Deno.serve(async (req) => {
           .eq('azienda_id', targetAziendaId);
       }
 
-      // Insert new credentials
+      // Insert new credentials (never store plain-text password)
       const { data: newAccesso, error: insertError } = await supabaseAdmin
         .from('accessi_azienda')
         .insert({
           azienda_id: targetAziendaId,
           username,
           password_hash: passwordHash,
-          password_plain: password,
           attivo: true,
         })
         .select()
@@ -168,7 +167,8 @@ Deno.serve(async (req) => {
 
       return new Response(
         JSON.stringify({ 
-          accesso: newAccesso,
+          accesso: { ...newAccesso, password_plain: password },
+          plainPassword: password,
           message: action === 'regenerate' ? 'Credenziali rigenerate' : 'Credenziali generate'
         }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

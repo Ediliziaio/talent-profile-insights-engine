@@ -49,7 +49,7 @@ export interface AccessoAzienda {
   id: string;
   azienda_id: string;
   username: string;
-  password_plain: string;
+  password_plain?: string | null;
   attivo: boolean;
   created_at: string;
   updated_at: string;
