@@ -1,23 +1,18 @@
 
 
-# Fix: Arco di sfondo gauge ancora troppo visibile
+# Fix: Rimuovere completamente l'arco di sfondo dei Gauge
 
 ## Problema
-Il colore `rgba(0,0,0,0.08)` per l'arco di sfondo risulta ancora troppo contrastato sugli sfondi colorati delle card (rosa/rosso per NON IDONEO). Si vede chiaramente un arco grigio dietro l'arco colorato.
+Anche con opacita' al 4%, l'arco di sfondo resta visibile sugli sfondi colorati (rosa per NON IDONEO). L'utente vuole che sparisca del tutto.
 
 ## Soluzione
 
 ### `src/components/AreaGaugeSVG.tsx` (riga 50)
-Ridurre drasticamente l'opacita' dell'arco di sfondo da `rgba(0,0,0,0.08)` a `rgba(0,0,0,0.04)` (4% invece di 8%).
+Impostare lo stroke dell'arco di sfondo a `transparent` oppure `rgba(0,0,0,0)`, rendendo l'arco completamente invisibile.
 
-In alternativa, se anche 4% risulta visibile, possiamo passare il colore di sfondo come prop dalla HeroCard, oppure usare `currentColor` con opacita' molto bassa.
-
-La soluzione piu' semplice e' dimezzare l'opacita':
 ```
-stroke="rgba(0,0,0,0.04)"
+stroke="transparent"
 ```
 
-### Impatto
-- Una sola modifica di valore
-- L'arco di sfondo diventa quasi invisibile ma mantiene un riferimento visivo leggero
-- Funziona su tutti gli sfondi colorati
+I gauge mostreranno solo l'arco colorato di progresso senza alcuna traccia di sfondo.
+
