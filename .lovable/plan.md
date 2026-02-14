@@ -1,71 +1,43 @@
 
 
-# Riformulazione Domande con Risposte Custom
+# Riformulazione Domande VEN (Blocco 9) - Da "Vendita" a "Persuasione"
 
 ## Il Problema
 
-Tutte le 242 domande usano le stesse 3 risposte: "Si, sempre / A volte / No, mai". Per 8 domande questo non ha senso:
+Le domande 201-209 usano un linguaggio troppo specifico per il ruolo commerciale: "vendita", "clienti", "trattativa", "proposte commerciali", "prodotti/servizi". Un candidato per ruoli di amministrazione, produzione o altro si sente estraneo a queste domande.
 
-- **Domande SPECIAL** (72, 73, 211, 212, 213, 228): richiedono risposte specifiche (fasce di eta, percentuali, mesi). "Si, sempre" come risposta a "A che eta hai iniziato a guadagnare?" e assurdo.
-- **Domande 87 e 191**: il testo e formulato in modo che "Si, sempre / A volte / No, mai" suona innaturale.
+Il tratto VEN misura in realta la **capacita di persuasione, influenza e comunicazione efficace** -- competenze trasversali a qualsiasi ruolo. Le domande vanno riformulate per catturare lo stesso costrutto psicologico con parole universali.
 
-## La Soluzione
+## Riformulazioni Proposte
 
-Due interventi combinati:
+| ID | Scala | Pol. | Testo Attuale | Testo Nuovo | Cosa Misura |
+|---|---|---|---|---|---|
+| 201 | VEN | + | "Chiudi spesso una vendita o un accordo con successo?" | "Riesci spesso a convincere gli altri ad accettare le tue proposte?" | Capacita di chiusura/persuasione |
+| 202 | VEN | - | "Ti capita di sentirti a disagio quando devi chiedere il prezzo per il tuo lavoro?" | "Ti capita di sentirti a disagio quando devi far valere il tuo punto di vista?" | Difficolta nell'assertivita |
+| 203 | VEN | + | "Riesci a mantenere relazioni con clienti nel lungo periodo?" | "Riesci a mantenere relazioni professionali solide nel lungo periodo?" | Fidelizzazione relazionale |
+| 204 | VEN | + | "Ti senti a tuo agio nel gestire obiezioni durante una trattativa?" | "Ti senti a tuo agio nel gestire le obiezioni quando presenti un'idea?" | Gestione delle resistenze |
+| 205 | VEN | + | "Sei bravo a identificare i bisogni dei tuoi clienti?" | "Sei bravo a capire cosa vogliono veramente le persone con cui interagisci?" | Ascolto attivo / empatia strategica |
+| 206 | PRI | + | "Ti capita di rinunciare a una vendita per mantenere la tua integrità?" | "Ti capita di rinunciare a un vantaggio personale per mantenere la tua integrita?" | Integrita etica (nota: scala PRI, non VEN) |
+| 207 | VEN | + | "Riesci a creare urgenza nelle tue proposte commerciali?" | "Riesci a motivare gli altri ad agire rapidamente sulle tue proposte?" | Capacita di attivazione |
+| 209 | VEN | + | "Sei bravo a presentare i vantaggi dei tuoi prodotti/servizi?" | "Sei bravo a presentare le tue idee in modo convincente?" | Comunicazione persuasiva |
 
-### A. Risposte custom per le 6 domande SPECIAL
+**Domanda 208** ("Ti piace costruire una rete di contatti professionali?") resta invariata: e gia formulata in modo universale.
 
-Aggiungere un campo opzionale `risposte_custom` alla struttura dati. Quando presente, il questionario mostra quelle etichette invece di "Si, sempre / A volte / No, mai".
+## Impatto sullo Scoring
 
-| ID | Domanda (invariata) | A | B | C |
-|---|---|---|---|---|
-| 72 | "A che eta hai iniziato a guadagnare denaro?" | Prima dei 21 anni | Tra i 21 e i 23 anni | Dopo i 23 anni |
-| 73 | "Che percentuale del tuo reddito annuo riesci a mettere da parte?" | Meno del 5% | Tra il 5% e il 15% | Piu del 15% |
-| 211 | "Dedichi regolarmente del tempo alla gestione dei tuoi investimenti?" | Si, regolarmente | Meno del dovuto | No, per niente |
-| 212 | "Le tue riserve finanziarie coprono..." | Meno di 3 mesi di spese | Tra 3 e 6 mesi di spese | Piu di 9 mesi di spese |
-| 213 | "A quanti mesi ammonta la tua autonomia finanziaria attuale?" | Meno di 3 mesi | Tra 3 e 9 mesi | Piu di 9 mesi |
-| 228 | "Rispetto alla media delle persone, quanto potenziale di successo ritieni di avere?" | Molto piu della media | Nella media | Un po' meno della media |
-
-Lo scoring SPECIAL resta identico: i valori A/B/C nel codice non cambiano, cambia solo l'etichetta visuale.
-
-### B. Riformulazione testo per Q87 e Q191
-
-Queste due domande hanno polarita standard ('-') ma il testo suona male con "Si, sempre / A volte / No, mai". Riformulazione:
-
-| ID | Testo attuale | Testo nuovo | Polarita | Perche funziona |
-|---|---|---|---|---|
-| 87 | "Ti senti troppo giovane o troppo vecchio per migliorare?" | "Ti capita di pensare che ormai sia troppo tardi per migliorare?" | - (invariata) | "Si, sempre / A volte / No, mai" suona naturale |
-| 191 | "Preferisci lavorare in maniera autonoma piuttosto che in team?" | "Ti capita di preferire il lavoro in solitaria rispetto al lavoro di squadra?" | - (invariata) | "Si, sempre / A volte / No, mai" suona naturale |
-
-La polarita '-' resta invariata, quindi lo scoring non cambia.
-
----
+**ZERO.** Tutte le polarita (+/-) restano identiche. Lo scoring V5 usa solo la scala e la polarita, non il testo. Nessuna modifica a `scoringV5.ts`, `ricalcoloV5.ts` o edge functions.
 
 ## Dettaglio Tecnico
 
 ### File da modificare
 
-**`src/data/questionario.ts`**
-- Aggiungere campo opzionale `risposte_custom?: { a: string; b: string; c: string }` all'interfaccia `DomandaV5`
-- Aggiungere `risposte_custom` alle 6 domande SPECIAL (72, 73, 211, 212, 213, 228)
-- Aggiornare il testo delle domande 87 e 191
+**`src/data/questionario.ts`** -- Aggiornare il campo `testo` per le domande 201, 202, 203, 204, 205, 206, 207, 209 (8 domande).
 
-**`src/pages/Questionario.tsx`**
-- Nel rendering delle risposte, controllare se la domanda corrente ha `risposte_custom`
-- Se si: usare quelle etichette al posto di "Si, sempre / A volte / No, mai"
-- Se no: comportamento attuale invariato
+### Aggiornamento database
 
-**`src/components/AnswerButton.tsx`**
-- Nessuna modifica necessaria: gia accetta `label` e `shortLabel` come props
-
-### Impatto sullo scoring
-- ZERO: lo scoring usa solo il valore `A`, `B`, `C` salvato in DB. Le etichette sono solo visuali.
-- La mappa `SPECIAL_SCORING` in `scoringV5.ts` resta identica.
-- Il `batch-ricalcolo-v5` edge function non e impattato.
+Eseguire una migrazione SQL per aggiornare la colonna `testo` nella tabella `domande` per gli stessi 8 ID, in modo che il database resti sincronizzato con il codice frontend.
 
 ### Ordine di esecuzione
-1. Aggiornare interfaccia `DomandaV5` in `questionario.ts`
-2. Aggiornare le 8 domande (6 custom labels + 2 riformulazioni testo)
-3. Aggiornare `Questionario.tsx` per leggere `risposte_custom`
-4. Aggiornare le stesse domande nel database (tabella `domande`)
+1. Aggiornare i testi in `questionario.ts`
+2. Eseguire la migrazione SQL sulla tabella `domande`
 
