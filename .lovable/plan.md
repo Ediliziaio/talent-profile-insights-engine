@@ -1,43 +1,40 @@
 
 
-# Miglioramento UX Sezione Risultati Candidato
+# Fix Definitivo: Gauge Semicircolari Tagliati
 
-## Problemi Identificati
+## Analisi Root Cause
 
-### 1. Gauge semicircolari ancora tagliati
-Nonostante le modifiche precedenti (cy=46, radius=38, viewBox "0 0 100 70"), gli archi sono ancora visivamente tagliati ai bordi superiori. Il problema e' che con radius=38 e strokeWidth=8 con strokeLinecap="round", il bordo visivo superiore dell'arco si trova a circa y=4, lasciando solo 4px di margine dal bordo del viewBox. I cap rotondi aggiungono ulteriore estensione che viene tagliata.
+Dopo analisi approfondita, il problema persiste per due ragioni combinate:
 
-### 2. HRM Score - Chiarimento
-Il punteggio HRM=71 di Ovidiu e' tecnicamente corretto secondo il manuale: le 7 domande HRM misurano assunzione di responsabilita', correzione errori, stabilizzazione ambientale e attenzione nell'insegnamento, non sociabilita' o preferenza per il lavoro di gruppo. Il suo profilo (HRM=71, ESP=0, LDR=-9) indica un "contributor responsabile" che si fa carico di tutto ma non vuole guidare o stare al centro dell'attenzione. Non e' un bug ma un aspetto interpretativo del tratto.
+1. **Border-radius clipping**: Il `rounded-xl` sul contenitore dei gauge e il `rounded-lg` sulla Card possono causare clipping visivo nel rendering del browser, anche senza `overflow-hidden` esplicito. Alcuni browser applicano implicitamente `overflow: hidden` quando c'e' un `border-radius`.
+
+2. **SVG senza overflow esplicito**: L'elemento SVG non ha `overflow="visible"` settato, il che significa che il browser puo' tagliare il contenuto che si avvicina ai bordi del viewBox.
 
 ## Interventi
 
-### 1. Fix definitivo AreaGaugeSVG
-Ridisegnare le coordinate SVG con piu' margine:
-- Ridurre il raggio da 38 a 34 per dare piu' respiro
-- Spostare il centro da cy=46 a cy=48
-- Il punto piu' alto dell'arco diventa: 48-34 = 14 (anziche' 8), con stroke a y=10 - ampio margine dal bordo
-- Aggiornare le posizioni del testo di conseguenza (y da 56 a 58)
+### 1. AreaGaugeSVG.tsx - Fix definitivo
 
-### 2. Miglioramento layout HeroCard
-- Rimuovere `overflow-hidden` dal Card principale che potrebbe contribuire al clipping
-- Migliorare il padding del contenitore gauge per garantire nessun taglio
+- Aggiungere `overflow="visible"` all'elemento SVG per impedire qualsiasi clipping interno
+- Aggiungere `className="overflow-visible"` al div wrapper per propagare la visibilita'
+- Queste due proprieta' garantiscono che gli archi con `strokeLinecap="round"` non vengano mai tagliati
+
+### 2. HeroCardV3.tsx - Rimuovere border-radius clipping
+
+- Aggiungere `overflow-visible` al contenitore dei gauge (il div con `bg-white/50 rounded-xl`) per evitare che il border-radius tagli il contenuto SVG
+- Aggiungere `overflow-visible` anche al div flex padre
 
 ## Dettaglio Tecnico
 
-### File da modificare
+### `src/components/AreaGaugeSVG.tsx`
+- Riga 44: cambiare il wrapper div da `className="flex flex-col items-center"` a `className="flex flex-col items-center overflow-visible"`
+- Riga 45: aggiungere `overflow="visible"` all'elemento `<svg>`
 
-**`src/components/AreaGaugeSVG.tsx`**
-- Cambiare `radius` da 38 a 34
-- Cambiare `cy` da 46 a 48
-- Cambiare `y` del testo percentuale da 56 a 58
-- Questo garantisce 10px+ di margine dal bordo superiore del viewBox
-
-**`src/components/HeroCardV3.tsx`**
-- Rimuovere `overflow-hidden` dal Card per eliminare qualsiasi clipping residuo dovuto al CSS
-- Il Card continua a funzionare correttamente senza overflow-hidden
+### `src/components/HeroCardV3.tsx`
+- Riga 186: aggiungere `overflow-visible` al div contenitore gauge: `"flex items-center ... rounded-xl p-2 md:p-3 overflow-visible"`
+- Riga 149: aggiungere `overflow-visible` al div flex padre
 
 ### Impatto
-- Solo modifiche SVG/CSS, nessun impatto su logica o dati
-- Risolve definitivamente il problema del taglio dei gauge
-- Desktop e mobile entrambi corretti
+- Solo CSS, nessun cambio logico
+- Risolve il clipping su tutti i browser
+- Zero rischi di regressione
+
