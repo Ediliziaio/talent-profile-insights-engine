@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -8,11 +9,33 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Brain, Shield, Lock, FileText, Lightbulb, Clock, Target, Heart, CheckCircle } from 'lucide-react';
 
 export default function ConsensoPrivacy() {
-  const { profile, loading } = useAuth();
+  const { profile, user, loading } = useAuth();
   const navigate = useNavigate();
   const [accepted, setAccepted] = useState(false);
+  const [checkingTest, setCheckingTest] = useState(true);
 
-  if (loading) {
+  // Check if test already completed → redirect
+  useEffect(() => {
+    if (!user || loading) return;
+    
+    const checkTestStatus = async () => {
+      const { data } = await supabase
+        .from('candidati')
+        .select('test_completato')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      
+      if (data?.test_completato) {
+        navigate('/test/completato', { replace: true });
+      } else {
+        setCheckingTest(false);
+      }
+    };
+    
+    checkTestStatus();
+  }, [user, loading, navigate]);
+
+  if (loading || checkingTest) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
