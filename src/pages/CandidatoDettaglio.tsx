@@ -8,6 +8,7 @@ import { RisposteDettagliate } from '@/components/RisposteDettagliate';
 import { PDFExportButton, PDFReportButton, PDFSyndromeReportButton, InterviewSheetPDFButton } from '@/components/PDFExportButton';
 import { ManagementGuideV5 } from '@/components/ManagementGuideV5';
 import { ActionPlanCardV5 } from '@/components/ActionPlanCardV5';
+import { GestioneAvanzataV3 } from '@/components/GestioneAvanzataV3';
 import { HeroCardV3 } from '@/components/HeroCardV3';
 import { AlertBannerV3 } from '@/components/AlertBannerV3';
 import { CompatibilitaTabV3 } from '@/components/CompatibilitaTabV3';
@@ -361,6 +362,17 @@ export default function CandidatoDettaglio() {
                         traits={traitsV5 as Record<TraitCode, number>}
                         syndromes={syndromes}
                         reliabilityIndex={reliabilityIndex || 'CAUTION'}
+                      />
+                      <GestioneAvanzataV3
+                        candidatoNome={candidato.nome}
+                        candidatoSesso={candidato.sesso}
+                        traits={traitsV5 as Record<TraitCode, number>}
+                        macroAree={{
+                          essere: esserePct || 0,
+                          fare: farePct || 0,
+                          avere: averePct || 0,
+                        }}
+                        eta={candidato.eta ?? undefined}
                       />
                     </>
                   ) : (
