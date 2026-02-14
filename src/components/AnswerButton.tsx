@@ -26,22 +26,17 @@ export function AnswerButton({
       <button
         onClick={onClick}
         className={cn(
-          "min-h-[56px] p-2 rounded-lg border-2 text-center transition-all touch-manipulation",
-          "active:scale-[0.98]",
-          "flex flex-col items-center justify-center gap-0.5",
+          "min-h-[44px] px-2.5 py-1.5 rounded-lg border-2 text-center transition-all touch-manipulation",
+          "active:scale-[0.97]",
+          "flex items-center justify-center gap-1.5",
           selected
-            ? "border-accent bg-accent text-accent-foreground shadow-md"
-            : "border-border bg-card hover:border-accent/50 hover:bg-accent/5"
+            ? "border-accent bg-accent text-accent-foreground"
+            : "border-border bg-card hover:border-accent/50 hover:bg-accent/5",
+          isSaving && selected && "animate-pulse"
         )}
       >
-        <div className={cn(
-          "w-7 h-7 rounded-full flex items-center justify-center shrink-0 font-bold text-xs transition-all",
-          selected ? "bg-white/20" : "bg-primary/10 text-primary",
-          isSaving && selected && "animate-pulse"
-        )}>
-          {selected ? <Check className="h-3.5 w-3.5" /> : value}
-        </div>
-        <span className="text-[10px] font-medium leading-tight">
+        {selected && <Check className="h-3.5 w-3.5 shrink-0" />}
+        <span className="text-[11px] font-semibold leading-tight line-clamp-1">
           {shortLabel || label}
         </span>
       </button>
