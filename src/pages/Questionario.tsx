@@ -340,7 +340,14 @@ export default function Questionario() {
                   </div>
 
                   {/* Answer buttons - Desktop */}
-                  {ANSWER_OPTIONS.map(option => (
+                  {(domanda.risposte_custom
+                    ? ANSWER_OPTIONS.map(option => ({
+                        ...option,
+                        label: domanda.risposte_custom![option.value.toLowerCase() as 'a' | 'b' | 'c'],
+                        shortLabel: domanda.risposte_custom![option.value.toLowerCase() as 'a' | 'b' | 'c'],
+                      }))
+                    : ANSWER_OPTIONS
+                  ).map(option => (
                     <AnswerButton
                       key={option.value}
                       value={option.value}
@@ -365,7 +372,14 @@ export default function Questionario() {
 
                   {/* Answer buttons - Mobile */}
                   <div className="grid grid-cols-3 gap-2">
-                    {ANSWER_OPTIONS.map(option => (
+                    {(domanda.risposte_custom
+                      ? ANSWER_OPTIONS.map(option => ({
+                          ...option,
+                          label: domanda.risposte_custom![option.value.toLowerCase() as 'a' | 'b' | 'c'],
+                          shortLabel: domanda.risposte_custom![option.value.toLowerCase() as 'a' | 'b' | 'c'],
+                        }))
+                      : ANSWER_OPTIONS
+                    ).map(option => (
                       <AnswerButton
                         key={option.value}
                         value={option.value}
