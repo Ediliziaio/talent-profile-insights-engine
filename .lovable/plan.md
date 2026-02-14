@@ -1,67 +1,68 @@
 
 
-# Sostituzione Ruoli Edilizia con Nuovi Ruoli Professionali
+# Aggiunta 5 Nuovi Ruoli Professionali (da 19 a 24)
 
-## Cosa cambia
+## Ruoli da aggiungere
 
-**Ruoli da RIMUOVERE (3):**
-- Capocantiere
-- Commerciale Edilizia  
-- Operaio/Installatore
+| # | Ruolo | Categoria | Tratti fondamentali | Requisiti chiave |
+|---|---|---|---|---|
+| 1 | **Controller di Gestione** | amministrativo | ORG, ADS, FIN, PRI | ORG>=45, ADS>=40, FIN>=30, PRI>=40, GP>=25 |
+| 2 | **Data Analyst** | tecnico | ORG, ADS, AUT, GP | ORG>=40, ADS>=40, AUT>=30, GP>=25, PRO>=20 |
+| 3 | **Account Manager** | commerciale | COM, VEN, ESP, HRM | COM>=35, VEN>=30, ESP>=20, HRM>=25, PRO>=25, DET>=25 |
+| 4 | **Office Manager** | amministrativo | ORG, COM, ADS, HRM | ORG>=40, COM>=30, ADS>=35, HRM>=25, PRO>=20 |
+| 5 | **Responsabile IT/Sistemi** | tecnico | ORG, ADS, GP, PRO | ORG>=45, ADS>=40, GP>=30, PRO>=30, AUT>=30 |
 
-**Ruoli da AGGIUNGERE (5):**
-1. **Imprenditore/Titolare** -- profilo alto su tutti gli assi: visione, rischio, decisione, costruzione team
-2. **Consulente Strategico** -- pensiero analitico, comunicazione, autonomia, non necessariamente commerciale
-3. **Team Leader/Coordinatore** -- leadership intermedia, gestione persone senza essere dirigente
-4. **Formatore/Coach** -- capacita' di trasmettere, empatia, proattivita', pazienza
-5. **Responsabile Qualita'/Compliance** -- rigore, principi, organizzazione, attenzione al dettaglio
+## Logica disqualifier per ogni ruolo
 
-Il totale passa da 17 a 19 ruoli.
+**Controller di Gestione** -- Profilo analitico-finanziario, rigore nei numeri
+- Blocking: ORG<30, ADS<25, sindromi S01/S02/S06
+- Warning: FIN<10
 
-## Dettagli tecnici
+**Data Analyst** -- Profilo metodico, precisione e autonomia
+- Blocking: ORG<25, ADS<25, sindromi S01/S02/S04
+- Warning: PRO<10
 
-### File: `src/lib/roleMatchingV5.ts`
+**Account Manager** -- Relazione con clienti esistenti, fidelizzazione
+- Blocking: COM<15, sindromi S01/S02/S03/S05
+- Warning: VEN<15, ESP<5
 
-**Rimozioni:**
-- Eliminare le 3 entry da `ROLE_PROFILES_V5`: `'Capocantiere'`, `'Commerciale Edilizia'`, `'Operaio/Installatore'`
-- Rimuovere mapping `'Cantiere'` e `'Edilizia'` da `FUNZIONE_TO_RUOLO_MAP`
-- Aggiornare commento header (da 17 a 19 ruoli)
+**Office Manager** -- Gestione ufficio, persone e procedure quotidiane
+- Blocking: ORG<25, sindromi S01/S04/S16
+- Warning: COM<15
 
-**Aggiunte -- struttura per ogni nuovo ruolo:**
+**Responsabile IT/Sistemi** -- Infrastruttura tecnica, problem solving sotto pressione
+- Blocking: ORG<30, ADS<25, sindromi S01/S02/S04
+- Warning: GP<15
 
-| Ruolo | Categoria | Tratti fondamentali | Soglie chiave |
-|---|---|---|---|
-| Imprenditore/Titolare | direzione | LDR, PRO, GP, AUT, DET | LDR>=45, PRO>=40, GP>=40, AUT>=40, DET>=35, VEN>=20 |
-| Consulente Strategico | tecnico | ORG, COM, PRO, AUT | ORG>=45, COM>=30, PRO>=35, AUT>=40, GP>=30 |
-| Team Leader/Coordinatore | direzione | LDR, COM, HRM, PRO | LDR>=35, COM>=25, HRM>=30, PRO>=30, GP>=30 |
-| Formatore/Coach | tecnico | COM, ESP, PRO, HRM | COM>=35, ESP>=25, PRO>=30, HRM>=35, DET>=25 |
-| Resp. Qualita'/Compliance | amministrativo | ORG, ADS, PRI, RC | ORG>=50, ADS>=45, PRI>=50, RC>=10, GP>=25 |
+Tutti con `validatoManualeV2: false`.
 
-Ogni ruolo avra': requisiti, disqualifiers, profilo ideale, tratti fondamentali, domande colloquio, `validatoManualeV2: false`.
+## File da modificare
 
-**Mapping aggiuntivi in `FUNZIONE_TO_RUOLO_MAP`:**
-- `'Imprenditore'` -> `'Imprenditore/Titolare'`
-- `'Titolare'` -> `'Imprenditore/Titolare'`
-- `'Consulenza'` -> `'Consulente Strategico'`
-- `'Coordinamento'` -> `'Team Leader/Coordinatore'`
-- `'Formazione'` -> `'Formatore/Coach'`
-- `'Qualita'` -> `'Responsabile Qualita/Compliance'`
-- `'Ufficio acquisti'` -> `'Buyer/Acquisti'`
-- `'Ufficio risorse umane'` -> `'HR Manager'`
+### `src/lib/roleMatchingV5.ts`
+- Aggiungere 5 nuove entry in `ROLE_PROFILES_V5` (dopo riga 935, prima di HR Recruiter)
+- Aggiornare commento header da 19 a 24 ruoli
+- Aggiungere mapping in `FUNZIONE_TO_RUOLO_MAP`:
+  - `'Controllo di gestione'` -> `'Controller di Gestione'`
+  - `'Data analysis'` -> `'Data Analyst'`
+  - `'Account management'` -> `'Account Manager'`
+  - `'Segreteria/Assistenza dir.'` -> `'Office Manager'` (piu' appropriato)
+  - `'IT'` -> `'Responsabile IT/Sistemi'`
+  - `'Sistemi informativi'` -> `'Responsabile IT/Sistemi'`
+- Aggiornare commento funzione `calculateAllRolesCompatibilityV5` (da 19 a 24)
 
-### File: `src/types/database.ts`
+### `src/types/database.ts`
+- Aggiungere nuove funzioni nell'array `FUNZIONI`: `'Controllo di gestione'`, `'Data analysis'`, `'Account management'`, `'IT/Sistemi informativi'`
 
-Aggiornare array `FUNZIONI` aggiungendo le nuove voci corrispondenti e rimuovendo quelle edilizia.
+### `src/test/roleMatchingV5.test.ts`
+- Aggiornare conteggio ruoli da 19 a 24
+- Aggiornare conteggio ruoli non validati da 12 a 17 (5 nuovi tutti non validati)
 
-### File: `src/test/roleMatchingV5.test.ts`
+## Verifica
 
-Aggiornare il test che verifica il conteggio ruoli (da 17 a 19) e i test sui ruoli validati/non validati (i nuovi sono tutti non validati).
-
-### Ricalcolo batch
-
-Dopo le modifiche, eseguire `batch-ricalcolo-v5` per aggiornare i profili candidato con il nuovo set di ruoli.
+Dopo l'implementazione, verifico sulla pagina candidato che i 5 nuovi ruoli appaiano nella lista compatibilita' con percentuali coerenti.
 
 ## Cosa NON cambia
-- Nessuna modifica a soglie dei ruoli esistenti
-- Nessuna modifica alla logica di scoring o sindromi
+- Nessuna modifica ai 19 ruoli esistenti
+- Nessuna modifica a logica scoring o sindromi
 - Nessuna modifica al database schema
+
