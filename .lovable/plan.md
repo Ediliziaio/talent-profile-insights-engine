@@ -1,22 +1,25 @@
 
-# Fix: Rimuovere sfondo bianco sovrapposto dai Gauge
+# Fix: Rimuovere artefatti celesti dietro i Gauge
 
 ## Problema
-Il contenitore dei gauge ha le classi `bg-white/50 rounded-xl` che creano un rettangolo bianco semitrasparente visibile sopra lo sfondo colorato della card (rosso/rosa per NON IDONEO). Questo causa l'effetto "due livelli sovrapposti".
+L'arco di sfondo dei gauge usa `stroke="hsl(var(--muted))"` che su sfondo colorato (rosa per NON IDONEO, verde per IDONEO, ecc.) appare come una striscia celeste/azzurrina visibile dietro l'arco colorato. Sembra un artefatto visivo.
 
-## Intervento
+## Soluzione
+Cambiare il colore dell'arco di sfondo da `hsl(var(--muted))` a un colore semitrasparente che si adatti a qualsiasi sfondo della card.
 
-### `src/components/HeroCardV3.tsx` (riga 186)
-Rimuovere `bg-white/50 dark:bg-white/5 rounded-xl` dal div contenitore dei gauge, mantenendo solo il layout flex e il padding.
-
-Da:
+### File: `src/components/AreaGaugeSVG.tsx` (riga 50)
+Cambiare lo stroke dell'arco di sfondo da:
 ```
-bg-white/50 dark:bg-white/5 rounded-xl p-2 md:p-3 overflow-visible
+stroke="hsl(var(--muted))"
 ```
-
-A:
+a:
 ```
-p-2 md:p-3 overflow-visible
+stroke="rgba(0,0,0,0.08)"
 ```
 
-Questo elimina completamente lo sfondo bianco sovrapposto, lasciando i gauge direttamente sullo sfondo della card.
+Questo usa un nero con 8% di opacita' che risulta come un leggero grigio su qualsiasi sfondo (bianco, rosa, verde, ambra, blu), senza creare l'effetto "croce celeste".
+
+### Impatto
+- Una sola riga di codice modificata
+- Funziona su tutti i colori di sfondo delle card (tutti i verdict)
+- Nessun impatto su logica o layout
