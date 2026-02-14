@@ -11,8 +11,7 @@ import { ActionPlanCardV5 } from '@/components/ActionPlanCardV5';
 import { GestioneAvanzataV3 } from '@/components/GestioneAvanzataV3';
 import { HeroCardV3 } from '@/components/HeroCardV3';
 import { AlertBannerV3 } from '@/components/AlertBannerV3';
-import { CompatibilitaTabV3 } from '@/components/CompatibilitaTabV3';
-import { ProfiloTabV3 } from '@/components/ProfiloTabV3';
+import { ProfiloUnificatoTab } from '@/components/ProfiloUnificatoTab';
 import { ColloquioTabV3 } from '@/components/ColloquioTabV3';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,7 +20,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import {
   ArrowLeft, Mail, Phone, Briefcase, Building2, Calendar,
-  Brain, Loader2, User, Target, BookOpen, UserCog, MessageSquare,
+  Brain, Loader2, User, Target, UserCog, MessageSquare,
   MoreHorizontal, FileText
 } from 'lucide-react';
 import {
@@ -298,15 +297,11 @@ export default function CandidatoDettaglio() {
                 />
               )}
 
-              {/* 4 TAB */}
-              <Tabs defaultValue="compatibilita" className="w-full">
+              {/* 3 TAB */}
+              <Tabs defaultValue="profilo" className="w-full">
                 <TabsList className="flex w-full mb-4 overflow-x-auto">
-                  <TabsTrigger value="compatibilita" className="flex-1 gap-1.5 text-xs sm:text-sm">
-                    <Target className="h-4 w-4 hidden sm:block" />
-                    <span>Compatibilità</span>
-                  </TabsTrigger>
                   <TabsTrigger value="profilo" className="flex-1 gap-1.5 text-xs sm:text-sm">
-                    <BookOpen className="h-4 w-4 hidden sm:block" />
+                    <Target className="h-4 w-4 hidden sm:block" />
                     <span>Profilo</span>
                   </TabsTrigger>
                   <TabsTrigger value="gestione" className="flex-1 gap-1.5 text-xs sm:text-sm">
@@ -319,10 +314,10 @@ export default function CandidatoDettaglio() {
                   </TabsTrigger>
                 </TabsList>
 
-                {/* TAB 1: Compatibilità */}
-                <TabsContent value="compatibilita" className="mt-4 space-y-6">
+                {/* TAB 1: Profilo (unificato) */}
+                <TabsContent value="profilo" className="mt-4 space-y-6">
                   {isV5 && traitsV5 ? (
-                    <CompatibilitaTabV3
+                    <ProfiloUnificatoTab
                       traitsV5={traitsV5}
                       ruoloRichiesto={ruoloRichiesto}
                       candidatoNome={candidato.nome}
@@ -330,22 +325,6 @@ export default function CandidatoDettaglio() {
                       candidateAge={candidato.eta ?? undefined}
                       syndromes={syndromes}
                       reliabilityIndex={reliabilityIndex}
-                    />
-                  ) : (
-                    <Card>
-                      <CardContent className="py-8 text-center text-muted-foreground">
-                        Dati V5 non disponibili per questo candidato.
-                      </CardContent>
-                    </Card>
-                  )}
-                </TabsContent>
-
-                {/* TAB 2: Profilo */}
-                <TabsContent value="profilo" className="mt-4 space-y-6">
-                  {isV5 && traitsV5 ? (
-                    <ProfiloTabV3
-                      candidatoNome={candidato.nome}
-                      candidatoSesso={candidato.sesso}
                       traits={traitsV5 as Record<TraitCode, number>}
                       macroAree={{
                         essere: esserePct || 0,
@@ -363,7 +342,7 @@ export default function CandidatoDettaglio() {
                   )}
                 </TabsContent>
 
-                {/* TAB 3: Gestione */}
+                {/* TAB 2: Gestione */}
                 <TabsContent value="gestione" className="mt-4 space-y-6">
                   {isV5 && traitsV5 ? (
                     <>
@@ -401,7 +380,7 @@ export default function CandidatoDettaglio() {
                   )}
                 </TabsContent>
 
-                {/* TAB 4: Colloquio */}
+                {/* TAB 3: Colloquio */}
                 <TabsContent value="colloquio" className="mt-4 space-y-6">
                   {isV5 && traitsV5 ? (
                     <ColloquioTabV3
