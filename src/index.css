@@ -191,6 +191,51 @@
   }
 }
 
+/* ─── Landing Page Dark Theme ─── */
+.landing-glow-card {
+  background: #111111;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.75rem;
+  transition: all 0.3s ease;
+}
+.landing-glow-card:hover {
+  border-color: rgba(240, 145, 51, 0.4);
+  box-shadow: 0 0 30px rgba(240, 145, 51, 0.1);
+}
+
+.landing-glow-card-red:hover {
+  border-color: rgba(239, 68, 68, 0.4);
+  box-shadow: 0 0 30px rgba(239, 68, 68, 0.1);
+}
+
+.stat-glow {
+  text-shadow: 0 0 40px rgba(240, 145, 51, 0.3);
+}
+
+.stat-glow-red {
+  text-shadow: 0 0 40px rgba(239, 68, 68, 0.3);
+}
+
+.glow-border-red {
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.08);
+}
+
+.glow-border-green {
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  box-shadow: 0 0 20px rgba(34, 197, 94, 0.08);
+}
+
+.glow-border-orange {
+  border: 1px solid rgba(240, 145, 51, 0.3);
+  box-shadow: 0 0 20px rgba(240, 145, 51, 0.08);
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(240, 145, 51, 0.1); }
+  50% { box-shadow: 0 0 40px rgba(240, 145, 51, 0.2); }
+}
+
 /* PDF Report Print Styles */
 @media print {
   .pdf-report {
