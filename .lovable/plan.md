@@ -1,116 +1,82 @@
 
 
-# Sezioni Mancanti -- Ispirate a ristrutturazionidebiti.it
+# Miglioramento Copy e Ristrutturazione Hero
 
 ## Panoramica
 
-La Home attuale ha 10 sezioni ma ne mancano 5 chiave presenti nel sito di riferimento. Queste sezioni aggiungono: carico emotivo (lettera aperta), credibilita' (chi siamo, casi reali, garanzie), confronto competitivo (tabella vs concorrenti) e urgenza (timeline "cosa succede se non agisci").
+Due interventi principali:
+1. **Hero split-layout**: testo a sinistra + immagine sfocata decorativa a destra (come ristrutturazionidebiti.it)
+2. **Pulizia copy**: rimuovere riferimenti tecnici (V5, 14 scale, 140 domande), riscrivere in ottica marketing puro
 
 ---
 
-## Sezioni da Aggiungere (in ordine di inserimento nella pagina)
+## 1. Hero Split-Layout
 
-### A. LETTERA APERTA EMOTIVA (dopo Hero, prima di "Problema")
-Sezione con sfondo bianco, tono diretto in seconda persona come ristrutturazionidebiti. Domande retoriche che colpiscono i pain point HR:
+La Hero attuale e' centrata con testo. Va trasformata in layout 2 colonne:
+- **Sinistra (60%)**: pretitolo, H1, sottotitolo, 2 CTA, micro-badge
+- **Destra (40%)**: immagine decorativa con blur/overlay (come ristrutturazionidebiti che usa un'immagine sfocata con gradiente sovrapposto)
 
-- "Quante volte hai assunto qualcuno che al colloquio sembrava perfetto... e dopo 3 mesi era un disastro?"
-- "Quante volte hai perso il candidato giusto perche' non avevi dati per decidere in fretta?"
-- "Quante volte hai sentito dire: 'Tanto il CV parla chiaro...' -- e poi il CV non aveva detto NIENTE?"
+L'immagine sara' un elemento decorativo CSS: un div con sfondo gradiente, forme geometriche sfocate (cerchi, rettangoli) che evocano dashboard/grafici, senza necessita' di un file immagine esterno. Effetto simile a ristrutturazionidebiti dove l'immagine e' volutamente astratta e sfocata.
 
-Chiusura con frase in grassetto: "La verita' e' questa: senza uno strumento scientifico, stai giocando d'azzardo con il futuro della tua azienda."
+Su mobile torna a layout singola colonna (solo testo, immagine nascosta o sotto).
 
-Stile: testo grande (text-xl/2xl), interlinea generosa, icone "?" animate come nel sito di riferimento.
+## 2. Correzioni Copy -- Tutti i Punti
 
-### B. "C'E' UNA BUONA NOTIZIA" (dopo la lettera, prima del Metodo)
-Transizione emotiva positiva con sfondo leggero (gradiente azzurro chiaro). Titolo: "Anzi, Un'Ottima Notizia."
+### Riferimenti tecnici da rimuovere/riscrivere
 
-4 blocchi con checkmark verde:
-1. "Mappare il profilo psicologico reale di ogni candidato" -- in 15 minuti, non in settimane
-2. "Sapere PRIMA se la persona e' adatta al ruolo" -- con dati, non con l'istinto
-3. "Ridurre il turnover fino al 40%" -- casi documentati dai nostri clienti
-4. "Andare al colloquio preparato" -- con domande mirate generate dall'assessment
+| Dove | Attuale | Nuovo |
+|------|---------|-------|
+| STEPS[1] desc | "140 domande validate scientificamente. 15 minuti..." | "Un questionario rapido, validato scientificamente. 15 minuti di compilazione, zero stress." |
+| STEPS[2] desc | "...14 scale, scoring V5, mappa interiore..." | "...profilo psicologico completo con mappa interiore, punti di forza e aree critiche. Tutto in tempo reale." |
+| FEATURES[0] desc | "14 scale psicologiche, scoring V5, analisi completa..." | "Analisi completa della personalita' su tutte le dimensioni chiave, in un unico report esecutivo." |
+| FEATURES[2] desc | "...con 30+ ruoli aziendali" | "...con i principali ruoli aziendali" |
+| STEPS[3] desc | "Role matching automatico con 30+ ruoli..." | "Compatibilita' automatica con i ruoli della tua azienda, guida personalizzata al colloquio e confronto tra candidati." |
+| FAQ "validato" | "...14 scale validate e un sistema di scoring proprietario (V5)..." | "...scale psicologiche validate e un sistema di scoring proprietario sviluppato con esperti di psicologia del lavoro." |
+| FAQ "differenza" | "...scoring numerico, role matching, analisi dei rischi operativi..." | Togliere "scoring numerico", riscrivere in modo discorsivo |
+| Contatori NUMERI | "14 Scale Psicologiche" | Sostituire con "30+ Ruoli Mappati" (piu' comprensibile per un HR) |
+| Testimonianze pretitolo | "Social Proof" | "Cosa Dicono i Nostri Clienti" |
+| Casi Reali pretitolo | "Case Studies" | "Storie di Successo" |
 
-Chiusura: "Il problema? Questi risultati li ottieni SOLO se usi uno strumento validato, costruito da esperti di psicologia del lavoro."
+### Copy migliorato per impatto marketing
 
-### C. CASI REALI / CASE STUDIES (dopo Testimonianze)
-Titolo: "Risultati Reali. Aziende Reali."
-
-3-4 card con struttura before/after come ristrutturazionidebiti:
-1. "Tech Startup -- 25 dipendenti" -- Turnover -40%, badge "-40%", descrizione: "Assumevano a sensazione, 1 errore su 3. Con TalentProfile: zero errori di selezione in 12 mesi."
-2. "Gruppo Industriale -- 200 dipendenti" -- Tempo selezione -60%, badge "-60%", descrizione: "Il processo di selezione durava 3 settimane. Ora decidono in 3 giorni con dati oggettivi."
-3. "Retail Chain -- 50 punti vendita" -- Costo hiring -35%, badge "-35%", descrizione: "Il costo per assunzione sbagliata era 2x lo stipendio annuo. Ridotto del 35% nel primo anno."
-
-Ogni card con: titolo azienda, badge percentuale grande colorato, descrizione, 2-3 risultati con checkmark.
-
-### D. TABELLA COMPARATIVA "GLI ALTRI VS TALENTPROFILE" (dopo Casi Reali)
-Sfondo bianco, titolo: "Perche' Scegliere TalentProfile?"
-
-Tabella responsive con 7 righe:
-| Aspetto | Gli Altri | TalentProfile |
-|---------|-----------|---------------|
-| Metodo | Colloquio + CV | Assessment psicologico validato |
-| Tempo | Settimane di valutazione | 15 minuti, report istantaneo |
-| Oggettivita' | Opinioni soggettive | 14 scale con scoring numerico |
-| Profondita' | Superficie (competenze) | Psicologia profonda (identita', difese, attaccamento) |
-| Role Matching | Manuale e approssimativo | Automatico su 30+ ruoli |
-| Colloquio | Domande generiche | Guida personalizzata dall'assessment |
-| Report | Appunti informali | PDF esecutivo professionale |
-
-Colonna "Gli Altri" con sfondo rosso chiaro e X rossa, colonna TalentProfile con sfondo verde chiaro e checkmark verde.
-
-### E. "COSA SUCCEDE SE NON AGISCI?" -- URGENCY TIMELINE (prima della CTA finale)
-Sfondo grigio scuro/blu scuro, titolo in bianco: "Cosa Succede Se Continui ad Assumere Senza Dati?"
-
-Timeline verticale progressiva (come ristrutturazionidebiti) con 4 step:
-1. "Mese 1-3" -- "L'assunzione sembra ok" -- "Il nuovo assunto e' in luna di miele. I problemi non si vedono ancora."
-2. "Mese 3-6" -- "I segnali arrivano" -- "Performance sotto le aspettative, conflitti nel team, feedback negativi dai colleghi."
-3. "Mese 6-12" -- "Il costo esplode" -- "Turnover, riassunzione, formazione persa. Costo reale: fino a 2x lo stipendio annuo."
-4. "Oltre 1 anno" -- "Il danno e' fatto" -- "Team destabilizzato, cultura aziendale compromessa, talenti che se ne vanno."
-
-Chiusura con box verde: "Ma C'e' Ancora Tempo. In questo momento puoi cambiare il tuo processo di selezione. Basta un assessment."
-
-### F. TRUST BADGES sulla CTA FINALE (upgrade sezione esistente)
-Aggiungere sotto il bottone "Richiedi una Demo" 3 micro-badge come nel sito di riferimento:
-- "Risposta in 24h"
-- "100% Riservato"
-- "Senza Impegno"
-
----
-
-## Ordine Finale delle Sezioni (16 totali)
-
-1. Navbar (esistente)
-2. Hero (esistente)
-3. **NUOVA: Lettera Aperta Emotiva**
-4. Problema - 4 motivi (esistente)
-5. **NUOVA: "C'e' Una Buona Notizia"**
-6. Il Metodo - 4 Step (esistente)
-7. Funzionalita' (esistente)
-8. Numeri (esistente)
-9. Testimonianze (esistente)
-10. **NUOVA: Casi Reali / Case Studies**
-11. **NUOVA: Tabella Comparativa**
-12. Per Chi E' / Non E' (esistente)
-13. **NUOVA: Urgency Timeline**
-14. FAQ (esistente)
-15. CTA Finale con trust badges (esistente, upgrade)
-16. Footer (esistente)
+| Sezione | Attuale | Nuovo |
+|---------|---------|-------|
+| Hero H1 | "BASTA Assunzioni Sbagliate. Scopri Chi Hai Davvero Davanti." | "BASTA Assunzioni Sbagliate. Scopri Chi Hai Davvero di Fronte." |
+| Hero sottotitolo | "TalentProfile mappa il profilo psicologico profondo dei candidati in 15 minuti..." | "In 15 minuti sai chi hai davvero di fronte. Il profilo psicologico completo del candidato -- prima ancora del colloquio." |
+| Lettera chiusura | "senza uno strumento scientifico, stai giocando d'azzardo..." | "senza dati reali sulla persona, stai scommettendo il futuro della tua azienda su una sensazione." |
+| Buona notizia chiusura | "...SOLO se usi uno strumento validato, costruito da esperti di psicologia del lavoro." | "...SOLO se hai lo strumento giusto. Uno strumento costruito da chi la psicologia del lavoro la conosce davvero." |
 
 ---
 
 ## Dettaglio Tecnico
 
 ### File da modificare
-Solo `src/pages/Home.tsx` -- tutte le nuove sezioni vengono aggiunte nel componente esistente con lo stesso pattern (Section wrapper con fade-in, dati in costanti in cima al file).
+Solo `src/pages/Home.tsx`
 
-### Stile
-- Lettera aperta: `text-xl md:text-2xl leading-relaxed` con icone `?` in cerchi arancioni animati (pulse)
-- Buona notizia: sfondo `bg-blue-50`, checkmark verdi `text-success`
-- Case studies: card con badge percentuale grande (`text-4xl font-black text-accent`) posizionato in alto a destra
-- Tabella comparativa: righe alternate, colonna sinistra con `bg-destructive/5` e `XCircle`, colonna destra con `bg-success/5` e `CheckCircle2`
-- Urgency timeline: sfondo `#1e3a5f`, pallini numerati arancioni, linea verticale come il metodo ma con colori che degradano da verde a rosso
-- Trust badges: `flex gap-4` con icone piccole e testo `text-sm text-white/80`
+### Hero -- nuova struttura JSX
+```
+<section sfondo gradiente>
+  <div max-w-7xl flex>
+    <div w-3/5 (testo, CTA, badge)>
+      ...testo allineato a sinistra
+    </div>
+    <div w-2/5 hidden lg:block (immagine decorativa)>
+      ...div con forme sfocate, gradiente, effetto "dashboard blurred"
+    </div>
+  </div>
+  ...cerchi decorativi di sfondo
+</section>
+```
+
+L'immagine decorativa e' composta da:
+- Un contenitore con `rounded-2xl overflow-hidden` e leggera `backdrop-blur`
+- 3-4 forme geometriche colorate (cerchi e rettangoli) con `blur-xl` e `opacity-60`
+- Un overlay con bordo sottile bianco/20 per dare effetto "card di vetro" (glassmorphism)
+- Nessun file immagine necessario -- tutto CSS/Tailwind
+
+### Contatori
+Sostituire il terzo contatore da `useCountUp(14)` a `useCountUp(30)` con label "Ruoli Mappati"
 
 ### Nessuna dipendenza aggiuntiva
-Tutto implementato con Tailwind, lucide-react e componenti shadcn gia' presenti.
+Tutto con Tailwind e CSS esistente.
 
