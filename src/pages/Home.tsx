@@ -29,6 +29,10 @@ import {
   Building2,
   Clock,
   Zap,
+  HelpCircle,
+  AlertTriangle,
+  Shield,
+  TrendingUp,
 } from 'lucide-react';
 
 /* ─── Hook: scroll-triggered fade-in ─── */
@@ -69,7 +73,7 @@ function useCountUp(target: number, duration = 2000) {
           const start = performance.now();
           const tick = (now: number) => {
             const progress = Math.min((now - start) / duration, 1);
-            const eased = 1 - Math.pow(1 - progress, 3); // easeOutCubic
+            const eased = 1 - Math.pow(1 - progress, 3);
             setValue(Math.round(eased * target));
             if (progress < 1) requestAnimationFrame(tick);
           };
@@ -266,6 +270,92 @@ const FOR_NOT_FOR = {
   ],
 };
 
+/* ─── NEW DATA: Lettera Aperta ─── */
+const LETTERA_DOMANDE = [
+  'Quante volte hai assunto qualcuno che al colloquio sembrava perfetto... e dopo 3 mesi era un disastro?',
+  'Quante volte hai perso il candidato giusto perché non avevi dati per decidere in fretta?',
+  'Quante volte hai sentito dire: "Tanto il CV parla chiaro..." — e poi il CV non aveva detto NIENTE?',
+];
+
+/* ─── NEW DATA: Buona Notizia ─── */
+const BUONA_NOTIZIA_ITEMS = [
+  { title: 'Mappare il profilo psicologico reale di ogni candidato', desc: 'In 15 minuti, non in settimane.' },
+  { title: 'Sapere PRIMA se la persona è adatta al ruolo', desc: 'Con dati, non con l\'istinto.' },
+  { title: 'Ridurre il turnover fino al 40%', desc: 'Casi documentati dai nostri clienti.' },
+  { title: 'Andare al colloquio preparato', desc: 'Con domande mirate generate dall\'assessment.' },
+];
+
+/* ─── NEW DATA: Casi Reali ─── */
+const CASE_STUDIES = [
+  {
+    company: 'Tech Startup',
+    size: '25 dipendenti',
+    badge: '-40%',
+    badgeLabel: 'Turnover',
+    desc: 'Assumevano a sensazione, 1 errore su 3. Con TalentProfile: zero errori di selezione in 12 mesi.',
+    results: ['Zero errori di hiring in 12 mesi', 'Tempo di onboarding dimezzato', 'Team più coeso e produttivo'],
+  },
+  {
+    company: 'Gruppo Industriale',
+    size: '200 dipendenti',
+    badge: '-60%',
+    badgeLabel: 'Tempo selezione',
+    desc: 'Il processo di selezione durava 3 settimane. Ora decidono in 3 giorni con dati oggettivi.',
+    results: ['Da 3 settimane a 3 giorni', 'Decisioni basate su dati reali', 'HR team più efficiente'],
+  },
+  {
+    company: 'Retail Chain',
+    size: '50 punti vendita',
+    badge: '-35%',
+    badgeLabel: 'Costo hiring',
+    desc: 'Il costo per assunzione sbagliata era 2x lo stipendio annuo. Ridotto del 35% nel primo anno.',
+    results: ['Risparmio di €180K nel primo anno', 'Turnover store manager -50%', 'Selezione standardizzata su tutti i punti vendita'],
+  },
+];
+
+/* ─── NEW DATA: Tabella Comparativa ─── */
+const COMPARISON_ROWS = [
+  { aspect: 'Metodo', others: 'Colloquio + CV', tp: 'Assessment psicologico validato' },
+  { aspect: 'Tempo', others: 'Settimane di valutazione', tp: '15 minuti, report istantaneo' },
+  { aspect: 'Oggettività', others: 'Opinioni soggettive', tp: '14 scale con scoring numerico' },
+  { aspect: 'Profondità', others: 'Superficie (competenze)', tp: 'Psicologia profonda (identità, difese, attaccamento)' },
+  { aspect: 'Role Matching', others: 'Manuale e approssimativo', tp: 'Automatico su 30+ ruoli' },
+  { aspect: 'Colloquio', others: 'Domande generiche', tp: 'Guida personalizzata dall\'assessment' },
+  { aspect: 'Report', others: 'Appunti informali', tp: 'PDF esecutivo professionale' },
+];
+
+/* ─── NEW DATA: Urgency Timeline ─── */
+const URGENCY_STEPS = [
+  {
+    period: 'Mese 1-3',
+    title: 'L\'assunzione sembra ok',
+    desc: 'Il nuovo assunto è in luna di miele. I problemi non si vedono ancora.',
+    color: 'text-green-400',
+    bgColor: 'bg-green-500',
+  },
+  {
+    period: 'Mese 3-6',
+    title: 'I segnali arrivano',
+    desc: 'Performance sotto le aspettative, conflitti nel team, feedback negativi dai colleghi.',
+    color: 'text-yellow-400',
+    bgColor: 'bg-yellow-500',
+  },
+  {
+    period: 'Mese 6-12',
+    title: 'Il costo esplode',
+    desc: 'Turnover, riassunzione, formazione persa. Costo reale: fino a 2x lo stipendio annuo.',
+    color: 'text-orange-400',
+    bgColor: 'bg-orange-500',
+  },
+  {
+    period: 'Oltre 1 anno',
+    title: 'Il danno è fatto',
+    desc: 'Team destabilizzato, cultura aziendale compromessa, talenti che se ne vanno.',
+    color: 'text-red-400',
+    bgColor: 'bg-red-500',
+  },
+];
+
 /* ─────────────────── COMPONENT ─────────────────── */
 export default function Home() {
   const navigate = useNavigate();
@@ -428,7 +518,30 @@ export default function Home() {
         <div className="absolute -bottom-32 -left-32 w-[500px] h-[500px] rounded-full bg-accent/10 blur-3xl" />
       </section>
 
-      {/* ═══ 3. PROBLEMA ═══ */}
+      {/* ═══ 3. LETTERA APERTA EMOTIVA (NUOVA) ═══ */}
+      <Section className="py-20 md:py-28 bg-background" id="lettera">
+        <div className="max-w-4xl mx-auto px-4 md:px-8">
+          <div className="space-y-8">
+            {LETTERA_DOMANDE.map((domanda, i) => (
+              <div key={i} className="flex items-start gap-4 md:gap-6">
+                <div className="shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-full bg-accent/15 flex items-center justify-center animate-pulse">
+                  <HelpCircle className="h-5 w-5 md:h-6 md:w-6 text-accent" />
+                </div>
+                <p className="text-xl md:text-2xl leading-relaxed text-foreground/90 pt-1">
+                  {domanda}
+                </p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-12 pt-8 border-t border-border">
+            <p className="text-xl md:text-2xl font-bold text-foreground leading-relaxed text-center">
+              La verità è questa: <span className="text-destructive">senza uno strumento scientifico, stai giocando d'azzardo con il futuro della tua azienda.</span>
+            </p>
+          </div>
+        </div>
+      </Section>
+
+      {/* ═══ 4. PROBLEMA ═══ */}
       <Section className="py-20 md:py-28 bg-background" id="problema">
         <div className="max-w-6xl mx-auto px-4 md:px-8">
           <h2 className="text-3xl md:text-5xl font-bold text-center mb-4 text-foreground">
@@ -458,7 +571,43 @@ export default function Home() {
         </div>
       </Section>
 
-      {/* ═══ 4. IL METODO ═══ */}
+      {/* ═══ 5. BUONA NOTIZIA (NUOVA) ═══ */}
+      <Section className="py-20 md:py-28 bg-blue-50" id="buona-notizia">
+        <div className="max-w-5xl mx-auto px-4 md:px-8">
+          <p className="text-sm uppercase tracking-widest text-accent font-semibold text-center mb-3">
+            Ma c'è una soluzione
+          </p>
+          <h2 className="text-3xl md:text-5xl font-bold text-center mb-4 text-foreground">
+            Anzi, Un'Ottima Notizia.
+          </h2>
+          <p className="text-center text-muted-foreground text-lg mb-14 max-w-2xl mx-auto">
+            Oggi puoi fare tutto questo:
+          </p>
+          <div className="grid sm:grid-cols-2 gap-6 mb-12">
+            {BUONA_NOTIZIA_ITEMS.map((item, i) => (
+              <div
+                key={i}
+                className="flex items-start gap-4 bg-white rounded-xl p-6 shadow-sm border border-border"
+              >
+                <div className="shrink-0 w-10 h-10 rounded-full bg-success/15 flex items-center justify-center">
+                  <CheckCircle2 className="h-5 w-5 text-success" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-foreground mb-1">{item.title}</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed">{item.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="text-center">
+            <p className="text-lg md:text-xl text-foreground leading-relaxed max-w-3xl mx-auto">
+              Il problema? Questi risultati li ottieni <strong>SOLO</strong> se usi uno strumento validato, costruito da esperti di psicologia del lavoro.
+            </p>
+          </div>
+        </div>
+      </Section>
+
+      {/* ═══ 6. IL METODO ═══ */}
       <Section className="py-20 md:py-28 bg-secondary/50" id="metodo">
         <div className="max-w-5xl mx-auto px-4 md:px-8">
           <p className="text-sm uppercase tracking-widest text-accent font-semibold text-center mb-3">
@@ -489,7 +638,7 @@ export default function Home() {
         </div>
       </Section>
 
-      {/* ═══ 5. FUNZIONALITÀ ═══ */}
+      {/* ═══ 7. FUNZIONALITÀ ═══ */}
       <Section className="py-20 md:py-28 bg-background" id="funzionalita">
         <div className="max-w-6xl mx-auto px-4 md:px-8">
           <p className="text-sm uppercase tracking-widest text-accent font-semibold text-center mb-3">
@@ -515,7 +664,7 @@ export default function Home() {
         </div>
       </Section>
 
-      {/* ═══ 6. NUMERI ═══ */}
+      {/* ═══ 8. NUMERI ═══ */}
       <Section className="py-20 md:py-28" id="numeri" >
         <div className="py-20 md:py-28" style={{ background: 'linear-gradient(160deg, #1e3a5f 0%, #2d5a8e 100%)' }}>
           <div className="max-w-6xl mx-auto px-4 md:px-8">
@@ -544,7 +693,7 @@ export default function Home() {
         </div>
       </Section>
 
-      {/* ═══ 7. TESTIMONIANZE ═══ */}
+      {/* ═══ 9. TESTIMONIANZE ═══ */}
       <Section className="py-20 md:py-28 bg-background" id="testimonianze">
         <div className="max-w-6xl mx-auto px-4 md:px-8">
           <p className="text-sm uppercase tracking-widest text-accent font-semibold text-center mb-3">
@@ -577,7 +726,120 @@ export default function Home() {
         </div>
       </Section>
 
-      {/* ═══ 8. PER CHI È / NON È ═══ */}
+      {/* ═══ 10. CASI REALI (NUOVA) ═══ */}
+      <Section className="py-20 md:py-28 bg-secondary/50" id="casi-reali">
+        <div className="max-w-6xl mx-auto px-4 md:px-8">
+          <p className="text-sm uppercase tracking-widest text-accent font-semibold text-center mb-3">
+            Case Studies
+          </p>
+          <h2 className="text-3xl md:text-5xl font-bold text-center mb-4 text-foreground">
+            Risultati Reali. Aziende Reali.
+          </h2>
+          <p className="text-center text-muted-foreground text-lg mb-14 max-w-2xl mx-auto">
+            Ecco cosa è successo quando hanno smesso di assumere a sensazione.
+          </p>
+          <div className="grid md:grid-cols-3 gap-6">
+            {CASE_STUDIES.map((cs, i) => (
+              <Card key={i} className="p-6 md:p-8 border border-border relative overflow-hidden hover:shadow-lg transition-shadow duration-300">
+                {/* Badge percentuale */}
+                <div className="absolute top-4 right-4">
+                  <div className="text-4xl font-black text-accent">{cs.badge}</div>
+                  <div className="text-xs text-muted-foreground font-medium text-right">{cs.badgeLabel}</div>
+                </div>
+                {/* Company info */}
+                <div className="flex items-center gap-2 mb-1">
+                  <Building2 className="h-4 w-4 text-primary" />
+                  <span className="font-bold text-foreground">{cs.company}</span>
+                </div>
+                <p className="text-sm text-muted-foreground mb-4">{cs.size}</p>
+                <p className="text-foreground leading-relaxed mb-6">{cs.desc}</p>
+                {/* Results */}
+                <ul className="space-y-2">
+                  {cs.results.map((r, j) => (
+                    <li key={j} className="flex items-start gap-2 text-sm">
+                      <CheckCircle2 className="h-4 w-4 text-success shrink-0 mt-0.5" />
+                      <span className="text-foreground/80">{r}</span>
+                    </li>
+                  ))}
+                </ul>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </Section>
+
+      {/* ═══ 11. TABELLA COMPARATIVA (NUOVA) ═══ */}
+      <Section className="py-20 md:py-28 bg-background" id="comparativa">
+        <div className="max-w-5xl mx-auto px-4 md:px-8">
+          <p className="text-sm uppercase tracking-widest text-accent font-semibold text-center mb-3">
+            Il Confronto
+          </p>
+          <h2 className="text-3xl md:text-5xl font-bold text-center mb-14 text-foreground">
+            Perché Scegliere TalentProfile?
+          </h2>
+          
+          {/* Desktop table */}
+          <div className="hidden md:block overflow-hidden rounded-xl border border-border">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="text-left p-4 font-bold text-foreground bg-muted/50 w-1/4">Aspetto</th>
+                  <th className="text-left p-4 font-bold text-destructive bg-destructive/5 w-[37.5%]">
+                    <div className="flex items-center gap-2">
+                      <XCircle className="h-5 w-5" /> Gli Altri
+                    </div>
+                  </th>
+                  <th className="text-left p-4 font-bold text-success bg-success/5 w-[37.5%]">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="h-5 w-5" /> TalentProfile
+                    </div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {COMPARISON_ROWS.map((row, i) => (
+                  <tr key={i} className={`border-b border-border last:border-0 ${i % 2 === 0 ? '' : 'bg-muted/20'}`}>
+                    <td className="p-4 font-semibold text-foreground">{row.aspect}</td>
+                    <td className="p-4 bg-destructive/5">
+                      <div className="flex items-start gap-2">
+                        <XCircle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
+                        <span className="text-foreground/70">{row.others}</span>
+                      </div>
+                    </td>
+                    <td className="p-4 bg-success/5">
+                      <div className="flex items-start gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-success shrink-0 mt-0.5" />
+                        <span className="text-foreground">{row.tp}</span>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile cards */}
+          <div className="md:hidden space-y-4">
+            {COMPARISON_ROWS.map((row, i) => (
+              <Card key={i} className="p-4 border border-border">
+                <h4 className="font-bold text-foreground mb-3">{row.aspect}</h4>
+                <div className="space-y-2">
+                  <div className="flex items-start gap-2 p-2 rounded-lg bg-destructive/5">
+                    <XCircle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
+                    <span className="text-sm text-foreground/70">{row.others}</span>
+                  </div>
+                  <div className="flex items-start gap-2 p-2 rounded-lg bg-success/5">
+                    <CheckCircle2 className="h-4 w-4 text-success shrink-0 mt-0.5" />
+                    <span className="text-sm text-foreground">{row.tp}</span>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </Section>
+
+      {/* ═══ 12. PER CHI È / NON È ═══ */}
       <Section className="py-20 md:py-28 bg-secondary/50" id="perchi">
         <div className="max-w-5xl mx-auto px-4 md:px-8">
           <h2 className="text-3xl md:text-5xl font-bold text-center mb-14 text-foreground">
@@ -616,7 +878,64 @@ export default function Home() {
         </div>
       </Section>
 
-      {/* ═══ 9. FAQ ═══ */}
+      {/* ═══ 13. URGENCY TIMELINE (NUOVA) ═══ */}
+      <Section className="py-20 md:py-28" id="urgency">
+        <div className="py-20 md:py-28" style={{ background: 'linear-gradient(160deg, #1e3a5f 0%, #162d4a 100%)' }}>
+          <div className="max-w-5xl mx-auto px-4 md:px-8">
+            <div className="flex items-center justify-center gap-3 mb-3">
+              <AlertTriangle className="h-5 w-5 text-orange-400" />
+              <p className="text-sm uppercase tracking-widest text-orange-300 font-semibold">
+                L'urgenza è reale
+              </p>
+            </div>
+            <h2 className="text-3xl md:text-5xl font-bold text-center mb-16 text-white">
+              Cosa Succede Se Continui<br className="hidden md:block" /> ad Assumere Senza Dati?
+            </h2>
+
+            <div className="relative">
+              {/* Vertical line with gradient */}
+              <div className="absolute left-6 md:left-8 top-0 bottom-0 w-0.5 hidden md:block"
+                style={{ background: 'linear-gradient(to bottom, #22c55e, #eab308, #f97316, #ef4444)' }} />
+              
+              <div className="space-y-10 md:space-y-14">
+                {URGENCY_STEPS.map((step, i) => (
+                  <div key={i} className="flex items-start gap-6 md:gap-8">
+                    <div className="shrink-0 relative z-10">
+                      <div className={`w-12 h-12 md:w-16 md:h-16 rounded-full ${step.bgColor} flex items-center justify-center shadow-lg`}>
+                        <span className="text-white text-sm md:text-base font-black">{String(i + 1).padStart(2, '0')}</span>
+                      </div>
+                    </div>
+                    <div className="pt-1 md:pt-2">
+                      <span className={`text-xs font-bold uppercase tracking-wider ${step.color}`}>
+                        {step.period}
+                      </span>
+                      <h3 className="text-xl md:text-2xl font-bold text-white mt-1 mb-2">{step.title}</h3>
+                      <p className="text-blue-200/80 text-base md:text-lg leading-relaxed">{step.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Positive closing box */}
+            <div className="mt-14 p-6 md:p-8 rounded-xl border border-success/30 bg-success/10">
+              <div className="flex items-start gap-4">
+                <div className="shrink-0 w-10 h-10 rounded-full bg-success/20 flex items-center justify-center">
+                  <TrendingUp className="h-5 w-5 text-green-400" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-white mb-2">Ma C'è Ancora Tempo.</h3>
+                  <p className="text-blue-200/90 text-base md:text-lg leading-relaxed">
+                    In questo momento puoi cambiare il tuo processo di selezione. <strong className="text-white">Basta un assessment.</strong>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      {/* ═══ 14. FAQ ═══ */}
       <Section className="py-20 md:py-28 bg-background" id="faq">
         <div className="max-w-3xl mx-auto px-4 md:px-8">
           <p className="text-sm uppercase tracking-widest text-accent font-semibold text-center mb-3">
@@ -644,7 +963,7 @@ export default function Home() {
         </div>
       </Section>
 
-      {/* ═══ 10. CTA FINALE + FOOTER ═══ */}
+      {/* ═══ 15. CTA FINALE + TRUST BADGES ═══ */}
       <section
         id="cta-finale"
         className="py-20 md:py-28 text-center"
@@ -664,6 +983,18 @@ export default function Home() {
           >
             Richiedi una Demo Gratuita <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
+          {/* Trust Badges */}
+          <div className="flex flex-wrap justify-center gap-6 mt-8">
+            <span className="flex items-center gap-2 text-sm text-white/80">
+              <Clock className="h-4 w-4" /> Risposta in 24h
+            </span>
+            <span className="flex items-center gap-2 text-sm text-white/80">
+              <Shield className="h-4 w-4" /> 100% Riservato
+            </span>
+            <span className="flex items-center gap-2 text-sm text-white/80">
+              <CheckCircle2 className="h-4 w-4" /> Senza Impegno
+            </span>
+          </div>
         </div>
       </section>
 
