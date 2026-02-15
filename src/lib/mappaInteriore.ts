@@ -801,3 +801,52 @@ function generateOverridePiano(
 
   return overrides;
 }
+
+// ─── Chart Data Helper ────────────────────────────────────────────────────────
+
+export interface DimensioneChartItem {
+  name: string;
+  value: number;
+  label: string;
+  color: string;
+  tooltip: string;
+}
+
+export function getDimensioniChartData(result: MappaInterioreResult): DimensioneChartItem[] {
+  const { dimensioni } = result;
+  const idScore = dimensioni.identitaRisultato;
+  const reScore = dimensioni.regolazioneEmotiva;
+
+  // Identità-Risultato: INVERTED (low = good)
+  const idColor = idScore <= 3 ? '#22c55e' : idScore <= 6 ? '#f59e0b' : '#ef4444';
+  const idLabel = getIdentitaLabel(idScore);
+
+  // Regolazione Emotiva: NORMAL (high = good)
+  const reColor = reScore <= 3 ? '#ef4444' : reScore <= 6 ? '#f59e0b' : '#22c55e';
+  const reLabel = getRegolazioneLabel(reScore);
+
+  // Attaccamento
+  const attDom = dimensioni.attaccamento.dominante;
+  const attScore = dimensioni.attaccamento.scores[attDom];
+  const attColor = attDom === 'sicuro' ? '#22c55e' : attDom === 'disorganizzato' ? '#ef4444' : '#f59e0b';
+  const attLabel = ATTACCAMENTO_FRONTEND[attDom];
+
+  // Difese
+  const hasDifesa = dimensioni.difesa.dominante !== null;
+  const difScore = hasDifesa ? (dimensioni.difesa.dominante!.livello === 'maturo' ? 3 : 6) : 0;
+  const difColor = !hasDifesa ? '#22c55e' : dimensioni.difesa.dominante!.livello === 'maturo' ? '#f59e0b' : '#ef4444';
+  const difLabel = hasDifesa ? dimensioni.difesa.dominante!.frontend : 'Equilibrate';
+
+  // Bisogno Primario
+  const bisScore = dimensioni.bisogno.primario.score;
+  const bisLabel = dimensioni.bisogno.primario.frontend;
+  const bisColor = '#8b5cf6';
+
+  return [
+    { name: 'Identità-Risultato', value: idScore, label: idLabel, color: idColor, tooltip: `Score ${idScore}/10 — ${idLabel}. Basso = identità stabile (positivo).` },
+    { name: 'Regolazione Emotiva', value: reScore, label: reLabel, color: reColor, tooltip: `Score ${reScore}/10 — ${reLabel}. Alto = regolazione eccellente.` },
+    { name: 'Attaccamento', value: attScore, label: attLabel, color: attColor, tooltip: `Stile dominante: ${attLabel}. Score ${attScore}/10.` },
+    { name: 'Difese', value: difScore, label: difLabel, color: difColor, tooltip: hasDifesa ? `Difesa attiva: ${difLabel}` : 'Nessuna difesa disfunzionale rilevata.' },
+    { name: 'Bisogno Primario', value: bisScore, label: bisLabel, color: bisColor, tooltip: `Bisogno dominante: ${bisLabel}. Intensità ${bisScore}/10.` },
+  ];
+}
