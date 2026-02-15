@@ -32,6 +32,7 @@ const ConsensoPrivacy = lazy(() => import('./pages/ConsensoPrivacy'));
 const Questionario = lazy(() => import('./pages/Questionario'));
 const TestCompletato = lazy(() => import('./pages/TestCompletato'));
 const FormAnagrafico = lazy(() => import('./pages/FormAnagrafico'));
+const Home = lazy(() => import('./pages/Home'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -77,6 +78,11 @@ const App = () => (
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<CandidatoRedirect />} />
+              <Route path="/home" element={
+                <Suspense fallback={<DashboardSkeleton />}>
+                  <Home />
+                </Suspense>
+              } />
               <Route path="/auth" element={<Auth />} />
               <Route path="/aziende" element={
                 <Suspense fallback={<AziendeSkeleton />}>
