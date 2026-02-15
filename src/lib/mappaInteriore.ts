@@ -50,6 +50,12 @@ export type ProfiloNarrativoCode =
   | 'esecutore_invisibile'
   | 'equilibrato';
 
+export interface DomandaColloquio {
+  area: string;
+  priorita: 'CRITICA' | 'ALTA' | 'MEDIA';
+  domande: string[];
+}
+
 export interface MappaInterioreResult {
   dimensioni: {
     identitaRisultato: number;
@@ -81,6 +87,8 @@ export interface MappaInterioreResult {
   cosa_teme: string[];
   errori_da_evitare: string[];
   pattern_combinatori: PatternResult[];
+  domande_colloquio_aggiuntive: DomandaColloquio[];
+  override_piano_crescita: string[];
 }
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
@@ -330,10 +338,12 @@ function detectPatterns(
     }
   }
   // Pattern 7
-  if (regolazione >= 8 && (difesa?.codice === 'sublimazione' || difesa?.codice === 'umorismo') && attaccamento === 'sicuro') {
+  if (regolazione >= 8 && attaccamento === 'sicuro' && (difesa?.codice === 'sublimazione' || difesa?.codice === 'umorismo' || difesa === null)) {
     patterns.push({
       codice: 'P7', frontend: 'Un punto di forza raro nel team',
-      azione: 'Valorizzare come mentore. Proteggere dal sovraccarico.',
+      azione: difesa === null
+        ? 'Profilo naturalmente integrato: trasforma le difficoltà in energia produttiva senza meccanismi difensivi. Valorizzare come mentore. Proteggere dal sovraccarico.'
+        : 'Valorizzare come mentore. Proteggere dal sovraccarico.',
       positivo: true,
     });
   }
@@ -351,6 +361,8 @@ function generateNarrativa(
   bisognoPrimario: string,
   attaccamentoDominante: AttaccamentoStile,
   difesaDominante: DifesaInfo | null,
+  identitaRisultato: number,
+  regolazioneEmotiva: number,
 ): MappaInterioreResult['narrativa'] & { cosa_motiva: string[]; cosa_blocca: string[]; cosa_teme: string[]; errori_da_evitare: string[] } {
   const s = g(sesso);
   
@@ -456,17 +468,104 @@ function generateNarrativa(
       };
     },
 
-    equilibrato: () => ({
-      chi_e_nel_profondo: `${nome} presenta un profilo psicologico equilibrato. Le dimensioni profonde sono nella norma, senza pattern disfunzionali significativi. Questo non significa assenza di complessità — ogni persona ne ha — ma che le risorse interne sono ben bilanciate.`,
-      cosa_lo_guida: `${nome} è guidat${s.o} da un mix bilanciato di bisogni. Non c'è un motore dominante che oscura gli altri: competenza, relazioni e stabilità si alternano in modo sano.`,
-      cosa_lo_blocca: `Non emergono blocchi strutturali significativi. Le aree di miglioramento sono fisiologiche, non patologiche. ${nome} ha le risorse per affrontare le sfide con equilibrio.`,
-      potenziale_inespresso: `Il potenziale di ${nome} non è nascosto sotto ferite o difese — è disponibile e accessibile. La sfida è indirizzarlo verso gli obiettivi giusti e fornire le opportunità di crescita adeguate.`,
-      la_chiave: 'Un profilo equilibrato è una risorsa rara. Valorizzare, non dare per scontato.',
-      cosa_motiva: ['Obiettivi chiari e stimolanti', 'Autonomia e fiducia', 'Collaborazione autentica', 'Riconoscimento del contributo'],
-      cosa_blocca: ['Micromanagement', 'Ambienti tossici', 'Mancanza di sfide', 'Incoerenza organizzativa'],
-      cosa_teme: ['Stagnazione professionale', 'Ambienti che non valorizzano le competenze', 'Perdita di equilibrio personale'],
-      errori_da_evitare: ['Non dare per scontat' + s.o + ' — anche i profili equilibrati hanno bisogno di attenzione', 'Non sovraccaricare pensando che "tanto regge" — anche le risorse migliori si esauriscono', 'Non trascurare il feedback positivo — l\'equilibrio va alimentato'],
-    }),
+    equilibrato: () => {
+      // Personalized equilibrato narrative based on specific trait distributions
+      const idStabile = identitaRisultato <= 2;
+      const reEccellente = regolazioneEmotiva >= 8;
+      const espBassa = t.ESP < 10;
+      const detBassa = t.DET < 20;
+
+      // chi_e_nel_profondo
+      let chi = '';
+      if (idStabile && reEccellente) {
+        chi = `${nome} è una persona che ha separato il proprio valore intrinseco dai risultati che ottiene. Quando fallisce, non si frantuma — impara. Quando vince, non si gonfia — costruisce. La sua forza non è nel carisma da palcoscenico ma nella capacità sistematica di trasformare problemi in soluzioni.`;
+        if (espBassa || detBassa) {
+          chi += ` Il suo tallone d'Achille non è emotivo ma relazionale: tende a fare da sol${s.o} ciò che potrebbe delegare${detBassa ? ', e a trattenere ciò che potrebbe dire' : ''}.`;
+        }
+      } else if (idStabile) {
+        chi = `${nome} ha un senso di sé stabile, separato da ciò che ottiene. I fallimenti professionali non diventano terremoti personali. È in grado di dire "il progetto non ha funzionato" senza sentire "io non valgo." Questo è un punto di forza raro e prezioso.`;
+      } else if (reEccellente) {
+        chi = `${nome} ha una capacità di regolazione emotiva eccezionale. Sotto pressione resta lucid${s.o}, non si lascia travolgere dalle emozioni negative ma le trasforma in energia per agire. È un punto di riferimento naturale nei momenti difficili.`;
+      } else {
+        chi = `${nome} presenta un profilo psicologico equilibrato. Le dimensioni profonde sono nella norma, senza pattern disfunzionali significativi. Le risorse interne sono ben bilanciate.`;
+      }
+
+      // cosa_lo_guida
+      let guida = '';
+      if (bisognoPrimario === 'competenza') {
+        guida = `Il motore principale è sentirsi capace e vedere che il lavoro produce risultati concreti. ${nome} non lavora per il riconoscimento ma per costruire cose che funzionano.`;
+      } else if (bisognoPrimario === 'sicurezza') {
+        guida = `Il bisogno di stabilità e prevedibilità guida ${nome}. Cerca terreno solido su cui costruire, metodi collaudati, certezze basate sui dati.`;
+      } else {
+        guida = `${nome} è guidat${s.o} da un mix bilanciato di bisogni. Non c'è un motore dominante che oscura gli altri: competenza, relazioni e stabilità si alternano in modo sano.`;
+      }
+
+      // cosa_lo_blocca
+      let blocca = '';
+      if (espBassa && detBassa) {
+        blocca = `L'area di crescita di ${nome} non è psicologica ma comunicativa e relazionale. Sa cosa fare, sa come farlo, ma fa fatica a dirlo agli altri e a costruire la rete larga che amplificherebbe il suo impatto.`;
+      } else if (espBassa) {
+        blocca = `La rete relazionale è l'area di crescita principale. ${nome} tende a fare da sol${s.o} ciò che potrebbe condividere o delegare. Non è chiusura — è un'abitudine che limita l'impatto.`;
+      } else if (detBassa) {
+        blocca = `La comunicazione assertiva è l'area di crescita principale. ${nome} sa cosa pensa ma fatica a dirlo con chiarezza, soprattutto quando implica conflitto.`;
+      } else {
+        blocca = `Non emergono blocchi strutturali significativi. Le aree di miglioramento sono fisiologiche, non patologiche. ${nome} ha le risorse per affrontare le sfide con equilibrio.`;
+      }
+
+      // potenziale_inespresso
+      let potenziale = '';
+      if (idStabile && reEccellente) {
+        potenziale = `Il profilo di base è eccezionalmente sano. Se ${nome} impara a costruire la rete relazionale che oggi manca${espBassa ? ` (ESP = ${t.ESP})` : ''} e a comunicare con più assertività${detBassa ? ` (DET = ${t.DET})` : ''}, diventa un profilo dirigenziale di altissimo livello.`;
+      } else {
+        potenziale = `Il potenziale di ${nome} non è nascosto sotto ferite o difese — è disponibile e accessibile. La sfida è indirizzarlo verso gli obiettivi giusti e fornire le opportunità di crescita adeguate.`;
+      }
+
+      // la_chiave
+      let chiave = '';
+      if (espBassa || detBassa) {
+        chiave = `Non devi fare tutto tu per farlo bene — devi insegnare ad altri a farlo come lo faresti tu.`;
+      } else if (idStabile && reEccellente) {
+        chiave = 'Un profilo eccezionalmente equilibrato è una risorsa rara. La sfida è passare da eccellenza individuale a moltiplicatore di eccellenza.';
+      } else {
+        chiave = 'Un profilo equilibrato è una risorsa rara. Valorizzare, non dare per scontato.';
+      }
+
+      // motiva/blocca/teme/errori customized
+      const motiva = ['Obiettivi chiari e stimolanti', 'Autonomia nell\'esecuzione', 'Vedere risultati concreti del proprio lavoro'];
+      if (bisognoPrimario === 'competenza') motiva.push('Riconoscimento della propria competenza e affidabilità');
+      if (bisognoPrimario === 'sicurezza') motiva.push('Ambiente organizzato con regole chiare e prevedibili');
+      motiva.push('Costruire qualcosa di duraturo e strutturato');
+
+      const blocchi = ['Micromanagement', 'Ambienti tossici o incoerenti'];
+      if (espBassa) blocchi.push('Isolamento relazionale prolungato');
+      if (detBassa) blocchi.push('Dover gestire conflitti diretti senza preparazione');
+      if (t.RC > 45) blocchi.push('Cambiamenti improvvisi senza preavviso né spiegazione');
+      blocchi.push('Mancanza di sfide');
+
+      const teme = ['Stagnazione professionale'];
+      if (espBassa) teme.push('Di restare sol' + s.o + ' sotto il peso senza nessuno su cui contare');
+      if (detBassa) teme.push('Di non riuscire a farsi capire quando conta');
+      teme.push('Perdita di equilibrio personale');
+
+      const errori = [
+        'Non dare per scontat' + s.o + ' — anche i profili equilibrati hanno bisogno di attenzione e riconoscimento',
+        'Non sovraccaricare pensando che "tanto regge" — anche le risorse migliori si esauriscono',
+      ];
+      if (espBassa) errori.push(`Non lasciare ${nome} sol${s.o} troppo a lungo — la rete va costruita attivamente, non aspettata`);
+      else errori.push('Non trascurare il feedback positivo — l\'equilibrio va alimentato');
+
+      return {
+        chi_e_nel_profondo: chi,
+        cosa_lo_guida: guida,
+        cosa_lo_blocca: blocca,
+        potenziale_inespresso: potenziale,
+        la_chiave: chiave,
+        cosa_motiva: motiva,
+        cosa_blocca: blocchi,
+        cosa_teme: teme,
+        errori_da_evitare: errori,
+      };
+    },
   };
 
   const gen = narratives[profilo]();
@@ -518,12 +617,21 @@ export function calculateMappaInteriore(
 
   const narrativa = generateNarrativa(
     profiloNarrativo, candidatoNome, candidatoSesso, t,
-    bisogno.primario.codice, attaccamento.dominante, difesa.dominante
+    bisogno.primario.codice, attaccamento.dominante, difesa.dominante,
+    identitaRisultato, regolazioneEmotiva
   );
 
   const pattern_combinatori = detectPatterns(
     identitaRisultato, regolazioneEmotiva, attaccamento.dominante,
     difesa.dominante, bisogno.primario.codice, t
+  );
+
+  const domande_colloquio_aggiuntive = generateDomandeColloquio(
+    identitaRisultato, regolazioneEmotiva, attaccamento.dominante, difesa.dominante, t
+  );
+
+  const override_piano_crescita = generateOverridePiano(
+    identitaRisultato, regolazioneEmotiva, attaccamento.dominante, difesa.dominante
   );
 
   return {
@@ -548,5 +656,148 @@ export function calculateMappaInteriore(
     cosa_teme: narrativa.cosa_teme,
     errori_da_evitare: narrativa.errori_da_evitare,
     pattern_combinatori,
+    domande_colloquio_aggiuntive,
+    override_piano_crescita,
   };
+}
+
+// ─── Domande Colloquio di Secondo Livello ─────────────────────────────────────
+
+function generateDomandeColloquio(
+  identita: number,
+  regolazione: number,
+  attaccamento: AttaccamentoStile,
+  difesa: DifesaInfo | null,
+  t: Record<string, number>,
+): DomandaColloquio[] {
+  const domande: DomandaColloquio[] = [];
+
+  if (regolazione <= 3) {
+    domande.push({
+      area: 'Gestione Emotiva',
+      priorita: 'CRITICA',
+      domande: [
+        'Come gestisci i periodi particolarmente intensi? Cosa fai per ricaricarti?',
+        'Raccontami dell\'ultima volta che ti sei sentito/a sotto pressione. Come ne sei uscito/a?',
+        'Quando senti che il carico è troppo, cosa fai? A chi ti rivolgi?',
+      ],
+    });
+  } else if (regolazione <= 4) {
+    domande.push({
+      area: 'Gestione Emotiva',
+      priorita: 'ALTA',
+      domande: [
+        'Come gestisci i periodi particolarmente intensi? Cosa fai per ricaricarti?',
+        'Raccontami dell\'ultima volta che ti sei sentito/a sotto pressione. Come ne sei uscito/a?',
+      ],
+    });
+  }
+
+  if (identita >= 7) {
+    domande.push({
+      area: 'Identità e Risultati',
+      priorita: 'ALTA',
+      domande: [
+        'Quando un progetto non va come previsto, come ti senti? Cosa ti dici?',
+        'C\'è differenza per te tra "il progetto non ha funzionato" e "io non sono capace"?',
+        'Come reagisci quando qualcuno critica il tuo lavoro?',
+      ],
+    });
+  }
+
+  if (attaccamento === 'evitante') {
+    domande.push({
+      area: 'Relazioni e Collaborazione',
+      priorita: 'ALTA',
+      domande: [
+        'Come preferisci lavorare: da solo/a o in team? Perché?',
+        'Quando hai bisogno di un confronto su un problema, a chi ti rivolgi?',
+        'C\'è qualcuno nel tuo contesto professionale con cui ti confidi?',
+      ],
+    });
+  }
+
+  if (t.GP < 21) {
+    domande.push({
+      area: 'Situazione Attuale',
+      priorita: regolazione <= 3 ? 'CRITICA' : 'ALTA',
+      domande: [
+        'Come stai in questo periodo? Non parlo del lavoro — parlo di te.',
+        'C\'è qualcosa nella tua vita che richiede molta energia in questo momento?',
+      ],
+    });
+  }
+
+  if (difesa?.codice === 'razionalizzazione') {
+    domande.push({
+      area: 'Consapevolezza di Sé',
+      priorita: 'MEDIA',
+      domande: [
+        'Ti è mai capitato di capire solo dopo che avevi sbagliato approccio? Raccontami.',
+        'Come reagisci quando qualcuno ti fa notare un errore?',
+      ],
+    });
+  }
+
+  if (t.RC > 55) {
+    domande.push({
+      area: 'Flessibilità',
+      priorita: 'ALTA',
+      domande: [
+        'Raccontami di una volta in cui il tuo metodo abituale non ha funzionato. Cosa hai fatto?',
+        'Se domani il tuo team ti proponesse un approccio completamente diverso dal tuo, come reagiresti?',
+      ],
+    });
+  }
+
+  if (t.ESP < 10) {
+    const existing = domande.find(d => d.area === 'Relazioni e Collaborazione');
+    if (!existing) {
+      domande.push({
+        area: 'Rete di Supporto',
+        priorita: 'MEDIA',
+        domande: [
+          'Quando hai bisogno di un confronto su un problema, a chi ti rivolgi?',
+          'C\'è qualcuno nel tuo contesto professionale con cui ti confidi?',
+        ],
+      });
+    }
+  }
+
+  return domande;
+}
+
+// ─── Override Piano di Crescita ───────────────────────────────────────────────
+
+function generateOverridePiano(
+  identita: number,
+  regolazione: number,
+  attaccamento: AttaccamentoStile,
+  difesa: DifesaInfo | null,
+): string[] {
+  const overrides: string[] = [];
+
+  if (identita >= 7) {
+    overrides.push('Lavorare sulla separazione identità-risultato in Fase 2: esercizi di auto-valutazione indipendente dai risultati');
+  }
+  if (regolazione <= 3) {
+    overrides.push('Priorità Fase 1: stabilizzazione emotiva. Ridurre carico non necessario del 20-30%. Check-in settimanali di benessere, non di performance');
+  }
+  if (attaccamento === 'ansioso') {
+    overrides.push('Feedback rassicurante ogni 1-2 settimane. Comunicazione proattiva su cambiamenti organizzativi');
+  }
+  if (attaccamento === 'evitante') {
+    overrides.push('Comunicazione breve e fattuale. Non forzare la socializzazione. Connessioni strutturate: mentore, peer di fiducia');
+  }
+  if (difesa && difesa.livello === 'maturo') {
+    overrides.push('Meccanismo di difesa maturo: segnalare come punto di forza nel feedback');
+  }
+  if (regolazione >= 8 && difesa === null && identita <= 2) {
+    overrides.push('Profilo eccezionalmente sano: valorizzare come mentore naturale. Proteggere dal sovraccarico');
+  }
+  if (attaccamento === 'disorganizzato') {
+    overrides.push('Attenzione: pattern relazionale complesso. Comunicazione molto chiara e prevedibile. Evitare messaggi ambigui');
+  }
+
+  return overrides;
 }
