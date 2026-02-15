@@ -1,109 +1,78 @@
 
 
-# Mappa Interiore -- Grafico a Candele e UX Upgrade
+# Pulizia, Stabilizzazione e Miglioramenti UX
 
-## Panoramica
+## 1. Codice da Rimuovere
 
-Aggiunta di un grafico a candele (barre bidirezionali) per le 5 dimensioni profonde e restyling completo della tab per un'esperienza visiva piu' professionale e coinvolgente.
+Ho analizzato l'intero codebase e l'app e' gia' molto pulita (precedenti cicli di cleanup). I file morti sono:
 
----
+| File | Motivo |
+|------|--------|
+| `src/components/TraitBarChart.tsx` (210 righe) | Mai importato da nessun file. Era il vecchio grafico a barre V5, sostituito da `TraitCandleChart` |
+| `src/App.css` (41 righe) | Boilerplate Vite mai importato. L'app usa `index.css` con Tailwind |
 
-## 1. Grafico a Candele delle Dimensioni
+Nessun altro componente, hook, pagina o modulo lib risulta inutilizzato. Tutti gli import sono attivi e referenziati.
 
-Un nuovo componente grafico con barre orizzontali bidirezionali per le 5 dimensioni, ispirato al `CandleChart` gia' esistente nel progetto ma adattato per le dimensioni psicologiche della Mappa Interiore.
+## 2. Bug e Fix Funzionali
 
-**Struttura del grafico:**
-- Asse Y: le 5 dimensioni (Identita-Risultato, Regolazione Emotiva, Attaccamento Sicuro, Difese, Bisogno Primario)
-- Asse X: scala 0-10
-- Barre orizzontali colorate per valore:
-  - Identita-Risultato: colori **invertiti** (verde 0-3, ambra 4-6, arancione/rosso 7-10 -- basso = positivo)
-  - Regolazione Emotiva: colori normali (rosso 0-3, ambra 4-6, verde 7-10)
-  - Attaccamento: score del dominante (verde se sicuro, ambra se ansioso/evitante, rosso se disorganizzato)
-  - Difese: 0 se equilibrate (verde), score stimato se attive (ambra/rosso)
-  - Bisogno Primario: score grezzo (neutro, blu/viola)
-- Zone di sfondo colorate (rosso chiaro, giallo chiaro, verde chiaro) come nel TraitCandleChart
-- Linea di riferimento a score 5 (centro scala)
-- Tooltip ricco con etichetta qualitativa e spiegazione breve
-- Label con valore numerico alla fine di ogni barra
-- Etichette complete sulle righe
+Ho verificato tutte le pagine del flusso candidato (Auth -> FormAnagrafico -> ConsensoPrivacy -> Questionario -> TestCompletato) e il flusso admin (Dashboard, Candidati, CandidatoDettaglio con tutti e 4 i tab). Console pulita: zero errori runtime, solo 4 warning di postMessage irrilevanti (piattaforma Lovable).
 
-Il grafico viene posizionato in cima alla tab, subito dopo il titolo, sostituendo le 2 progress bar attuali e integrando visivamente tutte e 5 le dimensioni in un'unica vista.
+Problemi riscontrati:
 
-## 2. Restyling UX Completo
+| Problema | Fix |
+|----------|-----|
+| Nessun bug bloccante trovato | -- |
+| `Questionario.tsx` riga 90: `onConflict: 'candidato_id,domanda_id'` presume un constraint univoco composito sulla tabella `risposte`. Se il constraint non esiste, l'upsert fallisce silenziosamente | Verificare e, se mancante, aggiungere il constraint univoco via migration |
+| Auth.tsx: i tab "Azienda" e "Registra" condividono le variabili `email` e `password`, causando leak di dati tra i form se l'utente cambia tab | Separare gli state: `regEmail`, `regPassword` per il form di registrazione |
 
-**A. Header della tab**
-- Titolo piu' grande con sottotitolo "Report di Psicologia Profonda"
-- Profilo narrativo mostrato come badge prominente sotto il titolo (es. "IL COSTRUTTORE SOTTO PRESSIONE" con sfondo colorato)
+## 3. Miglioramenti UX
 
-**B. Sezione Dimensioni (dopo il grafico)**
-- I 3 badge (Stile relazionale, Reazione pressione, Motore primario) diventano card pill piu' grandi con icone colorate e sfondo leggero
-- Il collapsible per l'attaccamento dettagliato rimane ma con stile migliorato (bordo sinistro colorato, punteggi con mini-barre)
+L'app segue gia' gli standard "esperienziali" (animazioni, feedback immediato, Zod validation). Piccoli affinamenti:
 
-**C. Card Narrative**
-- Sfondo leggero personalizzato per ogni card (non solo bordo sinistro)
-- Icone piu' grandi e colorate
-- Titoli piu' prominenti
-- Testo con interlinea piu' generosa per leggibilita'
+| Miglioramento | Dove | Dettaglio |
+|---------------|------|-----------|
+| Tab "Registra" su Auth non resetta errori quando si cambia tab | `Auth.tsx` | Aggiungere `setFieldErrors({})` su cambio tab |
+| `ConsensoPrivacy` non ha animazione di transizione verso il questionario | `ConsensoPrivacy.tsx` | Aggiungere fade-out prima della navigazione (micro-delay con feedback visivo sul bottone) |
+| Il bottone "Accetto e Proseguo" non mostra stato di caricamento | `ConsensoPrivacy.tsx` | Aggiungere stato loading con spinner al click, per evitare doppio click |
+| `TestCompletato.tsx` usa il colore `text-success` che potrebbe non essere definito nel tema | `TestCompletato.tsx` | Verificare e usare classe Tailwind sicura |
 
-**D. Card "La Chiave"**
-- Piu' enfatizzata: sfondo gradiente viola, testo piu' grande, icona chiave animata (pulse leggero)
-- Bordo doppio con ombra
+## 4. Verifiche Finali
 
-**E. Motiva / Blocca / Teme**
-- Card con sfondo colorato leggero (verde chiaro, rosso chiaro, ambra chiaro) invece del bianco
-- Icone colorate per ogni bullet point
-- Separatori visuali tra le card
+- **Smoke test**: Pagina candidato dettaglio con tutti e 4 i tab verificata via browser -- carica correttamente, nessun errore
+- **Console pulita**: 0 errori, 0 warning rilevanti
+- **Responsiveness**: Layout gia' responsive con breakpoint mobile/desktop su tutte le pagine
+- **Performance**: Code splitting attivo con React.lazy, skeleton loading, useMemo su sorting/filtering
 
-**F. Box Errori**
-- Piu' prominente con icona piu' grande
-- Ogni errore con numero in cerchio rosso
-- Bordo sinistro rosso spesso
+## Riepilogo Interventi
 
-**G. Pattern Combinatori**
-- Card con icona fulmine colorata
-- Sfondo leggero (verde se positivo, ambra se attenzione)
-- Azione in box separato con sfondo grigio chiaro
+### Rimozioni (2 file)
+1. `src/components/TraitBarChart.tsx` -- componente grafico mai usato
+2. `src/App.css` -- boilerplate Vite inutilizzato
 
-**H. Domande Colloquio**
-- Badge priorita' piu' visibili con colore pieno
-- Domande in blockquote stilizzato
-- Separatore tra gruppi
+### Fix funzionali (2)
+1. Auth.tsx: separare state email/password tra tab Azienda e Registra per evitare leak
+2. Verificare constraint univoco `candidato_id, domanda_id` su tabella `risposte` (necessario per upsert questionario)
 
-**I. Azioni Piano di Crescita**
-- Card con step numerati in cerchi colorati
-- Timeline visiva verticale tra gli step
-
-**J. Disclaimer**
-- Piu' discreto, sfondo grigio piu' chiaro, font piu' piccolo
+### Miglioramenti UX (3)
+1. Auth.tsx: reset errori al cambio tab
+2. ConsensoPrivacy.tsx: stato loading sul bottone "Accetto e Proseguo"
+3. Verificare che i colori `text-success` / `bg-success` siano definiti nel tema
 
 ---
 
-## File da modificare
+## Dettaglio Tecnico
 
-### `src/components/MappaInterioreTab.tsx`
-- Aggiungere il grafico a candele usando recharts (BarChart layout="vertical") direttamente nel componente
-- Restyling completo di tutte le sezioni come descritto sopra
-- Il grafico usa i dati gia' calcolati in `MappaInterioreResult.dimensioni`
+### Auth.tsx -- Separazione state e reset errori
+- Aggiungere `regEmail`, `regPassword` dedicati al form registrazione
+- `onValueChange` sulla TabsList per resettare fieldErrors
+- Impatto: zero regressione, fix comportamento inatteso
 
-### `src/lib/mappaInteriore.ts`
-- Nessuna modifica alla logica di calcolo
-- Eventuale aggiunta di una funzione helper `getDimensioniChartData()` che converte i risultati delle 5 dimensioni nel formato richiesto dal grafico recharts
+### ConsensoPrivacy.tsx -- Loading state
+- Aggiungere `const [navigating, setNavigating] = useState(false)` 
+- Nel `handleContinue`: `setNavigating(true)` poi `navigate()`
+- Bottone mostra spinner durante transizione
 
----
-
-## Dettaglio tecnico del grafico
-
-I dati per il grafico vengono costruiti dal risultato `MappaInterioreResult`:
-
-```text
-[
-  { name: "Identita-Risultato", value: 1, label: "Identita stabile", color: verde (invertito) },
-  { name: "Regolazione Emotiva", value: 9, label: "Eccellente", color: verde },
-  { name: "Attaccamento", value: 6, label: "Sicuro", color: verde },
-  { name: "Difese", value: 0, label: "Equilibrate", color: verde },
-  { name: "Bisogno Primario", value: 5, label: "Sicurezza", color: blu },
-]
-```
-
-Il grafico usa `ResponsiveContainer`, `BarChart` con `layout="vertical"`, `ReferenceArea` per le zone colorate, `ReferenceLine` a x=5, e `Cell` per colori condizionali per ogni barra. Tooltip personalizzato che mostra il significato qualitativo del punteggio.
+### Constraint DB risposte
+- Verificare con query SQL se esiste un unique constraint su `(candidato_id, domanda_id)`
+- Se mancante: migration per aggiungerlo (necessario per upsert corretto)
 
