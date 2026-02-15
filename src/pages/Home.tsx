@@ -514,25 +514,16 @@ export default function Home() {
               </span>
             </div>
           </div>
-          {/* Right: Decorative blurred "dashboard" */}
+          {/* Right: Team image */}
           <div className="hidden lg:block lg:w-2/5">
-            <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden border border-white/20 shadow-2xl" style={{ background: 'linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)' }}>
-              {/* Glassmorphism overlay */}
-              <div className="absolute inset-0 backdrop-blur-sm" />
-              {/* Decorative shapes */}
-              <div className="absolute top-8 left-8 w-32 h-32 rounded-full bg-accent/50 blur-2xl" />
-              <div className="absolute bottom-12 right-6 w-40 h-24 rounded-xl bg-primary/40 blur-2xl" />
-              <div className="absolute top-1/2 left-1/3 w-28 h-28 rounded-full bg-white/20 blur-xl" />
-              <div className="absolute bottom-8 left-12 w-36 h-16 rounded-lg bg-accent/30 blur-xl" />
-              {/* Faux UI elements */}
-              <div className="absolute top-6 left-6 right-6 h-3 rounded-full bg-white/10" />
-              <div className="absolute top-12 left-6 w-2/3 h-3 rounded-full bg-white/8" />
-              <div className="absolute top-[40%] left-8 right-8 flex gap-3">
-                <div className="flex-1 h-20 rounded-lg bg-white/10 border border-white/10" />
-                <div className="flex-1 h-20 rounded-lg bg-white/10 border border-white/10" />
-                <div className="flex-1 h-20 rounded-lg bg-white/10 border border-white/10" />
-              </div>
-              <div className="absolute bottom-6 left-8 right-8 h-12 rounded-lg bg-white/8 border border-white/10" />
+            <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl">
+              <img
+                src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80"
+                alt="Team professionale al lavoro"
+                className="w-full h-full object-cover"
+                loading="eager"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#1e3a5f]/40 to-transparent" />
             </div>
           </div>
         </div>
@@ -596,7 +587,7 @@ export default function Home() {
 
       {/* ═══ 5. BUONA NOTIZIA (NUOVA) ═══ */}
       <Section className="py-20 md:py-28 bg-blue-50" id="buona-notizia">
-        <div className="max-w-5xl mx-auto px-4 md:px-8">
+        <div className="max-w-6xl mx-auto px-4 md:px-8">
           <p className="text-sm uppercase tracking-widest text-accent font-semibold text-center mb-3">
             Ma c'è una soluzione
           </p>
@@ -606,26 +597,38 @@ export default function Home() {
           <p className="text-center text-muted-foreground text-lg mb-14 max-w-2xl mx-auto">
             Oggi puoi fare tutto questo:
           </p>
-          <div className="grid sm:grid-cols-2 gap-6 mb-12">
-            {BUONA_NOTIZIA_ITEMS.map((item, i) => (
-              <div
-                key={i}
-                className="flex items-start gap-4 bg-white rounded-xl p-6 shadow-sm border border-border"
-              >
-                <div className="shrink-0 w-10 h-10 rounded-full bg-success/15 flex items-center justify-center">
-                  <CheckCircle2 className="h-5 w-5 text-success" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-foreground mb-1">{item.title}</h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed">{item.desc}</p>
-                </div>
+          <div className="flex flex-col lg:flex-row gap-12 lg:gap-16">
+            <div className="lg:w-3/5">
+              <div className="grid sm:grid-cols-2 gap-6 mb-12">
+                {BUONA_NOTIZIA_ITEMS.map((item, i) => (
+                  <div
+                    key={i}
+                    className="flex items-start gap-4 bg-white rounded-xl p-6 shadow-sm border border-border"
+                  >
+                    <div className="shrink-0 w-10 h-10 rounded-full bg-success/15 flex items-center justify-center">
+                      <CheckCircle2 className="h-5 w-5 text-success" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-foreground mb-1">{item.title}</h3>
+                      <p className="text-muted-foreground text-sm leading-relaxed">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-          <div className="text-center">
-            <p className="text-lg md:text-xl text-foreground leading-relaxed max-w-3xl mx-auto">
-              Il problema? Questi risultati li ottieni <strong>SOLO</strong> se hai lo strumento giusto. Uno strumento costruito da chi la psicologia del lavoro la conosce davvero.
-            </p>
+              <div>
+                <p className="text-lg md:text-xl text-foreground leading-relaxed">
+                  Il problema? Questi risultati li ottieni <strong>SOLO</strong> se hai lo strumento giusto. Uno strumento costruito da chi la psicologia del lavoro la conosce davvero.
+                </p>
+              </div>
+            </div>
+            <div className="hidden lg:block lg:w-2/5">
+              <img
+                src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=600&q=80"
+                alt="Team che collabora in ufficio"
+                className="w-full h-full object-cover rounded-xl shadow-lg"
+                loading="lazy"
+              />
+            </div>
           </div>
         </div>
       </Section>
@@ -639,23 +642,33 @@ export default function Home() {
           <h2 className="text-3xl md:text-5xl font-bold text-center mb-16 text-foreground">
             Il Metodo TalentProfile in 4 Step
           </h2>
-          <div className="relative">
-            {/* vertical line */}
-            <div className="absolute left-6 md:left-8 top-0 bottom-0 w-0.5 bg-border hidden md:block" />
-            <div className="space-y-12">
-              {STEPS.map((s, i) => (
-                <div key={i} className="flex items-start gap-6 md:gap-8">
-                  <div className="shrink-0 relative z-10">
-                    <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-accent text-accent-foreground flex items-center justify-center text-lg md:text-xl font-black shadow-lg">
-                      {String(i + 1).padStart(2, '0')}
+          <div className="flex flex-col lg:flex-row gap-12 lg:gap-16">
+            <div className="lg:w-3/5 relative">
+              {/* vertical line */}
+              <div className="absolute left-6 md:left-8 top-0 bottom-0 w-0.5 bg-border hidden md:block" />
+              <div className="space-y-12">
+                {STEPS.map((s, i) => (
+                  <div key={i} className="flex items-start gap-6 md:gap-8">
+                    <div className="shrink-0 relative z-10">
+                      <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-accent text-accent-foreground flex items-center justify-center text-lg md:text-xl font-black shadow-lg">
+                        {String(i + 1).padStart(2, '0')}
+                      </div>
+                    </div>
+                    <div className="pt-1 md:pt-3">
+                      <h3 className="text-xl md:text-2xl font-bold mb-2 text-foreground">{s.title}</h3>
+                      <p className="text-muted-foreground text-base md:text-lg leading-relaxed">{s.desc}</p>
                     </div>
                   </div>
-                  <div className="pt-1 md:pt-3">
-                    <h3 className="text-xl md:text-2xl font-bold mb-2 text-foreground">{s.title}</h3>
-                    <p className="text-muted-foreground text-base md:text-lg leading-relaxed">{s.desc}</p>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
+            </div>
+            <div className="hidden lg:block lg:w-2/5">
+              <img
+                src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&q=80"
+                alt="Dashboard di analisi HR"
+                className="w-full h-full object-cover rounded-xl shadow-lg sticky top-32"
+                loading="lazy"
+              />
             </div>
           </div>
         </div>
@@ -735,9 +748,16 @@ export default function Home() {
                 </div>
                 <p className="text-foreground leading-relaxed mb-6 italic">"{t.quote}"</p>
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm">
-                    {t.name.split(' ').map((n) => n[0]).join('')}
-                  </div>
+                  <img
+                    src={[
+                      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&q=80',
+                      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&q=80',
+                      'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&q=80',
+                    ][i]}
+                    alt={t.name}
+                    className="w-10 h-10 rounded-full object-cover"
+                    loading="lazy"
+                  />
                   <div>
                     <div className="font-semibold text-sm text-foreground">{t.name}</div>
                     <div className="text-xs text-muted-foreground">{t.role}</div>
@@ -989,10 +1009,16 @@ export default function Home() {
       {/* ═══ 15. CTA FINALE + TRUST BADGES ═══ */}
       <section
         id="cta-finale"
-        className="py-20 md:py-28 text-center"
+        className="relative py-20 md:py-28 text-center overflow-hidden"
         style={{ background: 'linear-gradient(135deg, #f09133 0%, #e07a1f 100%)' }}
       >
-        <div className="max-w-3xl mx-auto px-4 md:px-8">
+        <img
+          src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1200&q=60"
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover opacity-20 blur-sm"
+          loading="lazy"
+        />
+        <div className="max-w-3xl mx-auto px-4 md:px-8 relative z-10">
           <h2 className="text-3xl md:text-5xl font-black text-white mb-6">
             Il futuro del tuo team inizia da qui.
           </h2>
