@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -33,7 +33,9 @@ import {
   AlertTriangle,
   Shield,
   TrendingUp,
+  Calculator,
 } from 'lucide-react';
+import { Slider } from '@/components/ui/slider';
 
 /* ─── Hook: scroll-triggered fade-in ─── */
 function useScrollAnimation() {
@@ -119,6 +121,7 @@ function scrollTo(id: string) {
 
 /* ─── DATA ─── */
 const NAV_LINKS = [
+  { label: 'Calcolatore', id: 'calcolatore' },
   { label: 'Funzionalità', id: 'funzionalita' },
   { label: 'Metodo', id: 'metodo' },
   { label: 'Numeri', id: 'numeri' },
@@ -369,6 +372,26 @@ export default function Home() {
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [ral, setRal] = useState(30000);
+  const [mesi, setMesi] = useState(3);
+
+  const costi = useMemo(() => {
+    const stipendioBruciato = (ral / 12) * mesi;
+    const formazione = ral * 0.15;
+    const recruiting = 3000;
+    const produttivitaPersa = (ral / 12) * mesi * 0.4;
+    const riassunzione = 3000;
+    const totale = stipendioBruciato + formazione + recruiting + produttivitaPersa + riassunzione;
+    return { stipendioBruciato, formazione, recruiting, produttivitaPersa, riassunzione, totale };
+  }, [ral, mesi]);
+
+  const costiBreakdown = useMemo(() => [
+    { label: 'Stipendio bruciato', value: costi.stipendioBruciato, color: 'bg-red-500' },
+    { label: 'Formazione persa', value: costi.formazione, color: 'bg-orange-500' },
+    { label: 'Costo recruiting', value: costi.recruiting, color: 'bg-yellow-500' },
+    { label: 'Produttività persa (40%)', value: costi.produttivitaPersa, color: 'bg-amber-500' },
+    { label: 'Costo riassunzione', value: costi.riassunzione, color: 'bg-rose-500' },
+  ], [costi]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -590,6 +613,137 @@ export default function Home() {
                 </div>
               </Card>
             ))}
+          </div>
+        </div>
+      </Section>
+
+      {/* ═══ 4b. CALCOLATORE COSTO ASSUNZIONE SBAGLIATA ═══ */}
+      <Section className="py-20 md:py-28 bg-secondary/50" id="calcolatore">
+        <div className="max-w-5xl mx-auto px-4 md:px-8">
+          <p className="text-sm uppercase tracking-widest text-destructive font-semibold text-center mb-3">
+            Il Conto Che Non Fai
+          </p>
+          <h2 className="text-3xl md:text-5xl font-bold text-center mb-4 text-foreground">
+            Quanto ti costa <span className="text-destructive">DAVVERO</span> un'assunzione sbagliata?
+          </h2>
+          <p className="text-center text-muted-foreground text-lg mb-14 max-w-2xl mx-auto">
+            Sposta gli slider e scopri quanto stai bruciando ogni volta che sbagli persona.
+          </p>
+
+          {/* Calculator Card */}
+          <Card className="p-6 md:p-10 max-w-3xl mx-auto border-2 border-border shadow-xl">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-12 h-12 rounded-xl bg-destructive/10 flex items-center justify-center">
+                <Calculator className="h-6 w-6 text-destructive" />
+              </div>
+              <h3 className="text-xl font-bold text-foreground">Calcolatore interattivo</h3>
+            </div>
+
+            {/* Slider RAL */}
+            <div className="mb-8">
+              <div className="flex justify-between items-baseline mb-3">
+                <label className="text-sm font-semibold text-foreground">Stipendio lordo annuo (RAL)</label>
+                <span className="text-2xl font-black text-foreground">€{ral.toLocaleString('it-IT')}</span>
+              </div>
+              <Slider
+                value={[ral]}
+                onValueChange={(v) => setRal(v[0])}
+                min={20000}
+                max={80000}
+                step={5000}
+                className="w-full"
+              />
+              <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                <span>€20.000</span>
+                <span>€80.000</span>
+              </div>
+            </div>
+
+            {/* Slider Mesi */}
+            <div className="mb-10">
+              <div className="flex justify-between items-baseline mb-3">
+                <label className="text-sm font-semibold text-foreground">Mesi prima di accorgerti dell'errore</label>
+                <span className="text-2xl font-black text-foreground">{mesi} {mesi === 1 ? 'mese' : 'mesi'}</span>
+              </div>
+              <Slider
+                value={[mesi]}
+                onValueChange={(v) => setMesi(v[0])}
+                min={1}
+                max={12}
+                step={1}
+                className="w-full"
+              />
+              <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                <span>1 mese</span>
+                <span>12 mesi</span>
+              </div>
+            </div>
+
+            {/* Risultato Totale */}
+            <div className="text-center py-6 px-4 rounded-xl bg-destructive/5 border border-destructive/20 mb-8">
+              <p className="text-sm font-semibold text-muted-foreground mb-1 uppercase tracking-wide">Danno totale stimato</p>
+              <p className="text-5xl md:text-6xl font-black text-destructive">
+                €{Math.round(costi.totale).toLocaleString('it-IT')}
+              </p>
+            </div>
+
+            {/* Breakdown */}
+            <div className="space-y-4">
+              {costiBreakdown.map((item, i) => {
+                const pct = costi.totale > 0 ? (item.value / costi.totale) * 100 : 0;
+                return (
+                  <div key={i}>
+                    <div className="flex justify-between text-sm mb-1">
+                      <span className="text-foreground font-medium">{item.label}</span>
+                      <span className="font-bold text-foreground">€{Math.round(item.value).toLocaleString('it-IT')}</span>
+                    </div>
+                    <div className="h-2.5 rounded-full bg-secondary overflow-hidden">
+                      <div
+                        className={`h-full rounded-full ${item.color} transition-all duration-500`}
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <p className="text-sm text-destructive font-medium mt-8 text-center leading-relaxed">
+              ⚠️ E questo senza contare il danno al morale del team, i clienti persi e il tempo che non torna.
+            </p>
+          </Card>
+
+          {/* Scenari */}
+          <div className="mt-16">
+            <h3 className="text-2xl md:text-3xl font-bold text-center mb-10 text-foreground">
+              Ti è mai capitato?
+            </h3>
+            <div className="grid md:grid-cols-3 gap-6">
+              <Card className="p-6 border border-border hover:shadow-lg transition-shadow">
+                <p className="text-3xl mb-3">💼</p>
+                <h4 className="text-lg font-bold text-foreground mb-3">Il commerciale perfetto</h4>
+                <p className="text-muted-foreground text-sm leading-relaxed mb-4">
+                  L'hai formato per 3 mesi. Gli hai dato il portfolio clienti. Sembrava il migliore. Poi ha mollato — portandosi dietro 2 clienti.
+                </p>
+                <p className="text-destructive font-bold text-lg">Costo stimato: €35.000+</p>
+              </Card>
+              <Card className="p-6 border border-border hover:shadow-lg transition-shadow">
+                <p className="text-3xl mb-3">👔</p>
+                <h4 className="text-lg font-bold text-foreground mb-3">Il responsabile che non responsabilizza</h4>
+                <p className="text-muted-foreground text-sm leading-relaxed mb-4">
+                  RAL €45.000. Dopo 6 mesi il team era a pezzi. 2 dimissioni a catena. Costo reale tra turnover, riassunzioni e produttività persa.
+                </p>
+                <p className="text-destructive font-bold text-lg">Oltre €80.000</p>
+              </Card>
+              <Card className="p-6 border border-border hover:shadow-lg transition-shadow">
+                <p className="text-3xl mb-3">🔧</p>
+                <h4 className="text-lg font-bold text-foreground mb-3">L'operativo che "andava bene"</h4>
+                <p className="text-muted-foreground text-sm leading-relaxed mb-4">
+                  Assunto d'urgenza, senza assessment. 4 mesi di errori operativi, reclami clienti, formazione buttata. Poi ricominciare da capo.
+                </p>
+                <p className="text-destructive font-bold text-lg">€22.000 per un ruolo da €25.000 di RAL</p>
+              </Card>
+            </div>
           </div>
         </div>
       </Section>
