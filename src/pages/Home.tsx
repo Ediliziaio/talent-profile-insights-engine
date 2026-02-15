@@ -529,15 +529,13 @@ export default function Home() {
           {/* Left: Text */}
           <div className="lg:w-3/5 text-center lg:text-left">
             <p className="text-sm uppercase tracking-widest text-orange-300 font-semibold mb-4">
-              Il sistema di assessment HR più completo d'Italia
+              Il 70% delle assunzioni sbagliate nasce da una valutazione superficiale.
             </p>
             <h1 className="text-4xl sm:text-5xl md:text-7xl font-black text-white leading-tight mb-6">
-              In 15 minuti sai chi hai davvero di fronte.
-              <br className="hidden sm:block" />
-              <span className="block mt-2">Prima ancora del colloquio.</span>
+              In 15 minuti sai se stai assumendo un talento… o un problema.
             </h1>
             <p className="text-lg md:text-xl text-blue-100 leading-relaxed max-w-2xl mb-8">
-              Il profilo psicologico completo del candidato — non le solite 4 domande generiche. 242 item, 15 tratti misurati, 24 sindromi comportamentali identificate. Report istantaneo, confronto candidati, guida al colloquio personalizzata.
+              In soli 15 minuti ottieni il profilo psicologico completo del candidato: 242 item scientifici, 15 tratti misurati, 24 sindromi comportamentali rilevate. Report immediato, confronto tra candidati e guida strategica al colloquio personalizzata.
             </p>
 
             {/* ★ URGENCY BANNER ★ */}
