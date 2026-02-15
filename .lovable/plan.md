@@ -1,10 +1,10 @@
 
 
-# Aggiornamento Completo Copy Landing Page
+# Calcolatore "Quanto Ti Costa un'Assunzione Sbagliata" + Verifica Copy
 
 ## Panoramica
 
-Aggiornamento massivo di tutti i testi della landing per allinearli al copy fornito dall'utente. Le modifiche riguardano esclusivamente i contenuti testuali e i dati -- nessun cambiamento strutturale o di layout.
+Aggiungere una nuova sezione interattiva con un calcolatore del costo di un'assunzione sbagliata, posizionata dopo la sezione "Il Problema" (sezione 4) e prima della "Buona Notizia" (sezione 5). Include slider per lo stipendio, mesi di formazione, e calcolo automatico del danno totale con breakdown visivo. Sotto il calcolatore, 2-3 scenari reali tipo "Ti e' mai capitato?".
 
 ---
 
@@ -14,105 +14,93 @@ Solo `src/pages/Home.tsx`
 
 ---
 
-## Modifiche ai dati (costanti in cima al file)
+## 1. Nuova sezione: Calcolatore Costo Assunzione Sbagliata
 
-### Hero (sezione JSX)
-- Sottotitolo: aggiungere i numeri chiave: "242 item, 15 tratti misurati, 24 sindromi comportamentali identificate. Report istantaneo, confronto candidati, guida al colloquio personalizzata."
-- Micro-badge: "1.000+ Aziende clienti" (era "100+ Aziende")
+### Posizione
+Tra la sezione "PROBLEMA" (sezione 4, riga 595) e "BUONA NOTIZIA" (sezione 5, riga 597).
 
-### PROBLEMS (4 card)
-Riscrivere le descrizioni con il copy fornito, molto piu' dettagliato e specifico:
-- "Assumi a sensazione": aggiungere "Parla bene, stringe la mano forte, ti guarda negli occhi. Poi dopo 90 giorni scopri che era tutto un copione..."
-- "Turnover alle stelle": aggiungere "Circa 30.000 euro tra formazione, produttivita' persa e riassunzione"
-- "Zero dati oggettivi": "Non ti dice come si comportera' sotto pressione, come gestira' il team, se e' un leader o un esecutore..."
-- "Team disfunzionali": "Un solo inserimento sbagliato puo' destabilizzare un team intero che funzionava"
+### Struttura
 
-### URGENCY_STEPS (4 step timeline)
-Riscrivere le descrizioni con il copy fornito, piu' lungo e narrativo:
-- Mese 1-3: "Luna di miele. Il nuovo assunto sorride, annuisce, fa bella figura. I problemi ci sono gia' -- ma non li vedi ancora. Il suo 'software mentale' e' in esecuzione, ma non l'hai mai testato."
-- Mese 3-6: "Performance sotto le aspettative. Conflitti con i colleghi. Non regge la pressione..."
-- Mese 6-12: "Turnover, riassunzione, formazione persa. Costo reale: fino a 2x lo stipendio annuo. Circa 30.000 euro bruciati..."
-- Oltre 12 mesi: "Team destabilizzato. Cultura aziendale compromessa. I talenti veri..."
-- Aggiungere titoli nuovi: "L'assunzione 'sembra' ok", "I segnali arrivano", "Il costo esplode", "Il danno e' strutturale"
-- Label "Oltre 1 anno" diventa "Oltre 12 mesi"
+**Titolo della sezione:**
+- Pretitolo: "Il Conto Che Non Fai"
+- H2: "Quanto ti costa DAVVERO un'assunzione sbagliata?"
+- Sottotitolo: "Sposta gli slider e scopri quanto stai bruciando ogni volta che sbagli persona."
 
-### Sezione URGENCY -- titolo
-Aggiungere sottotitolo "Il Costo Dell'Inazione" come pretitolo
+**Calcolatore interattivo (Card grande centrata):**
 
-### LETTERA APERTA
-Trasformare in lettera completa "Caro imprenditore" come da copy fornito:
-- Aprire con "Caro imprenditore,"
-- Testo narrativo empatico in 4 paragrafi
-- Chiusura con le specifiche: "242 domande. 15 tratti misurati. 24 sindromi comportamentali identificate. Report istantaneo."
-- Firma "Il Team TalentProfile"
-- Sotto-firma: "Psicologia del lavoro applicata alla realta' dell'impresa"
-- Rimuovere le 3 domande retoriche (LETTERA_DOMANDE) e il formato attuale con icone "?"
+Due slider (useState):
+1. **Stipendio lordo annuo** (RAL): da 20.000 a 80.000 euro, step 5.000, default 30.000
+2. **Mesi prima di accorgerti dell'errore**: da 1 a 12, step 1, default 3
 
-### STEPS (4 step del metodo)
-Riscrivere con copy piu' dettagliato:
-- Step 1: "Invii un link personalizzato. Il candidato compila in autonomia, da smartphone, tablet o PC. Zero logistica, zero presenza fisica richiesta."
-- Step 2: "242 domande a risposta chiusa. 15 minuti di compilazione. Validato scientificamente con coefficiente .75/1. Il candidato risponde in modo naturale e spontaneo -- niente da preparare, niente da fingere."
-- Step 3: "Profilo psicologico completo: 15 tratti, 3 macro-aree (Essere, Fare, Avere), 24 sindromi comportamentali, mappa interiore, punti di forza e aree critiche. Tutto in tempo reale."
-- Step 4: "Compatibilita' automatica con i ruoli della tua azienda. Guida personalizzata al colloquio con domande mirate. Confronto tra candidati. Assumi con i dati -- non con il dubbio."
-- Aggiungere sottotitolo alla sezione: "Dal link al report completo. 15 minuti. Zero logistica. Dati che nessun colloquio potrebbe darti."
+**Calcolo automatico (formula):**
+- Stipendio bruciato = RAL / 12 * mesi
+- Costo formazione = RAL * 0.15 (15% del RAL)
+- Costo recruiting (annunci, tempo HR, colloqui) = 3.000 euro fisso
+- Produttivita' persa = RAL / 12 * mesi * 0.4 (40% di produttivita' sotto le aspettative)
+- Costo riassunzione = 3.000 euro fisso
+- **TOTALE** = somma di tutti
 
-### FEATURES (6 card)
-Riscrivere descrizioni piu' specifiche:
-- Profilo 360: "15 tratti, 3 macro-aree, 24 sindromi comportamentali. Non le solite 4 dimensioni vaghe. Analisi completa della personalita' professionale in un report esecutivo che puoi leggere in 5 minuti."
-- Mappa Interiore: "La funzionalita' che ci rende unici. 7 profili psicologici profondi: identita', emozioni, stile di attaccamento, meccanismi difensivi. Cosa guida questa persona? Cosa la blocca? Dove sta il potenziale inespresso?"
-- Role Matching: "Compatibilita' istantanea con 30+ ruoli aziendali -- dal commerciale al caposquadra, dal responsabile HR al direttore tecnico. Scopri subito dove il candidato performa meglio."
-- Guida Colloquio: "Domande personalizzate generate dall'assessment. Non vai piu' al colloquio alla cieca. Sai esattamente cosa chiedere, dove approfondire, quali aree indagare per quel candidato specifico."
-- Confronto: "Confronta fino a 4 candidati fianco a fianco su tutte le dimensioni psicologiche. Devi scegliere tra 3 candidati per un ruolo? In 30 secondi vedi chi e' piu' adatto -- con i numeri, non con le opinioni."
-- Report PDF: "Scaricabile, condivisibile, pronto per il management. Include piano d'azione post-assunzione: cosa fare nei primi 90 giorni per ottenere il massimo da ogni nuova risorsa."
-- Aggiungere sottotitolo sezione: "Non un test generico. Un sistema completo di intelligence HR costruito per darti vantaggio competitivo nelle decisioni sulle persone."
+**Visualizzazione risultato:**
+- Numero grande animato in arancione col totale (es. "€27.500")
+- Sotto: breakdown in 5 voci con barra di progresso proporzionale e importo
+- Nota finale in rosso: "E questo senza contare il danno al morale del team, i clienti persi e il tempo che non torna."
 
-### TESTIMONIALS
-Riscrivere le quote con versioni piu' lunghe e specifiche:
-- Marco Rinaldi: "Da quando usiamo TalentProfile, il turnover nei primi 6 mesi e' calato del 40%. Finalmente abbiamo dati oggettivi per le nostre decisioni -- e il team HR ha smesso di navigare a vista."
-- Aggiungere "(200 dip.)" al ruolo
-- Chiara Fontana: "Assumevamo a sensazione e sbagliavamo 1 volta su 3. Con TalentProfile abbiamo ridotto gli errori di selezione quasi a zero. In 12 mesi, zero errori di hiring. Il ROI? Incalcolabile."
-- Aggiungere "(25 dip.)" al ruolo
-- Luca Ferretti: "La mappa interiore ci ha rivelato dinamiche che nessun colloquio avrebbe fatto emergere. Abbiamo capito perche' certi talenti non performavano: erano nel ruolo sbagliato. Spostati, sono diventati i migliori."
-- Aggiungere "(50 PV)" al ruolo
-
-### COMPARISON_ROWS (tabella comparativa)
-- Cambiare "Metodo" in "Strumento" e aggiornare: "Colloquio + CV" vs "Assessment 242 item validato"
-- Aggiungere riga "Post-assunzione": "Speri che vada bene" vs "Piano inserimento su misura"
-- Cambiare header da "Gli Altri" a "Metodo tradizionale", da "TalentProfile" a "TalentProfile 360°"
-
-### CASE_STUDIES
-- Terzo case study: badge da "-35%" a "€180K", badgeLabel da "Costo hiring" a "Risparmio nel primo anno"
-- Aggiungere settore a ogni card: "Settore: Software B2B", "Settore: Manifatturiero", "Settore: Retail / GDO"
-- Aggiungere "HR team piu' efficiente del 70%" al secondo case study
-
-### Contatori (NUMERI)
-- c1: da `useCountUp(100)` a `useCountUp(1000)` con label "Aziende clienti"
-- Aggiungere quarto contatore: ".75/1" con label "Validazione scientifica"
-- Nota: c4 attuale (15 min) va tenuto ma riordinato
-
-### FOR_NOT_FOR
-Espandere a 5 items per lista come da copy:
-- NOT: aggiungere "Cerchi una soluzione magica che faccia tutto da sola" e "Non sei disposto a usare i dati per prendere decisioni"
-- YES: aggiungere "Sai che le persone giuste fanno crescere l'azienda -- e quelle sbagliate la distruggono" e "Vuoi anche gestire e sviluppare il team attuale, non solo selezionare"
-
-### FAQ
-- Aggiungere icone emoji ai titoli delle domande come da copy
-- Aggiornare sottotitolo FAQ: "Le stesse domande che ci fanno tutti. Le risposte sincere che diamo sempre."
-
-### CTA FINALE
-Riscrivere il testo:
-- Titolo: "Il futuro del tuo team inizia da qui."
-- Sottotitolo: "Ogni giorno che passi senza dati oggettivi sulle persone e' un giorno in cui rischi un'altra assunzione sbagliata. Un altro 30.000 euro bruciato. Un altro talento perso."
-- Aggiungere riga: "La demo e' gratuita, dura 30 minuti e ti mostra esattamente come funziona il sistema sulla tua realta'. Nessun impegno. Nessun venditore aggressivo. Solo dati."
-- Pretitolo: "Inizia Ora"
-
-### Sezione PROBLEMA
-- Titolo: "Stai scommettendo il futuro della tua azienda su una sensazione."
-- Sottotitolo: "Lo sai anche tu. Al colloquio sembrava perfetto. Dopo 3 mesi era un disastro. Il CV diceva tutto -- tranne la verita'. Quante volte e' successo?"
+### Layout
+- Su desktop: card larga con sfondo chiaro, bordo, shadow
+- Slider con Tailwind (input range nativo stilizzato oppure il componente Slider di Radix gia' installato)
+- Su mobile: tutto in colonna, slider full-width
 
 ---
 
-## Nessun cambiamento strutturale
+## 2. Scenari "Ti E' Mai Capitato?"
 
-Layout, stili, immagini, animazioni e responsiveness restano invariati. Solo contenuti testuali aggiornati.
+Sotto il calcolatore, 3 card con scenari realistici:
+
+**Scenario 1 -- "Il commerciale perfetto"**
+- "L'hai formato per 3 mesi. Gli hai dato il portfolio clienti. Sembrava il migliore. Poi ha mollato -- portandosi dietro 2 clienti. Costo stimato: €35.000+"
+
+**Scenario 2 -- "Il responsabile che non responsabilizza"**
+- "RAL €45.000. Dopo 6 mesi il team era a pezzi. 2 dimissioni a catena. Costo reale tra turnover, riassunzioni e produttivita' persa: oltre €80.000."
+
+**Scenario 3 -- "L'operativo che 'andava bene'"**
+- "Assunto d'urgenza, senza assessment. 4 mesi di errori operativi, reclami clienti, formazione buttata. Poi ricominciare da capo. Totale: €22.000 per un ruolo da €25.000 di RAL."
+
+Layout: griglia 3 colonne su desktop, stack su mobile. Ogni card con icona emoji, titolo bold, testo narrativo, e importo in rosso.
+
+---
+
+## 3. Navigazione
+
+Aggiungere "Calcolatore" al NAV_LINKS con id `calcolatore` per poter navigare direttamente alla sezione.
+
+---
+
+## Dettaglio Tecnico
+
+### Stato React
+```
+const [ral, setRal] = useState(30000);
+const [mesi, setMesi] = useState(3);
+```
+
+Calcoli derivati con useMemo:
+```
+const costoTotale = useMemo(() => {
+  const stipendioBruciato = (ral / 12) * mesi;
+  const formazione = ral * 0.15;
+  const recruiting = 3000;
+  const produttivitaPersa = (ral / 12) * mesi * 0.4;
+  const riassunzione = 3000;
+  return { stipendioBruciato, formazione, recruiting, produttivitaPersa, riassunzione,
+           totale: stipendioBruciato + formazione + recruiting + produttivitaPersa + riassunzione };
+}, [ral, mesi]);
+```
+
+### Componenti utilizzati
+- `Slider` da `@radix-ui/react-slider` (gia' installato in `src/components/ui/slider.tsx`)
+- `Card` esistente
+- `Calculator` icon da lucide-react (da importare)
+
+### Nessuna dipendenza aggiuntiva
+Tutto con componenti e librerie gia' presenti.
 
