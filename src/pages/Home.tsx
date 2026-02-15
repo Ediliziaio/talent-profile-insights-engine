@@ -47,7 +47,7 @@ function useScrollAnimation() {
       ([entry]) => {
         if (entry.isIntersecting) {
           el.classList.add('opacity-100', 'translate-y-0');
-          el.classList.remove('opacity-0', 'translate-y-8');
+          el.classList.remove('opacity-0', 'translate-y-5');
           io.unobserve(el);
         }
       },
@@ -107,7 +107,7 @@ function Section({
     <section
       id={id}
       ref={ref}
-      className={`opacity-0 translate-y-8 transition-all duration-700 ease-out ${className}`}
+      className={`opacity-0 translate-y-5 transition-all duration-700 ease-out ${className}`}
     >
       {children}
     </section>
@@ -123,10 +123,10 @@ function scrollTo(id: string) {
 function MiniCTA({ text, subtext }: { text: string; subtext?: string }) {
   return (
     <div className="text-center mt-12 mb-4">
-      {subtext && <p className="text-white/50 text-sm mb-3">{subtext}</p>}
+      {subtext && <p className="text-[#6b7280] text-sm mb-3">{subtext}</p>}
       <Button
         size="lg"
-        className="bg-accent hover:bg-accent/90 text-accent-foreground text-lg px-8 py-6 rounded-xl shadow-lg"
+        className="bg-[#f09133] hover:bg-[#e07a1f] text-white text-lg px-8 py-6 rounded-xl shadow-lg"
         onClick={() => scrollTo('cta-finale')}
       >
         {text} <ArrowRight className="ml-2 h-5 w-5" />
@@ -363,28 +363,28 @@ const URGENCY_STEPS = [
     period: 'Mese 1–3',
     title: 'L\'assunzione "sembra" ok',
     desc: 'Luna di miele. Il nuovo assunto sorride, annuisce, fa bella figura. I problemi ci sono già — ma non li vedi ancora. Il suo "software mentale" è in esecuzione, ma non l\'hai mai testato.',
-    color: 'text-green-400',
+    color: 'text-green-600',
     bgColor: 'bg-green-500',
   },
   {
     period: 'Mese 3–6',
     title: 'I segnali arrivano',
     desc: 'Performance sotto le aspettative. Conflitti con i colleghi. Non regge la pressione. Non gestisce il team. I feedback negativi iniziano ad accumularsi — e tu inizi a chiederti: "Ma al colloquio era un\'altra persona?"',
-    color: 'text-yellow-400',
+    color: 'text-yellow-600',
     bgColor: 'bg-yellow-500',
   },
   {
     period: 'Mese 6–12',
     title: 'Il costo esplode',
     desc: 'Turnover, riassunzione, formazione persa. Costo reale: fino a 2x lo stipendio annuo. Circa €30.000 bruciati. E il tempo? Quello non torna.',
-    color: 'text-orange-400',
+    color: 'text-orange-600',
     bgColor: 'bg-orange-500',
   },
   {
     period: 'Oltre 12 mesi',
     title: 'Il danno è strutturale',
     desc: 'Team destabilizzato. Cultura aziendale compromessa. I talenti veri — quelli che avevi faticato a trovare — se ne vanno. Non per lo stipendio. Per l\'ambiente tossico che quel singolo errore ha creato.',
-    color: 'text-red-400',
+    color: 'text-red-600',
     bgColor: 'bg-red-500',
   },
 ];
@@ -436,20 +436,20 @@ export default function Home() {
   const c4 = useCountUp(15);
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white overflow-x-hidden">
+    <div className="min-h-screen bg-[#f7f4f0] text-[#1a1a2e] overflow-x-hidden">
       {/* ═══ 1. NAVBAR ═══ */}
       <nav
         className={`sticky top-0 z-50 transition-all duration-300 ${
           scrolled
-            ? 'bg-[#0a0a0a]/90 backdrop-blur-md shadow-sm border-b border-white/10'
-            : 'bg-transparent'
+            ? 'bg-white/95 backdrop-blur-md shadow-sm border-b border-[#e5e0db]'
+            : 'bg-white border-b border-transparent'
         }`}
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between px-4 md:px-8 h-16">
           <img
             src="/talentprofile_logo_v3.png"
             alt="TalentProfile"
-            className="h-10 md:h-12 brightness-0 invert"
+            className="h-10 md:h-12"
           />
 
           {/* Desktop links */}
@@ -458,7 +458,7 @@ export default function Home() {
               <button
                 key={l.id}
                 onClick={() => scrollTo(l.id)}
-                className="text-sm font-medium text-white/60 hover:text-white transition-colors"
+                className="text-sm font-medium text-[#6b7280] hover:text-[#f09133] transition-colors"
               >
                 {l.label}
               </button>
@@ -469,14 +469,14 @@ export default function Home() {
             <Button
               variant="outline"
               size="sm"
-              className="border-white/20 text-white hover:bg-white/10"
+              className="border-[#e5e0db] text-[#1a1a2e] hover:bg-[#f7f4f0]"
               onClick={() => navigate('/auth')}
             >
               Accedi
             </Button>
             <Button
               size="sm"
-              className="bg-accent hover:bg-accent/90 text-accent-foreground"
+              className="bg-[#f09133] hover:bg-[#e07a1f] text-white"
               onClick={() => scrollTo('cta-finale')}
             >
               Richiedi una Demo
@@ -486,25 +486,25 @@ export default function Home() {
           {/* Mobile hamburger */}
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetTrigger asChild className="lg:hidden">
-              <Button variant="ghost" size="icon" className="text-white">
+              <Button variant="ghost" size="icon" className="text-[#1a1a2e]">
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-72 bg-[#111111] border-white/10">
+            <SheetContent side="right" className="w-72 bg-white border-[#e5e0db]">
               <div className="flex flex-col gap-4 mt-8">
                 {NAV_LINKS.map((l) => (
                   <button
                     key={l.id}
                     onClick={() => handleNav(l.id)}
-                    className="text-left text-lg font-medium py-2 text-white/80 hover:text-accent transition-colors"
+                    className="text-left text-lg font-medium py-2 text-[#1a1a2e] hover:text-[#f09133] transition-colors"
                   >
                     {l.label}
                   </button>
                 ))}
-                <hr className="border-white/10" />
+                <hr className="border-[#e5e0db]" />
                 <Button
                   variant="outline"
-                  className="border-white/20 text-white hover:bg-white/10"
+                  className="border-[#e5e0db] text-[#1a1a2e]"
                   onClick={() => {
                     setMobileOpen(false);
                     navigate('/auth');
@@ -513,7 +513,7 @@ export default function Home() {
                   Accedi
                 </Button>
                 <Button
-                  className="bg-accent hover:bg-accent/90 text-accent-foreground"
+                  className="bg-[#f09133] hover:bg-[#e07a1f] text-white"
                   onClick={() => handleNav('cta-finale')}
                 >
                   Richiedi una Demo
@@ -524,85 +524,84 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* ═══ 2. HERO + URGENCY BANNER ═══ */}
-      <section className="relative py-24 md:py-40 overflow-hidden" style={{ background: 'linear-gradient(160deg, #0a0a0a 0%, #0d1117 40%, #111827 100%)' }}>
-        <div className="max-w-5xl mx-auto px-4 md:px-8 relative z-10 text-center">
-          <p className="text-sm uppercase tracking-[0.3em] text-accent font-semibold mb-6">
-            Il 70% delle assunzioni sbagliate nasce da una valutazione superficiale.
-          </p>
-          <h1 className="text-5xl sm:text-6xl md:text-8xl font-black text-white leading-[1.05] mb-8">
-            In 15 minuti sai se stai assumendo un talento… o un problema.
-          </h1>
-          <p className="text-lg md:text-xl text-white/60 leading-relaxed max-w-3xl mx-auto mb-10">
-            In soli 15 minuti ottieni il profilo psicologico completo del candidato: 242 item scientifici, 15 tratti misurati, 24 sindromi comportamentali rilevate. Report immediato, confronto tra candidati e guida strategica al colloquio personalizzata.
-          </p>
-
-          {/* ★ URGENCY BANNER ★ */}
-          <div className="mb-10 p-4 rounded-xl bg-red-500/10 glow-border-red max-w-2xl mx-auto">
-            <p className="text-lg md:text-xl font-bold text-red-300">
-              ⚠️ Ogni assunzione sbagliata ti costa in media <span className="text-red-400 text-2xl font-black stat-glow-red">€30.000</span>. Quante ne hai fatte quest'anno?
+      {/* ═══ 2. HERO (rounded box, JetHR-style) ═══ */}
+      <section className="px-4 md:px-8 pt-8 md:pt-12">
+        <div className="landing-hero-box max-w-7xl mx-auto py-20 md:py-32 px-6 md:px-16 relative overflow-hidden">
+          <div className="max-w-4xl mx-auto relative z-10 text-center">
+            <p className="text-sm uppercase tracking-[0.3em] text-[#f09133] font-semibold mb-6">
+              Il 70% delle assunzioni sbagliate nasce da una valutazione superficiale.
             </p>
-          </div>
+            <h1 className="text-4xl sm:text-5xl md:text-7xl font-black text-white leading-[1.08] mb-8">
+              In 15 minuti sai se stai assumendo un talento… o un problema.
+            </h1>
+            <p className="text-lg md:text-xl text-white/70 leading-relaxed max-w-3xl mx-auto mb-10">
+              In soli 15 minuti ottieni il profilo psicologico completo del candidato: 242 item scientifici, 15 tratti misurati, 24 sindromi comportamentali rilevate. Report immediato, confronto tra candidati e guida strategica al colloquio personalizzata.
+            </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Button
-              size="lg"
-              className="bg-accent hover:bg-accent/90 text-accent-foreground text-lg px-10 py-7 rounded-xl shadow-lg shadow-accent/20"
-              onClick={() => scrollTo('cta-finale')}
-            >
-              Richiedi una Demo <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              className="border-white/20 text-white hover:bg-white/10 text-lg px-8 py-7 rounded-xl"
-              onClick={() => scrollTo('metodo')}
-            >
-              Scopri di Più
-            </Button>
-          </div>
-          <div className="flex flex-wrap justify-center gap-8 text-sm text-white/40">
-            <span className="flex items-center gap-2">
-              <Building2 className="h-4 w-4 text-accent" /> 1.000+ Aziende clienti
-            </span>
-            <span className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-accent" /> 15 min per test
-            </span>
-            <span className="flex items-center gap-2">
-              <Zap className="h-4 w-4 text-accent" /> Report Istantaneo
-            </span>
+            {/* ★ URGENCY BANNER ★ */}
+            <div className="mb-10 p-4 rounded-xl bg-[#f09133]/10 border border-[#f09133]/20 max-w-2xl mx-auto">
+              <p className="text-lg md:text-xl font-bold text-white">
+                ⚠️ Ogni assunzione sbagliata ti costa in media <span className="text-[#f09133] text-2xl font-black">€30.000</span>. Quante ne hai fatte quest'anno?
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+              <Button
+                size="lg"
+                className="bg-[#f09133] hover:bg-[#e07a1f] text-white text-lg px-10 py-7 rounded-xl shadow-lg"
+                onClick={() => scrollTo('cta-finale')}
+              >
+                Richiedi una Demo <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+              <Button
+                variant="outline"
+                size="lg"
+                className="border-white/30 text-white hover:bg-white/10 text-lg px-8 py-7 rounded-xl"
+                onClick={() => scrollTo('metodo')}
+              >
+                Scopri di Più
+              </Button>
+            </div>
+            <div className="flex flex-wrap justify-center gap-8 text-sm text-white/50">
+              <span className="flex items-center gap-2">
+                <Building2 className="h-4 w-4 text-[#f09133]" /> 1.000+ Aziende clienti
+              </span>
+              <span className="flex items-center gap-2">
+                <Clock className="h-4 w-4 text-[#f09133]" /> 15 min per test
+              </span>
+              <span className="flex items-center gap-2">
+                <Zap className="h-4 w-4 text-[#f09133]" /> Report Istantaneo
+              </span>
+            </div>
           </div>
         </div>
-        {/* decorative */}
-        <div className="absolute -top-20 -right-20 w-96 h-96 rounded-full bg-accent/5 blur-3xl" />
-        <div className="absolute -bottom-32 -left-32 w-[500px] h-[500px] rounded-full bg-blue-500/5 blur-3xl" />
       </section>
 
       {/* ═══ 3. PROBLEMA (dolore) ═══ */}
-      <Section className="py-20 md:py-28 bg-[#0d0d0d]" id="problema">
+      <Section className="py-20 md:py-28" id="problema">
         <div className="max-w-6xl mx-auto px-4 md:px-8">
-          <p className="text-sm uppercase tracking-widest text-red-400 font-semibold text-center mb-3">
-            Il Problema
-          </p>
-          <h2 className="text-3xl md:text-5xl font-black text-center mb-4 text-white">
+          <div className="text-center mb-3">
+            <span className="section-badge">Il Problema</span>
+          </div>
+          <h2 className="text-3xl md:text-5xl font-black text-center mb-4">
             Stai scommettendo il futuro della tua azienda<br className="hidden md:block" /> su una sensazione.
           </h2>
-          <p className="text-center text-white/50 text-lg mb-14 max-w-2xl mx-auto">
+          <p className="text-center text-[#6b7280] text-lg mb-14 max-w-2xl mx-auto">
             Lo sai anche tu. Al colloquio sembrava perfetto. Dopo 3 mesi era un disastro. Il CV diceva tutto — tranne la verità. Quante volte è successo?
           </p>
           <div className="grid sm:grid-cols-2 gap-6">
             {PROBLEMS.map((p, i) => (
               <div
                 key={i}
-                className="landing-glow-card landing-glow-card-red p-6 md:p-8 group"
+                className="landing-card p-6 md:p-8 group"
               >
                 <div className="flex items-start gap-4">
-                  <div className="shrink-0 w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center group-hover:bg-red-500/20 transition-colors">
-                    <p.icon className="h-6 w-6 text-red-400" />
+                  <div className="shrink-0 w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center group-hover:bg-red-100 transition-colors">
+                    <p.icon className="h-6 w-6 text-red-500" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold mb-2 text-white">{p.title}</h3>
-                    <p className="text-white/60 leading-relaxed">{p.desc}</p>
+                    <h3 className="text-xl font-bold mb-2">{p.title}</h3>
+                    <p className="text-[#6b7280] leading-relaxed">{p.desc}</p>
                   </div>
                 </div>
               </div>
@@ -613,15 +612,15 @@ export default function Home() {
 
       {/* ═══ 4. URGENCY TIMELINE ═══ */}
       <Section className="py-0 md:py-0" id="urgency">
-        <div className="py-20 md:py-28 bg-[#0a0a0a]">
+        <div className="py-20 md:py-28 bg-white">
           <div className="max-w-5xl mx-auto px-4 md:px-8">
             <div className="flex items-center justify-center gap-3 mb-3">
-              <AlertTriangle className="h-5 w-5 text-accent" />
-              <p className="text-sm uppercase tracking-[0.3em] text-accent font-semibold">
+              <span className="section-badge">
+                <AlertTriangle className="h-3.5 w-3.5 mr-1.5" />
                 Il Costo Dell'Inazione
-              </p>
+              </span>
             </div>
-            <h2 className="text-3xl md:text-5xl font-black text-center mb-16 text-white">
+            <h2 className="text-3xl md:text-5xl font-black text-center mb-16">
               Cosa succede se continui<br className="hidden md:block" /> ad assumere senza dati?
             </h2>
 
@@ -633,8 +632,7 @@ export default function Home() {
                 {URGENCY_STEPS.map((step, i) => (
                   <div key={i} className="flex items-start gap-6 md:gap-8">
                     <div className="shrink-0 relative z-10">
-                      <div className={`w-12 h-12 md:w-16 md:h-16 rounded-full ${step.bgColor} flex items-center justify-center shadow-lg`}
-                        style={{ boxShadow: `0 0 20px ${step.bgColor === 'bg-green-500' ? 'rgba(34,197,94,0.3)' : step.bgColor === 'bg-yellow-500' ? 'rgba(234,179,8,0.3)' : step.bgColor === 'bg-orange-500' ? 'rgba(249,115,22,0.3)' : 'rgba(239,68,68,0.3)'}` }}>
+                      <div className={`w-12 h-12 md:w-16 md:h-16 rounded-full ${step.bgColor} flex items-center justify-center shadow-md`}>
                         <span className="text-white text-sm md:text-base font-black">{String(i + 1).padStart(2, '0')}</span>
                       </div>
                     </div>
@@ -642,8 +640,8 @@ export default function Home() {
                       <span className={`text-xs font-bold uppercase tracking-wider ${step.color}`}>
                         {step.period}
                       </span>
-                      <h3 className="text-xl md:text-2xl font-bold text-white mt-1 mb-2">{step.title}</h3>
-                      <p className="text-white/50 text-base md:text-lg leading-relaxed">{step.desc}</p>
+                      <h3 className="text-xl md:text-2xl font-bold mt-1 mb-2">{step.title}</h3>
+                      <p className="text-[#6b7280] text-base md:text-lg leading-relaxed">{step.desc}</p>
                     </div>
                   </div>
                 ))}
@@ -651,15 +649,15 @@ export default function Home() {
             </div>
 
             {/* Positive closing box */}
-            <div className="mt-14 p-6 md:p-8 rounded-xl glow-border-green bg-green-500/5">
+            <div className="mt-14 p-6 md:p-8 rounded-xl bg-green-50 border border-green-200">
               <div className="flex items-start gap-4">
-                <div className="shrink-0 w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
-                  <TrendingUp className="h-5 w-5 text-green-400" />
+                <div className="shrink-0 w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+                  <TrendingUp className="h-5 w-5 text-green-600" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-white mb-2">Ma C'è Ancora Tempo.</h3>
-                  <p className="text-white/60 text-base md:text-lg leading-relaxed">
-                    In questo momento puoi cambiare il tuo processo di selezione. <strong className="text-white">Basta un assessment.</strong>
+                  <h3 className="text-xl font-bold mb-2">Ma C'è Ancora Tempo.</h3>
+                  <p className="text-[#6b7280] text-base md:text-lg leading-relaxed">
+                    In questo momento puoi cambiare il tuo processo di selezione. <strong className="text-[#1a1a2e]">Basta un assessment.</strong>
                   </p>
                 </div>
               </div>
@@ -669,32 +667,34 @@ export default function Home() {
       </Section>
 
       {/* ═══ 5. CALCOLATORE ═══ */}
-      <Section className="py-20 md:py-28 bg-[#0d0d0d]" id="calcolatore">
+      <Section className="py-20 md:py-28" id="calcolatore">
         <div className="max-w-5xl mx-auto px-4 md:px-8">
-          <p className="text-sm uppercase tracking-widest text-red-400 font-semibold text-center mb-3">
-            Il Conto Che Non Fai
-          </p>
-          <h2 className="text-3xl md:text-5xl font-black text-center mb-4 text-white">
-            Quanto ti costa <span className="text-red-400">DAVVERO</span> un'assunzione sbagliata?
+          <div className="text-center mb-3">
+            <span className="section-badge" style={{ background: 'rgba(239, 68, 68, 0.08)', color: '#ef4444' }}>
+              Il Conto Che Non Fai
+            </span>
+          </div>
+          <h2 className="text-3xl md:text-5xl font-black text-center mb-4">
+            Quanto ti costa <span className="text-red-500">DAVVERO</span> un'assunzione sbagliata?
           </h2>
-          <p className="text-center text-white/50 text-lg mb-14 max-w-2xl mx-auto">
+          <p className="text-center text-[#6b7280] text-lg mb-14 max-w-2xl mx-auto">
             Sposta gli slider e scopri quanto stai bruciando ogni volta che sbagli persona.
           </p>
 
           {/* Calculator Card */}
-          <div className="landing-glow-card p-6 md:p-10 max-w-3xl mx-auto">
+          <div className="landing-card p-6 md:p-10 max-w-3xl mx-auto">
             <div className="flex items-center gap-3 mb-8">
-              <div className="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center">
-                <Calculator className="h-6 w-6 text-red-400" />
+              <div className="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center">
+                <Calculator className="h-6 w-6 text-red-500" />
               </div>
-              <h3 className="text-xl font-bold text-white">Calcolatore interattivo</h3>
+              <h3 className="text-xl font-bold">Calcolatore interattivo</h3>
             </div>
 
             {/* Slider RAL */}
             <div className="mb-8">
               <div className="flex justify-between items-baseline mb-3">
-                <label className="text-sm font-semibold text-white/80">Stipendio lordo annuo (RAL)</label>
-                <span className="text-2xl font-black text-white">€{ral.toLocaleString('it-IT')}</span>
+                <label className="text-sm font-semibold text-[#6b7280]">Stipendio lordo annuo (RAL)</label>
+                <span className="text-2xl font-black">€{ral.toLocaleString('it-IT')}</span>
               </div>
               <Slider
                 value={[ral]}
@@ -704,7 +704,7 @@ export default function Home() {
                 step={5000}
                 className="w-full"
               />
-              <div className="flex justify-between text-xs text-white/40 mt-1">
+              <div className="flex justify-between text-xs text-[#6b7280] mt-1">
                 <span>€20.000</span>
                 <span>€80.000</span>
               </div>
@@ -713,8 +713,8 @@ export default function Home() {
             {/* Slider Mesi */}
             <div className="mb-10">
               <div className="flex justify-between items-baseline mb-3">
-                <label className="text-sm font-semibold text-white/80">Mesi prima di accorgerti dell'errore</label>
-                <span className="text-2xl font-black text-white">{mesi} {mesi === 1 ? 'mese' : 'mesi'}</span>
+                <label className="text-sm font-semibold text-[#6b7280]">Mesi prima di accorgerti dell'errore</label>
+                <span className="text-2xl font-black">{mesi} {mesi === 1 ? 'mese' : 'mesi'}</span>
               </div>
               <Slider
                 value={[mesi]}
@@ -724,16 +724,16 @@ export default function Home() {
                 step={1}
                 className="w-full"
               />
-              <div className="flex justify-between text-xs text-white/40 mt-1">
+              <div className="flex justify-between text-xs text-[#6b7280] mt-1">
                 <span>1 mese</span>
                 <span>12 mesi</span>
               </div>
             </div>
 
             {/* Risultato Totale */}
-            <div className="text-center py-6 px-4 rounded-xl bg-red-500/10 glow-border-red mb-8">
-              <p className="text-sm font-semibold text-white/50 mb-1 uppercase tracking-wide">Danno totale stimato</p>
-              <p className="text-5xl md:text-6xl font-black text-red-400 stat-glow-red">
+            <div className="text-center py-6 px-4 rounded-xl bg-red-50 border border-red-200 mb-8">
+              <p className="text-sm font-semibold text-[#6b7280] mb-1 uppercase tracking-wide">Danno totale stimato</p>
+              <p className="text-5xl md:text-6xl font-black text-red-500">
                 €{Math.round(costi.totale).toLocaleString('it-IT')}
               </p>
             </div>
@@ -745,10 +745,10 @@ export default function Home() {
                 return (
                   <div key={i}>
                     <div className="flex justify-between text-sm mb-1">
-                      <span className="text-white/70 font-medium">{item.label}</span>
-                      <span className="font-bold text-white">€{Math.round(item.value).toLocaleString('it-IT')}</span>
+                      <span className="text-[#6b7280] font-medium">{item.label}</span>
+                      <span className="font-bold">€{Math.round(item.value).toLocaleString('it-IT')}</span>
                     </div>
-                    <div className="h-2.5 rounded-full bg-white/5 overflow-hidden">
+                    <div className="h-2.5 rounded-full bg-gray-100 overflow-hidden">
                       <div
                         className={`h-full rounded-full ${item.color} transition-all duration-500`}
                         style={{ width: `${pct}%` }}
@@ -759,40 +759,40 @@ export default function Home() {
               })}
             </div>
 
-            <p className="text-sm text-red-400 font-medium mt-8 text-center leading-relaxed">
+            <p className="text-sm text-red-500 font-medium mt-8 text-center leading-relaxed">
               ⚠️ E questo senza contare il danno al morale del team, i clienti persi e il tempo che non torna.
             </p>
           </div>
 
           {/* ★ SCENARI VISCERALI ★ */}
           <div className="mt-16">
-            <h3 className="text-2xl md:text-3xl font-bold text-center mb-10 text-white">
+            <h3 className="text-2xl md:text-3xl font-bold text-center mb-10">
               Ti è mai capitato?
             </h3>
             <div className="grid md:grid-cols-3 gap-6">
-              <div className="landing-glow-card landing-glow-card-red p-6">
+              <div className="landing-card p-6 border-l-4 border-l-red-400">
                 <p className="text-3xl mb-3">💼</p>
-                <h4 className="text-lg font-bold text-white mb-3">Il commerciale "perfetto"</h4>
-                <p className="text-white/50 text-sm leading-relaxed mb-4">
-                  Lo avevi formato <strong className="text-white/80">TU</strong> per 3 mesi. Gli avevi dato il portfolio clienti migliore. Ti guardava negli occhi e diceva "questa è la mia azienda". Il lunedì mattina ti chiama e ti dice che se ne va. Portandosi dietro 2 clienti. Tre mesi di stipendio, formazione, affiancamento — tutto in fumo. E adesso devi ricominciare da zero.
+                <h4 className="text-lg font-bold mb-3">Il commerciale "perfetto"</h4>
+                <p className="text-[#6b7280] text-sm leading-relaxed mb-4">
+                  Lo avevi formato <strong className="text-[#1a1a2e]">TU</strong> per 3 mesi. Gli avevi dato il portfolio clienti migliore. Ti guardava negli occhi e diceva "questa è la mia azienda". Il lunedì mattina ti chiama e ti dice che se ne va. Portandosi dietro 2 clienti. Tre mesi di stipendio, formazione, affiancamento — tutto in fumo. E adesso devi ricominciare da zero.
                 </p>
-                <p className="text-red-400 font-black text-2xl stat-glow-red">Costo reale: €35.000+</p>
+                <p className="text-red-500 font-black text-2xl">Costo reale: €35.000+</p>
               </div>
-              <div className="landing-glow-card landing-glow-card-red p-6">
+              <div className="landing-card p-6 border-l-4 border-l-red-400">
                 <p className="text-3xl mb-3">👔</p>
-                <h4 className="text-lg font-bold text-white mb-3">Il responsabile che distrugge il team</h4>
-                <p className="text-white/50 text-sm leading-relaxed mb-4">
+                <h4 className="text-lg font-bold mb-3">Il responsabile che distrugge il team</h4>
+                <p className="text-[#6b7280] text-sm leading-relaxed mb-4">
                   RAL €45.000. Al colloquio sembrava un leader nato. Dopo 6 mesi il team era a pezzi. I migliori se ne sono andati — 2 dimissioni a catena. Il clima? Tossico. Tu non te ne sei accorto subito perché "sembrava autoritario, non autoritativo". Costo tra turnover, riassunzioni e produttività bruciata?
                 </p>
-                <p className="text-red-400 font-black text-2xl stat-glow-red">Oltre €80.000</p>
+                <p className="text-red-500 font-black text-2xl">Oltre €80.000</p>
               </div>
-              <div className="landing-glow-card landing-glow-card-red p-6">
+              <div className="landing-card p-6 border-l-4 border-l-red-400">
                 <p className="text-3xl mb-3">🔧</p>
-                <h4 className="text-lg font-bold text-white mb-3">L'operativo assunto "d'urgenza"</h4>
-                <p className="text-white/50 text-sm leading-relaxed mb-4">
+                <h4 className="text-lg font-bold mb-3">L'operativo assunto "d'urgenza"</h4>
+                <p className="text-[#6b7280] text-sm leading-relaxed mb-4">
                   Dovevi riempire quel posto SUBITO. Niente assessment, niente test, "tanto è un ruolo operativo". 4 mesi dopo: errori a catena, reclami dai clienti, il responsabile di linea che ti chiede "ma chi hai assunto?". Formazione buttata. Ricominciare da capo. Per un ruolo da €25.000 di RAL.
                 </p>
-                <p className="text-red-400 font-black text-2xl stat-glow-red">Totale: €22.000</p>
+                <p className="text-red-500 font-black text-2xl">Totale: €22.000</p>
               </div>
             </div>
           </div>
@@ -802,89 +802,88 @@ export default function Home() {
       </Section>
 
       {/* ═══ 6. LETTERA APERTA ═══ */}
-      <Section className="py-20 md:py-28 bg-[#0a0a0a]" id="lettera">
+      <Section className="py-20 md:py-28 bg-white" id="lettera">
         <div className="max-w-4xl mx-auto px-4 md:px-8">
-          <div className="w-20 h-1 bg-accent mb-8 mx-auto md:mx-0" />
-          <h3 className="text-2xl md:text-3xl font-bold text-white mb-8 italic">Caro imprenditore,</h3>
+          <div className="w-20 h-1 bg-[#f09133] mb-8 mx-auto md:mx-0" />
+          <h3 className="text-2xl md:text-3xl font-bold mb-8 italic">Caro imprenditore,</h3>
           <div className="space-y-6">
             {LETTERA_PARAGRAPHS.map((paragrafo, i) => (
-              <p key={i} className="text-lg md:text-xl leading-relaxed text-white/70 italic">
-                {i === LETTERA_PARAGRAPHS.length - 1 ? <strong className="text-white not-italic">{paragrafo}</strong> : paragrafo}
+              <p key={i} className="text-lg md:text-xl leading-relaxed text-[#6b7280] italic">
+                {i === LETTERA_PARAGRAPHS.length - 1 ? <strong className="text-[#1a1a2e] not-italic">{paragrafo}</strong> : paragrafo}
               </p>
             ))}
           </div>
-          <p className="text-lg text-white/40 mt-4 italic">
+          <p className="text-lg text-[#6b7280]/60 mt-4 italic">
             Non è magia. È scienza applicata alle decisioni più importanti della tua azienda: le persone che ci metti dentro.
           </p>
-          <div className="mt-10 pt-6 border-t border-white/10">
-            <p className="text-xl font-bold text-white">Il Team TalentProfile</p>
-            <p className="text-sm text-white/40 mt-1">Psicologia del lavoro applicata alla realtà dell'impresa</p>
+          <div className="mt-10 pt-6 border-t border-[#e5e0db]">
+            <p className="text-xl font-bold">Il Team TalentProfile</p>
+            <p className="text-sm text-[#6b7280] mt-1">Psicologia del lavoro applicata alla realtà dell'impresa</p>
           </div>
         </div>
       </Section>
 
       {/* ═══ 7. BUONA NOTIZIA ═══ */}
-      <Section className="py-20 md:py-28 bg-[#0f1419]" id="buona-notizia">
+      <Section className="py-20 md:py-28" id="buona-notizia">
         <div className="max-w-5xl mx-auto px-4 md:px-8">
-          <p className="text-sm uppercase tracking-widest text-accent font-semibold text-center mb-3">
-            Ma c'è una soluzione
-          </p>
-          <h2 className="text-3xl md:text-5xl font-black text-center mb-4 text-white">
+          <div className="text-center mb-3">
+            <span className="section-badge">Ma c'è una soluzione</span>
+          </div>
+          <h2 className="text-3xl md:text-5xl font-black text-center mb-4">
             Anzi, Un'Ottima Notizia.
           </h2>
-          <p className="text-center text-white/50 text-lg mb-14 max-w-2xl mx-auto">
+          <p className="text-center text-[#6b7280] text-lg mb-14 max-w-2xl mx-auto">
             Oggi puoi fare tutto questo:
           </p>
           <div className="grid sm:grid-cols-2 gap-6 mb-12 max-w-3xl mx-auto">
             {BUONA_NOTIZIA_ITEMS.map((item, i) => (
               <div
                 key={i}
-                className="landing-glow-card glow-border-green p-6 flex items-start gap-4"
+                className="landing-card p-6 flex items-start gap-4 border-l-4 border-l-green-400"
               >
-                <div className="shrink-0 w-10 h-10 rounded-full bg-green-500/15 flex items-center justify-center">
-                  <CheckCircle2 className="h-5 w-5 text-green-400" />
+                <div className="shrink-0 w-10 h-10 rounded-full bg-green-50 flex items-center justify-center">
+                  <CheckCircle2 className="h-5 w-5 text-green-500" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-white mb-1">{item.title}</h3>
-                  <p className="text-white/50 text-sm leading-relaxed">{item.desc}</p>
+                  <h3 className="font-bold mb-1">{item.title}</h3>
+                  <p className="text-[#6b7280] text-sm leading-relaxed">{item.desc}</p>
                 </div>
               </div>
             ))}
           </div>
           <div className="max-w-3xl mx-auto">
-            <p className="text-lg md:text-xl text-white/70 leading-relaxed text-center">
-              Il problema? Questi risultati li ottieni <strong className="text-white">SOLO</strong> se hai lo strumento giusto. Uno strumento costruito da chi la psicologia del lavoro la conosce davvero.
+            <p className="text-lg md:text-xl text-[#6b7280] leading-relaxed text-center">
+              Il problema? Questi risultati li ottieni <strong className="text-[#1a1a2e]">SOLO</strong> se hai lo strumento giusto. Uno strumento costruito da chi la psicologia del lavoro la conosce davvero.
             </p>
           </div>
         </div>
       </Section>
 
       {/* ═══ 8. IL METODO ═══ */}
-      <Section className="py-20 md:py-28 bg-[#0a0a0a]" id="metodo">
+      <Section className="py-20 md:py-28 bg-white" id="metodo">
         <div className="max-w-5xl mx-auto px-4 md:px-8">
-          <p className="text-sm uppercase tracking-widest text-accent font-semibold text-center mb-3">
-            Come Funziona
-          </p>
-          <h2 className="text-3xl md:text-5xl font-black text-center mb-4 text-white">
+          <div className="text-center mb-3">
+            <span className="section-badge">Come Funziona</span>
+          </div>
+          <h2 className="text-3xl md:text-5xl font-black text-center mb-4">
             Il Metodo TalentProfile in 4 Step
           </h2>
-          <p className="text-center text-white/50 text-lg mb-16 max-w-2xl mx-auto">
+          <p className="text-center text-[#6b7280] text-lg mb-16 max-w-2xl mx-auto">
             Dal link al report completo. 15 minuti. Zero logistica. Dati che nessun colloquio potrebbe darti.
           </p>
           <div className="max-w-3xl mx-auto relative">
-            <div className="absolute left-6 md:left-8 top-0 bottom-0 w-0.5 bg-white/10 hidden md:block" />
+            <div className="absolute left-6 md:left-8 top-0 bottom-0 w-0.5 bg-[#e5e0db] hidden md:block" />
             <div className="space-y-12">
               {STEPS.map((s, i) => (
                 <div key={i} className="flex items-start gap-6 md:gap-8">
                   <div className="shrink-0 relative z-10">
-                    <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-accent text-white flex items-center justify-center text-lg md:text-xl font-black shadow-lg"
-                      style={{ boxShadow: '0 0 20px rgba(240,145,51,0.3)' }}>
+                    <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-[#f09133] text-white flex items-center justify-center text-lg md:text-xl font-black shadow-md">
                       {String(i + 1).padStart(2, '0')}
                     </div>
                   </div>
                   <div className="pt-1 md:pt-3">
-                    <h3 className="text-xl md:text-2xl font-bold mb-2 text-white">{s.title}</h3>
-                    <p className="text-white/50 text-base md:text-lg leading-relaxed">{s.desc}</p>
+                    <h3 className="text-xl md:text-2xl font-bold mb-2">{s.title}</h3>
+                    <p className="text-[#6b7280] text-base md:text-lg leading-relaxed">{s.desc}</p>
                   </div>
                 </div>
               ))}
@@ -894,28 +893,28 @@ export default function Home() {
       </Section>
 
       {/* ═══ 9. FUNZIONALITÀ ═══ */}
-      <Section className="py-20 md:py-28 bg-[#0d0d0d]" id="funzionalita">
+      <Section className="py-20 md:py-28" id="funzionalita">
         <div className="max-w-6xl mx-auto px-4 md:px-8">
-          <p className="text-sm uppercase tracking-widest text-accent font-semibold text-center mb-3">
-            Funzionalità
-          </p>
-          <h2 className="text-3xl md:text-5xl font-black text-center mb-4 text-white">
+          <div className="text-center mb-3">
+            <span className="section-badge">Funzionalità</span>
+          </div>
+          <h2 className="text-3xl md:text-5xl font-black text-center mb-4">
             Tutto quello che ti serve per assumere meglio
           </h2>
-          <p className="text-center text-white/50 text-lg mb-14 max-w-2xl mx-auto">
+          <p className="text-center text-[#6b7280] text-lg mb-14 max-w-2xl mx-auto">
             Non un test generico. Un sistema completo di intelligence HR costruito per darti vantaggio competitivo nelle decisioni sulle persone.
           </p>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {FEATURES.map((f, i) => (
               <div
                 key={i}
-                className="landing-glow-card p-6 hover:-translate-y-1 transition-all duration-300"
+                className="landing-card p-6"
               >
-                <div className="w-11 h-11 rounded-lg bg-accent/10 flex items-center justify-center mb-4">
-                  <f.icon className="h-5 w-5 text-accent" />
+                <div className="w-11 h-11 rounded-lg bg-[#f09133]/10 flex items-center justify-center mb-4">
+                  <f.icon className="h-5 w-5 text-[#f09133]" />
                 </div>
-                <h3 className="text-lg font-bold mb-2 text-white">{f.title}</h3>
-                <p className="text-white/50 text-sm leading-relaxed">{f.desc}</p>
+                <h3 className="text-lg font-bold mb-2">{f.title}</h3>
+                <p className="text-[#6b7280] text-sm leading-relaxed">{f.desc}</p>
               </div>
             ))}
           </div>
@@ -923,26 +922,26 @@ export default function Home() {
       </Section>
 
       {/* ═══ 10. TABELLA COMPARATIVA ═══ */}
-      <Section className="py-20 md:py-28 bg-[#0a0a0a]" id="comparativa">
+      <Section className="py-20 md:py-28 bg-white" id="comparativa">
         <div className="max-w-5xl mx-auto px-4 md:px-8">
-          <p className="text-sm uppercase tracking-widest text-accent font-semibold text-center mb-3">
-            Il Confronto
-          </p>
-          <h2 className="text-3xl md:text-5xl font-black text-center mb-14 text-white">
+          <div className="text-center mb-3">
+            <span className="section-badge">Il Confronto</span>
+          </div>
+          <h2 className="text-3xl md:text-5xl font-black text-center mb-14">
             Perché TalentProfile è diverso
           </h2>
           {/* Desktop table */}
-          <div className="hidden md:block overflow-hidden rounded-xl border border-white/10">
+          <div className="hidden md:block overflow-hidden rounded-xl border border-[#e5e0db] bg-white shadow-sm">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-white/10">
-                  <th className="text-left p-4 font-bold text-white/80 bg-white/5 w-1/4">Aspetto</th>
-                  <th className="text-left p-4 font-bold text-red-400 bg-red-500/5 w-[37.5%]">
+                <tr className="border-b border-[#e5e0db]">
+                  <th className="text-left p-4 font-bold text-[#6b7280] bg-gray-50 w-1/4">Aspetto</th>
+                  <th className="text-left p-4 font-bold text-red-500 bg-red-50/50 w-[37.5%]">
                     <div className="flex items-center gap-2">
                       <XCircle className="h-5 w-5" /> Metodo tradizionale
                     </div>
                   </th>
-                  <th className="text-left p-4 font-bold text-green-400 bg-green-500/5 w-[37.5%]">
+                  <th className="text-left p-4 font-bold text-green-600 bg-green-50/50 w-[37.5%]">
                     <div className="flex items-center gap-2">
                       <CheckCircle2 className="h-5 w-5" /> TalentProfile 360°
                     </div>
@@ -951,18 +950,18 @@ export default function Home() {
               </thead>
               <tbody>
                 {COMPARISON_ROWS.map((row, i) => (
-                  <tr key={i} className={`border-b border-white/5 last:border-0 ${i % 2 === 0 ? '' : 'bg-white/[0.02]'}`}>
-                    <td className="p-4 font-semibold text-white/80">{row.aspect}</td>
-                    <td className="p-4 bg-red-500/5">
+                  <tr key={i} className={`border-b border-[#e5e0db]/50 last:border-0 ${i % 2 === 0 ? '' : 'bg-gray-50/50'}`}>
+                    <td className="p-4 font-semibold text-[#1a1a2e]">{row.aspect}</td>
+                    <td className="p-4 bg-red-50/30">
                       <div className="flex items-start gap-2">
-                        <XCircle className="h-4 w-4 text-red-400/60 shrink-0 mt-0.5" />
-                        <span className="text-white/50">{row.others}</span>
+                        <XCircle className="h-4 w-4 text-red-400 shrink-0 mt-0.5" />
+                        <span className="text-[#6b7280]">{row.others}</span>
                       </div>
                     </td>
-                    <td className="p-4 bg-green-500/5">
+                    <td className="p-4 bg-green-50/30">
                       <div className="flex items-start gap-2">
-                        <CheckCircle2 className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
-                        <span className="text-white/80">{row.tp}</span>
+                        <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
+                        <span className="text-[#1a1a2e]">{row.tp}</span>
                       </div>
                     </td>
                   </tr>
@@ -974,16 +973,16 @@ export default function Home() {
           {/* Mobile cards */}
           <div className="md:hidden space-y-4">
             {COMPARISON_ROWS.map((row, i) => (
-              <div key={i} className="landing-glow-card p-4">
-                <h4 className="font-bold text-white mb-3">{row.aspect}</h4>
+              <div key={i} className="landing-card p-4">
+                <h4 className="font-bold mb-3">{row.aspect}</h4>
                 <div className="space-y-2">
-                  <div className="flex items-start gap-2 p-2 rounded-lg bg-red-500/10">
+                  <div className="flex items-start gap-2 p-2 rounded-lg bg-red-50">
                     <XCircle className="h-4 w-4 text-red-400 shrink-0 mt-0.5" />
-                    <span className="text-sm text-white/50">{row.others}</span>
+                    <span className="text-sm text-[#6b7280]">{row.others}</span>
                   </div>
-                  <div className="flex items-start gap-2 p-2 rounded-lg bg-green-500/10">
-                    <CheckCircle2 className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
-                    <span className="text-sm text-white/80">{row.tp}</span>
+                  <div className="flex items-start gap-2 p-2 rounded-lg bg-green-50">
+                    <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
+                    <span className="text-sm text-[#1a1a2e]">{row.tp}</span>
                   </div>
                 </div>
               </div>
@@ -995,37 +994,37 @@ export default function Home() {
       </Section>
 
       {/* ═══ 11. TESTIMONIANZE + CASI REALI ═══ */}
-      <Section className="py-20 md:py-28 bg-[#0d0d0d]" id="testimonianze">
+      <Section className="py-20 md:py-28" id="testimonianze">
         <div className="max-w-6xl mx-auto px-4 md:px-8">
-          <p className="text-sm uppercase tracking-widest text-accent font-semibold text-center mb-3">
-            Prova Sociale
-          </p>
-          <h2 className="text-3xl md:text-5xl font-black text-center mb-4 text-white">
+          <div className="text-center mb-3">
+            <span className="section-badge">Prova Sociale</span>
+          </div>
+          <h2 className="text-3xl md:text-5xl font-black text-center mb-4">
             Chi usa TalentProfile non torna indietro.
           </h2>
-          <p className="text-center text-white/50 text-lg mb-14 max-w-2xl mx-auto">
+          <p className="text-center text-[#6b7280] text-lg mb-14 max-w-2xl mx-auto">
             Prima sbagliavano. Adesso no. Ecco le loro storie — con il prima e il dopo.
           </p>
 
           <div className="grid md:grid-cols-3 gap-6 mb-16">
             {TESTIMONIALS.map((t, i) => (
-              <div key={i} className="landing-glow-card p-6 md:p-8">
+              <div key={i} className="landing-card p-6 md:p-8">
                 <div className="flex gap-1 mb-4">
                   {Array.from({ length: t.stars }).map((_, j) => (
-                    <Star key={j} className="h-5 w-5 fill-accent text-accent" />
+                    <Star key={j} className="h-5 w-5 fill-[#f09133] text-[#f09133]" />
                   ))}
                 </div>
                 {/* PRIMA */}
-                <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20">
-                  <p className="text-xs font-bold uppercase tracking-wider text-red-400 mb-1">PRIMA</p>
-                  <p className="text-sm text-white/60 leading-relaxed">{t.before}</p>
+                <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-100">
+                  <p className="text-xs font-bold uppercase tracking-wider text-red-500 mb-1">PRIMA</p>
+                  <p className="text-sm text-[#6b7280] leading-relaxed">{t.before}</p>
                 </div>
                 {/* DOPO */}
-                <div className="mb-4 p-3 rounded-lg bg-green-500/10 border border-green-500/20">
-                  <p className="text-xs font-bold uppercase tracking-wider text-green-400 mb-1">DOPO</p>
-                  <p className="text-sm text-white/60 leading-relaxed">{t.after}</p>
+                <div className="mb-4 p-3 rounded-lg bg-green-50 border border-green-100">
+                  <p className="text-xs font-bold uppercase tracking-wider text-green-600 mb-1">DOPO</p>
+                  <p className="text-sm text-[#6b7280] leading-relaxed">{t.after}</p>
                 </div>
-                <p className="text-white/70 leading-relaxed mb-6 italic text-sm">"{t.quote}"</p>
+                <p className="text-[#6b7280] leading-relaxed mb-6 italic text-sm">"{t.quote}"</p>
                 <div className="flex items-center gap-3">
                   <img
                     src={[
@@ -1038,8 +1037,8 @@ export default function Home() {
                     loading="lazy"
                   />
                   <div>
-                    <div className="font-semibold text-sm text-white">{t.name}</div>
-                    <div className="text-xs text-white/40">{t.role}</div>
+                    <div className="font-semibold text-sm">{t.name}</div>
+                    <div className="text-xs text-[#6b7280]">{t.role}</div>
                   </div>
                 </div>
               </div>
@@ -1047,29 +1046,29 @@ export default function Home() {
           </div>
 
           {/* CASI REALI */}
-          <h3 className="text-2xl md:text-3xl font-bold text-center mb-10 text-white">
+          <h3 className="text-2xl md:text-3xl font-bold text-center mb-10">
             Risultati Reali. Aziende Reali.
           </h3>
           <div className="grid md:grid-cols-3 gap-6">
             {CASE_STUDIES.map((cs, i) => (
-              <div key={i} className="landing-glow-card p-6 md:p-8 relative overflow-hidden">
+              <div key={i} className="landing-card p-6 md:p-8 relative overflow-hidden">
                 {/* Badge */}
                 <div className="absolute top-4 right-4">
-                  <div className="text-4xl font-black text-accent stat-glow">{cs.badge}</div>
-                  <div className="text-xs text-white/40 font-medium text-right">{cs.badgeLabel}</div>
+                  <div className="text-4xl font-black text-[#f09133]">{cs.badge}</div>
+                  <div className="text-xs text-[#6b7280] font-medium text-right">{cs.badgeLabel}</div>
                 </div>
                 <div className="flex items-center gap-2 mb-1">
-                  <Building2 className="h-4 w-4 text-accent" />
-                  <span className="font-bold text-white">{cs.company}</span>
+                  <Building2 className="h-4 w-4 text-[#f09133]" />
+                  <span className="font-bold">{cs.company}</span>
                 </div>
-                <p className="text-sm text-white/40 mb-1">{cs.size}</p>
-                <p className="text-xs text-accent font-medium mb-4">{cs.sector}</p>
-                <p className="text-white/60 leading-relaxed mb-6">{cs.desc}</p>
+                <p className="text-sm text-[#6b7280] mb-1">{cs.size}</p>
+                <p className="text-xs text-[#f09133] font-medium mb-4">{cs.sector}</p>
+                <p className="text-[#6b7280] leading-relaxed mb-6">{cs.desc}</p>
                 <ul className="space-y-2">
                   {cs.results.map((r, j) => (
                     <li key={j} className="flex items-start gap-2 text-sm">
-                      <CheckCircle2 className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
-                      <span className="text-white/60">{r}</span>
+                      <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
+                      <span className="text-[#6b7280]">{r}</span>
                     </li>
                   ))}
                 </ul>
@@ -1081,13 +1080,11 @@ export default function Home() {
         </div>
       </Section>
 
-      {/* ═══ 12. NUMERI / CONTATORI ═══ */}
-      <Section className="py-0 md:py-0" id="numeri">
-        <div className="py-24 md:py-32 bg-[#0a0a0a] relative overflow-hidden">
-          {/* Subtle gradient bg */}
-          <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-transparent to-blue-500/5" />
+      {/* ═══ 12. NUMERI / CONTATORI (rounded box like hero) ═══ */}
+      <Section className="py-0 md:py-0 px-4 md:px-8" id="numeri">
+        <div className="landing-counter-box py-20 md:py-28 max-w-7xl mx-auto relative overflow-hidden">
           <div className="max-w-6xl mx-auto px-4 md:px-8 relative z-10">
-            <p className="text-sm uppercase tracking-[0.3em] text-accent font-semibold text-center mb-3">
+            <p className="text-sm uppercase tracking-[0.3em] text-[#f09133] font-semibold text-center mb-3">
               I Risultati Parlano
             </p>
             <h2 className="text-3xl md:text-5xl font-black text-center mb-16 text-white">
@@ -1101,15 +1098,15 @@ export default function Home() {
                 { ref: c4.ref, val: c4.value, suffix: ' min', label: 'Tempo per test' },
               ].map((n, i) => (
                 <div key={i} ref={n.ref}>
-                  <div className="text-5xl md:text-7xl font-black text-accent mb-2 stat-glow">
+                  <div className="text-5xl md:text-7xl font-black text-[#f09133] mb-2">
                     {n.val}{n.suffix}
                   </div>
-                  <div className="text-white/40 text-sm md:text-base font-medium">{n.label}</div>
+                  <div className="text-white/60 text-sm md:text-base font-medium">{n.label}</div>
                 </div>
               ))}
               <div>
-                <div className="text-5xl md:text-7xl font-black text-accent mb-2 stat-glow">.75/1</div>
-                <div className="text-white/40 text-sm md:text-base font-medium">Validazione scientifica</div>
+                <div className="text-5xl md:text-7xl font-black text-[#f09133] mb-2">.75/1</div>
+                <div className="text-white/60 text-sm md:text-base font-medium">Validazione scientifica</div>
               </div>
             </div>
           </div>
@@ -1117,42 +1114,42 @@ export default function Home() {
       </Section>
 
       {/* ═══ 13. PER CHI È / NON È ═══ */}
-      <Section className="py-20 md:py-28 bg-[#0d0d0d]" id="perchi">
+      <Section className="py-20 md:py-28" id="perchi">
         <div className="max-w-5xl mx-auto px-4 md:px-8">
-          <p className="text-sm uppercase tracking-widest text-accent font-semibold text-center mb-3">
-            Qualificazione
-          </p>
-          <h2 className="text-3xl md:text-5xl font-black text-center mb-4 text-white">
+          <div className="text-center mb-3">
+            <span className="section-badge">Qualificazione</span>
+          </div>
+          <h2 className="text-3xl md:text-5xl font-black text-center mb-4">
             TalentProfile fa per te?
           </h2>
-          <p className="text-center text-white/50 text-lg mb-14 max-w-2xl mx-auto">
+          <p className="text-center text-[#6b7280] text-lg mb-14 max-w-2xl mx-auto">
             Non è per tutti. Ed è giusto così. Ecco come capire se siamo il tuo strumento.
           </p>
           <div className="grid md:grid-cols-2 gap-6">
             {/* NON è per te */}
-            <div className="landing-glow-card p-6 md:p-8 glow-border-red bg-red-500/5">
-              <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-red-400">
+            <div className="landing-card p-6 md:p-8 border-l-4 border-l-red-400 bg-red-50/30">
+              <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-red-500">
                 <XCircle className="h-6 w-6" /> NON è per te se...
               </h3>
               <ul className="space-y-4">
                 {FOR_NOT_FOR.not.map((item, i) => (
                   <li key={i} className="flex items-start gap-3">
-                    <XCircle className="h-5 w-5 text-red-400/60 shrink-0 mt-0.5" />
-                    <span className="text-white/70">{item}</span>
+                    <XCircle className="h-5 w-5 text-red-400 shrink-0 mt-0.5" />
+                    <span className="text-[#6b7280]">{item}</span>
                   </li>
                 ))}
               </ul>
             </div>
             {/* È per te */}
-            <div className="landing-glow-card p-6 md:p-8 glow-border-green bg-green-500/5">
-              <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-green-400">
+            <div className="landing-card p-6 md:p-8 border-l-4 border-l-green-400 bg-green-50/30">
+              <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-green-600">
                 <CheckCircle2 className="h-6 w-6" /> È PER TE se...
               </h3>
               <ul className="space-y-4">
                 {FOR_NOT_FOR.yes.map((item, i) => (
                   <li key={i} className="flex items-start gap-3">
-                    <CheckCircle2 className="h-5 w-5 text-green-400 shrink-0 mt-0.5" />
-                    <span className="text-white/70">{item}</span>
+                    <CheckCircle2 className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
+                    <span className="text-[#6b7280]">{item}</span>
                   </li>
                 ))}
               </ul>
@@ -1162,15 +1159,15 @@ export default function Home() {
       </Section>
 
       {/* ═══ 14. FAQ ═══ */}
-      <Section className="py-20 md:py-28 bg-[#0a0a0a]" id="faq">
+      <Section className="py-20 md:py-28 bg-white" id="faq">
         <div className="max-w-3xl mx-auto px-4 md:px-8">
-          <p className="text-sm uppercase tracking-widest text-accent font-semibold text-center mb-3">
-            FAQ
-          </p>
-          <h2 className="text-3xl md:text-5xl font-black text-center mb-4 text-white">
+          <div className="text-center mb-3">
+            <span className="section-badge">FAQ</span>
+          </div>
+          <h2 className="text-3xl md:text-5xl font-black text-center mb-4">
             Domande Frequenti
           </h2>
-          <p className="text-center text-white/50 text-lg mb-14 max-w-2xl mx-auto">
+          <p className="text-center text-[#6b7280] text-lg mb-14 max-w-2xl mx-auto">
             Le stesse domande che ci fanno tutti. Le risposte sincere che diamo sempre.
           </p>
           <Accordion type="single" collapsible className="space-y-2">
@@ -1178,12 +1175,12 @@ export default function Home() {
               <AccordionItem
                 key={i}
                 value={`faq-${i}`}
-                className="border border-white/10 rounded-lg px-4 bg-[#111111] data-[state=open]:glow-border-orange hover:border-white/20 transition-colors"
+                className="border border-[#e5e0db] rounded-lg px-4 bg-white hover:border-[#f09133]/40 transition-colors"
               >
-                <AccordionTrigger className="text-left text-base md:text-lg font-semibold hover:no-underline text-white/90">
+                <AccordionTrigger className="text-left text-base md:text-lg font-semibold hover:no-underline">
                   {f.q}
                 </AccordionTrigger>
-                <AccordionContent className="text-white/50 text-base leading-relaxed">
+                <AccordionContent className="text-[#6b7280] text-base leading-relaxed">
                   {f.a}
                 </AccordionContent>
               </AccordionItem>
@@ -1193,23 +1190,23 @@ export default function Home() {
       </Section>
 
       {/* ═══ 15. RIQUADRO COSTO INAZIONE ═══ */}
-      <Section className="py-16 md:py-20 bg-[#0d0d0d]" id="costo-inazione">
+      <Section className="py-16 md:py-20" id="costo-inazione">
         <div className="max-w-4xl mx-auto px-4 md:px-8">
-          <div className="landing-glow-card p-8 md:p-12 glow-border-red" style={{ animation: 'glow-pulse 3s ease-in-out infinite' }}>
+          <div className="landing-card p-8 md:p-12 border-red-300 bg-red-50/50">
             <div className="text-center">
-              <AlertTriangle className="h-12 w-12 text-red-400 mx-auto mb-4" />
-              <h3 className="text-2xl md:text-3xl font-black text-white mb-6">
+              <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+              <h3 className="text-2xl md:text-3xl font-black mb-6">
                 Il costo di NON agire oggi
               </h3>
-              <div className="space-y-4 text-lg md:text-xl text-white/70 leading-relaxed">
-                <p>Se assumi <strong className="text-white">10 persone l'anno</strong> e ne sbagli 3...</p>
-                <p className="text-4xl md:text-5xl font-black text-red-400 stat-glow-red">
+              <div className="space-y-4 text-lg md:text-xl text-[#6b7280] leading-relaxed">
+                <p>Se assumi <strong className="text-[#1a1a2e]">10 persone l'anno</strong> e ne sbagli 3...</p>
+                <p className="text-4xl md:text-5xl font-black text-red-500">
                   3 × €30.000 = €90.000/anno bruciati
                 </p>
-                <p>In 3 anni sono <strong className="text-red-400">€270.000</strong>.</p>
-                <div className="pt-4 border-t border-white/10 mt-6">
-                  <p className="text-white/50 text-base">
-                    Il costo di TalentProfile? <strong className="text-white">Una frazione di un singolo errore.</strong>
+                <p>In 3 anni sono <strong className="text-red-500">€270.000</strong>.</p>
+                <div className="pt-4 border-t border-red-200 mt-6">
+                  <p className="text-[#6b7280] text-base">
+                    Il costo di TalentProfile? <strong className="text-[#1a1a2e]">Una frazione di un singolo errore.</strong>
                   </p>
                 </div>
               </div>
@@ -1221,43 +1218,47 @@ export default function Home() {
       {/* ═══ 16. CTA FINALE ═══ */}
       <section
         id="cta-finale"
-        className="relative py-24 md:py-32 text-center overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #f09133 0%, #e07a1f 50%, #d06a10 100%)' }}
+        className="px-4 md:px-8 py-8"
       >
-        <div className="max-w-3xl mx-auto px-4 md:px-8 relative z-10">
-          <p className="text-sm uppercase tracking-[0.3em] text-white/70 font-semibold mb-4">Inizia Ora</p>
-          <h2 className="text-4xl md:text-6xl font-black text-white mb-6">
-            Il futuro del tuo team inizia da qui.
-          </h2>
-          <p className="text-lg md:text-xl text-white/90 mb-4 leading-relaxed">
-            Ogni giorno che passi senza dati oggettivi sulle persone è un giorno in cui rischi un'altra assunzione sbagliata. Un altro €30.000 bruciato. Un altro talento perso.
-          </p>
-          <p className="text-base text-white/80 mb-10 leading-relaxed">
-            La demo è gratuita, dura 30 minuti e ti mostra esattamente come funziona il sistema sulla tua realtà. Nessun impegno. Nessun venditore aggressivo. Solo dati.
-          </p>
-          <Button
-            size="lg"
-            className="bg-white text-accent hover:bg-white/90 text-lg px-10 py-7 rounded-xl shadow-xl font-bold"
-            onClick={() => window.open('mailto:info@talentprofile.it?subject=Richiesta Demo TalentProfile', '_blank')}
-          >
-            Richiedi una Demo Gratuita <ArrowRight className="ml-2 h-5 w-5" />
-          </Button>
-          <div className="flex flex-wrap justify-center gap-6 mt-8">
-            <span className="flex items-center gap-2 text-sm text-white/80">
-              <Clock className="h-4 w-4" /> Risposta in 24h
-            </span>
-            <span className="flex items-center gap-2 text-sm text-white/80">
-              <Shield className="h-4 w-4" /> 100% Riservato
-            </span>
-            <span className="flex items-center gap-2 text-sm text-white/80">
-              <CheckCircle2 className="h-4 w-4" /> Senza Impegno
-            </span>
+        <div
+          className="relative py-20 md:py-28 text-center overflow-hidden rounded-3xl max-w-7xl mx-auto"
+          style={{ background: 'linear-gradient(135deg, #f09133 0%, #e07a1f 50%, #d06a10 100%)' }}
+        >
+          <div className="max-w-3xl mx-auto px-4 md:px-8 relative z-10">
+            <p className="text-sm uppercase tracking-[0.3em] text-white/80 font-semibold mb-4">Inizia Ora</p>
+            <h2 className="text-4xl md:text-6xl font-black text-white mb-6">
+              Il futuro del tuo team inizia da qui.
+            </h2>
+            <p className="text-lg md:text-xl text-white/90 mb-4 leading-relaxed">
+              Ogni giorno che passi senza dati oggettivi sulle persone è un giorno in cui rischi un'altra assunzione sbagliata. Un altro €30.000 bruciato. Un altro talento perso.
+            </p>
+            <p className="text-base text-white/80 mb-10 leading-relaxed">
+              La demo è gratuita, dura 30 minuti e ti mostra esattamente come funziona il sistema sulla tua realtà. Nessun impegno. Nessun venditore aggressivo. Solo dati.
+            </p>
+            <Button
+              size="lg"
+              className="bg-white text-[#f09133] hover:bg-white/90 text-lg px-10 py-7 rounded-xl shadow-xl font-bold"
+              onClick={() => window.open('mailto:info@talentprofile.it?subject=Richiesta Demo TalentProfile', '_blank')}
+            >
+              Richiedi una Demo Gratuita <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+            <div className="flex flex-wrap justify-center gap-6 mt-8">
+              <span className="flex items-center gap-2 text-sm text-white/80">
+                <Clock className="h-4 w-4" /> Risposta in 24h
+              </span>
+              <span className="flex items-center gap-2 text-sm text-white/80">
+                <Shield className="h-4 w-4" /> 100% Riservato
+              </span>
+              <span className="flex items-center gap-2 text-sm text-white/80">
+                <CheckCircle2 className="h-4 w-4" /> Senza Impegno
+              </span>
+            </div>
           </div>
         </div>
       </section>
 
       {/* ═══ FOOTER ═══ */}
-      <footer className="bg-[#050505] py-12">
+      <footer className="bg-[#1e3a5f] py-12 mt-8">
         <div className="max-w-6xl mx-auto px-4 md:px-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <img
@@ -1265,38 +1266,38 @@ export default function Home() {
               alt="TalentProfile"
               className="h-10 brightness-0 invert"
             />
-            <div className="flex flex-wrap justify-center gap-6 text-sm text-white/30">
+            <div className="flex flex-wrap justify-center gap-6 text-sm text-white/50">
               {NAV_LINKS.map((l) => (
                 <button
                   key={l.id}
                   onClick={() => scrollTo(l.id)}
-                  className="hover:text-accent transition-colors"
+                  className="hover:text-[#f09133] transition-colors"
                 >
                   {l.label}
                 </button>
               ))}
               <button
                 onClick={() => navigate('/auth')}
-                className="hover:text-accent transition-colors"
+                className="hover:text-[#f09133] transition-colors"
               >
                 Accedi
               </button>
             </div>
           </div>
 
-          <div className="mt-8 pt-6 border-t border-white/5">
+          <div className="mt-8 pt-6 border-t border-white/10">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-              <div className="flex flex-wrap justify-center md:justify-start gap-4 text-xs text-white/25">
+              <div className="flex flex-wrap justify-center md:justify-start gap-4 text-xs text-white/30">
                 <span>TalentProfile S.r.l. — P.IVA 12345678901</span>
                 <span>|</span>
-                <a href="#" className="hover:text-accent transition-colors">Privacy Policy</a>
+                <a href="#" className="hover:text-[#f09133] transition-colors">Privacy Policy</a>
                 <span>|</span>
-                <a href="#" className="hover:text-accent transition-colors">Cookie Policy</a>
+                <a href="#" className="hover:text-[#f09133] transition-colors">Cookie Policy</a>
                 <span>|</span>
-                <a href="#" className="hover:text-accent transition-colors">Termini e Condizioni</a>
+                <a href="#" className="hover:text-[#f09133] transition-colors">Termini e Condizioni</a>
               </div>
-              <div className="flex items-center gap-4 text-xs text-white/25">
-                <a href="mailto:info@talentprofile.it" className="flex items-center gap-1.5 hover:text-accent transition-colors">
+              <div className="flex items-center gap-4 text-xs text-white/30">
+                <a href="mailto:info@talentprofile.it" className="flex items-center gap-1.5 hover:text-[#f09133] transition-colors">
                   <Mail className="h-3.5 w-3.5" /> info@talentprofile.it
                 </a>
                 <span className="flex items-center gap-1.5">
@@ -1304,7 +1305,7 @@ export default function Home() {
                 </span>
               </div>
             </div>
-            <p className="text-center text-xs text-white/15 mt-4">
+            <p className="text-center text-xs text-white/20 mt-4">
               © {new Date().getFullYear()} TalentProfile. Tutti i diritti riservati.
             </p>
           </div>

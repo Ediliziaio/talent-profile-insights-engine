@@ -191,49 +191,40 @@
   }
 }
 
-/* ─── Landing Page Dark Theme ─── */
-.landing-glow-card {
-  background: #111111;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+/* ─── Landing Page Light Theme (JetHR-inspired) ─── */
+.landing-card {
+  background: #ffffff;
+  border: 1px solid #e5e0db;
   border-radius: 0.75rem;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.06);
   transition: all 0.3s ease;
 }
-.landing-glow-card:hover {
-  border-color: rgba(240, 145, 51, 0.4);
-  box-shadow: 0 0 30px rgba(240, 145, 51, 0.1);
+.landing-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.08), 0 8px 10px -6px rgb(0 0 0 / 0.04);
 }
 
-.landing-glow-card-red:hover {
-  border-color: rgba(239, 68, 68, 0.4);
-  box-shadow: 0 0 30px rgba(239, 68, 68, 0.1);
+.section-badge {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(240, 145, 51, 0.1);
+  color: #f09133;
+  padding: 4px 14px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
-.stat-glow {
-  text-shadow: 0 0 40px rgba(240, 145, 51, 0.3);
+.landing-hero-box {
+  background: #1e3a5f;
+  border-radius: 1.5rem;
 }
 
-.stat-glow-red {
-  text-shadow: 0 0 40px rgba(239, 68, 68, 0.3);
-}
-
-.glow-border-red {
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  box-shadow: 0 0 20px rgba(239, 68, 68, 0.08);
-}
-
-.glow-border-green {
-  border: 1px solid rgba(34, 197, 94, 0.3);
-  box-shadow: 0 0 20px rgba(34, 197, 94, 0.08);
-}
-
-.glow-border-orange {
-  border: 1px solid rgba(240, 145, 51, 0.3);
-  box-shadow: 0 0 20px rgba(240, 145, 51, 0.08);
-}
-
-@keyframes glow-pulse {
-  0%, 100% { box-shadow: 0 0 20px rgba(240, 145, 51, 0.1); }
-  50% { box-shadow: 0 0 40px rgba(240, 145, 51, 0.2); }
+.landing-counter-box {
+  background: #1e3a5f;
+  border-radius: 1.5rem;
 }
 
 /* PDF Report Print Styles */
