@@ -1,7 +1,8 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Sparkles, AlertTriangle, CheckCircle2, XCircle, AlertCircle, Info, Heart } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Sparkles, AlertTriangle, CheckCircle2, XCircle, AlertCircle, Info, Heart, MessageCircle, Target, ChevronDown } from 'lucide-react';
 import { TraitCode } from '@/types/database';
 import { SyndromeResult } from '@/lib/syndromes';
 import {
@@ -105,6 +106,7 @@ export function MappaInterioreTab({
     () => calculateMappaInteriore(traits, candidatoNome, candidatoSesso, syndromes, eta),
     [traits, candidatoNome, candidatoSesso, syndromes, eta]
   );
+  const [attaccamentoOpen, setAttaccamentoOpen] = useState(false);
 
   // Profilo bilanciato → messaggio positivo
   if (!result) {
@@ -122,7 +124,7 @@ export function MappaInterioreTab({
     );
   }
 
-  const { dimensioni, profiloNarrativoLabel, narrativa, cosa_motiva, cosa_blocca, cosa_teme, errori_da_evitare, pattern_combinatori } = result;
+  const { dimensioni, profiloNarrativoLabel, narrativa, cosa_motiva, cosa_blocca, cosa_teme, errori_da_evitare, pattern_combinatori, domande_colloquio_aggiuntive, override_piano_crescita } = result;
 
   const difesaLabel = dimensioni.difesa.dominante
     ? dimensioni.difesa.dominante.frontend
@@ -155,10 +157,28 @@ export function MappaInterioreTab({
 
       {/* Badges */}
       <div className="flex flex-wrap gap-2">
-        <Badge variant="outline" className="text-xs px-3 py-1.5">
-          <Heart className="h-3 w-3 mr-1.5" />
-          Stile relazionale: {ATTACCAMENTO_FRONTEND[dimensioni.attaccamento.dominante]}
-        </Badge>
+        <Collapsible open={attaccamentoOpen} onOpenChange={setAttaccamentoOpen}>
+          <CollapsibleTrigger asChild>
+            <Badge variant="outline" className="text-xs px-3 py-1.5 cursor-pointer hover:bg-muted transition-colors">
+              <Heart className="h-3 w-3 mr-1.5" />
+              Stile relazionale: {ATTACCAMENTO_FRONTEND[dimensioni.attaccamento.dominante]}
+              <ChevronDown className={`h-3 w-3 ml-1 transition-transform ${attaccamentoOpen ? 'rotate-180' : ''}`} />
+            </Badge>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="mt-2">
+            <Card>
+              <CardContent className="py-3 px-4">
+                <p className="text-xs font-medium mb-2">Punteggi Attaccamento dettagliati</p>
+                <div className="grid grid-cols-2 gap-1.5 text-xs text-muted-foreground">
+                  <span>Sicuro: <strong className="text-foreground">{dimensioni.attaccamento.scores.sicuro}/10</strong></span>
+                  <span>Ansioso: <strong className="text-foreground">{dimensioni.attaccamento.scores.ansioso}/10</strong></span>
+                  <span>Evitante: <strong className="text-foreground">{dimensioni.attaccamento.scores.evitante}/10</strong></span>
+                  <span>Disorganizzato: <strong className="text-foreground">{dimensioni.attaccamento.scores.disorganizzato}/10</strong></span>
+                </div>
+              </CardContent>
+            </Card>
+          </CollapsibleContent>
+        </Collapsible>
         <Badge variant="outline" className="text-xs px-3 py-1.5">
           <AlertCircle className="h-3 w-3 mr-1.5" />
           Reazione alla pressione: {difesaLabel}
@@ -309,6 +329,63 @@ export function MappaInterioreTab({
             </Card>
           ))}
         </div>
+      )}
+
+      {/* Domande Colloquio di Secondo Livello */}
+      {domande_colloquio_aggiuntive.length > 0 && (
+        <div className="space-y-3">
+          <h3 className="text-sm font-semibold flex items-center gap-1.5">
+            <MessageCircle className="h-4 w-4" />
+            Domande Colloquio di Secondo Livello
+          </h3>
+          {domande_colloquio_aggiuntive.map((gruppo, i) => (
+            <Card key={i}>
+              <CardHeader className="pb-2 pt-4 px-5">
+                <div className="flex items-center gap-2">
+                  <CardTitle className="text-sm">{gruppo.area}</CardTitle>
+                  <Badge
+                    variant={gruppo.priorita === 'CRITICA' ? 'destructive' : gruppo.priorita === 'ALTA' ? 'default' : 'secondary'}
+                    className="text-[10px] px-2 py-0.5"
+                  >
+                    {gruppo.priorita}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent className="px-5 pb-4">
+                <ul className="space-y-2">
+                  {gruppo.domande.map((domanda, j) => (
+                    <li key={j} className="text-xs text-muted-foreground flex items-start gap-2">
+                      <span className="text-primary mt-0.5 shrink-0">→</span>
+                      <span className="italic">"{domanda}"</span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {/* Azioni per il Piano di Crescita */}
+      {override_piano_crescita.length > 0 && (
+        <Card className="bg-muted/30 border-primary/20">
+          <CardHeader className="pb-2 pt-4 px-5">
+            <CardTitle className="text-sm flex items-center gap-1.5">
+              <Target className="h-4 w-4 text-primary" />
+              Azioni per il Piano di Crescita
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="px-5 pb-4">
+            <ul className="space-y-2">
+              {override_piano_crescita.map((override, i) => (
+                <li key={i} className="text-xs text-muted-foreground flex items-start gap-2">
+                  <span className="font-bold text-primary shrink-0">{i + 1}.</span>
+                  {override}
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
       )}
 
       {/* Disclaimer */}
