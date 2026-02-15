@@ -6,13 +6,14 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Brain, Shield, Lock, FileText, Lightbulb, Clock, Target, Heart, CheckCircle } from 'lucide-react';
+import { Brain, Shield, Lock, FileText, Lightbulb, Clock, Target, Heart, CheckCircle, Loader2 } from 'lucide-react';
 
 export default function ConsensoPrivacy() {
   const { profile, user, loading } = useAuth();
   const navigate = useNavigate();
   const [accepted, setAccepted] = useState(false);
   const [checkingTest, setCheckingTest] = useState(true);
+  const [navigating, setNavigating] = useState(false);
 
   // Check if test already completed → redirect
   useEffect(() => {
@@ -49,8 +50,9 @@ export default function ConsensoPrivacy() {
   }
 
   const handleContinue = () => {
-    if (accepted) {
-      navigate('/test/questionario');
+    if (accepted && !navigating) {
+      setNavigating(true);
+      setTimeout(() => navigate('/test/questionario'), 300);
     }
   };
 
@@ -213,10 +215,17 @@ export default function ConsensoPrivacy() {
           <Button 
             size="lg" 
             onClick={handleContinue} 
-            disabled={!accepted}
+            disabled={!accepted || navigating}
             className="w-full sm:w-auto h-12 text-base bg-accent hover:bg-accent/90"
           >
-            Accetto e Proseguo
+            {navigating ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Caricamento...
+              </>
+            ) : (
+              'Accetto e Proseguo'
+            )}
           </Button>
         </CardFooter>
       </Card>
