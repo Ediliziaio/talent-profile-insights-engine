@@ -158,17 +158,17 @@ const STEPS = [
   {
     icon: ClipboardCheck,
     title: 'Assessment Psicologico',
-    desc: '140 domande validate scientificamente. 15 minuti di compilazione, zero stress. Il candidato risponde in modo naturale e spontaneo.',
+    desc: 'Un questionario rapido, validato scientificamente. 15 minuti di compilazione, zero stress. Il candidato risponde in modo naturale e spontaneo.',
   },
   {
     icon: BarChart3,
     title: 'Report Istantaneo',
-    desc: 'Profilo psicologico completo: 14 scale, scoring V5, mappa interiore, punti di forza e aree critiche. Tutto in tempo reale.',
+    desc: 'Profilo psicologico completo con mappa interiore, punti di forza e aree critiche. Tutto in tempo reale.',
   },
   {
     icon: Lightbulb,
     title: 'Decisione Informata',
-    desc: 'Role matching automatico con 30+ ruoli, guida personalizzata al colloquio e confronto tra candidati. Assumi con i dati, non con il dubbio.',
+    desc: 'Compatibilità automatica con i ruoli della tua azienda, guida personalizzata al colloquio e confronto tra candidati. Assumi con i dati, non con il dubbio.',
   },
 ];
 
@@ -176,7 +176,7 @@ const FEATURES = [
   {
     icon: Brain,
     title: 'Profilo Psicologico 360°',
-    desc: '14 scale psicologiche, scoring V5, analisi completa della personalità in un unico report esecutivo.',
+    desc: 'Analisi completa della personalità su tutte le dimensioni chiave, in un unico report esecutivo.',
   },
   {
     icon: Target,
@@ -186,7 +186,7 @@ const FEATURES = [
   {
     icon: Users,
     title: 'Role Matching',
-    desc: 'Compatibilità automatica con 30+ ruoli aziendali. Scopri subito dove il candidato performa meglio.',
+    desc: 'Compatibilità automatica con i principali ruoli aziendali. Scopri subito dove il candidato performa meglio.',
   },
   {
     icon: Lightbulb,
@@ -233,7 +233,7 @@ const FAQ_DATA = [
   },
   {
     q: 'È validato scientificamente?',
-    a: 'Sì. TalentProfile si basa su modelli psicometrici riconosciuti, con 14 scale validate e un sistema di scoring proprietario (V5) sviluppato con esperti di psicologia del lavoro.',
+    a: 'Sì. TalentProfile si basa su modelli psicometrici riconosciuti, con scale psicologiche validate e un sistema di scoring proprietario sviluppato con esperti di psicologia del lavoro.',
   },
   {
     q: 'Come invio il test a un candidato?',
@@ -253,7 +253,7 @@ const FAQ_DATA = [
   },
   {
     q: 'Che differenza c\'è rispetto a un test della personalità generico?',
-    a: 'I test generici danno etichette vaghe. TalentProfile fornisce un profilo psicologico profondo con scoring numerico, role matching, analisi dei rischi operativi e una guida concreta al colloquio.',
+    a: 'I test generici danno etichette vaghe. TalentProfile fornisce un profilo psicologico profondo con compatibilità ruolo, analisi dei rischi operativi e una guida concreta al colloquio — tutto in un unico report.',
   },
 ];
 
@@ -317,7 +317,7 @@ const CASE_STUDIES = [
 const COMPARISON_ROWS = [
   { aspect: 'Metodo', others: 'Colloquio + CV', tp: 'Assessment psicologico validato' },
   { aspect: 'Tempo', others: 'Settimane di valutazione', tp: '15 minuti, report istantaneo' },
-  { aspect: 'Oggettività', others: 'Opinioni soggettive', tp: '14 scale con scoring numerico' },
+  { aspect: 'Oggettività', others: 'Opinioni soggettive', tp: 'Scale psicologiche validate con analisi quantitativa' },
   { aspect: 'Profondità', others: 'Superficie (competenze)', tp: 'Psicologia profonda (identità, difese, attaccamento)' },
   { aspect: 'Role Matching', others: 'Manuale e approssimativo', tp: 'Automatico su 30+ ruoli' },
   { aspect: 'Colloquio', others: 'Domande generiche', tp: 'Guida personalizzata dall\'assessment' },
@@ -379,7 +379,7 @@ export default function Home() {
   /* ─── Counters ─── */
   const c1 = useCountUp(100);
   const c2 = useCountUp(5000);
-  const c3 = useCountUp(14);
+  const c3 = useCountUp(30);
   const c4 = useCountUp(15);
 
   return (
@@ -471,46 +471,69 @@ export default function Home() {
 
       {/* ═══ 2. HERO ═══ */}
       <section className="relative py-20 md:py-32 overflow-hidden" style={{ background: 'linear-gradient(160deg, #1e3a5f 0%, #2d5a8e 60%, #3b7ddd 100%)' }}>
-        <div className="max-w-5xl mx-auto px-4 md:px-8 text-center relative z-10">
-          <p className="text-sm uppercase tracking-widest text-orange-300 font-semibold mb-4">
-            Il sistema di assessment HR più completo d'Italia
-          </p>
-          <h1 className="text-4xl sm:text-5xl md:text-7xl font-black text-white leading-tight mb-6">
-            <span className="text-accent">BASTA</span> Assunzioni Sbagliate.
-            <br className="hidden sm:block" />
-            <span className="block mt-2">Scopri Chi Hai Davvero Davanti.</span>
-          </h1>
-          <p className="text-lg md:text-xl text-blue-100 leading-relaxed max-w-3xl mx-auto mb-10">
-            TalentProfile mappa il profilo psicologico profondo dei candidati in 15 minuti.
-            Riduci il turnover, assumi le persone giuste, fai crescere il tuo team.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Button
-              size="lg"
-              className="bg-accent hover:bg-accent/90 text-accent-foreground text-lg px-8 py-6 rounded-xl shadow-lg"
-              onClick={() => scrollTo('cta-finale')}
-            >
-              Richiedi una Demo <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              className="border-white/40 text-white hover:bg-white/10 text-lg px-8 py-6 rounded-xl"
-              onClick={() => scrollTo('metodo')}
-            >
-              Scopri di Più
-            </Button>
+        <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10 flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
+          {/* Left: Text */}
+          <div className="lg:w-3/5 text-center lg:text-left">
+            <p className="text-sm uppercase tracking-widest text-orange-300 font-semibold mb-4">
+              Il sistema di assessment HR più completo d'Italia
+            </p>
+            <h1 className="text-4xl sm:text-5xl md:text-7xl font-black text-white leading-tight mb-6">
+              <span className="text-accent">BASTA</span> Assunzioni Sbagliate.
+              <br className="hidden sm:block" />
+              <span className="block mt-2">Scopri Chi Hai Davvero di Fronte.</span>
+            </h1>
+            <p className="text-lg md:text-xl text-blue-100 leading-relaxed max-w-2xl mb-10">
+              In 15 minuti sai chi hai davvero di fronte. Il profilo psicologico completo del candidato — prima ancora del colloquio.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-12">
+              <Button
+                size="lg"
+                className="bg-accent hover:bg-accent/90 text-accent-foreground text-lg px-8 py-6 rounded-xl shadow-lg"
+                onClick={() => scrollTo('cta-finale')}
+              >
+                Richiedi una Demo <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+              <Button
+                variant="outline"
+                size="lg"
+                className="border-white/40 text-white hover:bg-white/10 text-lg px-8 py-6 rounded-xl"
+                onClick={() => scrollTo('metodo')}
+              >
+                Scopri di Più
+              </Button>
+            </div>
+            <div className="flex flex-wrap justify-center lg:justify-start gap-6 text-sm text-blue-200">
+              <span className="flex items-center gap-2">
+                <Building2 className="h-4 w-4 text-accent" /> 100+ Aziende
+              </span>
+              <span className="flex items-center gap-2">
+                <Clock className="h-4 w-4 text-accent" /> 15 min per test
+              </span>
+              <span className="flex items-center gap-2">
+                <Zap className="h-4 w-4 text-accent" /> Report Istantaneo
+              </span>
+            </div>
           </div>
-          <div className="flex flex-wrap justify-center gap-6 text-sm text-blue-200">
-            <span className="flex items-center gap-2">
-              <Building2 className="h-4 w-4 text-accent" /> 100+ Aziende
-            </span>
-            <span className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-accent" /> 15 min per test
-            </span>
-            <span className="flex items-center gap-2">
-              <Zap className="h-4 w-4 text-accent" /> Report Istantaneo
-            </span>
+          {/* Right: Decorative blurred "dashboard" */}
+          <div className="hidden lg:block lg:w-2/5">
+            <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden border border-white/20 shadow-2xl" style={{ background: 'linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)' }}>
+              {/* Glassmorphism overlay */}
+              <div className="absolute inset-0 backdrop-blur-sm" />
+              {/* Decorative shapes */}
+              <div className="absolute top-8 left-8 w-32 h-32 rounded-full bg-accent/50 blur-2xl" />
+              <div className="absolute bottom-12 right-6 w-40 h-24 rounded-xl bg-primary/40 blur-2xl" />
+              <div className="absolute top-1/2 left-1/3 w-28 h-28 rounded-full bg-white/20 blur-xl" />
+              <div className="absolute bottom-8 left-12 w-36 h-16 rounded-lg bg-accent/30 blur-xl" />
+              {/* Faux UI elements */}
+              <div className="absolute top-6 left-6 right-6 h-3 rounded-full bg-white/10" />
+              <div className="absolute top-12 left-6 w-2/3 h-3 rounded-full bg-white/8" />
+              <div className="absolute top-[40%] left-8 right-8 flex gap-3">
+                <div className="flex-1 h-20 rounded-lg bg-white/10 border border-white/10" />
+                <div className="flex-1 h-20 rounded-lg bg-white/10 border border-white/10" />
+                <div className="flex-1 h-20 rounded-lg bg-white/10 border border-white/10" />
+              </div>
+              <div className="absolute bottom-6 left-8 right-8 h-12 rounded-lg bg-white/8 border border-white/10" />
+            </div>
           </div>
         </div>
         {/* decorative circles */}
@@ -535,7 +558,7 @@ export default function Home() {
           </div>
           <div className="mt-12 pt-8 border-t border-border">
             <p className="text-xl md:text-2xl font-bold text-foreground leading-relaxed text-center">
-              La verità è questa: <span className="text-destructive">senza uno strumento scientifico, stai giocando d'azzardo con il futuro della tua azienda.</span>
+              La verità è questa: <span className="text-destructive">senza dati reali sulla persona, stai scommettendo il futuro della tua azienda su una sensazione.</span>
             </p>
           </div>
         </div>
@@ -601,7 +624,7 @@ export default function Home() {
           </div>
           <div className="text-center">
             <p className="text-lg md:text-xl text-foreground leading-relaxed max-w-3xl mx-auto">
-              Il problema? Questi risultati li ottieni <strong>SOLO</strong> se usi uno strumento validato, costruito da esperti di psicologia del lavoro.
+              Il problema? Questi risultati li ottieni <strong>SOLO</strong> se hai lo strumento giusto. Uno strumento costruito da chi la psicologia del lavoro la conosce davvero.
             </p>
           </div>
         </div>
@@ -678,7 +701,7 @@ export default function Home() {
               {[
                 { ref: c1.ref, val: c1.value, suffix: '+', label: 'Aziende' },
                 { ref: c2.ref, val: c2.value.toLocaleString('it-IT'), suffix: '+', label: 'Assessment completati' },
-                { ref: c3.ref, val: c3.value, suffix: '', label: 'Scale Psicologiche' },
+                { ref: c3.ref, val: c3.value, suffix: '+', label: 'Ruoli Mappati' },
                 { ref: c4.ref, val: c4.value, suffix: ' min', label: 'Tempo Medio Test' },
               ].map((n, i) => (
                 <div key={i} ref={n.ref}>
@@ -697,7 +720,7 @@ export default function Home() {
       <Section className="py-20 md:py-28 bg-background" id="testimonianze">
         <div className="max-w-6xl mx-auto px-4 md:px-8">
           <p className="text-sm uppercase tracking-widest text-accent font-semibold text-center mb-3">
-            Social Proof
+            Cosa Dicono i Nostri Clienti
           </p>
           <h2 className="text-3xl md:text-5xl font-bold text-center mb-14 text-foreground">
             Le aziende che scelgono TalentProfile assumono meglio
@@ -730,7 +753,7 @@ export default function Home() {
       <Section className="py-20 md:py-28 bg-secondary/50" id="casi-reali">
         <div className="max-w-6xl mx-auto px-4 md:px-8">
           <p className="text-sm uppercase tracking-widest text-accent font-semibold text-center mb-3">
-            Case Studies
+            Storie di Successo
           </p>
           <h2 className="text-3xl md:text-5xl font-bold text-center mb-4 text-foreground">
             Risultati Reali. Aziende Reali.
