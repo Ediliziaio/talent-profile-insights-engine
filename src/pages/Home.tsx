@@ -130,45 +130,45 @@ const PROBLEMS = [
   {
     icon: Gauge,
     title: 'Assumi a sensazione',
-    desc: 'Al colloquio sembrano perfetti. Poi, dopo 3 mesi, scopri che non c\'erano mai stati. Nessun dato, nessun metodo — solo istinto.',
+    desc: 'Al colloquio ti convince. Parla bene, stringe la mano forte, ti guarda negli occhi. Poi dopo 90 giorni scopri che era tutto un copione. Nessun dato, nessun metodo — solo istinto. E l\'istinto, in HR, è un lusso che non puoi permetterti.',
   },
   {
     icon: TrendingDown,
     title: 'Turnover alle stelle',
-    desc: 'Chi assumi non resta. E ogni volta che ricominci, bruci tempo, soldi e morale del team. Il costo reale? Fino a 2x lo stipendio annuo.',
+    desc: 'Chi assumi non resta. E ogni volta che ricominci da capo bruci tempo, soldi e il morale del team. Il costo reale di un inserimento sbagliato? Fino a 2x lo stipendio annuo. Circa €30.000 tra formazione, produttività persa e riassunzione.',
   },
   {
     icon: Target,
-    title: 'Nessun dato oggettivo',
-    desc: 'Valuti le persone con il CV e una chiacchierata. Ma il CV non dice chi è davvero una persona, né come si comporterà sotto pressione.',
+    title: 'Zero dati oggettivi',
+    desc: 'Valuti le persone con il CV e una chiacchierata. Ma il CV non ti dice come si comporterà sotto pressione, come gestirà il team, se è un leader o un esecutore. Non ti dice CHI È. Ti dice solo cosa dice di aver fatto.',
   },
   {
     icon: UserX,
     title: 'Team disfunzionali',
-    desc: 'Inserisci persone sbagliate nei ruoli sbagliati. Il risultato? Conflitti, calo di produttività e talenti che se ne vanno.',
+    desc: 'Persona sbagliata nel ruolo sbagliato. Il risultato? Conflitti, calo di produttività, i talenti veri che se ne vanno. Un solo inserimento sbagliato può destabilizzare un team intero che funzionava.',
   },
 ];
 
 const STEPS = [
   {
     icon: Send,
-    title: 'Invita il candidato',
-    desc: 'Invii un link personalizzato. Il candidato compila in autonomia, da qualsiasi dispositivo. Zero logistica.',
+    title: 'Invita il Candidato',
+    desc: 'Invii un link personalizzato. Il candidato compila in autonomia, da smartphone, tablet o PC. Zero logistica, zero presenza fisica richiesta.',
   },
   {
     icon: ClipboardCheck,
     title: 'Assessment Psicologico',
-    desc: 'Un questionario rapido, validato scientificamente. 15 minuti di compilazione, zero stress. Il candidato risponde in modo naturale e spontaneo.',
+    desc: '242 domande a risposta chiusa. 15 minuti di compilazione. Validato scientificamente con coefficiente .75/1. Il candidato risponde in modo naturale e spontaneo — niente da preparare, niente da fingere.',
   },
   {
     icon: BarChart3,
     title: 'Report Istantaneo',
-    desc: 'Profilo psicologico completo con mappa interiore, punti di forza e aree critiche. Tutto in tempo reale.',
+    desc: 'Profilo psicologico completo: 15 tratti, 3 macro-aree (Essere, Fare, Avere), 24 sindromi comportamentali, mappa interiore, punti di forza e aree critiche. Tutto in tempo reale.',
   },
   {
     icon: Lightbulb,
     title: 'Decisione Informata',
-    desc: 'Compatibilità automatica con i ruoli della tua azienda, guida personalizzata al colloquio e confronto tra candidati. Assumi con i dati, non con il dubbio.',
+    desc: 'Compatibilità automatica con i ruoli della tua azienda. Guida personalizzata al colloquio con domande mirate. Confronto tra candidati. Assumi con i dati — non con il dubbio.',
   },
 ];
 
@@ -176,105 +176,110 @@ const FEATURES = [
   {
     icon: Brain,
     title: 'Profilo Psicologico 360°',
-    desc: 'Analisi completa della personalità su tutte le dimensioni chiave, in un unico report esecutivo.',
+    desc: '15 tratti, 3 macro-aree, 24 sindromi comportamentali. Non le solite 4 dimensioni vaghe. Analisi completa della personalità professionale in un report esecutivo che puoi leggere in 5 minuti.',
   },
   {
     icon: Target,
     title: 'Mappa Interiore',
-    desc: 'Psicologia profonda: identità, emozioni, stile di attaccamento e meccanismi difensivi del candidato.',
+    desc: 'La funzionalità che ci rende unici. 7 profili psicologici profondi: identità, emozioni, stile di attaccamento, meccanismi difensivi. Cosa guida questa persona? Cosa la blocca? Dove sta il potenziale inespresso?',
   },
   {
     icon: Users,
-    title: 'Role Matching',
-    desc: 'Compatibilità automatica con i principali ruoli aziendali. Scopri subito dove il candidato performa meglio.',
+    title: 'Role Matching Automatico',
+    desc: 'Compatibilità istantanea con 30+ ruoli aziendali — dal commerciale al caposquadra, dal responsabile HR al direttore tecnico. Scopri subito dove il candidato performa meglio.',
   },
   {
     icon: Lightbulb,
     title: 'Guida al Colloquio',
-    desc: 'Domande personalizzate generate direttamente dall\'assessment. Vai al colloquio preparato.',
+    desc: 'Domande personalizzate generate dall\'assessment. Non vai più al colloquio alla cieca. Sai esattamente cosa chiedere, dove approfondire, quali aree indagare per quel candidato specifico.',
   },
   {
     icon: BarChart3,
     title: 'Confronto Candidati',
-    desc: 'Confronta fino a 4 candidati fianco a fianco su tutte le dimensioni psicologiche.',
+    desc: 'Confronta fino a 4 candidati fianco a fianco su tutte le dimensioni psicologiche. Devi scegliere tra 3 candidati per un ruolo? In 30 secondi vedi chi è più adatto — con i numeri, non con le opinioni.',
   },
   {
     icon: FileText,
     title: 'Report PDF Esecutivo',
-    desc: 'Scaricabile, condivisibile, pronto per il management. Professionale e completo.',
+    desc: 'Scaricabile, condivisibile, pronto per il management. Include piano d\'azione post-assunzione: cosa fare nei primi 90 giorni per ottenere il massimo da ogni nuova risorsa.',
   },
 ];
 
 const TESTIMONIALS = [
   {
     name: 'Marco Rinaldi',
-    role: 'HR Director — Gruppo Industriale',
-    quote: 'Da quando usiamo TalentProfile, il turnover nei primi 6 mesi è calato del 40%. Finalmente abbiamo dati oggettivi per le nostre decisioni.',
+    role: 'HR Director — Gruppo Industriale (200 dip.)',
+    quote: 'Da quando usiamo TalentProfile, il turnover nei primi 6 mesi è calato del 40%. Finalmente abbiamo dati oggettivi per le nostre decisioni — e il team HR ha smesso di navigare a vista.',
     stars: 5,
   },
   {
     name: 'Chiara Fontana',
-    role: 'CEO — Tech Startup',
-    quote: 'Assumevamo a sensazione e sbagliavamo 1 volta su 3. Con TalentProfile abbiamo ridotto gli errori di selezione quasi a zero.',
+    role: 'CEO — Tech Startup (25 dip.)',
+    quote: 'Assumevamo a sensazione e sbagliavamo 1 volta su 3. Con TalentProfile abbiamo ridotto gli errori di selezione quasi a zero. In 12 mesi, zero errori di hiring. Il ROI? Incalcolabile.',
     stars: 5,
   },
   {
     name: 'Luca Ferretti',
-    role: 'Responsabile Selezione — Retail',
-    quote: 'Il report è incredibilmente dettagliato. La mappa interiore ci ha rivelato dinamiche che nessun colloquio avrebbe fatto emergere.',
+    role: 'Resp. Selezione — Retail Chain (50 PV)',
+    quote: 'La mappa interiore ci ha rivelato dinamiche che nessun colloquio avrebbe fatto emergere. Abbiamo capito perché certi talenti non performavano: erano nel ruolo sbagliato. Spostati, sono diventati i migliori.',
     stars: 5,
   },
 ];
 
 const FAQ_DATA = [
   {
-    q: 'Quanto dura il test?',
+    q: '⏱️ Quanto dura il test?',
     a: 'Il candidato completa l\'assessment in circa 15 minuti. Il report è disponibile istantaneamente, senza attese.',
   },
   {
-    q: 'È validato scientificamente?',
+    q: '🔬 È validato scientificamente?',
     a: 'Sì. TalentProfile si basa su modelli psicometrici riconosciuti, con scale psicologiche validate e un sistema di scoring proprietario sviluppato con esperti di psicologia del lavoro.',
   },
   {
-    q: 'Come invio il test a un candidato?',
+    q: '📧 Come invio il test a un candidato?',
     a: 'Crei il candidato dalla dashboard, e il sistema genera automaticamente un link unico. Il candidato lo apre da qualsiasi dispositivo e compila in autonomia.',
   },
   {
-    q: 'I dati sono sicuri?',
+    q: '🔒 I dati sono sicuri?',
     a: 'Assolutamente. Tutti i dati sono crittografati, conservati su server europei e trattati nel pieno rispetto del GDPR. Il consenso del candidato viene raccolto prima dell\'assessment.',
   },
   {
-    q: 'Posso usarlo per il mio team attuale?',
+    q: '👥 Posso usarlo per il mio team attuale?',
     a: 'Certo. TalentProfile non serve solo per la selezione: puoi mappare il profilo psicologico dei tuoi collaboratori attuali per ottimizzare ruoli, team building e percorsi di crescita.',
   },
   {
-    q: 'Quanto costa?',
+    q: '💰 Quanto costa?',
     a: 'Offriamo piani flessibili basati sul numero di assessment. Richiedi una demo per ricevere un preventivo personalizzato in base alle tue esigenze.',
   },
   {
-    q: 'Che differenza c\'è rispetto a un test della personalità generico?',
+    q: '🔍 Che differenza c\'è rispetto a un test generico?',
     a: 'I test generici danno etichette vaghe. TalentProfile fornisce un profilo psicologico profondo con compatibilità ruolo, analisi dei rischi operativi e una guida concreta al colloquio — tutto in un unico report.',
   },
 ];
 
 const FOR_NOT_FOR = {
   not: [
-    'Assumi solo per urgenza senza voler cambiare metodo',
+    'Assumi solo per urgenza e non vuoi cambiare metodo',
     'Pensi che il curriculum basti a capire una persona',
     'Non vuoi investire nella qualità della selezione',
+    'Cerchi una soluzione magica che faccia tutto da sola',
+    'Non sei disposto a usare i dati per prendere decisioni',
   ],
   yes: [
-    'Vuoi smettere di assumere a sensazione',
+    'Vuoi smettere di assumere a sensazione e iniziare con i dati',
     'Cerchi uno strumento scientifico per le tue decisioni HR',
-    'Vuoi ridurre il turnover e costruire team stabili',
+    'Vuoi ridurre il turnover e costruire team stabili nel tempo',
+    'Sai che le persone giuste fanno crescere l\'azienda — e quelle sbagliate la distruggono',
+    'Vuoi anche gestire e sviluppare il team attuale, non solo selezionare',
   ],
 };
 
 /* ─── NEW DATA: Lettera Aperta ─── */
-const LETTERA_DOMANDE = [
-  'Quante volte hai assunto qualcuno che al colloquio sembrava perfetto... e dopo 3 mesi era un disastro?',
-  'Quante volte hai perso il candidato giusto perché non avevi dati per decidere in fretta?',
-  'Quante volte hai sentito dire: "Tanto il CV parla chiaro..." — e poi il CV non aveva detto NIENTE?',
+const LETTERA_PARAGRAPHS = [
+  'Se stai leggendo questa pagina è perché conosci la frustrazione di assumere la persona sbagliata. L\'hai vissuta in prima persona — forse più di una volta.',
+  'Non è colpa tua. È che fino ad oggi non avevi uno strumento che ti permettesse di vedere cosa c\'è sotto il curriculum. Quello che il candidato non ti dice al colloquio — perché non lo sa nemmeno lui.',
+  'TalentProfile non misura la persona. Misura il software mentale che ha sviluppato in anni di esperienze. Come reagisce sotto pressione? Come gestisce le relazioni? Ha la struttura per quel ruolo — o è solo bravo a recitare la parte?',
+  '242 domande. 15 tratti misurati. 24 sindromi comportamentali identificate. Report istantaneo.',
 ];
 
 /* ─── NEW DATA: Buona Notizia ─── */
@@ -290,67 +295,70 @@ const CASE_STUDIES = [
   {
     company: 'Tech Startup',
     size: '25 dipendenti',
+    sector: 'Settore: Software B2B',
     badge: '-40%',
-    badgeLabel: 'Turnover',
+    badgeLabel: 'Riduzione turnover',
     desc: 'Assumevano a sensazione, 1 errore su 3. Con TalentProfile: zero errori di selezione in 12 mesi.',
     results: ['Zero errori di hiring in 12 mesi', 'Tempo di onboarding dimezzato', 'Team più coeso e produttivo'],
   },
   {
     company: 'Gruppo Industriale',
     size: '200 dipendenti',
+    sector: 'Settore: Manifatturiero',
     badge: '-60%',
     badgeLabel: 'Tempo selezione',
     desc: 'Il processo di selezione durava 3 settimane. Ora decidono in 3 giorni con dati oggettivi.',
-    results: ['Da 3 settimane a 3 giorni', 'Decisioni basate su dati reali', 'HR team più efficiente'],
+    results: ['Da 3 settimane a 3 giorni', 'Decisioni basate su dati reali', 'HR team più efficiente del 70%'],
   },
   {
     company: 'Retail Chain',
     size: '50 punti vendita',
-    badge: '-35%',
-    badgeLabel: 'Costo hiring',
-    desc: 'Il costo per assunzione sbagliata era 2x lo stipendio annuo. Ridotto del 35% nel primo anno.',
-    results: ['Risparmio di €180K nel primo anno', 'Turnover store manager -50%', 'Selezione standardizzata su tutti i punti vendita'],
+    sector: 'Settore: Retail / GDO',
+    badge: '€180K',
+    badgeLabel: 'Risparmio nel primo anno',
+    desc: 'Il costo per assunzione sbagliata era 2x lo stipendio annuo. Ridotto drasticamente nel primo anno.',
+    results: ['Costo hiring ridotto del 35%', 'Turnover store manager -50%', 'Selezione standardizzata su tutti i PV'],
   },
 ];
 
 /* ─── NEW DATA: Tabella Comparativa ─── */
 const COMPARISON_ROWS = [
-  { aspect: 'Metodo', others: 'Colloquio + CV', tp: 'Assessment psicologico validato' },
-  { aspect: 'Tempo', others: 'Settimane di valutazione', tp: '15 minuti, report istantaneo' },
-  { aspect: 'Oggettività', others: 'Opinioni soggettive', tp: 'Scale psicologiche validate con analisi quantitativa' },
-  { aspect: 'Profondità', others: 'Superficie (competenze)', tp: 'Psicologia profonda (identità, difese, attaccamento)' },
-  { aspect: 'Role Matching', others: 'Manuale e approssimativo', tp: 'Automatico su 30+ ruoli' },
-  { aspect: 'Colloquio', others: 'Domande generiche', tp: 'Guida personalizzata dall\'assessment' },
-  { aspect: 'Report', others: 'Appunti informali', tp: 'PDF esecutivo professionale' },
+  { aspect: 'Strumento', others: 'Colloquio + CV', tp: 'Assessment 242 item validato' },
+  { aspect: 'Tempo', others: 'Settimane', tp: '15 minuti, report istantaneo' },
+  { aspect: 'Oggettività', others: 'Opinioni soggettive', tp: 'Scale psicologiche validate' },
+  { aspect: 'Profondità', others: 'Superficie (competenze)', tp: 'Psicologia profonda (identità, difese)' },
+  { aspect: 'Role Matching', others: 'Manuale, approssimativo', tp: 'Automatico su 30+ ruoli' },
+  { aspect: 'Colloquio', others: 'Domande generiche', tp: 'Guida personalizzata' },
+  { aspect: 'Post-assunzione', others: 'Speri che vada bene', tp: 'Piano inserimento su misura' },
 ];
 
 /* ─── NEW DATA: Urgency Timeline ─── */
 const URGENCY_STEPS = [
   {
-    period: 'Mese 1-3',
-    title: 'L\'assunzione sembra ok',
-    desc: 'Il nuovo assunto è in luna di miele. I problemi non si vedono ancora.',
+    period: 'Mese 1–3',
+    title: 'L\'assunzione "sembra" ok',
+    desc: 'Luna di miele. Il nuovo assunto sorride, annuisce, fa bella figura. I problemi ci sono già — ma non li vedi ancora. Il suo "software mentale" è in esecuzione, ma non l\'hai mai testato.',
     color: 'text-green-400',
     bgColor: 'bg-green-500',
   },
   {
-    period: 'Mese 3-6',
+    period: 'Mese 3–6',
     title: 'I segnali arrivano',
-    desc: 'Performance sotto le aspettative, conflitti nel team, feedback negativi dai colleghi.',
+    desc: 'Performance sotto le aspettative. Conflitti con i colleghi. Non regge la pressione. Non gestisce il team. I feedback negativi iniziano ad accumularsi — e tu inizi a chiederti: "Ma al colloquio era un\'altra persona?"',
     color: 'text-yellow-400',
     bgColor: 'bg-yellow-500',
   },
   {
-    period: 'Mese 6-12',
+    period: 'Mese 6–12',
     title: 'Il costo esplode',
-    desc: 'Turnover, riassunzione, formazione persa. Costo reale: fino a 2x lo stipendio annuo.',
+    desc: 'Turnover, riassunzione, formazione persa. Costo reale: fino a 2x lo stipendio annuo. Circa €30.000 bruciati. E il tempo? Quello non torna.',
     color: 'text-orange-400',
     bgColor: 'bg-orange-500',
   },
   {
-    period: 'Oltre 1 anno',
-    title: 'Il danno è fatto',
-    desc: 'Team destabilizzato, cultura aziendale compromessa, talenti che se ne vanno.',
+    period: 'Oltre 12 mesi',
+    title: 'Il danno è strutturale',
+    desc: 'Team destabilizzato. Cultura aziendale compromessa. I talenti veri — quelli che avevi faticato a trovare — se ne vanno. Non per lo stipendio. Per l\'ambiente tossico che quel singolo errore ha creato.',
     color: 'text-red-400',
     bgColor: 'bg-red-500',
   },
@@ -377,7 +385,7 @@ export default function Home() {
   );
 
   /* ─── Counters ─── */
-  const c1 = useCountUp(100);
+  const c1 = useCountUp(1000);
   const c2 = useCountUp(5000);
   const c3 = useCountUp(30);
   const c4 = useCountUp(15);
@@ -478,12 +486,12 @@ export default function Home() {
               Il sistema di assessment HR più completo d'Italia
             </p>
             <h1 className="text-4xl sm:text-5xl md:text-7xl font-black text-white leading-tight mb-6">
-              <span className="text-accent">BASTA</span> Assunzioni Sbagliate.
+              In 15 minuti sai chi hai davvero di fronte.
               <br className="hidden sm:block" />
-              <span className="block mt-2">Scopri Chi Hai Davvero di Fronte.</span>
+              <span className="block mt-2">Prima ancora del colloquio.</span>
             </h1>
             <p className="text-lg md:text-xl text-blue-100 leading-relaxed max-w-2xl mb-10">
-              In 15 minuti sai chi hai davvero di fronte. Il profilo psicologico completo del candidato — prima ancora del colloquio.
+              Il profilo psicologico completo del candidato — non le solite 4 domande generiche. 242 item, 15 tratti misurati, 24 sindromi comportamentali identificate. Report istantaneo, confronto candidati, guida al colloquio personalizzata.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-12">
               <Button
@@ -504,7 +512,7 @@ export default function Home() {
             </div>
             <div className="flex flex-wrap justify-center lg:justify-start gap-6 text-sm text-blue-200">
               <span className="flex items-center gap-2">
-                <Building2 className="h-4 w-4 text-accent" /> 100+ Aziende
+                <Building2 className="h-4 w-4 text-accent" /> 1.000+ Aziende clienti
               </span>
               <span className="flex items-center gap-2">
                 <Clock className="h-4 w-4 text-accent" /> 15 min per test
@@ -532,25 +540,23 @@ export default function Home() {
         <div className="absolute -bottom-32 -left-32 w-[500px] h-[500px] rounded-full bg-accent/10 blur-3xl" />
       </section>
 
-      {/* ═══ 3. LETTERA APERTA EMOTIVA (NUOVA) ═══ */}
+      {/* ═══ 3. LETTERA APERTA ═══ */}
       <Section className="py-20 md:py-28 bg-background" id="lettera">
         <div className="max-w-4xl mx-auto px-4 md:px-8">
-          <div className="space-y-8">
-            {LETTERA_DOMANDE.map((domanda, i) => (
-              <div key={i} className="flex items-start gap-4 md:gap-6">
-                <div className="shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-full bg-accent/15 flex items-center justify-center animate-pulse">
-                  <HelpCircle className="h-5 w-5 md:h-6 md:w-6 text-accent" />
-                </div>
-                <p className="text-xl md:text-2xl leading-relaxed text-foreground/90 pt-1">
-                  {domanda}
-                </p>
-              </div>
+          <h3 className="text-2xl md:text-3xl font-bold text-foreground mb-8 italic">Caro imprenditore,</h3>
+          <div className="space-y-6">
+            {LETTERA_PARAGRAPHS.map((paragrafo, i) => (
+              <p key={i} className="text-lg md:text-xl leading-relaxed text-foreground/90">
+                {i === LETTERA_PARAGRAPHS.length - 1 ? <strong>{paragrafo}</strong> : paragrafo}
+              </p>
             ))}
           </div>
-          <div className="mt-12 pt-8 border-t border-border">
-            <p className="text-xl md:text-2xl font-bold text-foreground leading-relaxed text-center">
-              La verità è questa: <span className="text-destructive">senza dati reali sulla persona, stai scommettendo il futuro della tua azienda su una sensazione.</span>
-            </p>
+          <p className="text-lg text-muted-foreground mt-4 italic">
+            Non è magia. È scienza applicata alle decisioni più importanti della tua azienda: le persone che ci metti dentro.
+          </p>
+          <div className="mt-10 pt-6 border-t border-border">
+            <p className="text-xl font-bold text-foreground">Il Team TalentProfile</p>
+            <p className="text-sm text-muted-foreground mt-1">Psicologia del lavoro applicata alla realtà dell'impresa</p>
           </div>
         </div>
       </Section>
@@ -558,11 +564,14 @@ export default function Home() {
       {/* ═══ 4. PROBLEMA ═══ */}
       <Section className="py-20 md:py-28 bg-background" id="problema">
         <div className="max-w-6xl mx-auto px-4 md:px-8">
+          <p className="text-sm uppercase tracking-widest text-destructive font-semibold text-center mb-3">
+            Il Problema
+          </p>
           <h2 className="text-3xl md:text-5xl font-bold text-center mb-4 text-foreground">
-            Se il tuo processo di selezione non funziona,<br className="hidden md:block" /> è quasi sempre per questi 4 motivi
+            Stai scommettendo il futuro della tua azienda<br className="hidden md:block" /> su una sensazione.
           </h2>
           <p className="text-center text-muted-foreground text-lg mb-14 max-w-2xl mx-auto">
-            Li riconosci? Allora sai già quanto ti costano.
+            Lo sai anche tu. Al colloquio sembrava perfetto. Dopo 3 mesi era un disastro. Il CV diceva tutto — tranne la verità. Quante volte è successo?
           </p>
           <div className="grid sm:grid-cols-2 gap-6">
             {PROBLEMS.map((p, i) => (
@@ -639,9 +648,12 @@ export default function Home() {
           <p className="text-sm uppercase tracking-widest text-accent font-semibold text-center mb-3">
             Come Funziona
           </p>
-          <h2 className="text-3xl md:text-5xl font-bold text-center mb-16 text-foreground">
+          <h2 className="text-3xl md:text-5xl font-bold text-center mb-4 text-foreground">
             Il Metodo TalentProfile in 4 Step
           </h2>
+          <p className="text-center text-muted-foreground text-lg mb-16 max-w-2xl mx-auto">
+            Dal link al report completo. 15 minuti. Zero logistica. Dati che nessun colloquio potrebbe darti.
+          </p>
           <div className="flex flex-col lg:flex-row gap-12 lg:gap-16">
             <div className="lg:w-3/5 relative">
               {/* vertical line */}
@@ -680,9 +692,12 @@ export default function Home() {
           <p className="text-sm uppercase tracking-widest text-accent font-semibold text-center mb-3">
             Funzionalità
           </p>
-          <h2 className="text-3xl md:text-5xl font-bold text-center mb-14 text-foreground">
+          <h2 className="text-3xl md:text-5xl font-bold text-center mb-4 text-foreground">
             Tutto quello che ti serve per assumere meglio
           </h2>
+          <p className="text-center text-muted-foreground text-lg mb-14 max-w-2xl mx-auto">
+            Non un test generico. Un sistema completo di intelligence HR costruito per darti vantaggio competitivo nelle decisioni sulle persone.
+          </p>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {FEATURES.map((f, i) => (
               <Card
@@ -710,12 +725,12 @@ export default function Home() {
             <h2 className="text-3xl md:text-5xl font-bold text-center mb-16 text-white">
               I Numeri Che Contano
             </h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-8 text-center">
               {[
-                { ref: c1.ref, val: c1.value, suffix: '+', label: 'Aziende' },
+                { ref: c1.ref, val: c1.value.toLocaleString('it-IT'), suffix: '+', label: 'Aziende clienti' },
                 { ref: c2.ref, val: c2.value.toLocaleString('it-IT'), suffix: '+', label: 'Assessment completati' },
-                { ref: c3.ref, val: c3.value, suffix: '+', label: 'Ruoli Mappati' },
-                { ref: c4.ref, val: c4.value, suffix: ' min', label: 'Tempo Medio Test' },
+                { ref: c3.ref, val: c3.value, suffix: '+', label: 'Ruoli mappati' },
+                { ref: c4.ref, val: c4.value, suffix: ' min', label: 'Tempo per test' },
               ].map((n, i) => (
                 <div key={i} ref={n.ref}>
                   <div className="text-4xl md:text-6xl font-black text-accent mb-2">
@@ -724,6 +739,10 @@ export default function Home() {
                   <div className="text-blue-200 text-sm md:text-base font-medium">{n.label}</div>
                 </div>
               ))}
+              <div>
+                <div className="text-4xl md:text-6xl font-black text-accent mb-2">.75/1</div>
+                <div className="text-blue-200 text-sm md:text-base font-medium">Validazione scientifica</div>
+              </div>
             </div>
           </div>
         </div>
@@ -733,11 +752,12 @@ export default function Home() {
       <Section className="py-20 md:py-28 bg-background" id="testimonianze">
         <div className="max-w-6xl mx-auto px-4 md:px-8">
           <p className="text-sm uppercase tracking-widest text-accent font-semibold text-center mb-3">
-            Cosa Dicono i Nostri Clienti
+            Testimonianze
           </p>
-          <h2 className="text-3xl md:text-5xl font-bold text-center mb-14 text-foreground">
-            Le aziende che scelgono TalentProfile assumono meglio
+          <h2 className="text-3xl md:text-5xl font-bold text-center mb-4 text-foreground">
+            Le aziende che scelgono TalentProfile
           </h2>
+          <p className="text-center text-muted-foreground text-lg mb-14 max-w-2xl mx-auto">assumono meglio</p>
           <div className="grid md:grid-cols-3 gap-6">
             {TESTIMONIALS.map((t, i) => (
               <Card key={i} className="p-6 md:p-8 border border-border">
@@ -794,7 +814,8 @@ export default function Home() {
                   <Building2 className="h-4 w-4 text-primary" />
                   <span className="font-bold text-foreground">{cs.company}</span>
                 </div>
-                <p className="text-sm text-muted-foreground mb-4">{cs.size}</p>
+                <p className="text-sm text-muted-foreground mb-1">{cs.size}</p>
+                <p className="text-xs text-accent font-medium mb-4">{cs.sector}</p>
                 <p className="text-foreground leading-relaxed mb-6">{cs.desc}</p>
                 {/* Results */}
                 <ul className="space-y-2">
@@ -818,9 +839,8 @@ export default function Home() {
             Il Confronto
           </p>
           <h2 className="text-3xl md:text-5xl font-bold text-center mb-14 text-foreground">
-            Perché Scegliere TalentProfile?
+            Perché TalentProfile è diverso
           </h2>
-          
           {/* Desktop table */}
           <div className="hidden md:block overflow-hidden rounded-xl border border-border">
             <table className="w-full">
@@ -829,12 +849,12 @@ export default function Home() {
                   <th className="text-left p-4 font-bold text-foreground bg-muted/50 w-1/4">Aspetto</th>
                   <th className="text-left p-4 font-bold text-destructive bg-destructive/5 w-[37.5%]">
                     <div className="flex items-center gap-2">
-                      <XCircle className="h-5 w-5" /> Gli Altri
+                      <XCircle className="h-5 w-5" /> Metodo tradizionale
                     </div>
                   </th>
                   <th className="text-left p-4 font-bold text-success bg-success/5 w-[37.5%]">
                     <div className="flex items-center gap-2">
-                      <CheckCircle2 className="h-5 w-5" /> TalentProfile
+                      <CheckCircle2 className="h-5 w-5" /> TalentProfile 360°
                     </div>
                   </th>
                 </tr>
@@ -885,9 +905,15 @@ export default function Home() {
       {/* ═══ 12. PER CHI È / NON È ═══ */}
       <Section className="py-20 md:py-28 bg-secondary/50" id="perchi">
         <div className="max-w-5xl mx-auto px-4 md:px-8">
-          <h2 className="text-3xl md:text-5xl font-bold text-center mb-14 text-foreground">
+          <p className="text-sm uppercase tracking-widest text-accent font-semibold text-center mb-3">
+            Qualificazione
+          </p>
+          <h2 className="text-3xl md:text-5xl font-bold text-center mb-4 text-foreground">
             TalentProfile fa per te?
           </h2>
+          <p className="text-center text-muted-foreground text-lg mb-14 max-w-2xl mx-auto">
+            Non è per tutti. Ed è giusto così. Ecco come capire se siamo il tuo strumento.
+          </p>
           <div className="grid md:grid-cols-2 gap-6">
             {/* NON è per te */}
             <Card className="p-6 md:p-8 border-2 border-destructive/30 bg-destructive/5">
@@ -928,11 +954,11 @@ export default function Home() {
             <div className="flex items-center justify-center gap-3 mb-3">
               <AlertTriangle className="h-5 w-5 text-orange-400" />
               <p className="text-sm uppercase tracking-widest text-orange-300 font-semibold">
-                L'urgenza è reale
+                Il Costo Dell'Inazione
               </p>
             </div>
             <h2 className="text-3xl md:text-5xl font-bold text-center mb-16 text-white">
-              Cosa Succede Se Continui<br className="hidden md:block" /> ad Assumere Senza Dati?
+              Cosa succede se continui<br className="hidden md:block" /> ad assumere senza dati?
             </h2>
 
             <div className="relative">
@@ -984,9 +1010,12 @@ export default function Home() {
           <p className="text-sm uppercase tracking-widest text-accent font-semibold text-center mb-3">
             FAQ
           </p>
-          <h2 className="text-3xl md:text-5xl font-bold text-center mb-14 text-foreground">
+          <h2 className="text-3xl md:text-5xl font-bold text-center mb-4 text-foreground">
             Domande Frequenti
           </h2>
+          <p className="text-center text-muted-foreground text-lg mb-14 max-w-2xl mx-auto">
+            Le stesse domande che ci fanno tutti. Le risposte sincere che diamo sempre.
+          </p>
           <Accordion type="single" collapsible className="space-y-2">
             {FAQ_DATA.map((f, i) => (
               <AccordionItem
@@ -1019,11 +1048,15 @@ export default function Home() {
           loading="lazy"
         />
         <div className="max-w-3xl mx-auto px-4 md:px-8 relative z-10">
+          <p className="text-sm uppercase tracking-widest text-white/70 font-semibold mb-4">Inizia Ora</p>
           <h2 className="text-3xl md:text-5xl font-black text-white mb-6">
             Il futuro del tuo team inizia da qui.
           </h2>
-          <p className="text-lg md:text-xl text-white/90 mb-10 leading-relaxed">
-            Smetti di assumere alla cieca. Richiedi una demo gratuita e scopri come TalentProfile può trasformare il tuo processo di selezione.
+          <p className="text-lg md:text-xl text-white/90 mb-4 leading-relaxed">
+            Ogni giorno che passi senza dati oggettivi sulle persone è un giorno in cui rischi un'altra assunzione sbagliata. Un altro €30.000 bruciato. Un altro talento perso.
+          </p>
+          <p className="text-base text-white/80 mb-10 leading-relaxed">
+            La demo è gratuita, dura 30 minuti e ti mostra esattamente come funziona il sistema sulla tua realtà. Nessun impegno. Nessun venditore aggressivo. Solo dati.
           </p>
           <Button
             size="lg"
