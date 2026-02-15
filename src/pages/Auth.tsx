@@ -20,6 +20,8 @@ import {
 export default function Auth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [regEmail, setRegEmail] = useState('');
+  const [regPassword, setRegPassword] = useState('');
   const [nome, setNome] = useState('');
   const [cognome, setCognome] = useState('');
   const [loading, setLoading] = useState(false);
@@ -75,7 +77,7 @@ export default function Auth() {
     setFieldErrors({});
     
     // Validate with Zod
-    const validation = registerSchema.safeParse({ nome, cognome, email, password });
+    const validation = registerSchema.safeParse({ nome, cognome, email: regEmail, password: regPassword });
     if (!validation.success) {
       const errors: Record<string, string> = {};
       validation.error.errors.forEach(err => {
@@ -188,7 +190,7 @@ export default function Auth() {
           <CardDescription className="text-sm">Sistema di Assessment HR</CardDescription>
         </CardHeader>
         <CardContent className="px-4 sm:px-6">
-          <Tabs defaultValue="candidate" className="space-y-4">
+          <Tabs defaultValue="candidate" className="space-y-4" onValueChange={() => { setFieldErrors({}); setCandidateErrors({}); }}>
             <TabsList className="grid w-full grid-cols-3 h-11">
               <TabsTrigger value="candidate" className="flex items-center justify-center gap-1.5 h-full text-xs sm:text-sm">
                 <User className="h-4 w-4 shrink-0" />
@@ -329,8 +331,8 @@ export default function Auth() {
                   <Input 
                     id="reg-email" 
                     type="email" 
-                    value={email} 
-                    onChange={e => setEmail(e.target.value)} 
+                    value={regEmail} 
+                    onChange={e => setRegEmail(e.target.value)} 
                     className={`h-11 text-base ${fieldErrors.email ? 'border-destructive' : ''}`}
                   />
                   {fieldErrors.email && (
@@ -343,8 +345,8 @@ export default function Auth() {
                     id="reg-password" 
                     type="password"
                     autoComplete="new-password"
-                    value={password} 
-                    onChange={e => setPassword(e.target.value)} 
+                    value={regPassword} 
+                    onChange={e => setRegPassword(e.target.value)} 
                     className={`h-11 text-base ${fieldErrors.password ? 'border-destructive' : ''}`}
                   />
                   {fieldErrors.password && (
