@@ -1,125 +1,109 @@
 
 
-# Correzioni e Completamenti della Mappa Interiore
+# Mappa Interiore -- Grafico a Candele e UX Upgrade
 
-## Problemi Identificati
+## Panoramica
 
-### 1. Calcoli: CORRETTI
-Ho verificato ogni formula con i tratti reali nel database (ORG=75, AUT=45, GP=35, ADS=52, DET=16, VEN=11, HRM=71, LDR=27, PRO=81, COM=31, ESP=8, RC=53, FIN=14, SUC=69, PRI=35):
-- Identita-Risultato = 1/10 (corretto)
-- Regolazione Emotiva = 9/10 (corretto)
-- Attaccamento Sicuro con score 5 (corretto)
-- Difese Equilibrate (corretto)
-- Bisogno Primario = Competenza con score 5 (corretto)
-
-Il DOCX con GP=-26, PRO=16, RC=71 si riferisce a un test diverso, NON e' quello presente nel database.
-
-### 2. Narrativa "Equilibrato" troppo generica (PROBLEMA PRINCIPALE)
-Il profilo "equilibrato" produce testi generici come "profilo psicologico equilibrato, dimensioni nella norma." Ma il report di riferimento per gli stessi tratti dice: "una persona che ha separato il proprio valore intrinseco dai risultati che ottiene. Quando fallisce, non si frantuma -- impara." La differenza e' enorme.
-
-Il problema: la funzione `generateNarrativa` usa template fissi per profilo, senza considerare i tratti specifici. Un profilo "equilibrato" con ID=1 e RE=9 (punteggi eccezionali) riceve lo stesso testo generico di qualsiasi altro "equilibrato".
-
-### 3. Sezioni mancanti dal manuale
-Confrontando con il documento DOCX completo e il Capitolo 6-7 del manuale:
-
-- **Azioni Concrete per il Piano di Crescita** (4 fasi) -- MANCANTE
-- **Domande Colloquio di Secondo Livello** -- MANCANTE
-- **Override al Piano di Crescita** -- MANCANTE
-- **Attendibilita del Test** (con CTRL) -- MANCANTE (puo' essere aggiunta in futuro)
-
-### 4. Pattern Combinatorio mancante
-Per Florin con RE=9, difese null (ma simile a sublimazione), sicuro: il Pattern 7 ("Un punto di forza raro nel team") non scatta perche' la difesa e' null. Il report di riferimento dice che il profilo "funziona come una sublimazione naturale" ma il sistema non lo rileva. Serve una condizione piu' flessibile.
+Aggiunta di un grafico a candele (barre bidirezionali) per le 5 dimensioni profonde e restyling completo della tab per un'esperienza visiva piu' professionale e coinvolgente.
 
 ---
 
-## Piano di Correzioni
+## 1. Grafico a Candele delle Dimensioni
 
-### File 1: `src/lib/mappaInteriore.ts` -- Miglioramenti logica
+Un nuovo componente grafico con barre orizzontali bidirezionali per le 5 dimensioni, ispirato al `CandleChart` gia' esistente nel progetto ma adattato per le dimensioni psicologiche della Mappa Interiore.
 
-**A. Narrativa "equilibrato" personalizzata in base ai tratti**
+**Struttura del grafico:**
+- Asse Y: le 5 dimensioni (Identita-Risultato, Regolazione Emotiva, Attaccamento Sicuro, Difese, Bisogno Primario)
+- Asse X: scala 0-10
+- Barre orizzontali colorate per valore:
+  - Identita-Risultato: colori **invertiti** (verde 0-3, ambra 4-6, arancione/rosso 7-10 -- basso = positivo)
+  - Regolazione Emotiva: colori normali (rosso 0-3, ambra 4-6, verde 7-10)
+  - Attaccamento: score del dominante (verde se sicuro, ambra se ansioso/evitante, rosso se disorganizzato)
+  - Difese: 0 se equilibrate (verde), score stimato se attive (ambra/rosso)
+  - Bisogno Primario: score grezzo (neutro, blu/viola)
+- Zone di sfondo colorate (rosso chiaro, giallo chiaro, verde chiaro) come nel TraitCandleChart
+- Linea di riferimento a score 5 (centro scala)
+- Tooltip ricco con etichetta qualitativa e spiegazione breve
+- Label con valore numerico alla fine di ogni barra
+- Etichette complete sulle righe
 
-Invece di un template generico, la funzione `generateNarrativa` per il profilo `equilibrato` analizzera' i tratti specifici e generera' testi diversi in base a:
-- Se ID <= 2 (identita' stabile rara): narrativa che evidenzia la separazione sana tra valore personale e risultati
-- Se RE >= 8 (regolazione eccellente): narrativa che evidenzia la capacita' di restare lucidi sotto pressione
-- Se ESP < 10 (rete minima): menzione dell'area relazionale come punto di crescita
-- Se DET < 20 (assertivita' bassa): menzione della comunicazione come area di sviluppo
-- Combinazione di questi fattori per testi unici e specifici
+Il grafico viene posizionato in cima alla tab, subito dopo il titolo, sostituendo le 2 progress bar attuali e integrando visivamente tutte e 5 le dimensioni in un'unica vista.
 
-Esempio per Florin (ID=1, RE=9, ESP=8, DET=16):
-- chi_e_nel_profondo: "[Nome] e' una persona che ha separato il proprio valore intrinseco dai risultati. Quando fallisce, non si frantuma -- impara. La sua forza non e' nel carisma da palcoscenico ma nella capacita' sistematica di trasformare problemi in soluzioni. Il suo tallone d'Achille non e' emotivo ma relazionale: tende a fare da solo cio' che potrebbe delegare."
-- cosa_lo_guida: "Il motore principale e' sentirsi capace e vedere che il lavoro produce risultati concreti. Non lavora per il riconoscimento ma per costruire cose che funzionano."
-- la_chiave: "Non devi fare tutto tu per farlo bene -- devi insegnare ad altri a farlo come lo faresti tu."
+## 2. Restyling UX Completo
 
-**B. Pattern 7 piu' flessibile**
+**A. Header della tab**
+- Titolo piu' grande con sottotitolo "Report di Psicologia Profonda"
+- Profilo narrativo mostrato come badge prominente sotto il titolo (es. "IL COSTRUTTORE SOTTO PRESSIONE" con sfondo colorato)
 
-Aggiungere una variante del Pattern 7 che scatta anche quando:
-- RE >= 8 AND attaccamento sicuro AND difese null (nessuna difesa disfunzionale)
-Questo copre il caso di persone come Florin che sono "naturalmente sublimanti" senza che il sistema lo rilevi come difesa.
+**B. Sezione Dimensioni (dopo il grafico)**
+- I 3 badge (Stile relazionale, Reazione pressione, Motore primario) diventano card pill piu' grandi con icone colorate e sfondo leggero
+- Il collapsible per l'attaccamento dettagliato rimane ma con stile migliorato (bordo sinistro colorato, punteggi con mini-barre)
 
-**C. Aggiungere domande colloquio aggiuntive**
+**C. Card Narrative**
+- Sfondo leggero personalizzato per ogni card (non solo bordo sinistro)
+- Icone piu' grandi e colorate
+- Titoli piu' prominenti
+- Testo con interlinea piu' generosa per leggibilita'
 
-Nuovo campo nel risultato: `domande_colloquio_aggiuntive` con array di oggetti {area, priorita, domande[]}.
-Le domande vengono generate in base alle dimensioni (Cap. 7 del manuale):
-- Se RE <= 4: domande su gestione emotiva
-- Se ID >= 7: domande su separazione identita-risultato
-- Se attaccamento evitante: domande su relazioni
-- Se GP < 21: domande sulla situazione attuale (con delicatezza)
-- Se difesa razionalizzazione: domande su consapevolezza di se'
+**D. Card "La Chiave"**
+- Piu' enfatizzata: sfondo gradiente viola, testo piu' grande, icona chiave animata (pulse leggero)
+- Bordo doppio con ombra
 
-**D. Aggiungere override piano crescita**
+**E. Motiva / Blocca / Teme**
+- Card con sfondo colorato leggero (verde chiaro, rosso chiaro, ambra chiaro) invece del bianco
+- Icone colorate per ogni bullet point
+- Separatori visuali tra le card
 
-Nuovo campo: `override_piano_crescita` con array di stringhe.
-Generati in base a (Cap. 6 del manuale):
-- Se ID >= 7: "Lavorare sulla separazione identita-risultato in Fase 2"
-- Se RE <= 3: "Priorita Fase 1: stabilizzazione emotiva, ridurre carico 20-30%"
-- Se attaccamento ansioso: "Feedback rassicurante ogni 1-2 settimane"
-- Se attaccamento evitante: "Comunicazione breve e fattuale"
-- Se difese mature: "Segnalare come punto di forza"
+**F. Box Errori**
+- Piu' prominente con icona piu' grande
+- Ogni errore con numero in cerchio rosso
+- Bordo sinistro rosso spesso
 
-### File 2: `src/components/MappaInterioreTab.tsx` -- Nuove sezioni UI
+**G. Pattern Combinatori**
+- Card con icona fulmine colorata
+- Sfondo leggero (verde se positivo, ambra se attenzione)
+- Azione in box separato con sfondo grigio chiaro
 
-**A. Sezione "Domande Colloquio di Secondo Livello"**
-- Dopo i Pattern Combinatori
-- Card con icona Search/MessageCircle
-- Raggruppate per area con badge di priorita' (ALTA/MEDIA/CRITICA)
-- Ogni domanda come list item
+**H. Domande Colloquio**
+- Badge priorita' piu' visibili con colore pieno
+- Domande in blockquote stilizzato
+- Separatore tra gruppi
 
-**B. Sezione "Azioni per il Piano di Crescita"**
-- Prima del disclaimer
-- Card con sfondo leggero
-- Override specifici generati dalla logica
+**I. Azioni Piano di Crescita**
+- Card con step numerati in cerchi colorati
+- Timeline visiva verticale tra gli step
 
-**C. Sezione "Punteggi Attaccamento dettagliati"**
-- Tooltip o collapsible sotto il badge "Stile relazionale"
-- Mostra tutti e 4 gli score (Sicuro X, Ansioso Y, Evitante Z, Disorganizzato W)
-- Come nel report di riferimento: "componente ansiosa 2/10, evitante 2/10"
-
-### File 3: `src/pages/CandidatoDettaglio.tsx` -- Nessuna modifica
-
-Il componente e' gia' correttamente integrato. La Tab riceve tutti i dati necessari.
+**J. Disclaimer**
+- Piu' discreto, sfondo grigio piu' chiaro, font piu' piccolo
 
 ---
 
-## Tipo di ritorno aggiornato
+## File da modificare
+
+### `src/components/MappaInterioreTab.tsx`
+- Aggiungere il grafico a candele usando recharts (BarChart layout="vertical") direttamente nel componente
+- Restyling completo di tutte le sezioni come descritto sopra
+- Il grafico usa i dati gia' calcolati in `MappaInterioreResult.dimensioni`
+
+### `src/lib/mappaInteriore.ts`
+- Nessuna modifica alla logica di calcolo
+- Eventuale aggiunta di una funzione helper `getDimensioniChartData()` che converte i risultati delle 5 dimensioni nel formato richiesto dal grafico recharts
+
+---
+
+## Dettaglio tecnico del grafico
+
+I dati per il grafico vengono costruiti dal risultato `MappaInterioreResult`:
 
 ```text
-MappaInterioreResult {
-  ... campi esistenti ...
-  + domande_colloquio_aggiuntive: { area: string; priorita: string; domande: string[] }[]
-  + override_piano_crescita: string[]
-}
+[
+  { name: "Identita-Risultato", value: 1, label: "Identita stabile", color: verde (invertito) },
+  { name: "Regolazione Emotiva", value: 9, label: "Eccellente", color: verde },
+  { name: "Attaccamento", value: 6, label: "Sicuro", color: verde },
+  { name: "Difese", value: 0, label: "Equilibrate", color: verde },
+  { name: "Bisogno Primario", value: 5, label: "Sicurezza", color: blu },
+]
 ```
 
----
-
-## Verifica attesa per Florin Ovidiu (tratti nel DB)
-
-Con i tratti reali (ORG=75, AUT=45, GP=35, ADS=52, DET=16, VEN=11, HRM=71, LDR=27, PRO=81, COM=31, ESP=8, RC=53, FIN=14, SUC=69, PRI=35):
-
-- ID = 1/10, RE = 9/10 (invariati, corretti)
-- Profilo "equilibrato" ma con narrativa PERSONALIZZATA che parla della separazione sana identita-risultato, della regolazione eccellente, della rete relazionale da costruire
-- La Chiave: "Non devi fare tutto tu per farlo bene -- devi insegnare ad altri a farlo come lo faresti tu."
-- Pattern 7 variante: "Un punto di forza raro nel team" (scattera' perche' RE >= 8 AND sicuro AND nessuna difesa disfunzionale)
-- Domande colloquio: nessuna di priorita' ALTA (profilo sano), solo area "Rete di Supporto" priorita' MEDIA (ESP=8)
-- Override piano: "Segnalare come punto di forza" (nessuna difesa disfunzionale con regolazione eccellente)
+Il grafico usa `ResponsiveContainer`, `BarChart` con `layout="vertical"`, `ReferenceArea` per le zone colorate, `ReferenceLine` a x=5, e `Cell` per colori condizionali per ogni barra. Tooltip personalizzato che mostra il significato qualitativo del punteggio.
 
