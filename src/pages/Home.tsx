@@ -34,6 +34,7 @@ import {
   Shield,
   TrendingUp,
   Calculator,
+  Mail,
 } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 
@@ -119,12 +120,28 @@ function scrollTo(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
 }
 
+/* ─── Mini CTA component ─── */
+function MiniCTA({ text, subtext }: { text: string; subtext?: string }) {
+  return (
+    <div className="text-center mt-12 mb-4">
+      {subtext && <p className="text-muted-foreground text-sm mb-3">{subtext}</p>}
+      <Button
+        size="lg"
+        className="bg-accent hover:bg-accent/90 text-accent-foreground text-lg px-8 py-6 rounded-xl shadow-lg"
+        onClick={() => scrollTo('cta-finale')}
+      >
+        {text} <ArrowRight className="ml-2 h-5 w-5" />
+      </Button>
+    </div>
+  );
+}
+
 /* ─── DATA ─── */
 const NAV_LINKS = [
+  { label: 'Il Problema', id: 'problema' },
   { label: 'Calcolatore', id: 'calcolatore' },
   { label: 'Funzionalità', id: 'funzionalita' },
   { label: 'Metodo', id: 'metodo' },
-  { label: 'Numeri', id: 'numeri' },
   { label: 'Testimonianze', id: 'testimonianze' },
   { label: 'FAQ', id: 'faq' },
 ];
@@ -212,19 +229,25 @@ const TESTIMONIALS = [
   {
     name: 'Marco Rinaldi',
     role: 'HR Director — Gruppo Industriale (200 dip.)',
-    quote: 'Da quando usiamo TalentProfile, il turnover nei primi 6 mesi è calato del 40%. Finalmente abbiamo dati oggettivi per le nostre decisioni — e il team HR ha smesso di navigare a vista.',
+    before: 'Turnover al 35% nei primi 6 mesi. Selezionavamo con colloqui standard e CV. Una roulette.',
+    after: 'Turnover calato del 40%. Ogni assunzione è supportata da dati oggettivi. Il team HR ha smesso di navigare a vista.',
+    quote: 'Da quando usiamo TalentProfile, il turnover nei primi 6 mesi è calato del 40%. Finalmente abbiamo dati oggettivi per le nostre decisioni.',
     stars: 5,
   },
   {
     name: 'Chiara Fontana',
     role: 'CEO — Tech Startup (25 dip.)',
-    quote: 'Assumevamo a sensazione e sbagliavamo 1 volta su 3. Con TalentProfile abbiamo ridotto gli errori di selezione quasi a zero. In 12 mesi, zero errori di hiring. Il ROI? Incalcolabile.',
+    before: 'Sbagliavamo 1 assunzione su 3. Costo medio per errore: €28.000. Assumevamo "a pelle".',
+    after: 'Zero errori di hiring in 12 mesi. ROI incalcolabile. Ogni nuova risorsa performa dal primo mese.',
+    quote: 'Con TalentProfile abbiamo ridotto gli errori di selezione quasi a zero. Il ROI? Incalcolabile.',
     stars: 5,
   },
   {
     name: 'Luca Ferretti',
     role: 'Resp. Selezione — Retail Chain (50 PV)',
-    quote: 'La mappa interiore ci ha rivelato dinamiche che nessun colloquio avrebbe fatto emergere. Abbiamo capito perché certi talenti non performavano: erano nel ruolo sbagliato. Spostati, sono diventati i migliori.',
+    before: 'Store manager sbagliati in 3 punti vendita. Perdite di €180K in un anno tra turnover e riassunzioni.',
+    after: 'Turnover store manager -50%. Selezione standardizzata. Abbiamo scoperto talenti interni nel ruolo sbagliato.',
+    quote: 'La mappa interiore ci ha rivelato dinamiche che nessun colloquio avrebbe fatto emergere. Abbiamo capito perché certi talenti non performavano.',
     stars: 5,
   },
 ];
@@ -277,7 +300,7 @@ const FOR_NOT_FOR = {
   ],
 };
 
-/* ─── NEW DATA: Lettera Aperta ─── */
+/* ─── Lettera Aperta ─── */
 const LETTERA_PARAGRAPHS = [
   'Se stai leggendo questa pagina è perché conosci la frustrazione di assumere la persona sbagliata. L\'hai vissuta in prima persona — forse più di una volta.',
   'Non è colpa tua. È che fino ad oggi non avevi uno strumento che ti permettesse di vedere cosa c\'è sotto il curriculum. Quello che il candidato non ti dice al colloquio — perché non lo sa nemmeno lui.',
@@ -285,7 +308,7 @@ const LETTERA_PARAGRAPHS = [
   '242 domande. 15 tratti misurati. 24 sindromi comportamentali identificate. Report istantaneo.',
 ];
 
-/* ─── NEW DATA: Buona Notizia ─── */
+/* ─── Buona Notizia ─── */
 const BUONA_NOTIZIA_ITEMS = [
   { title: 'Mappare il profilo psicologico reale di ogni candidato', desc: 'In 15 minuti, non in settimane.' },
   { title: 'Sapere PRIMA se la persona è adatta al ruolo', desc: 'Con dati, non con l\'istinto.' },
@@ -293,7 +316,7 @@ const BUONA_NOTIZIA_ITEMS = [
   { title: 'Andare al colloquio preparato', desc: 'Con domande mirate generate dall\'assessment.' },
 ];
 
-/* ─── NEW DATA: Casi Reali ─── */
+/* ─── Casi Reali ─── */
 const CASE_STUDIES = [
   {
     company: 'Tech Startup',
@@ -324,7 +347,7 @@ const CASE_STUDIES = [
   },
 ];
 
-/* ─── NEW DATA: Tabella Comparativa ─── */
+/* ─── Tabella Comparativa ─── */
 const COMPARISON_ROWS = [
   { aspect: 'Strumento', others: 'Colloquio + CV', tp: 'Assessment 242 item validato' },
   { aspect: 'Tempo', others: 'Settimane', tp: '15 minuti, report istantaneo' },
@@ -335,7 +358,7 @@ const COMPARISON_ROWS = [
   { aspect: 'Post-assunzione', others: 'Speri che vada bene', tp: 'Piano inserimento su misura' },
 ];
 
-/* ─── NEW DATA: Urgency Timeline ─── */
+/* ─── Urgency Timeline ─── */
 const URGENCY_STEPS = [
   {
     period: 'Mese 1–3',
@@ -500,7 +523,7 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* ═══ 2. HERO ═══ */}
+      {/* ═══ 2. HERO + URGENCY BANNER ═══ */}
       <section className="relative py-20 md:py-32 overflow-hidden" style={{ background: 'linear-gradient(160deg, #1e3a5f 0%, #2d5a8e 60%, #3b7ddd 100%)' }}>
         <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10 flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
           {/* Left: Text */}
@@ -513,9 +536,17 @@ export default function Home() {
               <br className="hidden sm:block" />
               <span className="block mt-2">Prima ancora del colloquio.</span>
             </h1>
-            <p className="text-lg md:text-xl text-blue-100 leading-relaxed max-w-2xl mb-10">
+            <p className="text-lg md:text-xl text-blue-100 leading-relaxed max-w-2xl mb-8">
               Il profilo psicologico completo del candidato — non le solite 4 domande generiche. 242 item, 15 tratti misurati, 24 sindromi comportamentali identificate. Report istantaneo, confronto candidati, guida al colloquio personalizzata.
             </p>
+
+            {/* ★ URGENCY BANNER ★ */}
+            <div className="mb-10 p-4 rounded-xl bg-red-500/20 border border-red-400/40 backdrop-blur-sm">
+              <p className="text-lg md:text-xl font-bold text-red-200">
+                ⚠️ Ogni assunzione sbagliata ti costa in media <span className="text-red-300 text-2xl font-black">€30.000</span>. Quante ne hai fatte quest'anno?
+              </p>
+            </div>
+
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-12">
               <Button
                 size="lg"
@@ -563,28 +594,7 @@ export default function Home() {
         <div className="absolute -bottom-32 -left-32 w-[500px] h-[500px] rounded-full bg-accent/10 blur-3xl" />
       </section>
 
-      {/* ═══ 3. LETTERA APERTA ═══ */}
-      <Section className="py-20 md:py-28 bg-background" id="lettera">
-        <div className="max-w-4xl mx-auto px-4 md:px-8">
-          <h3 className="text-2xl md:text-3xl font-bold text-foreground mb-8 italic">Caro imprenditore,</h3>
-          <div className="space-y-6">
-            {LETTERA_PARAGRAPHS.map((paragrafo, i) => (
-              <p key={i} className="text-lg md:text-xl leading-relaxed text-foreground/90">
-                {i === LETTERA_PARAGRAPHS.length - 1 ? <strong>{paragrafo}</strong> : paragrafo}
-              </p>
-            ))}
-          </div>
-          <p className="text-lg text-muted-foreground mt-4 italic">
-            Non è magia. È scienza applicata alle decisioni più importanti della tua azienda: le persone che ci metti dentro.
-          </p>
-          <div className="mt-10 pt-6 border-t border-border">
-            <p className="text-xl font-bold text-foreground">Il Team TalentProfile</p>
-            <p className="text-sm text-muted-foreground mt-1">Psicologia del lavoro applicata alla realtà dell'impresa</p>
-          </div>
-        </div>
-      </Section>
-
-      {/* ═══ 4. PROBLEMA ═══ */}
+      {/* ═══ 3. PROBLEMA (dolore) ═══ */}
       <Section className="py-20 md:py-28 bg-background" id="problema">
         <div className="max-w-6xl mx-auto px-4 md:px-8">
           <p className="text-sm uppercase tracking-widest text-destructive font-semibold text-center mb-3">
@@ -617,7 +627,64 @@ export default function Home() {
         </div>
       </Section>
 
-      {/* ═══ 4b. CALCOLATORE COSTO ASSUNZIONE SBAGLIATA ═══ */}
+      {/* ═══ 4. URGENCY TIMELINE (amplifica il dolore) ═══ */}
+      <Section className="py-0 md:py-0" id="urgency">
+        <div className="py-20 md:py-28" style={{ background: 'linear-gradient(160deg, #1e3a5f 0%, #162d4a 100%)' }}>
+          <div className="max-w-5xl mx-auto px-4 md:px-8">
+            <div className="flex items-center justify-center gap-3 mb-3">
+              <AlertTriangle className="h-5 w-5 text-orange-400" />
+              <p className="text-sm uppercase tracking-widest text-orange-300 font-semibold">
+                Il Costo Dell'Inazione
+              </p>
+            </div>
+            <h2 className="text-3xl md:text-5xl font-bold text-center mb-16 text-white">
+              Cosa succede se continui<br className="hidden md:block" /> ad assumere senza dati?
+            </h2>
+
+            <div className="relative">
+              {/* Vertical line with gradient */}
+              <div className="absolute left-6 md:left-8 top-0 bottom-0 w-0.5 hidden md:block"
+                style={{ background: 'linear-gradient(to bottom, #22c55e, #eab308, #f97316, #ef4444)' }} />
+              
+              <div className="space-y-10 md:space-y-14">
+                {URGENCY_STEPS.map((step, i) => (
+                  <div key={i} className="flex items-start gap-6 md:gap-8">
+                    <div className="shrink-0 relative z-10">
+                      <div className={`w-12 h-12 md:w-16 md:h-16 rounded-full ${step.bgColor} flex items-center justify-center shadow-lg`}>
+                        <span className="text-white text-sm md:text-base font-black">{String(i + 1).padStart(2, '0')}</span>
+                      </div>
+                    </div>
+                    <div className="pt-1 md:pt-2">
+                      <span className={`text-xs font-bold uppercase tracking-wider ${step.color}`}>
+                        {step.period}
+                      </span>
+                      <h3 className="text-xl md:text-2xl font-bold text-white mt-1 mb-2">{step.title}</h3>
+                      <p className="text-blue-200/80 text-base md:text-lg leading-relaxed">{step.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Positive closing box */}
+            <div className="mt-14 p-6 md:p-8 rounded-xl border border-success/30 bg-success/10">
+              <div className="flex items-start gap-4">
+                <div className="shrink-0 w-10 h-10 rounded-full bg-success/20 flex items-center justify-center">
+                  <TrendingUp className="h-5 w-5 text-green-400" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-white mb-2">Ma C'è Ancora Tempo.</h3>
+                  <p className="text-blue-200/90 text-base md:text-lg leading-relaxed">
+                    In questo momento puoi cambiare il tuo processo di selezione. <strong className="text-white">Basta un assessment.</strong>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      {/* ═══ 5. CALCOLATORE (quantifica il dolore in €) ═══ */}
       <Section className="py-20 md:py-28 bg-secondary/50" id="calcolatore">
         <div className="max-w-5xl mx-auto px-4 md:px-8">
           <p className="text-sm uppercase tracking-widest text-destructive font-semibold text-center mb-3">
@@ -713,7 +780,7 @@ export default function Home() {
             </p>
           </Card>
 
-          {/* Scenari */}
+          {/* ★ SCENARI VISCERALI ★ */}
           <div className="mt-16">
             <h3 className="text-2xl md:text-3xl font-bold text-center mb-10 text-foreground">
               Ti è mai capitato?
@@ -721,34 +788,58 @@ export default function Home() {
             <div className="grid md:grid-cols-3 gap-6">
               <Card className="p-6 border border-border hover:shadow-lg transition-shadow">
                 <p className="text-3xl mb-3">💼</p>
-                <h4 className="text-lg font-bold text-foreground mb-3">Il commerciale perfetto</h4>
+                <h4 className="text-lg font-bold text-foreground mb-3">Il commerciale "perfetto"</h4>
                 <p className="text-muted-foreground text-sm leading-relaxed mb-4">
-                  L'hai formato per 3 mesi. Gli hai dato il portfolio clienti. Sembrava il migliore. Poi ha mollato — portandosi dietro 2 clienti.
+                  Lo avevi formato <strong>TU</strong> per 3 mesi. Gli avevi dato il portfolio clienti migliore. Ti guardava negli occhi e diceva "questa è la mia azienda". Il lunedì mattina ti chiama e ti dice che se ne va. Portandosi dietro 2 clienti. Tre mesi di stipendio, formazione, affiancamento — tutto in fumo. E adesso devi ricominciare da zero.
                 </p>
-                <p className="text-destructive font-bold text-lg">Costo stimato: €35.000+</p>
+                <p className="text-destructive font-black text-xl">Costo reale: €35.000+</p>
               </Card>
               <Card className="p-6 border border-border hover:shadow-lg transition-shadow">
                 <p className="text-3xl mb-3">👔</p>
-                <h4 className="text-lg font-bold text-foreground mb-3">Il responsabile che non responsabilizza</h4>
+                <h4 className="text-lg font-bold text-foreground mb-3">Il responsabile che distrugge il team</h4>
                 <p className="text-muted-foreground text-sm leading-relaxed mb-4">
-                  RAL €45.000. Dopo 6 mesi il team era a pezzi. 2 dimissioni a catena. Costo reale tra turnover, riassunzioni e produttività persa.
+                  RAL €45.000. Al colloquio sembrava un leader nato. Dopo 6 mesi il team era a pezzi. I migliori se ne sono andati — 2 dimissioni a catena. Il clima? Tossico. Tu non te ne sei accorto subito perché "sembrava autoritario, non autoritativo". Costo tra turnover, riassunzioni e produttività bruciata?
                 </p>
-                <p className="text-destructive font-bold text-lg">Oltre €80.000</p>
+                <p className="text-destructive font-black text-xl">Oltre €80.000</p>
               </Card>
               <Card className="p-6 border border-border hover:shadow-lg transition-shadow">
                 <p className="text-3xl mb-3">🔧</p>
-                <h4 className="text-lg font-bold text-foreground mb-3">L'operativo che "andava bene"</h4>
+                <h4 className="text-lg font-bold text-foreground mb-3">L'operativo assunto "d'urgenza"</h4>
                 <p className="text-muted-foreground text-sm leading-relaxed mb-4">
-                  Assunto d'urgenza, senza assessment. 4 mesi di errori operativi, reclami clienti, formazione buttata. Poi ricominciare da capo.
+                  Dovevi riempire quel posto SUBITO. Niente assessment, niente test, "tanto è un ruolo operativo". 4 mesi dopo: errori a catena, reclami dai clienti, il responsabile di linea che ti chiede "ma chi hai assunto?". Formazione buttata. Ricominciare da capo. Per un ruolo da €25.000 di RAL.
                 </p>
-                <p className="text-destructive font-bold text-lg">€22.000 per un ruolo da €25.000 di RAL</p>
+                <p className="text-destructive font-black text-xl">Totale: €22.000</p>
               </Card>
             </div>
+          </div>
+
+          {/* ★ MINI CTA dopo calcolatore ★ */}
+          <MiniCTA text="Vuoi evitare questo costo? Richiedi una demo" subtext="Scopri come TalentProfile ti avrebbe salvato in ognuno di questi scenari." />
+        </div>
+      </Section>
+
+      {/* ═══ 6. LETTERA APERTA (empatia + transizione) ═══ */}
+      <Section className="py-20 md:py-28 bg-background" id="lettera">
+        <div className="max-w-4xl mx-auto px-4 md:px-8">
+          <h3 className="text-2xl md:text-3xl font-bold text-foreground mb-8 italic">Caro imprenditore,</h3>
+          <div className="space-y-6">
+            {LETTERA_PARAGRAPHS.map((paragrafo, i) => (
+              <p key={i} className="text-lg md:text-xl leading-relaxed text-foreground/90">
+                {i === LETTERA_PARAGRAPHS.length - 1 ? <strong>{paragrafo}</strong> : paragrafo}
+              </p>
+            ))}
+          </div>
+          <p className="text-lg text-muted-foreground mt-4 italic">
+            Non è magia. È scienza applicata alle decisioni più importanti della tua azienda: le persone che ci metti dentro.
+          </p>
+          <div className="mt-10 pt-6 border-t border-border">
+            <p className="text-xl font-bold text-foreground">Il Team TalentProfile</p>
+            <p className="text-sm text-muted-foreground mt-1">Psicologia del lavoro applicata alla realtà dell'impresa</p>
           </div>
         </div>
       </Section>
 
-      {/* ═══ 5. BUONA NOTIZIA (NUOVA) ═══ */}
+      {/* ═══ 7. BUONA NOTIZIA (sollievo) ═══ */}
       <Section className="py-20 md:py-28 bg-blue-50" id="buona-notizia">
         <div className="max-w-6xl mx-auto px-4 md:px-8">
           <p className="text-sm uppercase tracking-widest text-accent font-semibold text-center mb-3">
@@ -796,7 +887,7 @@ export default function Home() {
         </div>
       </Section>
 
-      {/* ═══ 6. IL METODO ═══ */}
+      {/* ═══ 8. IL METODO ═══ */}
       <Section className="py-20 md:py-28 bg-secondary/50" id="metodo">
         <div className="max-w-5xl mx-auto px-4 md:px-8">
           <p className="text-sm uppercase tracking-widest text-accent font-semibold text-center mb-3">
@@ -840,7 +931,7 @@ export default function Home() {
         </div>
       </Section>
 
-      {/* ═══ 7. FUNZIONALITÀ ═══ */}
+      {/* ═══ 9. FUNZIONALITÀ ═══ */}
       <Section className="py-20 md:py-28 bg-background" id="funzionalita">
         <div className="max-w-6xl mx-auto px-4 md:px-8">
           <p className="text-sm uppercase tracking-widest text-accent font-semibold text-center mb-3">
@@ -869,125 +960,8 @@ export default function Home() {
         </div>
       </Section>
 
-      {/* ═══ 8. NUMERI ═══ */}
-      <Section className="py-20 md:py-28" id="numeri" >
-        <div className="py-20 md:py-28" style={{ background: 'linear-gradient(160deg, #1e3a5f 0%, #2d5a8e 100%)' }}>
-          <div className="max-w-6xl mx-auto px-4 md:px-8">
-            <p className="text-sm uppercase tracking-widest text-orange-300 font-semibold text-center mb-3">
-              I Risultati Parlano
-            </p>
-            <h2 className="text-3xl md:text-5xl font-bold text-center mb-16 text-white">
-              I Numeri Che Contano
-            </h2>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-8 text-center">
-              {[
-                { ref: c1.ref, val: c1.value.toLocaleString('it-IT'), suffix: '+', label: 'Aziende clienti' },
-                { ref: c2.ref, val: c2.value.toLocaleString('it-IT'), suffix: '+', label: 'Assessment completati' },
-                { ref: c3.ref, val: c3.value, suffix: '+', label: 'Ruoli mappati' },
-                { ref: c4.ref, val: c4.value, suffix: ' min', label: 'Tempo per test' },
-              ].map((n, i) => (
-                <div key={i} ref={n.ref}>
-                  <div className="text-4xl md:text-6xl font-black text-accent mb-2">
-                    {n.val}{n.suffix}
-                  </div>
-                  <div className="text-blue-200 text-sm md:text-base font-medium">{n.label}</div>
-                </div>
-              ))}
-              <div>
-                <div className="text-4xl md:text-6xl font-black text-accent mb-2">.75/1</div>
-                <div className="text-blue-200 text-sm md:text-base font-medium">Validazione scientifica</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Section>
-
-      {/* ═══ 9. TESTIMONIANZE ═══ */}
-      <Section className="py-20 md:py-28 bg-background" id="testimonianze">
-        <div className="max-w-6xl mx-auto px-4 md:px-8">
-          <p className="text-sm uppercase tracking-widest text-accent font-semibold text-center mb-3">
-            Testimonianze
-          </p>
-          <h2 className="text-3xl md:text-5xl font-bold text-center mb-4 text-foreground">
-            Le aziende che scelgono TalentProfile
-          </h2>
-          <p className="text-center text-muted-foreground text-lg mb-14 max-w-2xl mx-auto">assumono meglio</p>
-          <div className="grid md:grid-cols-3 gap-6">
-            {TESTIMONIALS.map((t, i) => (
-              <Card key={i} className="p-6 md:p-8 border border-border">
-                <div className="flex gap-1 mb-4">
-                  {Array.from({ length: t.stars }).map((_, j) => (
-                    <Star key={j} className="h-5 w-5 fill-accent text-accent" />
-                  ))}
-                </div>
-                <p className="text-foreground leading-relaxed mb-6 italic">"{t.quote}"</p>
-                <div className="flex items-center gap-3">
-                  <img
-                    src={[
-                      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&q=80',
-                      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&q=80',
-                      'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&q=80',
-                    ][i]}
-                    alt={t.name}
-                    className="w-10 h-10 rounded-full object-cover"
-                    loading="lazy"
-                  />
-                  <div>
-                    <div className="font-semibold text-sm text-foreground">{t.name}</div>
-                    <div className="text-xs text-muted-foreground">{t.role}</div>
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </Section>
-
-      {/* ═══ 10. CASI REALI (NUOVA) ═══ */}
-      <Section className="py-20 md:py-28 bg-secondary/50" id="casi-reali">
-        <div className="max-w-6xl mx-auto px-4 md:px-8">
-          <p className="text-sm uppercase tracking-widest text-accent font-semibold text-center mb-3">
-            Storie di Successo
-          </p>
-          <h2 className="text-3xl md:text-5xl font-bold text-center mb-4 text-foreground">
-            Risultati Reali. Aziende Reali.
-          </h2>
-          <p className="text-center text-muted-foreground text-lg mb-14 max-w-2xl mx-auto">
-            Ecco cosa è successo quando hanno smesso di assumere a sensazione.
-          </p>
-          <div className="grid md:grid-cols-3 gap-6">
-            {CASE_STUDIES.map((cs, i) => (
-              <Card key={i} className="p-6 md:p-8 border border-border relative overflow-hidden hover:shadow-lg transition-shadow duration-300">
-                {/* Badge percentuale */}
-                <div className="absolute top-4 right-4">
-                  <div className="text-4xl font-black text-accent">{cs.badge}</div>
-                  <div className="text-xs text-muted-foreground font-medium text-right">{cs.badgeLabel}</div>
-                </div>
-                {/* Company info */}
-                <div className="flex items-center gap-2 mb-1">
-                  <Building2 className="h-4 w-4 text-primary" />
-                  <span className="font-bold text-foreground">{cs.company}</span>
-                </div>
-                <p className="text-sm text-muted-foreground mb-1">{cs.size}</p>
-                <p className="text-xs text-accent font-medium mb-4">{cs.sector}</p>
-                <p className="text-foreground leading-relaxed mb-6">{cs.desc}</p>
-                {/* Results */}
-                <ul className="space-y-2">
-                  {cs.results.map((r, j) => (
-                    <li key={j} className="flex items-start gap-2 text-sm">
-                      <CheckCircle2 className="h-4 w-4 text-success shrink-0 mt-0.5" />
-                      <span className="text-foreground/80">{r}</span>
-                    </li>
-                  ))}
-                </ul>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </Section>
-
-      {/* ═══ 11. TABELLA COMPARATIVA (NUOVA) ═══ */}
-      <Section className="py-20 md:py-28 bg-background" id="comparativa">
+      {/* ═══ 10. TABELLA COMPARATIVA ═══ */}
+      <Section className="py-20 md:py-28 bg-secondary/50" id="comparativa">
         <div className="max-w-5xl mx-auto px-4 md:px-8">
           <p className="text-sm uppercase tracking-widest text-accent font-semibold text-center mb-3">
             Il Confronto
@@ -1053,10 +1027,137 @@ export default function Home() {
               </Card>
             ))}
           </div>
+
+          {/* ★ MINI CTA dopo comparativa ★ */}
+          <MiniCTA text="Pronto a cambiare metodo?" subtext="Smetti di affidarti all'istinto. Inizia a decidere con i dati." />
         </div>
       </Section>
 
-      {/* ═══ 12. PER CHI È / NON È ═══ */}
+      {/* ═══ 11. TESTIMONIANZE + CASI REALI (prova sociale unificata) ═══ */}
+      <Section className="py-20 md:py-28 bg-background" id="testimonianze">
+        <div className="max-w-6xl mx-auto px-4 md:px-8">
+          <p className="text-sm uppercase tracking-widest text-accent font-semibold text-center mb-3">
+            Prova Sociale
+          </p>
+          <h2 className="text-3xl md:text-5xl font-bold text-center mb-4 text-foreground">
+            Chi usa TalentProfile non torna indietro.
+          </h2>
+          <p className="text-center text-muted-foreground text-lg mb-14 max-w-2xl mx-auto">
+            Prima sbagliavano. Adesso no. Ecco le loro storie — con il prima e il dopo.
+          </p>
+
+          {/* ★ TESTIMONIAL CON PRIMA/DOPO ★ */}
+          <div className="grid md:grid-cols-3 gap-6 mb-16">
+            {TESTIMONIALS.map((t, i) => (
+              <Card key={i} className="p-6 md:p-8 border border-border">
+                <div className="flex gap-1 mb-4">
+                  {Array.from({ length: t.stars }).map((_, j) => (
+                    <Star key={j} className="h-5 w-5 fill-accent text-accent" />
+                  ))}
+                </div>
+                {/* PRIMA */}
+                <div className="mb-4 p-3 rounded-lg bg-destructive/5 border border-destructive/15">
+                  <p className="text-xs font-bold uppercase tracking-wider text-destructive mb-1">PRIMA</p>
+                  <p className="text-sm text-foreground/80 leading-relaxed">{t.before}</p>
+                </div>
+                {/* DOPO */}
+                <div className="mb-4 p-3 rounded-lg bg-success/5 border border-success/15">
+                  <p className="text-xs font-bold uppercase tracking-wider text-success mb-1">DOPO</p>
+                  <p className="text-sm text-foreground/80 leading-relaxed">{t.after}</p>
+                </div>
+                <p className="text-foreground leading-relaxed mb-6 italic text-sm">"{t.quote}"</p>
+                <div className="flex items-center gap-3">
+                  <img
+                    src={[
+                      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&q=80',
+                      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&q=80',
+                      'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&q=80',
+                    ][i]}
+                    alt={t.name}
+                    className="w-10 h-10 rounded-full object-cover"
+                    loading="lazy"
+                  />
+                  <div>
+                    <div className="font-semibold text-sm text-foreground">{t.name}</div>
+                    <div className="text-xs text-muted-foreground">{t.role}</div>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+
+          {/* CASI REALI */}
+          <h3 className="text-2xl md:text-3xl font-bold text-center mb-10 text-foreground">
+            Risultati Reali. Aziende Reali.
+          </h3>
+          <div className="grid md:grid-cols-3 gap-6">
+            {CASE_STUDIES.map((cs, i) => (
+              <Card key={i} className="p-6 md:p-8 border border-border relative overflow-hidden hover:shadow-lg transition-shadow duration-300">
+                {/* Badge percentuale */}
+                <div className="absolute top-4 right-4">
+                  <div className="text-4xl font-black text-accent">{cs.badge}</div>
+                  <div className="text-xs text-muted-foreground font-medium text-right">{cs.badgeLabel}</div>
+                </div>
+                {/* Company info */}
+                <div className="flex items-center gap-2 mb-1">
+                  <Building2 className="h-4 w-4 text-primary" />
+                  <span className="font-bold text-foreground">{cs.company}</span>
+                </div>
+                <p className="text-sm text-muted-foreground mb-1">{cs.size}</p>
+                <p className="text-xs text-accent font-medium mb-4">{cs.sector}</p>
+                <p className="text-foreground leading-relaxed mb-6">{cs.desc}</p>
+                {/* Results */}
+                <ul className="space-y-2">
+                  {cs.results.map((r, j) => (
+                    <li key={j} className="flex items-start gap-2 text-sm">
+                      <CheckCircle2 className="h-4 w-4 text-success shrink-0 mt-0.5" />
+                      <span className="text-foreground/80">{r}</span>
+                    </li>
+                  ))}
+                </ul>
+              </Card>
+            ))}
+          </div>
+
+          {/* ★ MINI CTA dopo case study ★ */}
+          <MiniCTA text="Vuoi risultati come questi?" subtext="Richiedi una demo e scopri come TalentProfile può trasformare il tuo processo di selezione." />
+        </div>
+      </Section>
+
+      {/* ═══ 12. NUMERI / CONTATORI ═══ */}
+      <Section className="py-0 md:py-0" id="numeri">
+        <div className="py-20 md:py-28" style={{ background: 'linear-gradient(160deg, #1e3a5f 0%, #2d5a8e 100%)' }}>
+          <div className="max-w-6xl mx-auto px-4 md:px-8">
+            <p className="text-sm uppercase tracking-widest text-orange-300 font-semibold text-center mb-3">
+              I Risultati Parlano
+            </p>
+            <h2 className="text-3xl md:text-5xl font-bold text-center mb-16 text-white">
+              I Numeri Che Contano
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-8 text-center">
+              {[
+                { ref: c1.ref, val: c1.value.toLocaleString('it-IT'), suffix: '+', label: 'Aziende clienti' },
+                { ref: c2.ref, val: c2.value.toLocaleString('it-IT'), suffix: '+', label: 'Assessment completati' },
+                { ref: c3.ref, val: c3.value, suffix: '+', label: 'Ruoli mappati' },
+                { ref: c4.ref, val: c4.value, suffix: ' min', label: 'Tempo per test' },
+              ].map((n, i) => (
+                <div key={i} ref={n.ref}>
+                  <div className="text-4xl md:text-6xl font-black text-accent mb-2">
+                    {n.val}{n.suffix}
+                  </div>
+                  <div className="text-blue-200 text-sm md:text-base font-medium">{n.label}</div>
+                </div>
+              ))}
+              <div>
+                <div className="text-4xl md:text-6xl font-black text-accent mb-2">.75/1</div>
+                <div className="text-blue-200 text-sm md:text-base font-medium">Validazione scientifica</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      {/* ═══ 13. PER CHI È / NON È ═══ */}
       <Section className="py-20 md:py-28 bg-secondary/50" id="perchi">
         <div className="max-w-5xl mx-auto px-4 md:px-8">
           <p className="text-sm uppercase tracking-widest text-accent font-semibold text-center mb-3">
@@ -1101,63 +1202,6 @@ export default function Home() {
         </div>
       </Section>
 
-      {/* ═══ 13. URGENCY TIMELINE (NUOVA) ═══ */}
-      <Section className="py-20 md:py-28" id="urgency">
-        <div className="py-20 md:py-28" style={{ background: 'linear-gradient(160deg, #1e3a5f 0%, #162d4a 100%)' }}>
-          <div className="max-w-5xl mx-auto px-4 md:px-8">
-            <div className="flex items-center justify-center gap-3 mb-3">
-              <AlertTriangle className="h-5 w-5 text-orange-400" />
-              <p className="text-sm uppercase tracking-widest text-orange-300 font-semibold">
-                Il Costo Dell'Inazione
-              </p>
-            </div>
-            <h2 className="text-3xl md:text-5xl font-bold text-center mb-16 text-white">
-              Cosa succede se continui<br className="hidden md:block" /> ad assumere senza dati?
-            </h2>
-
-            <div className="relative">
-              {/* Vertical line with gradient */}
-              <div className="absolute left-6 md:left-8 top-0 bottom-0 w-0.5 hidden md:block"
-                style={{ background: 'linear-gradient(to bottom, #22c55e, #eab308, #f97316, #ef4444)' }} />
-              
-              <div className="space-y-10 md:space-y-14">
-                {URGENCY_STEPS.map((step, i) => (
-                  <div key={i} className="flex items-start gap-6 md:gap-8">
-                    <div className="shrink-0 relative z-10">
-                      <div className={`w-12 h-12 md:w-16 md:h-16 rounded-full ${step.bgColor} flex items-center justify-center shadow-lg`}>
-                        <span className="text-white text-sm md:text-base font-black">{String(i + 1).padStart(2, '0')}</span>
-                      </div>
-                    </div>
-                    <div className="pt-1 md:pt-2">
-                      <span className={`text-xs font-bold uppercase tracking-wider ${step.color}`}>
-                        {step.period}
-                      </span>
-                      <h3 className="text-xl md:text-2xl font-bold text-white mt-1 mb-2">{step.title}</h3>
-                      <p className="text-blue-200/80 text-base md:text-lg leading-relaxed">{step.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Positive closing box */}
-            <div className="mt-14 p-6 md:p-8 rounded-xl border border-success/30 bg-success/10">
-              <div className="flex items-start gap-4">
-                <div className="shrink-0 w-10 h-10 rounded-full bg-success/20 flex items-center justify-center">
-                  <TrendingUp className="h-5 w-5 text-green-400" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-white mb-2">Ma C'è Ancora Tempo.</h3>
-                  <p className="text-blue-200/90 text-base md:text-lg leading-relaxed">
-                    In questo momento puoi cambiare il tuo processo di selezione. <strong className="text-white">Basta un assessment.</strong>
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Section>
-
       {/* ═══ 14. FAQ ═══ */}
       <Section className="py-20 md:py-28 bg-background" id="faq">
         <div className="max-w-3xl mx-auto px-4 md:px-8">
@@ -1189,7 +1233,33 @@ export default function Home() {
         </div>
       </Section>
 
-      {/* ═══ 15. CTA FINALE + TRUST BADGES ═══ */}
+      {/* ═══ 15. RIQUADRO COSTO INAZIONE (pre-CTA) ═══ */}
+      <Section className="py-16 md:py-20 bg-destructive/5" id="costo-inazione">
+        <div className="max-w-4xl mx-auto px-4 md:px-8">
+          <Card className="p-8 md:p-12 border-2 border-destructive/30 bg-white shadow-xl">
+            <div className="text-center">
+              <AlertTriangle className="h-12 w-12 text-destructive mx-auto mb-4" />
+              <h3 className="text-2xl md:text-3xl font-black text-foreground mb-6">
+                Il costo di NON agire oggi
+              </h3>
+              <div className="space-y-4 text-lg md:text-xl text-foreground/90 leading-relaxed">
+                <p>Se assumi <strong>10 persone l'anno</strong> e ne sbagli 3...</p>
+                <p className="text-3xl md:text-4xl font-black text-destructive">
+                  3 × €30.000 = €90.000/anno bruciati
+                </p>
+                <p>In 3 anni sono <strong className="text-destructive">€270.000</strong>.</p>
+                <div className="pt-4 border-t border-border mt-6">
+                  <p className="text-muted-foreground text-base">
+                    Il costo di TalentProfile? <strong className="text-foreground">Una frazione di un singolo errore.</strong>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </Card>
+        </div>
+      </Section>
+
+      {/* ═══ 16. CTA FINALE + TRUST BADGES ═══ */}
       <section
         id="cta-finale"
         className="relative py-20 md:py-28 text-center overflow-hidden"
@@ -1234,7 +1304,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer */}
+      {/* ═══ FOOTER COMPLETO ═══ */}
       <footer className="bg-foreground py-12">
         <div className="max-w-6xl mx-auto px-4 md:px-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
@@ -1261,8 +1331,31 @@ export default function Home() {
               </button>
             </div>
           </div>
-          <div className="mt-8 pt-6 border-t border-white/10 text-center text-xs text-white/40">
-            © {new Date().getFullYear()} TalentProfile. Tutti i diritti riservati.
+
+          {/* ★ FOOTER AGGIUNTIVO: P.IVA, Privacy, Contatti ★ */}
+          <div className="mt-8 pt-6 border-t border-white/10">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="flex flex-wrap justify-center md:justify-start gap-4 text-xs text-white/50">
+                <span>TalentProfile S.r.l. — P.IVA 12345678901</span>
+                <span>|</span>
+                <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
+                <span>|</span>
+                <a href="#" className="hover:text-white transition-colors">Cookie Policy</a>
+                <span>|</span>
+                <a href="#" className="hover:text-white transition-colors">Termini e Condizioni</a>
+              </div>
+              <div className="flex items-center gap-4 text-xs text-white/50">
+                <a href="mailto:info@talentprofile.it" className="flex items-center gap-1.5 hover:text-white transition-colors">
+                  <Mail className="h-3.5 w-3.5" /> info@talentprofile.it
+                </a>
+                <span className="flex items-center gap-1.5">
+                  <Shield className="h-3.5 w-3.5" /> GDPR Compliant
+                </span>
+              </div>
+            </div>
+            <p className="text-center text-xs text-white/30 mt-4">
+              © {new Date().getFullYear()} TalentProfile. Tutti i diritti riservati.
+            </p>
           </div>
         </div>
       </footer>
