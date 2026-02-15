@@ -12,6 +12,7 @@ import { GestioneAvanzataV3 } from '@/components/GestioneAvanzataV3';
 import { HeroCardV3 } from '@/components/HeroCardV3';
 import { AlertBannerV3 } from '@/components/AlertBannerV3';
 import { ProfiloUnificatoTab } from '@/components/ProfiloUnificatoTab';
+import { MappaInterioreTab } from '@/components/MappaInterioreTab';
 import { ColloquioTabV3 } from '@/components/ColloquioTabV3';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,7 +22,7 @@ import { useToast } from '@/hooks/use-toast';
 import {
   ArrowLeft, Mail, Phone, Briefcase, Building2, Calendar,
   Brain, Loader2, User, Target, UserCog, MessageSquare,
-  MoreHorizontal, FileText
+  MoreHorizontal, FileText, Sparkles
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -308,6 +309,10 @@ export default function CandidatoDettaglio() {
                     <UserCog className="h-4 w-4 hidden sm:block" />
                     <span>Gestione</span>
                   </TabsTrigger>
+                  <TabsTrigger value="mappa" className="flex-1 gap-1.5 text-xs sm:text-sm">
+                    <Sparkles className="h-4 w-4 hidden sm:block" />
+                    <span>Mappa Interiore</span>
+                  </TabsTrigger>
                   <TabsTrigger value="colloquio" className="flex-1 gap-1.5 text-xs sm:text-sm">
                     <MessageSquare className="h-4 w-4 hidden sm:block" />
                     <span>Colloquio</span>
@@ -380,7 +385,26 @@ export default function CandidatoDettaglio() {
                   )}
                 </TabsContent>
 
-                {/* TAB 3: Colloquio */}
+                {/* TAB 3: Mappa Interiore */}
+                <TabsContent value="mappa" className="mt-4 space-y-6">
+                  {isV5 && traitsV5 ? (
+                    <MappaInterioreTab
+                      traits={traitsV5 as Record<TraitCode, number>}
+                      candidatoNome={candidato.nome}
+                      candidatoSesso={candidato.sesso}
+                      eta={candidato.eta ?? undefined}
+                      syndromes={syndromes}
+                    />
+                  ) : (
+                    <Card>
+                      <CardContent className="py-8 text-center text-muted-foreground">
+                        Dati V5 non disponibili per questo candidato.
+                      </CardContent>
+                    </Card>
+                  )}
+                </TabsContent>
+
+                {/* TAB 4: Colloquio */}
                 <TabsContent value="colloquio" className="mt-4 space-y-6">
                   {isV5 && traitsV5 ? (
                     <ColloquioTabV3
