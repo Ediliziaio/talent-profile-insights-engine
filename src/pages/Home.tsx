@@ -28,6 +28,14 @@ import {
   Calculator,
   Mail,
   Linkedin,
+  XCircle,
+  AlertTriangle,
+  Lock,
+  Globe,
+  Server,
+  TrendingDown,
+  Check,
+  X,
 } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 
@@ -237,6 +245,57 @@ const FAQ_DATA = [
 
 const LOGO_COMPANIES = [
   'TechCorp', 'InnovaGroup', 'AlphaRetail', 'NordEst HR', 'MediPlus', 'BuildItalia', 'FinServ Pro'
+];
+
+const PROBLEMS = [
+  {
+    icon: TrendingDown,
+    title: 'Turnover nei primi 6 mesi',
+    desc: 'Il 46% dei neoassunti lascia entro 18 mesi. Ma il danno inizia molto prima: demotivazione, errori, team instabile.',
+  },
+  {
+    icon: AlertTriangle,
+    title: 'Colloqui basati sull\'istinto',
+    desc: 'Senza dati oggettivi, le decisioni si basano su impressioni e bias cognitivi. Risultato: errori sistematici.',
+  },
+  {
+    icon: Calculator,
+    title: 'Costi nascosti delle assunzioni sbagliate',
+    desc: 'Ogni errore di selezione costa in media €30.000 tra stipendio bruciato, formazione persa e riassunzione.',
+  },
+];
+
+const COMPARISON_ROWS = [
+  { label: 'Metodo di valutazione', trad: 'CV + colloquio', tp: 'Assessment scientifico' },
+  { label: 'Base decisionale', trad: 'Soggettivo / istinto', tp: '15 tratti misurati oggettivamente' },
+  { label: 'Tempo di valutazione', trad: 'Settimane', tp: '15 minuti' },
+  { label: 'Profondità analisi', trad: 'Superficiale', tp: '24 sindromi + mappa interiore' },
+  { label: 'Compatibilità ruolo', trad: 'Opinione personale', tp: 'Role matching automatico' },
+  { label: 'Confronto candidati', trad: 'Fogli Excel manuali', tp: 'Dashboard comparativa' },
+  { label: 'Guida al colloquio', trad: 'Domande generiche', tp: 'Domande personalizzate AI' },
+];
+
+const TARGET_YES = [
+  'HR Manager che vogliono dati oggettivi',
+  'CEO di PMI che assumono in prima persona',
+  'Recruiter stanchi di errori di selezione',
+  'Team leader che costruiscono squadre',
+  'Consulenti HR che cercano strumenti avanzati',
+];
+
+const TARGET_NO = [
+  'Cerchi soluzioni gratuite senza investire',
+  'Non credi nel valore dei dati nelle HR',
+  'Preferisci affidarti solo all\'istinto',
+  'Non hai intenzione di migliorare il processo',
+];
+
+const TRUST_BADGES = [
+  { icon: Shield, label: 'GDPR Compliant', desc: 'Piena conformità normativa' },
+  { icon: Globe, label: 'Server EU', desc: 'Dati in Europa' },
+  { icon: Lock, label: 'Dati crittografati', desc: 'Crittografia end-to-end' },
+  { icon: Server, label: 'ISO 27001', desc: 'Standard di sicurezza' },
+  { icon: Zap, label: 'Nessuna installazione', desc: '100% cloud-based' },
 ];
 
 /* ─────────────────── COMPONENT ─────────────────── */
@@ -490,7 +549,33 @@ export default function Home() {
         </div>
       </Section>
 
-      {/* ═══ 4. FUNZIONALITÀ (grid 3x3, badge "PIATTAFORMA") ═══ */}
+      {/* ═══ 4. PROBLEMA (NUOVA) ═══ */}
+      <Section className="py-20 md:py-28 bg-white">
+        <div className="max-w-6xl mx-auto px-4 md:px-8">
+          <div className="text-center mb-3">
+            <span className="section-badge">Il Problema</span>
+          </div>
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
+            Perché le aziende continuano a sbagliare assunzioni
+          </h2>
+          <p className="text-center text-[#6b7280] text-base mb-14 max-w-2xl mx-auto">
+            I metodi tradizionali di selezione hanno limiti strutturali che costano caro.
+          </p>
+          <div className="grid sm:grid-cols-3 gap-6">
+            {PROBLEMS.map((p, i) => (
+              <div key={i} className="landing-card p-6">
+                <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mb-4">
+                  <p.icon className="h-5 w-5 text-red-500" />
+                </div>
+                <h3 className="text-lg font-bold mb-2">{p.title}</h3>
+                <p className="text-[#6b7280] text-sm leading-relaxed">{p.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </Section>
+
+      {/* ═══ 5. FUNZIONALITÀ (grid 3x3, badge "PIATTAFORMA") ═══ */}
       <Section className="py-20 md:py-28" id="funzionalita">
         <div className="max-w-6xl mx-auto px-4 md:px-8">
           <div className="text-center mb-3">
@@ -527,7 +612,7 @@ export default function Home() {
         </div>
       </Section>
 
-      {/* ═══ 5. MANIFESTO ═══ */}
+      {/* ═══ 6. MANIFESTO ═══ */}
       <Section className="py-20 md:py-28 bg-white" id="manifesto">
         <div className="max-w-6xl mx-auto px-4 md:px-8">
           <div className="flex flex-col md:flex-row items-center gap-12 md:gap-16">
@@ -563,7 +648,27 @@ export default function Home() {
         </div>
       </Section>
 
-      {/* ═══ 6. IL METODO (4 step) ═══ */}
+      {/* ═══ 7. CTA INTERMEDIO (NUOVO) ═══ */}
+      <Section className="py-10 md:py-14">
+        <div className="max-w-4xl mx-auto px-4 md:px-8">
+          <div className="rounded-2xl bg-[#f09133]/5 border border-[#f09133]/20 py-10 px-6 md:px-12 text-center">
+            <h3 className="text-xl md:text-2xl font-bold mb-3">
+              Vuoi vedere TalentProfile in azione?
+            </h3>
+            <p className="text-[#6b7280] text-base mb-6 max-w-xl mx-auto">
+              Richiedi una demo gratuita e scopri come funziona sulla tua realtà aziendale.
+            </p>
+            <Button
+              className="bg-[#f09133] hover:bg-[#e07a1f] text-white rounded-xl px-8"
+              onClick={() => scrollTo('cta-finale')}
+            >
+              Richiedi una demo gratuita <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </Section>
+
+      {/* ═══ 8. IL METODO (4 step) ═══ */}
       <Section className="py-20 md:py-28" id="metodo">
         <div className="max-w-5xl mx-auto px-4 md:px-8">
           <div className="text-center mb-3">
@@ -596,7 +701,7 @@ export default function Home() {
         </div>
       </Section>
 
-      {/* ═══ 7. CALCOLATORE (semplificato, sobrio) ═══ */}
+      {/* ═══ 9. CALCOLATORE (semplificato, sobrio) ═══ */}
       <Section className="py-20 md:py-28 bg-white" id="calcolatore">
         <div className="max-w-4xl mx-auto px-4 md:px-8">
           <div className="text-center mb-3">
@@ -689,8 +794,55 @@ export default function Home() {
         </div>
       </Section>
 
-      {/* ═══ 8. TESTIMONIANZE (stile LinkedIn) ═══ */}
-      <Section className="py-20 md:py-28" id="testimonianze">
+      {/* ═══ 10. TABELLA COMPARATIVA (NUOVA) ═══ */}
+      <Section className="py-20 md:py-28">
+        <div className="max-w-4xl mx-auto px-4 md:px-8">
+          <div className="text-center mb-3">
+            <span className="section-badge">Confronto</span>
+          </div>
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
+            Metodo Tradizionale vs TalentProfile
+          </h2>
+          <p className="text-center text-[#6b7280] text-base mb-14 max-w-2xl mx-auto">
+            Ecco perché i dati battono l'istinto.
+          </p>
+          <div className="landing-card overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-[#e5e0db]">
+                    <th className="text-left p-4 font-semibold text-[#6b7280]">Criterio</th>
+                    <th className="text-center p-4 font-semibold text-red-500 bg-red-50">Metodo Tradizionale</th>
+                    <th className="text-center p-4 font-semibold text-green-600 bg-green-50">TalentProfile</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {COMPARISON_ROWS.map((row, i) => (
+                    <tr key={i} className="border-b border-[#e5e0db] last:border-0">
+                      <td className="p-4 font-medium">{row.label}</td>
+                      <td className="p-4 text-center bg-red-50/50">
+                        <div className="flex items-center justify-center gap-2">
+                          <X className="h-4 w-4 text-red-400" />
+                          <span className="text-[#6b7280]">{row.trad}</span>
+                        </div>
+                      </td>
+                      <td className="p-4 text-center bg-green-50/50">
+                        <div className="flex items-center justify-center gap-2">
+                          <Check className="h-4 w-4 text-green-500" />
+                          <span className="text-[#1a1a2e] font-medium">{row.tp}</span>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      {/* ═══ 11. TESTIMONIANZE (stile LinkedIn) ═══ */}
+      <Section className="py-20 md:py-28 bg-white" id="testimonianze">
         <div className="max-w-6xl mx-auto px-4 md:px-8">
           <div className="text-center mb-3">
             <span className="section-badge">Testimonianze</span>
@@ -736,7 +888,58 @@ export default function Home() {
         </div>
       </Section>
 
-      {/* ═══ 9. NUMERI / CONTATORI ═══ */}
+      {/* ═══ 12. PER CHI È (NUOVA) ═══ */}
+      <Section className="py-20 md:py-28">
+        <div className="max-w-5xl mx-auto px-4 md:px-8">
+          <div className="text-center mb-3">
+            <span className="section-badge">Per Chi È</span>
+          </div>
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
+            TalentProfile è per te?
+          </h2>
+          <p className="text-center text-[#6b7280] text-base mb-14 max-w-2xl mx-auto">
+            Scopri se il nostro sistema è adatto alle tue esigenze.
+          </p>
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Card Verde */}
+            <div className="landing-card p-6 border-green-200">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center">
+                  <CheckCircle2 className="h-5 w-5 text-green-500" />
+                </div>
+                <h3 className="text-lg font-bold text-green-700">Per chi è TalentProfile</h3>
+              </div>
+              <ul className="space-y-3">
+                {TARGET_YES.map((item, i) => (
+                  <li key={i} className="flex items-start gap-3">
+                    <Check className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
+                    <span className="text-[#6b7280] text-sm">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            {/* Card Rossa */}
+            <div className="landing-card p-6 border-red-200">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center">
+                  <XCircle className="h-5 w-5 text-red-500" />
+                </div>
+                <h3 className="text-lg font-bold text-red-700">Non fa per te se...</h3>
+              </div>
+              <ul className="space-y-3">
+                {TARGET_NO.map((item, i) => (
+                  <li key={i} className="flex items-start gap-3">
+                    <X className="h-4 w-4 text-red-400 mt-0.5 shrink-0" />
+                    <span className="text-[#6b7280] text-sm">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      {/* ═══ 13. NUMERI / CONTATORI ═══ */}
       <Section className="py-0 md:py-0 px-4 md:px-8" id="numeri">
         <div className="landing-counter-box py-16 md:py-24 max-w-7xl mx-auto relative overflow-hidden">
           <div className="max-w-6xl mx-auto px-4 md:px-8 relative z-10">
@@ -769,7 +972,30 @@ export default function Home() {
         </div>
       </Section>
 
-      {/* ═══ 10. FAQ ═══ */}
+      {/* ═══ 14. TRUST / SICUREZZA (NUOVA) ═══ */}
+      <Section className="py-16 md:py-20 bg-white">
+        <div className="max-w-5xl mx-auto px-4 md:px-8">
+          <div className="text-center mb-12">
+            <span className="section-badge mb-3 inline-block">Sicurezza</span>
+            <h2 className="text-2xl md:text-3xl font-bold">
+              I tuoi dati sono al sicuro
+            </h2>
+          </div>
+          <div className="flex flex-wrap justify-center gap-8 md:gap-12">
+            {TRUST_BADGES.map((badge, i) => (
+              <div key={i} className="flex flex-col items-center text-center max-w-[120px]">
+                <div className="w-14 h-14 rounded-full bg-[#f7f4f0] border border-[#e5e0db] flex items-center justify-center mb-3">
+                  <badge.icon className="h-6 w-6 text-[#1e3a5f]" />
+                </div>
+                <span className="text-sm font-semibold text-[#1a1a2e]">{badge.label}</span>
+                <span className="text-xs text-[#6b7280] mt-1">{badge.desc}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </Section>
+
+      {/* ═══ 15. FAQ ═══ */}
       <Section className="py-20 md:py-28" id="faq">
         <div className="max-w-3xl mx-auto px-4 md:px-8">
           <div className="text-center mb-3">
