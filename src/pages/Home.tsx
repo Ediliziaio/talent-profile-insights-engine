@@ -52,6 +52,44 @@ import {
 import { Slider } from '@/components/ui/slider';
 
 /* ─── Animation variants ─── */
+/* ── Typewriter component ── */
+const TypewriterText = ({ text }: { text: string }) => {
+  const [charIndex, setCharIndex] = useState(0);
+  const [started, setStarted] = useState(false);
+  const [done, setDone] = useState(false);
+  const ref = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setStarted(true); observer.disconnect(); } },
+      { threshold: 0.5 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!started || charIndex >= text.length) {
+      if (started && charIndex >= text.length) {
+        const t = setTimeout(() => setDone(true), 500);
+        return () => clearTimeout(t);
+      }
+      return;
+    }
+    const id = setTimeout(() => setCharIndex((i) => i + 1), 50);
+    return () => clearTimeout(id);
+  }, [started, charIndex, text]);
+
+  return (
+    <strong className="text-[#1a1a2e]" ref={ref}>
+      {started ? text.slice(0, charIndex) : '\u00A0'}
+      {started && !done && <span className="typing-cursor">|</span>}
+    </strong>
+  );
+};
+
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
   visible: { opacity: 1, y: 0 },
@@ -702,9 +740,9 @@ export default function Home() {
                 <span className="text-sm font-semibold text-[#f09133] uppercase tracking-wider">Una lettera per te</span>
               </div>
               
-              <div className="letter-style space-y-5">
+               <div className="letter-style space-y-5">
                 <p className="text-lg">
-                  <strong className="text-[#1a1a2e]">So cosa stai passando. Ci siamo passati tutti.</strong>
+                  <TypewriterText text="So cosa stai passando. Ci siamo passati tutti." />
                 </p>
                 <p>
                   Hai assunto qualcuno che al colloquio sembrava perfetto. Motivato, competente, entusiasta. Diceva tutte le cose giuste. Ti guardava negli occhi con quella sicurezza che ti faceva pensare: <em>"Finalmente ho trovato la persona giusta."</em>
