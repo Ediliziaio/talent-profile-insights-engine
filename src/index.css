@@ -311,6 +311,49 @@
   pointer-events: none;
 }
 
+/* ─── Letter Section ─── */
+.letter-style {
+  font-family: Georgia, 'Times New Roman', serif;
+  line-height: 1.9;
+  color: #3d3935;
+}
+
+/* ─── Fear Card ─── */
+.fear-card {
+  background: rgba(26, 26, 46, 0.85);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 0.75rem;
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.08);
+  transition: all 0.3s ease;
+}
+.fear-card:hover {
+  border-color: rgba(239, 68, 68, 0.6);
+  box-shadow: 0 0 30px rgba(239, 68, 68, 0.15);
+  transform: translateY(-3px);
+}
+
+@keyframes pulse-border {
+  0%, 100% { border-color: rgba(239, 68, 68, 0.3); }
+  50% { border-color: rgba(239, 68, 68, 0.7); }
+}
+
+.animate-pulse-border {
+  animation: pulse-border 2.5s ease-in-out infinite;
+}
+
+/* ─── Case Study Card ─── */
+.case-study-card {
+  background: #ffffff;
+  border: 1px solid #e5e0db;
+  border-radius: 1rem;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+.case-study-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 50px -10px rgba(0,0,0,0.12);
+}
+
 /* PDF Report Print Styles */
 @media print {
   .pdf-report {

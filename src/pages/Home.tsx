@@ -41,6 +41,13 @@ import {
   HelpCircle,
   ChevronRight,
   BadgeCheck,
+  BookOpen,
+  Flame,
+  Award,
+  TrendingUp,
+  Skull,
+  UserX,
+  Timer,
 } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 
@@ -308,6 +315,82 @@ const TRUST_BADGES = [
   { icon: Zap, label: 'Nessuna installazione', desc: '100% cloud-based' },
 ];
 
+const FEAR_SCENARIOS = [
+  {
+    icon: UserX,
+    title: 'Lunedì mattina. Il nuovo assunto non si presenta.',
+    desc: 'Nessun messaggio. Nessuna chiamata. Tre mesi di selezione buttati. Il team è a terra.',
+  },
+  {
+    icon: Flame,
+    title: 'Il team migliore si sgretola in 3 mesi.',
+    desc: 'Una sola assunzione sbagliata ha destabilizzato l\'equilibrio. I talenti migliori se ne vanno.',
+  },
+  {
+    icon: Timer,
+    title: 'Hai scelto con l\'istinto. 6 mesi dopo ricominci.',
+    desc: 'Formazione bruciata, clienti persi, morale a pezzi. Tutto da rifare.',
+  },
+  {
+    icon: Skull,
+    title: 'Perfetto al colloquio. Il peggior elemento in azienda.',
+    desc: 'Carismatico, eloquente, convincente. Ma in azienda? Tossico, manipolativo, distruttivo.',
+  },
+];
+
+const CASE_STUDIES = [
+  {
+    company: 'PMI Manifatturiera',
+    sector: 'Manifatturiero — 120 dipendenti',
+    challenge: 'Turnover al 45% nei primi 12 mesi. Team instabili, costi fuori controllo.',
+    solution: 'Assessment TalentProfile su tutti i nuovi ingressi + mappatura team esistente.',
+    resultBefore: 45,
+    resultAfter: 12,
+    resultLabel: 'Turnover',
+    resultSuffix: '%',
+    timeline: '6 mesi',
+    highlight: 'Turnover ridotto dal 45% al 12%',
+    color: '#f09133',
+  },
+  {
+    company: 'Startup Tech',
+    sector: 'Technology — 25 dipendenti',
+    challenge: '3 assunzioni sbagliate consecutive in ruoli chiave. Prodotto in ritardo di 8 mesi.',
+    solution: 'Role matching automatico + guida al colloquio personalizzata per ogni candidato.',
+    resultBefore: 3,
+    resultAfter: 0,
+    resultLabel: 'Errori di selezione',
+    resultSuffix: '',
+    timeline: '8 mesi',
+    highlight: 'Team stabile da 8 mesi consecutivi',
+    color: '#1e3a5f',
+  },
+  {
+    company: 'Catena Retail',
+    sector: 'Retail — 50 punti vendita',
+    challenge: 'Costo errori di selezione: €180.000/anno. Store manager sbagliati = vendite in calo.',
+    solution: 'Assessment pre-assunzione + profilo psicologico per tutti i ruoli manageriali.',
+    resultBefore: 180,
+    resultAfter: 54,
+    resultLabel: 'Costo errori (K€)',
+    resultSuffix: 'K€',
+    timeline: '12 mesi',
+    highlight: 'Risparmio del 70% sui costi di selezione',
+    color: '#22c55e',
+  },
+];
+
+const FAQ_DATA_EXTRA = [
+  {
+    q: 'Posso provarlo gratis?',
+    a: 'Sì, offriamo una demo gratuita di 30 minuti dove puoi vedere il sistema in azione sulla tua realtà aziendale. Nessun impegno.',
+  },
+  {
+    q: 'Quanto tempo ci vuole per integrarlo?',
+    a: 'Zero. TalentProfile è 100% cloud-based. Nessuna installazione, nessuna integrazione. Crei un account e inizi subito.',
+  },
+];
+
 /* ─────────────────── COMPONENT ─────────────────── */
 export default function Home() {
   const navigate = useNavigate();
@@ -508,6 +591,19 @@ export default function Home() {
                   4.8 su 5 — Assessment validato scientificamente
                 </span>
               </motion.div>
+
+              {/* Micro-badges */}
+              <motion.div variants={fadeUp} transition={{ duration: 0.5 }} className="flex flex-wrap gap-3 mt-4">
+                {[
+                  { icon: Users, text: 'Usato da +1000 HR Manager' },
+                  { icon: Clock, text: '15 min per assessment' },
+                  { icon: Zap, text: 'Report istantaneo' },
+                ].map((badge, i) => (
+                  <span key={i} className="inline-flex items-center gap-1.5 text-[11px] text-white/50 bg-white/[0.07] border border-white/10 rounded-full px-3 py-1">
+                    <badge.icon className="h-3 w-3" /> {badge.text}
+                  </span>
+                ))}
+              </motion.div>
             </motion.div>
 
             {/* Right — Product Mockup with glow shadow */}
@@ -580,6 +676,67 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ═══ LETTERA AL LETTORE — Emotional connection ═══ */}
+      <motion.section
+        className="py-16 md:py-20 bg-white"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.15 }}
+        variants={fadeUp}
+        transition={sectionTransition}
+      >
+        <div className="max-w-3xl mx-auto px-4 md:px-8">
+          <motion.div
+            className="border-l-8 border-[#f09133] bg-white rounded-r-xl p-8 md:p-12 shadow-[0_8px_40px_rgba(0,0,0,0.06)] relative overflow-hidden"
+            variants={fadeLeft}
+            transition={{ duration: 0.7, ease: 'easeOut' }}
+          >
+            {/* Decorative envelope */}
+            <div className="absolute top-4 right-4 opacity-[0.06]">
+              <Mail className="h-24 w-24 text-[#1a1a2e]" />
+            </div>
+            
+            <div className="relative z-10">
+              <div className="flex items-center gap-3 mb-6">
+                <BookOpen className="h-6 w-6 text-[#f09133]" />
+                <span className="text-sm font-semibold text-[#f09133] uppercase tracking-wider">Una lettera per te</span>
+              </div>
+              
+              <div className="letter-style space-y-5">
+                <p className="text-lg">
+                  <strong className="text-[#1a1a2e]">So cosa stai passando.</strong>
+                </p>
+                <p>
+                  Hai assunto qualcuno che al colloquio sembrava perfetto. Motivato, competente, entusiasta. Poi, dopo tre mesi, ti sei chiesto: <em>"Ma chi ho preso?"</em>
+                </p>
+                <p>
+                  Hai paura di sbagliare ancora. Di perdere tempo, soldi, energia. Di dover ricominciare da capo mentre il tuo team perde fiducia.
+                </p>
+                
+                <div className="bg-[#fef9c3]/60 border-l-4 border-[#f09133]/50 rounded-r-lg p-4 my-6">
+                  <p className="text-[#1a1a2e] font-medium italic">
+                    "Il 73% degli HR manager ammette di aver fatto almeno un'assunzione sbagliata nell'ultimo anno. Non sei solo."
+                  </p>
+                </div>
+                
+                <p>
+                  Ho creato TalentProfile per una ragione semplice: <strong className="text-[#1a1a2e]">nessuna azienda dovrebbe decidere sulle persone al buio.</strong> Non con l'istinto. Non con le sensazioni. Con i dati.
+                </p>
+                <p>
+                  Questa lettera è per te che vuoi smettere di sperare e iniziare a sapere.
+                </p>
+              </div>
+              
+              {/* Signature */}
+              <div className="mt-8 pt-6 border-t border-[#e5e0db]/50">
+                <p className="font-serif italic text-lg text-[#1a1a2e] mb-1">Alessandro Rossi</p>
+                <p className="text-sm text-[#6b7280]">Fondatore, TalentProfile</p>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </motion.section>
+
       {/* ═══ 3. LOGO BAR — Separator + hover grayscale remove ═══ */}
       <motion.section
         className="py-8 md:py-10 bg-[#faf8f5]"
@@ -626,9 +783,20 @@ export default function Home() {
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 accent-underline mx-auto w-fit">
             Perché le aziende continuano a sbagliare assunzioni
           </h2>
-          <p className="text-center text-[#6b7280] text-base mb-10 max-w-2xl mx-auto">
+          <p className="text-center text-[#6b7280] text-base mb-6 max-w-2xl mx-auto">
             I metodi tradizionali di selezione hanno limiti strutturali che costano caro.
           </p>
+          {/* Shock value */}
+          <motion.div
+            className="text-center mb-10"
+            initial={{ opacity: 0, scale: 0.8 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <span className="text-5xl md:text-7xl font-black text-red-500">€30.000</span>
+            <p className="text-[#6b7280] text-sm mt-2">È il costo medio di <strong className="text-[#1a1a2e]">ogni singolo errore</strong> di selezione</p>
+          </motion.div>
           <div className="gradient-separator mb-10" />
           <motion.div
             className="grid sm:grid-cols-3 gap-6"
@@ -657,6 +825,74 @@ export default function Home() {
           </motion.div>
         </div>
       </motion.section>
+
+      {/* ═══ L'INCUBO CHE CONOSCI — Fear Section ═══ */}
+      <section className="py-16 md:py-24 relative" style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%)' }}>
+        {/* Decorative red glow */}
+        <div className="absolute top-0 left-[20%] w-[300px] h-[300px] rounded-full bg-red-500/[0.04] blur-3xl" />
+        <div className="absolute bottom-0 right-[15%] w-[250px] h-[250px] rounded-full bg-red-500/[0.06] blur-3xl" />
+        
+        <div className="max-w-6xl mx-auto px-4 md:px-8 relative z-10">
+          <motion.div
+            className="text-center mb-4"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.15 }}
+            variants={fadeUp}
+            transition={sectionTransition}
+          >
+            <span className="inline-flex items-center gap-2 bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider mb-4">
+              <AlertTriangle className="h-3.5 w-3.5" /> La realtà che nessuno racconta
+            </span>
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+              L'incubo che conosci bene
+            </h2>
+            <p className="text-white/50 text-base max-w-2xl mx-auto mb-14">
+              Questi scenari ti suonano familiari? Non sei l'unico.
+            </p>
+          </motion.div>
+
+          <motion.div
+            className="grid sm:grid-cols-2 gap-6"
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.15 }}
+          >
+            {FEAR_SCENARIOS.map((s, i) => (
+              <motion.div
+                key={i}
+                className="fear-card animate-pulse-border p-6 md:p-8"
+                variants={fadeUp}
+                transition={{ ...cardTransition, delay: i * 0.15 }}
+              >
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-full bg-red-500/15 flex items-center justify-center shrink-0">
+                    <s.icon className="h-6 w-6 text-red-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-white mb-2">{s.title}</h3>
+                    <p className="text-white/50 text-sm leading-relaxed">{s.desc}</p>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+
+          <motion.div
+            className="text-center mt-12"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.15 }}
+            variants={fadeUp}
+            transition={{ ...sectionTransition, delay: 0.6 }}
+          >
+            <p className="text-white/40 text-sm mb-2">Non deve essere così.</p>
+            <p className="text-[#f09133] font-semibold text-lg">C'è un modo migliore.</p>
+            <div className="w-12 h-[2px] bg-[#f09133]/50 mx-auto mt-4" />
+          </motion.div>
+        </div>
+      </section>
 
       {/* ═══ 5. FUNZIONALITÀ — Alternating borders + chevron ═══ */}
       <motion.section
@@ -794,9 +1030,10 @@ export default function Home() {
             <h3 className="text-xl md:text-2xl font-bold mb-3">
               Vuoi vedere TalentProfile in azione?
             </h3>
-            <p className="text-[#6b7280] text-base mb-6 max-w-xl mx-auto">
+            <p className="text-[#6b7280] text-base mb-3 max-w-xl mx-auto">
               Richiedi una demo gratuita e scopri come funziona sulla tua realtà aziendale.
             </p>
+            <p className="text-sm text-[#f09133] font-semibold mb-6">Già 1.247 aziende l'hanno fatto</p>
             <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
               <Button
                 className="bg-[#f09133] hover:bg-[#e07a1f] text-white rounded-xl px-8 shadow-[0_4px_20px_rgba(240,145,51,0.3)]"
@@ -944,6 +1181,13 @@ export default function Home() {
               <p className="text-4xl md:text-5xl font-bold text-red-500 relative z-10">
                 €{Math.round(costi.totale).toLocaleString('it-IT')}
               </p>
+              {/* Savings comparison */}
+              <div className="mt-4 pt-3 border-t border-green-200 relative z-10">
+                <p className="text-sm text-green-600 font-semibold flex items-center justify-center gap-2">
+                  <TrendingUp className="h-4 w-4" />
+                  Con TalentProfile: <span className="text-lg font-bold">€{Math.round(costi.totale * 0.7).toLocaleString('it-IT')}</span> risparmiati
+                </p>
+              </div>
             </div>
 
             {/* Breakdown */}
@@ -1041,6 +1285,16 @@ export default function Home() {
                       </td>
                     </motion.tr>
                   ))}
+                  {/* Score row */}
+                  <tr className="border-t-2 border-[#e5e0db] bg-[#faf8f5]">
+                    <td className="p-4 font-bold text-[#1a1a2e]">Punteggio totale</td>
+                    <td className="p-4 text-center bg-red-50/50">
+                      <span className="text-2xl font-bold text-red-500">2/7</span>
+                    </td>
+                    <td className="p-4 text-center bg-green-50/50">
+                      <span className="text-2xl font-bold text-green-600">7/7</span>
+                    </td>
+                  </tr>
                 </motion.tbody>
               </table>
             </div>
@@ -1109,6 +1363,124 @@ export default function Home() {
 
                 {/* Text */}
                 <p className="text-[#6b7280] text-sm leading-relaxed relative z-10">{t.text}</p>
+                
+                {/* Key metrics */}
+                <div className="flex gap-3 mt-4 pt-3 border-t border-[#e5e0db]/40">
+                  {[
+                    ['-40% turnover', '-35% costi', '+3 mesi retention'],
+                    ['Zero errori', '+200% ROI', 'Team stabile'],
+                    ['+85% fit', '-60% rotazione', 'Report in 15min'],
+                  ][i]?.map((metric, j) => (
+                    <span key={j} className="text-[10px] font-semibold text-[#f09133] bg-[#f09133]/10 px-2 py-0.5 rounded-full">
+                      {metric}
+                    </span>
+                  ))}
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </motion.section>
+
+      {/* ═══ STORIE DI SUCCESSO — Case Studies ═══ */}
+      <motion.section
+        className="py-16 md:py-20 bg-gradient-to-b from-[#faf8f5] to-white"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.15 }}
+        variants={fadeUp}
+        transition={sectionTransition}
+      >
+        <div className="max-w-6xl mx-auto px-4 md:px-8">
+          <div className="text-center mb-3">
+            <span className="section-badge">
+              <Award className="h-3.5 w-3.5 mr-1.5 inline" /> Storie di Successo
+            </span>
+          </div>
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 accent-underline mx-auto w-fit">
+            Risultati reali, aziende reali
+          </h2>
+          <p className="text-center text-[#6b7280] text-base mb-14 max-w-2xl mx-auto">
+            Ecco come TalentProfile ha trasformato il processo di selezione di aziende come la tua.
+          </p>
+
+          <motion.div
+            className="grid md:grid-cols-3 gap-8"
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.15 }}
+          >
+            {CASE_STUDIES.map((cs, i) => (
+              <motion.div
+                key={i}
+                className="case-study-card"
+                variants={fadeUp}
+                transition={cardTransition}
+                whileHover={{ y: -6 }}
+              >
+                {/* Header */}
+                <div className="p-6 pb-4 border-b border-[#e5e0db]/50">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: `${cs.color}15` }}>
+                        <Building2 className="h-5 w-5" style={{ color: cs.color }} />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-[#1a1a2e]">{cs.company}</h3>
+                        <p className="text-xs text-[#6b7280]">{cs.sector}</p>
+                      </div>
+                    </div>
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider bg-green-100 text-green-700 px-2.5 py-1 rounded-full">
+                      <BadgeCheck className="h-3 w-3" /> Caso Reale
+                    </span>
+                  </div>
+                </div>
+
+                {/* Body */}
+                <div className="p-6 space-y-4">
+                  <div>
+                    <p className="text-xs font-semibold text-red-500 uppercase tracking-wider mb-1">La Sfida</p>
+                    <p className="text-sm text-[#6b7280] leading-relaxed">{cs.challenge}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-[#1e3a5f] uppercase tracking-wider mb-1">La Soluzione</p>
+                    <p className="text-sm text-[#6b7280] leading-relaxed">{cs.solution}</p>
+                  </div>
+                  
+                  {/* Result Bar */}
+                  <div className="bg-[#f7f4f0] rounded-lg p-4">
+                    <p className="text-xs font-semibold text-[#6b7280] uppercase tracking-wider mb-3">Risultato in {cs.timeline}</p>
+                    <div className="flex items-end gap-4 mb-3">
+                      <div className="text-center">
+                        <p className="text-2xl font-bold text-red-400 line-through opacity-70">{cs.resultBefore}{cs.resultSuffix}</p>
+                        <p className="text-[10px] text-[#6b7280]">Prima</p>
+                      </div>
+                      <ArrowRight className="h-5 w-5 text-[#f09133] mb-2" />
+                      <div className="text-center">
+                        <p className="text-3xl font-bold" style={{ color: cs.color }}>{cs.resultAfter}{cs.resultSuffix}</p>
+                        <p className="text-[10px] text-[#6b7280]">Dopo</p>
+                      </div>
+                    </div>
+                    {/* Progress bar */}
+                    <div className="h-2 rounded-full bg-gray-200 overflow-hidden">
+                      <motion.div
+                        className="h-full rounded-full"
+                        style={{ background: cs.color }}
+                        initial={{ width: 0 }}
+                        whileInView={{ width: `${100 - (cs.resultAfter / cs.resultBefore) * 100}%` }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 1.2, delay: 0.3, ease: 'easeOut' }}
+                      />
+                    </div>
+                  </div>
+                  
+                  {/* Highlight */}
+                  <div className="flex items-center gap-2 pt-2">
+                    <TrendingUp className="h-4 w-4 text-green-500 shrink-0" />
+                    <p className="text-sm font-semibold text-[#1a1a2e]">{cs.highlight}</p>
+                  </div>
+                </div>
               </motion.div>
             ))}
           </motion.div>
@@ -1285,6 +1657,7 @@ export default function Home() {
               </motion.div>
             ))}
           </motion.div>
+          <p className="text-center text-xs text-[#6b7280] mt-6">Conformi a tutte le normative europee sulla protezione dei dati personali</p>
         </div>
       </motion.section>
 
@@ -1317,7 +1690,7 @@ export default function Home() {
             viewport={{ once: true, amount: 0.15 }}
           >
             <Accordion type="single" collapsible className="space-y-2">
-              {FAQ_DATA.map((f, i) => (
+              {[...FAQ_DATA, ...FAQ_DATA_EXTRA].map((f, i) => (
                 <motion.div key={i} variants={fadeUp} transition={cardTransition}>
                   <AccordionItem
                     value={`faq-${i}`}
