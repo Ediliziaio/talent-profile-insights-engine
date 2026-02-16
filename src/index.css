@@ -201,7 +201,7 @@
 }
 .landing-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.08), 0 8px 10px -6px rgb(0 0 0 / 0.04);
+  box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1), 0 8px 16px -6px rgba(0,0,0,0.05);
 }
 
 .section-badge {
@@ -209,13 +209,44 @@
   align-items: center;
   border: 1px solid #1a1a2e;
   color: #1a1a2e;
-  background: transparent;
+  background: #f7f4f0;
   padding: 4px 14px;
   border-radius: 6px;
   font-size: 0.7rem;
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+}
+
+/* Glassmorphism card */
+.glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(229, 224, 219, 0.5);
+  border-radius: 0.75rem;
+}
+
+/* Gradient separator between sections */
+.gradient-separator {
+  height: 2px;
+  width: 100%;
+  background: linear-gradient(90deg, transparent 0%, #f09133 30%, #f09133 70%, transparent 100%);
+  opacity: 0.3;
+}
+
+/* Semi-transparent decorative numbers */
+.number-decoration {
+  position: absolute;
+  top: 0.5rem;
+  right: 1rem;
+  font-size: 3.5rem;
+  font-weight: 900;
+  line-height: 1;
+  opacity: 0.06;
+  pointer-events: none;
+  user-select: none;
+  color: #1a1a2e;
 }
 
 /* Logo marquee infinite scroll */

@@ -446,7 +446,7 @@ export default function Home() {
 
       {/* ═══ 2. HERO — Radial gradient + decorative spheres ═══ */}
       <section className="px-4 md:px-8 pt-6 md:pt-10">
-        <div className="landing-hero-box max-w-7xl mx-auto py-16 md:py-24 px-6 md:px-16 relative overflow-hidden" style={{ background: 'radial-gradient(ellipse at 30% 50%, #2a4f7a 0%, #1e3a5f 70%)' }}>
+        <div className="landing-hero-box max-w-7xl mx-auto py-16 md:py-24 px-6 md:px-16 relative overflow-hidden border border-white/10" style={{ background: 'radial-gradient(ellipse at 30% 50%, #2a4f7a 0%, #1e3a5f 70%)' }}>
           {/* Decorative blurred spheres */}
           <div className="absolute top-[-60px] right-[-40px] w-[200px] h-[200px] rounded-full bg-white/5 blur-3xl" />
           <div className="absolute bottom-[-80px] left-[10%] w-[300px] h-[300px] rounded-full bg-[#f09133]/10 blur-3xl" />
@@ -549,15 +549,15 @@ export default function Home() {
                   </div>
                   <div className="space-y-2">
                     {[
-                      { label: 'Leadership', val: 82 },
-                      { label: 'Resilienza', val: 75 },
-                      { label: 'Empatia', val: 88 },
+                      { label: 'Leadership', val: 82, color: 'from-[#f09133] to-[#e07a1f]' },
+                      { label: 'Resilienza', val: 75, color: 'from-[#1e3a5f] to-[#2a4f7a]' },
+                      { label: 'Empatia', val: 88, color: 'from-green-500 to-green-400' },
                     ].map((t) => (
                       <div key={t.label} className="flex items-center gap-2">
                         <span className="text-xs text-[#6b7280] w-16">{t.label}</span>
                         <div className="flex-1 h-2 rounded-full bg-gray-100 overflow-hidden">
                           <motion.div
-                            className="h-full rounded-full bg-gradient-to-r from-[#f09133] to-[#e07a1f]"
+                            className={`h-full rounded-full bg-gradient-to-r ${t.color}`}
                             initial={{ width: 0 }}
                             animate={{ width: `${t.val}%` }}
                             transition={{ duration: 1.2, delay: 0.8 + t.val * 0.005, ease: 'easeOut' }}
@@ -566,6 +566,12 @@ export default function Home() {
                         <span className="text-xs font-semibold text-[#1a1a2e] w-8">{t.val}%</span>
                       </div>
                     ))}
+                  </div>
+                  {/* Report badge */}
+                  <div className="mt-3 text-center">
+                    <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold text-[#6b7280] bg-[#f7f4f0] px-3 py-1 rounded-full border border-[#e5e0db]">
+                      <FileText className="h-3 w-3" /> Report Esecutivo
+                    </span>
                   </div>
                 </div>
               </div>
@@ -576,7 +582,7 @@ export default function Home() {
 
       {/* ═══ 3. LOGO BAR — Separator + hover grayscale remove ═══ */}
       <motion.section
-        className="py-12 md:py-16 bg-white"
+        className="py-8 md:py-10 bg-[#faf8f5]"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.15 }}
@@ -620,9 +626,10 @@ export default function Home() {
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 accent-underline mx-auto w-fit">
             Perché le aziende continuano a sbagliare assunzioni
           </h2>
-          <p className="text-center text-[#6b7280] text-base mb-14 max-w-2xl mx-auto">
+          <p className="text-center text-[#6b7280] text-base mb-10 max-w-2xl mx-auto">
             I metodi tradizionali di selezione hanno limiti strutturali che costano caro.
           </p>
+          <div className="gradient-separator mb-10" />
           <motion.div
             className="grid sm:grid-cols-3 gap-6"
             variants={staggerContainer}
@@ -633,15 +640,15 @@ export default function Home() {
             {PROBLEMS.map((p, i) => (
               <motion.div
                 key={i}
-                className="landing-card p-6 border-l-[6px] border-l-red-400 relative overflow-hidden"
+                className="landing-card p-6 border-l-[6px] border-l-red-400 relative overflow-hidden bg-gradient-to-br from-white to-rose-50/30"
                 variants={fadeUp}
                 transition={cardTransition}
                 whileHover={{ y: -5, boxShadow: '0 12px 40px rgba(0,0,0,0.08)' }}
               >
                 {/* Decorative stat number */}
-                <span className="absolute top-3 right-4 text-5xl font-black text-red-100/60 select-none pointer-events-none">{p.stat}</span>
-                <div className="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center mb-4">
-                  <p.icon className="h-7 w-7 text-red-500" />
+                <span className="absolute top-2 right-3 text-6xl font-black text-red-100/50 select-none pointer-events-none leading-none">{p.stat}</span>
+                <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mb-4">
+                  <p.icon className="h-8 w-8 text-red-500" />
                 </div>
                 <h3 className="text-lg font-bold mb-2">{p.title}</h3>
                 <p className="text-[#6b7280] text-sm leading-relaxed">{p.desc}</p>
@@ -681,15 +688,17 @@ export default function Home() {
             {FEATURES.map((f, i) => (
               <motion.div
                 key={i}
-                className={`landing-card p-6 group cursor-pointer border-l-4 ${f.borderColor} relative`}
+                className={`landing-card p-6 group cursor-pointer border-l-[5px] ${f.borderColor} relative overflow-hidden`}
                 variants={fadeUp}
                 transition={cardTransition}
                 whileHover={{ y: -6, boxShadow: '0 16px 50px rgba(0,0,0,0.1)' }}
               >
+                {/* Decorative number */}
+                <span className="number-decoration">{String(i + 1).padStart(2, '0')}</span>
                 <motion.div
-                  className="w-12 h-12 rounded-full bg-[#f09133]/10 flex items-center justify-center mb-4 group-hover:bg-[#f09133]/20 transition-colors duration-300"
+                  className="w-14 h-14 rounded-full bg-[#f09133]/10 flex items-center justify-center mb-4 group-hover:bg-[#f09133]/25 transition-colors duration-300"
                 >
-                  <f.icon className="h-5 w-5 text-[#f09133] group-hover:scale-110 transition-transform duration-300" />
+                  <f.icon className="h-6 w-6 text-[#f09133] group-hover:scale-110 transition-transform duration-300" />
                 </motion.div>
                 <h3 className="text-lg font-bold mb-2">{f.title}</h3>
                 <p className="text-[#6b7280] text-sm leading-relaxed">{f.desc}</p>
@@ -726,7 +735,7 @@ export default function Home() {
               variants={fadeLeft}
               transition={{ duration: 0.7, ease: 'easeOut' }}
             >
-              <div className="aspect-[4/3] rounded-2xl bg-gradient-to-br from-[#1e3a5f] to-[#2a4f7a] flex items-center justify-center p-8 relative overflow-hidden shadow-[0_20px_50px_rgba(30,58,95,0.3)]">
+              <div className="aspect-[4/3] rounded-2xl bg-gradient-to-br from-[#1e3a5f] to-[#2a4f7a] flex items-center justify-center p-8 relative overflow-hidden shadow-[0_20px_60px_rgba(30,58,95,0.4)] border border-white/10">
                 {/* Geometric pattern */}
                 <div className="absolute inset-0 opacity-[0.06]" style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
                 <div className="absolute top-[-30px] right-[-30px] w-[120px] h-[120px] rounded-full bg-white/5 blur-xl" />
@@ -739,7 +748,7 @@ export default function Home() {
                     <Brain className="h-20 w-20 mx-auto mb-4 opacity-70" />
                   </motion.div>
                   <p className="text-lg font-semibold opacity-80">La scienza dietro le decisioni</p>
-                  <p className="text-sm italic text-white/50 mt-3">"La persona giusta al posto giusto cambia tutto."</p>
+                  <p className="text-base italic text-white/50 mt-3 font-medium">"La persona giusta al posto giusto cambia tutto."</p>
                 </div>
               </div>
             </motion.div>
@@ -778,9 +787,10 @@ export default function Home() {
         transition={sectionTransition}
       >
         <div className="max-w-4xl mx-auto px-4 md:px-8">
-          <div className="rounded-2xl bg-gradient-to-r from-[#f09133]/5 to-[#f09133]/10 border border-[#f09133]/30 py-10 px-6 md:px-12 text-center relative overflow-hidden">
-            <div className="absolute top-[-20px] right-[-20px] w-[100px] h-[100px] rounded-full bg-[#f09133]/5 blur-2xl" />
-            <Sparkles className="h-8 w-8 text-[#f09133]/60 mx-auto mb-4" />
+          <div className="rounded-2xl bg-gradient-to-r from-[#f09133]/8 to-[#f09133]/15 border border-[#f09133]/40 py-10 px-6 md:px-12 text-center relative overflow-hidden">
+            <div className="dot-pattern" />
+            <div className="absolute top-[-20px] right-[-20px] w-[100px] h-[100px] rounded-full bg-[#f09133]/8 blur-2xl" />
+            <Sparkles className="h-8 w-8 text-[#f09133]/60 mx-auto mb-4 relative z-10" />
             <h3 className="text-xl md:text-2xl font-bold mb-3">
               Vuoi vedere TalentProfile in azione?
             </h3>
@@ -830,12 +840,14 @@ export default function Home() {
             <div className="absolute left-6 md:left-8 top-0 bottom-0 w-0.5 hidden md:block" style={{ background: 'linear-gradient(to bottom, #f09133, #1e3a5f)' }} />
             <div className="space-y-10">
               {STEPS.map((s, i) => (
-                <motion.div key={i} className={`flex items-start gap-6 md:gap-8 rounded-xl p-4 md:p-5 ${i % 2 === 0 ? 'bg-[#faf8f5]' : 'bg-white'}`} variants={fadeUp} transition={cardTransition}>
-                  <div className="shrink-0 relative z-10">
-                    <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-[#f09133] text-white flex flex-col items-center justify-center text-lg md:text-xl font-bold shadow-[0_0_20px_rgba(240,145,51,0.35)]">
+                <motion.div key={i} className="flex items-start gap-6 md:gap-8 rounded-xl p-5 md:p-6 landing-card border border-[#e5e0db]/60" variants={fadeUp} transition={cardTransition} whileHover={{ y: -3 }}>
+                  <div className="shrink-0 relative z-10 flex flex-col items-center">
+                    <div className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-[#f09133] text-white flex flex-col items-center justify-center text-lg md:text-xl font-bold shadow-[0_0_25px_rgba(240,145,51,0.4)]">
                       {String(i + 1).padStart(2, '0')}
                     </div>
-                    <s.icon className="h-4 w-4 text-[#f09133] mx-auto mt-1.5 opacity-60" />
+                    <s.icon className="h-4 w-4 text-[#f09133] mt-2 opacity-60" />
+                    {/* Horizontal connector line */}
+                    <div className="hidden md:block absolute top-7 left-full w-4 h-0.5 bg-[#f09133]/20" />
                   </div>
                   <div className="pt-1 md:pt-3">
                     <h3 className="text-xl md:text-2xl font-bold mb-2">{s.title}</h3>
@@ -918,16 +930,18 @@ export default function Home() {
             </div>
 
             {/* Risultato — gradient + alert icon */}
-            <div className="text-center py-6 px-4 rounded-xl bg-gradient-to-br from-red-50 to-red-100/50 border border-red-200 mb-8 relative">
+            <div className="text-center py-8 px-6 rounded-xl bg-gradient-to-br from-red-50 via-red-100/60 to-orange-50/40 border border-red-200 mb-8 relative overflow-hidden">
+              {/* Decorative Euro icon */}
+              <span className="absolute top-4 left-6 text-7xl font-black text-red-100/40 select-none pointer-events-none leading-none">€</span>
               <motion.div
                 animate={{ scale: [1, 1.1, 1] }}
                 transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
                 className="absolute top-4 right-4"
               >
-                <AlertTriangle className="h-5 w-5 text-red-400" />
+                <AlertTriangle className="h-6 w-6 text-red-400" />
               </motion.div>
-              <p className="text-sm font-semibold text-[#6b7280] mb-1 uppercase tracking-wide">Danno totale stimato</p>
-              <p className="text-4xl md:text-5xl font-bold text-red-500">
+              <p className="text-sm font-semibold text-[#6b7280] mb-1 uppercase tracking-wide relative z-10">Danno totale stimato</p>
+              <p className="text-4xl md:text-5xl font-bold text-red-500 relative z-10">
                 €{Math.round(costi.totale).toLocaleString('it-IT')}
               </p>
             </div>
@@ -975,16 +989,16 @@ export default function Home() {
           <p className="text-center text-[#6b7280] text-base mb-14 max-w-2xl mx-auto">
             Ecco perché i dati battono l'istinto.
           </p>
-          <div className="landing-card overflow-hidden rounded-xl shadow-[0_4px_30px_rgba(0,0,0,0.06)]">
+          <div className="landing-card overflow-hidden rounded-xl shadow-[0_8px_40px_rgba(0,0,0,0.08)]">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b-2 border-[#e5e0db]">
-                    <th className="text-left p-4 font-semibold text-[#6b7280]">Criterio</th>
-                    <th className="text-center p-4 font-semibold text-red-600 bg-red-100/70">Metodo Tradizionale</th>
-                    <th className="text-center p-4 font-semibold text-green-700 bg-green-100/70 relative">
+                    <th className="text-left p-5 font-bold text-[#1a1a2e] text-base">Criterio</th>
+                    <th className="text-center p-5 font-bold text-red-700 text-base bg-red-100/80">Metodo Tradizionale</th>
+                    <th className="text-center p-5 font-bold text-green-800 text-base bg-green-100/80 relative">
                       TalentProfile
-                      <span className="absolute top-1 right-2 text-[10px] bg-green-500 text-white px-1.5 py-0.5 rounded-full font-bold">✓ Vincitore</span>
+                      <span className="absolute top-2 right-2 text-[10px] bg-green-500 text-white px-2 py-1 rounded-full font-bold shadow-sm">✓ Vincitore</span>
                     </th>
                   </tr>
                 </thead>
@@ -1005,8 +1019,8 @@ export default function Home() {
                           viewport={{ once: true }}
                           transition={{ delay: i * 0.05, duration: 0.4 }}
                         >
-                          <div className="w-6 h-6 rounded-full bg-red-100 flex items-center justify-center shrink-0">
-                            <X className="h-3.5 w-3.5 text-red-500" />
+                          <div className="w-7 h-7 rounded-full bg-red-100 flex items-center justify-center shrink-0">
+                            <X className="h-4 w-4 text-red-500" />
                           </div>
                           <span className="text-[#6b7280]">{row.trad}</span>
                         </motion.div>
@@ -1019,8 +1033,8 @@ export default function Home() {
                           viewport={{ once: true }}
                           transition={{ delay: i * 0.05, duration: 0.4 }}
                         >
-                          <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center shrink-0">
-                            <Check className="h-3.5 w-3.5 text-green-600" />
+                          <div className="w-7 h-7 rounded-full bg-green-100 flex items-center justify-center shrink-0">
+                            <Check className="h-4 w-4 text-green-600" />
                           </div>
                           <span className="text-[#1a1a2e] font-medium">{row.tp}</span>
                         </motion.div>
@@ -1064,15 +1078,15 @@ export default function Home() {
             viewport={{ once: true, amount: 0.15 }}
           >
             {TESTIMONIALS.map((t, i) => (
-              <motion.div key={i} className="bg-white rounded-xl p-6 shadow-[0_4px_20px_rgba(0,0,0,0.06)] border border-[#e5e0db]/50 relative overflow-hidden" variants={fadeUp} transition={cardTransition} whileHover={{ y: -5, boxShadow: '0 16px 50px rgba(0,0,0,0.1)' }}>
+              <motion.div key={i} className="bg-gradient-to-br from-white to-[#faf8f5]/50 rounded-xl p-8 shadow-[0_4px_25px_rgba(0,0,0,0.07)] border border-[#e5e0db]/50 relative overflow-hidden" variants={fadeUp} transition={cardTransition} whileHover={{ y: -5, boxShadow: '0 16px 50px rgba(0,0,0,0.1)' }}>
                 {/* Decorative quote */}
-                <span className="absolute top-2 right-4 text-6xl font-serif text-[#e5e0db]/40 select-none pointer-events-none leading-none">"</span>
+                <span className="absolute top-1 right-4 text-7xl font-serif text-[#f09133]/15 select-none pointer-events-none leading-none">"</span>
                 {/* LinkedIn-style header */}
                 <div className="flex items-start gap-3 mb-4">
                   <img
                     src={t.image}
                     alt={t.name}
-                    className="w-12 h-12 rounded-full object-cover ring-2 ring-[#f09133]/30 ring-offset-2"
+                    className="w-14 h-14 rounded-full object-cover ring-2 ring-[#f09133]/40 ring-offset-2"
                     loading="lazy"
                   />
                   <div className="flex-1 min-w-0">
@@ -1122,10 +1136,10 @@ export default function Home() {
           </p>
           <div className="grid md:grid-cols-2 gap-6 relative">
             {/* VS divider */}
-            <div className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-[#1a1a2e] text-white items-center justify-center font-bold text-sm shadow-lg">VS</div>
+            <div className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 w-14 h-14 rounded-full bg-[#1a1a2e] text-white items-center justify-center font-bold text-base shadow-[0_0_20px_rgba(26,26,46,0.4)]">VS</div>
             {/* Card Verde */}
             <motion.div
-              className="landing-card p-6 border-l-4 border-l-green-400 bg-gradient-to-br from-green-50/50 to-white"
+              className="landing-card p-8 border-l-[6px] border-l-green-400 bg-gradient-to-br from-green-50/60 to-white"
               variants={fadeLeft}
               initial="hidden"
               whileInView="visible"
@@ -1152,7 +1166,7 @@ export default function Home() {
             </motion.div>
             {/* Card Rossa */}
             <motion.div
-              className="landing-card p-6 border-l-4 border-l-red-400 bg-gradient-to-br from-red-50/50 to-white"
+              className="landing-card p-8 border-l-[6px] border-l-red-400 bg-gradient-to-br from-red-50/60 to-white"
               variants={fadeRight}
               initial="hidden"
               whileInView="visible"
@@ -1217,19 +1231,21 @@ export default function Home() {
                 { ref: c4.ref, val: c4.value, suffix: ' min', label: 'Tempo per test', icon: Clock },
               ].map((n, i) => (
                 <motion.div key={i} ref={n.ref} variants={scaleIn} transition={cardTransition} className="relative">
-                  {i > 0 && <div className="hidden md:block absolute left-0 top-1/4 bottom-1/4 w-px bg-white/10" />}
-                  <div className="text-4xl md:text-5xl font-bold text-[#f09133] mb-2" style={{ textShadow: '0 0 30px rgba(240,145,51,0.3)' }}>
+                  {i > 0 && <div className="hidden md:block absolute left-0 top-1/4 bottom-1/4 w-px bg-white/15" />}
+                  <div className="text-5xl md:text-6xl font-bold text-[#f09133] mb-2" style={{ textShadow: '0 0 30px rgba(240,145,51,0.3)' }}>
                     {n.val}{n.suffix}
                   </div>
-                  <n.icon className="h-4 w-4 text-white/30 mx-auto mb-1" />
+                  <n.icon className="h-5 w-5 text-white/40 mx-auto mb-1" />
                   <div className="text-white/60 text-sm font-medium">{n.label}</div>
+                  <div className="text-white/30 text-xs mt-0.5">e in crescita</div>
                 </motion.div>
               ))}
               <motion.div variants={scaleIn} transition={cardTransition} className="relative">
                 <div className="hidden md:block absolute left-0 top-1/4 bottom-1/4 w-px bg-white/10" />
-                <div className="text-4xl md:text-5xl font-bold text-[#f09133] mb-2" style={{ textShadow: '0 0 30px rgba(240,145,51,0.3)' }}>.75/1</div>
-                <Star className="h-4 w-4 text-white/30 mx-auto mb-1" />
+                <div className="text-5xl md:text-6xl font-bold text-[#f09133] mb-2" style={{ textShadow: '0 0 30px rgba(240,145,51,0.3)' }}>.75/1</div>
+                <Star className="h-5 w-5 text-white/40 mx-auto mb-1" />
                 <div className="text-white/60 text-sm font-medium">Validazione scientifica</div>
+                <div className="text-white/30 text-xs mt-0.5">certificata</div>
               </motion.div>
             </motion.div>
           </div>
@@ -1260,9 +1276,9 @@ export default function Home() {
             viewport={{ once: true, amount: 0.15 }}
           >
             {TRUST_BADGES.map((badge, i) => (
-              <motion.div key={i} className="flex flex-col items-center text-center w-[140px] bg-white rounded-xl p-4 shadow-[0_2px_15px_rgba(0,0,0,0.04)] border border-[#e5e0db]/50" variants={scaleIn} transition={cardTransition}>
-                <div className="w-14 h-14 rounded-full bg-[#f7f4f0] border-2 border-[#f09133]/20 flex items-center justify-center mb-3">
-                  <badge.icon className="h-6 w-6 text-[#1e3a5f]" />
+              <motion.div key={i} className="flex flex-col items-center text-center w-[160px] bg-white rounded-xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.05)] border border-[#e5e0db]/50 hover:scale-105 transition-transform duration-300" variants={scaleIn} transition={cardTransition}>
+                <div className="w-16 h-16 rounded-full bg-[#f7f4f0] border-2 border-[#f09133]/30 flex items-center justify-center mb-3">
+                  <badge.icon className="h-7 w-7 text-[#1e3a5f]" />
                 </div>
                 <span className="text-sm font-semibold text-[#1a1a2e]">{badge.label}</span>
                 <span className="text-xs text-[#6b7280] mt-1">{badge.desc}</span>
@@ -1288,7 +1304,7 @@ export default function Home() {
             <span className="section-badge">FAQ</span>
           </div>
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 accent-underline mx-auto w-fit">
-            <HelpCircle className="inline-block h-8 w-8 text-[#f09133] mr-2 -mt-1" />
+            <HelpCircle className="inline-block h-9 w-9 text-[#f09133] mr-2 -mt-1" />
             Domande Frequenti
           </h2>
           <p className="text-center text-[#6b7280] text-base mb-14 max-w-2xl mx-auto">
@@ -1305,7 +1321,7 @@ export default function Home() {
                 <motion.div key={i} variants={fadeUp} transition={cardTransition}>
                   <AccordionItem
                     value={`faq-${i}`}
-                    className="border border-[#e5e0db] rounded-lg px-4 bg-white hover:border-[#f09133]/40 hover:shadow-md transition-all duration-300 data-[state=open]:border-l-4 data-[state=open]:border-l-[#f09133] data-[state=open]:shadow-md"
+                    className="border border-[#e5e0db] rounded-lg px-5 py-1 bg-white hover:border-[#f09133]/40 hover:shadow-md hover:bg-[#faf8f5]/50 transition-all duration-300 data-[state=open]:border-l-4 data-[state=open]:border-l-[#f09133] data-[state=open]:shadow-md"
                   >
                     <AccordionTrigger className="text-left text-base font-semibold hover:no-underline">
                       {f.q}
@@ -1368,7 +1384,7 @@ export default function Home() {
               className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-1.5 mb-6"
             >
               <Zap className="h-3.5 w-3.5 text-[#f09133]" />
-              <span className="text-xs font-semibold text-white/80">Solo 5 demo disponibili questa settimana</span>
+              <span className="text-xs font-semibold text-[#f09133]">Solo 5 demo disponibili questa settimana</span>
             </motion.div>
             <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
               Il futuro del tuo team inizia{' '}
@@ -1380,10 +1396,20 @@ export default function Home() {
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
               <Button
                 size="lg"
-                className="bg-[#f09133] hover:bg-[#e07a1f] text-white text-lg px-10 py-7 rounded-xl shadow-[0_0_30px_rgba(240,145,51,0.4)] animate-[pulse_3s_ease-in-out_infinite]"
+                className="bg-[#f09133] hover:bg-[#e07a1f] text-white text-xl px-12 py-8 rounded-xl shadow-[0_0_30px_rgba(240,145,51,0.4)] animate-[pulse_3s_ease-in-out_infinite]"
                 onClick={() => window.open('mailto:info@talentprofile.it?subject=Richiesta Demo TalentProfile', '_blank')}
               >
                 Richiedi una Demo Gratuita <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="mt-4">
+              <Button
+                variant="outline"
+                size="lg"
+                className="border-white/30 text-white/80 hover:bg-white/10 hover:text-white rounded-xl px-8"
+                onClick={() => window.open('https://linkedin.com', '_blank')}
+              >
+                <Linkedin className="mr-2 h-4 w-4" /> Oppure scrivici su LinkedIn
               </Button>
             </motion.div>
             <div className="flex flex-wrap justify-center gap-6 mt-8">
@@ -1406,7 +1432,7 @@ export default function Home() {
         {/* Orange gradient separator */}
         <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#f09133] to-transparent" />
         <div className="max-w-6xl mx-auto px-4 md:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-10">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-10">
             {/* Col 1 — Logo + desc */}
             <div>
               <img
@@ -1431,22 +1457,33 @@ export default function Home() {
             {/* Col 2 — Link rapidi */}
             <div>
               <h4 className="text-sm font-semibold text-white mb-4 uppercase tracking-wider">Link rapidi</h4>
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 {NAV_LINKS.map((l) => (
                   <button
                     key={l.id}
                     onClick={() => scrollTo(l.id)}
-                    className="block text-sm text-white/50 hover:text-[#f09133] transition-colors"
+                    className="block text-sm text-white/50 hover:text-[#f09133] transition-colors relative after:content-[''] after:absolute after:bottom-[-2px] after:left-0 after:w-0 after:h-[1px] after:bg-[#f09133] after:transition-all after:duration-300 hover:after:w-full"
                   >
                     {l.label}
                   </button>
                 ))}
                 <button
                   onClick={() => navigate('/auth')}
-                  className="block text-sm text-white/50 hover:text-[#f09133] transition-colors"
+                  className="block text-sm text-white/50 hover:text-[#f09133] transition-colors relative after:content-[''] after:absolute after:bottom-[-2px] after:left-0 after:w-0 after:h-[1px] after:bg-[#f09133] after:transition-all after:duration-300 hover:after:w-full"
                 >
                   Accedi
                 </button>
+              </div>
+            </div>
+
+            {/* Col 3 — Risorse */}
+            <div>
+              <h4 className="text-sm font-semibold text-white mb-4 uppercase tracking-wider">Risorse</h4>
+              <div className="space-y-2.5">
+                <a href="#" className="block text-sm text-white/50 hover:text-[#f09133] transition-colors relative after:content-[''] after:absolute after:bottom-[-2px] after:left-0 after:w-0 after:h-[1px] after:bg-[#f09133] after:transition-all after:duration-300 hover:after:w-full">Blog HR</a>
+                <a href="#" className="block text-sm text-white/50 hover:text-[#f09133] transition-colors relative after:content-[''] after:absolute after:bottom-[-2px] after:left-0 after:w-0 after:h-[1px] after:bg-[#f09133] after:transition-all after:duration-300 hover:after:w-full">Guida all'Assessment</a>
+                <a href="#" className="block text-sm text-white/50 hover:text-[#f09133] transition-colors relative after:content-[''] after:absolute after:bottom-[-2px] after:left-0 after:w-0 after:h-[1px] after:bg-[#f09133] after:transition-all after:duration-300 hover:after:w-full">Case Studies</a>
+                <a href="#" className="block text-sm text-white/50 hover:text-[#f09133] transition-colors relative after:content-[''] after:absolute after:bottom-[-2px] after:left-0 after:w-0 after:h-[1px] after:bg-[#f09133] after:transition-all after:duration-300 hover:after:w-full">Webinar</a>
               </div>
             </div>
 
