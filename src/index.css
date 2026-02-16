@@ -225,12 +225,22 @@
 }
 
 .animate-marquee {
-  animation: marquee 25s linear infinite;
+  animation: marquee 20s linear infinite;
 }
 
 .logo-marquee-container {
   mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
   -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+}
+
+/* Floating animation for mockup */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
 }
 
 .landing-hero-box {
@@ -241,6 +251,33 @@
 .landing-counter-box {
   background: #1e3a5f;
   border-radius: 1.5rem;
+}
+
+/* Accent underline for section titles */
+.accent-underline {
+  position: relative;
+  display: inline-block;
+}
+.accent-underline::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 48px;
+  height: 3px;
+  background: #f09133;
+  border-radius: 2px;
+}
+
+/* Subtle dot pattern background */
+.dot-pattern {
+  background-image: radial-gradient(circle, #1a1a2e 0.5px, transparent 0.5px);
+  background-size: 24px 24px;
+  opacity: 0.03;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
 }
 
 /* PDF Report Print Styles */
