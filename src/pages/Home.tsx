@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import {
   Accordion,
@@ -39,27 +40,45 @@ import {
 } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 
-/* ─── Hook: scroll-triggered fade-in ─── */
-function useScrollAnimation() {
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          el.classList.add('opacity-100', 'translate-y-0');
-          el.classList.remove('opacity-0', 'translate-y-4');
-          io.unobserve(el);
-        }
-      },
-      { threshold: 0.1 }
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
-  return ref;
-}
+/* ─── Animation variants ─── */
+const fadeUp = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { opacity: 1, y: 0 },
+};
+
+const fadeLeft = {
+  hidden: { opacity: 0, x: -40 },
+  visible: { opacity: 1, x: 0 },
+};
+
+const fadeRight = {
+  hidden: { opacity: 0, x: 40 },
+  visible: { opacity: 1, x: 0 },
+};
+
+const scaleIn = {
+  hidden: { opacity: 0, scale: 0.85 },
+  visible: { opacity: 1, scale: 1 },
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 },
+  },
+};
+
+const staggerContainerFast = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.08 },
+  },
+};
+
+const sectionTransition = { duration: 0.6, ease: 'easeOut' as const };
+const cardTransition = { duration: 0.5, ease: 'easeOut' as const };
 
 /* ─── Hook: animated counter ─── */
 function useCountUp(target: number, duration = 2000) {
@@ -92,28 +111,6 @@ function useCountUp(target: number, duration = 2000) {
   }, [target, duration]);
 
   return { value, ref };
-}
-
-/* ─── Section wrapper ─── */
-function Section({
-  children,
-  className = '',
-  id,
-}: {
-  children: React.ReactNode;
-  className?: string;
-  id?: string;
-}) {
-  const ref = useScrollAnimation();
-  return (
-    <section
-      id={id}
-      ref={ref}
-      className={`opacity-0 translate-y-4 transition-all duration-700 ease-out ${className}`}
-    >
-      {children}
-    </section>
-  );
 }
 
 /* ─── Smooth scroll helper ─── */
@@ -438,16 +435,29 @@ export default function Home() {
         <div className="landing-hero-box max-w-7xl mx-auto py-16 md:py-24 px-6 md:px-16 relative overflow-hidden">
           <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16 relative z-10">
             {/* Left — Text */}
-            <div className="flex-1 lg:max-w-[58%]">
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] mb-6">
+            <motion.div
+              className="flex-1 lg:max-w-[58%]"
+              initial="hidden"
+              animate="visible"
+              variants={staggerContainer}
+            >
+              <motion.h1
+                variants={fadeUp}
+                transition={{ duration: 0.7, ease: 'easeOut' }}
+                className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] mb-6"
+              >
                 Assumi le persone giuste.{' '}
                 <span className="text-[#f09133]">Con i dati.</span>
-              </h1>
-              <p className="text-base md:text-lg text-white/70 leading-relaxed max-w-xl mb-8">
+              </motion.h1>
+              <motion.p
+                variants={fadeUp}
+                transition={{ duration: 0.6, ease: 'easeOut' }}
+                className="text-base md:text-lg text-white/70 leading-relaxed max-w-xl mb-8"
+              >
                 In 15 minuti ottieni il profilo psicologico completo del candidato: 15 tratti misurati, 24 sindromi comportamentali, compatibilità ruolo e guida al colloquio personalizzata.
-              </p>
+              </motion.p>
 
-              <div className="flex flex-col sm:flex-row gap-3 mb-8">
+              <motion.div variants={fadeUp} transition={{ duration: 0.5 }} className="flex flex-col sm:flex-row gap-3 mb-8">
                 <Button
                   variant="outline"
                   size="lg"
@@ -463,10 +473,10 @@ export default function Home() {
                 >
                   Inizia ora <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
-              </div>
+              </motion.div>
 
               {/* Social proof widget */}
-              <div className="flex items-center gap-3">
+              <motion.div variants={fadeUp} transition={{ duration: 0.5 }} className="flex items-center gap-3">
                 <div className="flex gap-0.5">
                   {[...Array(5)].map((_, i) => (
                     <Star key={i} className="h-4 w-4 fill-[#f09133] text-[#f09133]" />
@@ -475,11 +485,16 @@ export default function Home() {
                 <span className="text-sm text-white/60">
                   4.8 su 5 — Assessment validato scientificamente
                 </span>
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
 
             {/* Right — Product Mockup */}
-            <div className="flex-1 lg:max-w-[42%] w-full">
+            <motion.div
+              className="flex-1 lg:max-w-[42%] w-full"
+              initial={{ opacity: 0, x: 60, scale: 0.95 }}
+              animate={{ opacity: 1, x: 0, scale: 1 }}
+              transition={{ duration: 0.8, ease: 'easeOut', delay: 0.3 }}
+            >
               <div className="bg-white rounded-2xl shadow-2xl p-5 md:p-6">
                 {/* Mockup header */}
                 <div className="flex items-center gap-2 mb-4">
@@ -527,30 +542,47 @@ export default function Home() {
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
 
-      {/* ═══ 3. LOGO BAR ═══ */}
-      <Section className="py-12 md:py-16">
+      {/* ═══ 3. LOGO BAR — Infinite Marquee ═══ */}
+      <motion.section
+        className="py-12 md:py-16"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.15 }}
+        variants={fadeUp}
+        transition={sectionTransition}
+      >
         <div className="max-w-6xl mx-auto px-4 md:px-8 text-center">
           <p className="text-sm text-[#6b7280] mb-8 font-medium">
             Scelto da più di 1.000 aziende italiane
           </p>
-          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-14 logo-bar">
-            {LOGO_COMPANIES.map((name) => (
-              <div key={name} className="flex items-center gap-2">
-                <Building2 className="h-5 w-5 text-[#1a1a2e]" />
-                <span className="text-sm font-semibold text-[#1a1a2e]">{name}</span>
-              </div>
-            ))}
+          <div className="logo-marquee-container overflow-hidden">
+            <div className="animate-marquee flex items-center gap-14 w-max hover:[animation-play-state:paused]">
+              {/* Duplicate logos twice for seamless loop */}
+              {[...LOGO_COMPANIES, ...LOGO_COMPANIES].map((name, i) => (
+                <div key={`${name}-${i}`} className="flex items-center gap-2 opacity-50 grayscale shrink-0">
+                  <Building2 className="h-5 w-5 text-[#1a1a2e]" />
+                  <span className="text-sm font-semibold text-[#1a1a2e] whitespace-nowrap">{name}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-      </Section>
+      </motion.section>
 
       {/* ═══ 4. PROBLEMA (NUOVA) ═══ */}
-      <Section className="py-20 md:py-28 bg-white">
+      <motion.section
+        className="py-20 md:py-28 bg-white"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.15 }}
+        variants={fadeUp}
+        transition={sectionTransition}
+      >
         <div className="max-w-6xl mx-auto px-4 md:px-8">
           <div className="text-center mb-3">
             <span className="section-badge">Il Problema</span>
@@ -561,22 +593,36 @@ export default function Home() {
           <p className="text-center text-[#6b7280] text-base mb-14 max-w-2xl mx-auto">
             I metodi tradizionali di selezione hanno limiti strutturali che costano caro.
           </p>
-          <div className="grid sm:grid-cols-3 gap-6">
+          <motion.div
+            className="grid sm:grid-cols-3 gap-6"
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.15 }}
+          >
             {PROBLEMS.map((p, i) => (
-              <div key={i} className="landing-card p-6">
+              <motion.div key={i} className="landing-card p-6" variants={fadeUp} transition={cardTransition}>
                 <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mb-4">
                   <p.icon className="h-5 w-5 text-red-500" />
                 </div>
                 <h3 className="text-lg font-bold mb-2">{p.title}</h3>
                 <p className="text-[#6b7280] text-sm leading-relaxed">{p.desc}</p>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
-      </Section>
+      </motion.section>
 
       {/* ═══ 5. FUNZIONALITÀ (grid 3x3, badge "PIATTAFORMA") ═══ */}
-      <Section className="py-20 md:py-28" id="funzionalita">
+      <motion.section
+        className="py-20 md:py-28"
+        id="funzionalita"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.15 }}
+        variants={fadeUp}
+        transition={sectionTransition}
+      >
         <div className="max-w-6xl mx-auto px-4 md:px-8">
           <div className="text-center mb-3">
             <span className="section-badge">Piattaforma</span>
@@ -587,20 +633,28 @@ export default function Home() {
           <p className="text-center text-[#6b7280] text-base mb-14 max-w-2xl mx-auto">
             Un sistema completo di intelligence HR per decisioni basate sui dati.
           </p>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <motion.div
+            className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.15 }}
+          >
             {FEATURES.map((f, i) => (
-              <div
+              <motion.div
                 key={i}
                 className="landing-card p-6 group cursor-pointer"
+                variants={fadeUp}
+                transition={cardTransition}
               >
                 <div className="w-12 h-12 rounded-full bg-[#f09133]/10 flex items-center justify-center mb-4 group-hover:bg-[#f09133]/20 transition-colors">
                   <f.icon className="h-5 w-5 text-[#f09133]" />
                 </div>
                 <h3 className="text-lg font-bold mb-2">{f.title}</h3>
                 <p className="text-[#6b7280] text-sm leading-relaxed">{f.desc}</p>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
           <div className="text-center mt-10">
             <button
               onClick={() => scrollTo('metodo')}
@@ -610,23 +664,35 @@ export default function Home() {
             </button>
           </div>
         </div>
-      </Section>
+      </motion.section>
 
       {/* ═══ 6. MANIFESTO ═══ */}
-      <Section className="py-20 md:py-28 bg-white" id="manifesto">
+      <motion.section
+        className="py-20 md:py-28 bg-white"
+        id="manifesto"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.15 }}
+        variants={fadeUp}
+        transition={sectionTransition}
+      >
         <div className="max-w-6xl mx-auto px-4 md:px-8">
           <div className="flex flex-col md:flex-row items-center gap-12 md:gap-16">
             {/* Left — Image placeholder */}
-            <div className="flex-1 w-full md:max-w-[45%]">
+            <motion.div
+              className="flex-1 w-full md:max-w-[45%]"
+              variants={fadeLeft}
+              transition={{ duration: 0.7, ease: 'easeOut' }}
+            >
               <div className="aspect-[4/3] rounded-2xl bg-gradient-to-br from-[#1e3a5f] to-[#2a4f7a] flex items-center justify-center p-8">
                 <div className="text-center text-white">
                   <Brain className="h-16 w-16 mx-auto mb-4 opacity-60" />
                   <p className="text-lg font-semibold opacity-80">La scienza dietro le decisioni</p>
                 </div>
               </div>
-            </div>
+            </motion.div>
             {/* Right — Text */}
-            <div className="flex-1">
+            <motion.div className="flex-1" variants={fadeRight} transition={{ duration: 0.7, ease: 'easeOut' }}>
               <span className="section-badge mb-4 inline-block">Manifesto</span>
               <h2 className="text-3xl md:text-4xl font-bold mb-6">
                 Odiamo le assunzioni sbagliate.
@@ -643,13 +709,20 @@ export default function Home() {
               >
                 Inizia ora <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
-            </div>
+            </motion.div>
           </div>
         </div>
-      </Section>
+      </motion.section>
 
       {/* ═══ 7. CTA INTERMEDIO (NUOVO) ═══ */}
-      <Section className="py-10 md:py-14">
+      <motion.section
+        className="py-10 md:py-14"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.15 }}
+        variants={fadeUp}
+        transition={sectionTransition}
+      >
         <div className="max-w-4xl mx-auto px-4 md:px-8">
           <div className="rounded-2xl bg-[#f09133]/5 border border-[#f09133]/20 py-10 px-6 md:px-12 text-center">
             <h3 className="text-xl md:text-2xl font-bold mb-3">
@@ -666,10 +739,18 @@ export default function Home() {
             </Button>
           </div>
         </div>
-      </Section>
+      </motion.section>
 
       {/* ═══ 8. IL METODO (4 step) ═══ */}
-      <Section className="py-20 md:py-28" id="metodo">
+      <motion.section
+        className="py-20 md:py-28"
+        id="metodo"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.15 }}
+        variants={fadeUp}
+        transition={sectionTransition}
+      >
         <div className="max-w-5xl mx-auto px-4 md:px-8">
           <div className="text-center mb-3">
             <span className="section-badge">Come Funziona</span>
@@ -680,11 +761,17 @@ export default function Home() {
           <p className="text-center text-[#6b7280] text-base mb-16 max-w-2xl mx-auto">
             Dal link al report completo. 15 minuti. Zero logistica.
           </p>
-          <div className="max-w-3xl mx-auto relative">
+          <motion.div
+            className="max-w-3xl mx-auto relative"
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.15 }}
+          >
             <div className="absolute left-6 md:left-8 top-0 bottom-0 w-0.5 bg-[#e5e0db] hidden md:block" />
             <div className="space-y-12">
               {STEPS.map((s, i) => (
-                <div key={i} className="flex items-start gap-6 md:gap-8">
+                <motion.div key={i} className="flex items-start gap-6 md:gap-8" variants={fadeUp} transition={cardTransition}>
                   <div className="shrink-0 relative z-10">
                     <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-[#f09133] text-white flex items-center justify-center text-lg md:text-xl font-bold shadow-md">
                       {String(i + 1).padStart(2, '0')}
@@ -694,15 +781,23 @@ export default function Home() {
                     <h3 className="text-xl md:text-2xl font-bold mb-2">{s.title}</h3>
                     <p className="text-[#6b7280] text-base leading-relaxed">{s.desc}</p>
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
-          </div>
+          </motion.div>
         </div>
-      </Section>
+      </motion.section>
 
       {/* ═══ 9. CALCOLATORE (semplificato, sobrio) ═══ */}
-      <Section className="py-20 md:py-28 bg-white" id="calcolatore">
+      <motion.section
+        className="py-20 md:py-28 bg-white"
+        id="calcolatore"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.15 }}
+        variants={fadeUp}
+        transition={sectionTransition}
+      >
         <div className="max-w-4xl mx-auto px-4 md:px-8">
           <div className="text-center mb-3">
             <span className="section-badge">Calcolatore</span>
@@ -792,10 +887,17 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </Section>
+      </motion.section>
 
       {/* ═══ 10. TABELLA COMPARATIVA (NUOVA) ═══ */}
-      <Section className="py-20 md:py-28">
+      <motion.section
+        className="py-20 md:py-28"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.15 }}
+        variants={fadeUp}
+        transition={sectionTransition}
+      >
         <div className="max-w-4xl mx-auto px-4 md:px-8">
           <div className="text-center mb-3">
             <span className="section-badge">Confronto</span>
@@ -816,33 +918,58 @@ export default function Home() {
                     <th className="text-center p-4 font-semibold text-green-600 bg-green-50">TalentProfile</th>
                   </tr>
                 </thead>
-                <tbody>
+                <motion.tbody
+                  variants={staggerContainerFast}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, amount: 0.15 }}
+                >
                   {COMPARISON_ROWS.map((row, i) => (
-                    <tr key={i} className="border-b border-[#e5e0db] last:border-0">
+                    <motion.tr key={i} className="border-b border-[#e5e0db] last:border-0" variants={fadeUp} transition={cardTransition}>
                       <td className="p-4 font-medium">{row.label}</td>
                       <td className="p-4 text-center bg-red-50/50">
-                        <div className="flex items-center justify-center gap-2">
+                        <motion.div
+                          className="flex items-center justify-center gap-2"
+                          initial={{ opacity: 0, x: -20 }}
+                          whileInView={{ opacity: 1, x: 0 }}
+                          viewport={{ once: true }}
+                          transition={{ delay: i * 0.05, duration: 0.4 }}
+                        >
                           <X className="h-4 w-4 text-red-400" />
                           <span className="text-[#6b7280]">{row.trad}</span>
-                        </div>
+                        </motion.div>
                       </td>
                       <td className="p-4 text-center bg-green-50/50">
-                        <div className="flex items-center justify-center gap-2">
+                        <motion.div
+                          className="flex items-center justify-center gap-2"
+                          initial={{ opacity: 0, x: 20 }}
+                          whileInView={{ opacity: 1, x: 0 }}
+                          viewport={{ once: true }}
+                          transition={{ delay: i * 0.05, duration: 0.4 }}
+                        >
                           <Check className="h-4 w-4 text-green-500" />
                           <span className="text-[#1a1a2e] font-medium">{row.tp}</span>
-                        </div>
+                        </motion.div>
                       </td>
-                    </tr>
+                    </motion.tr>
                   ))}
-                </tbody>
+                </motion.tbody>
               </table>
             </div>
           </div>
         </div>
-      </Section>
+      </motion.section>
 
       {/* ═══ 11. TESTIMONIANZE (stile LinkedIn) ═══ */}
-      <Section className="py-20 md:py-28 bg-white" id="testimonianze">
+      <motion.section
+        className="py-20 md:py-28 bg-white"
+        id="testimonianze"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.15 }}
+        variants={fadeUp}
+        transition={sectionTransition}
+      >
         <div className="max-w-6xl mx-auto px-4 md:px-8">
           <div className="text-center mb-3">
             <span className="section-badge">Testimonianze</span>
@@ -854,9 +981,15 @@ export default function Home() {
             Ecco cosa dicono i professionisti HR che hanno scelto il nostro sistema.
           </p>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <motion.div
+            className="grid md:grid-cols-3 gap-6"
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.15 }}
+          >
             {TESTIMONIALS.map((t, i) => (
-              <div key={i} className="landing-card p-6">
+              <motion.div key={i} className="landing-card p-6" variants={fadeUp} transition={cardTransition}>
                 {/* LinkedIn-style header */}
                 <div className="flex items-start gap-3 mb-4">
                   <img
@@ -882,14 +1015,21 @@ export default function Home() {
 
                 {/* Text */}
                 <p className="text-[#6b7280] text-sm leading-relaxed">{t.text}</p>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
-      </Section>
+      </motion.section>
 
       {/* ═══ 12. PER CHI È (NUOVA) ═══ */}
-      <Section className="py-20 md:py-28">
+      <motion.section
+        className="py-20 md:py-28"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.15 }}
+        variants={fadeUp}
+        transition={sectionTransition}
+      >
         <div className="max-w-5xl mx-auto px-4 md:px-8">
           <div className="text-center mb-3">
             <span className="section-badge">Per Chi È</span>
@@ -902,7 +1042,14 @@ export default function Home() {
           </p>
           <div className="grid md:grid-cols-2 gap-6">
             {/* Card Verde */}
-            <div className="landing-card p-6 border-green-200">
+            <motion.div
+              className="landing-card p-6 border-green-200"
+              variants={fadeLeft}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.15 }}
+              transition={{ duration: 0.6, ease: 'easeOut' }}
+            >
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center">
                   <CheckCircle2 className="h-5 w-5 text-green-500" />
@@ -917,9 +1064,16 @@ export default function Home() {
                   </li>
                 ))}
               </ul>
-            </div>
+            </motion.div>
             {/* Card Rossa */}
-            <div className="landing-card p-6 border-red-200">
+            <motion.div
+              className="landing-card p-6 border-red-200"
+              variants={fadeRight}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.15 }}
+              transition={{ duration: 0.6, ease: 'easeOut' }}
+            >
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center">
                   <XCircle className="h-5 w-5 text-red-500" />
@@ -934,13 +1088,21 @@ export default function Home() {
                   </li>
                 ))}
               </ul>
-            </div>
+            </motion.div>
           </div>
         </div>
-      </Section>
+      </motion.section>
 
       {/* ═══ 13. NUMERI / CONTATORI ═══ */}
-      <Section className="py-0 md:py-0 px-4 md:px-8" id="numeri">
+      <motion.section
+        className="py-0 md:py-0 px-4 md:px-8"
+        id="numeri"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.15 }}
+        variants={fadeUp}
+        transition={sectionTransition}
+      >
         <div className="landing-counter-box py-16 md:py-24 max-w-7xl mx-auto relative overflow-hidden">
           <div className="max-w-6xl mx-auto px-4 md:px-8 relative z-10">
             <p className="text-sm uppercase tracking-[0.2em] text-[#f09133] font-semibold text-center mb-3">
@@ -949,31 +1111,44 @@ export default function Home() {
             <h2 className="text-3xl md:text-4xl font-bold text-center mb-14 text-white">
               I risultati parlano
             </h2>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-8 text-center">
+            <motion.div
+              className="grid grid-cols-2 md:grid-cols-5 gap-8 text-center"
+              variants={staggerContainer}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.15 }}
+            >
               {[
                 { ref: c1.ref, val: c1.value.toLocaleString('it-IT'), suffix: '+', label: 'Aziende clienti' },
                 { ref: c2.ref, val: c2.value.toLocaleString('it-IT'), suffix: '+', label: 'Assessment completati' },
                 { ref: c3.ref, val: c3.value, suffix: '+', label: 'Ruoli mappati' },
                 { ref: c4.ref, val: c4.value, suffix: ' min', label: 'Tempo per test' },
               ].map((n, i) => (
-                <div key={i} ref={n.ref}>
+                <motion.div key={i} ref={n.ref} variants={scaleIn} transition={cardTransition}>
                   <div className="text-4xl md:text-5xl font-bold text-[#f09133] mb-2">
                     {n.val}{n.suffix}
                   </div>
                   <div className="text-white/60 text-sm font-medium">{n.label}</div>
-                </div>
+                </motion.div>
               ))}
-              <div>
+              <motion.div variants={scaleIn} transition={cardTransition}>
                 <div className="text-4xl md:text-5xl font-bold text-[#f09133] mb-2">.75/1</div>
                 <div className="text-white/60 text-sm font-medium">Validazione scientifica</div>
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
           </div>
         </div>
-      </Section>
+      </motion.section>
 
       {/* ═══ 14. TRUST / SICUREZZA (NUOVA) ═══ */}
-      <Section className="py-16 md:py-20 bg-white">
+      <motion.section
+        className="py-16 md:py-20 bg-white"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.15 }}
+        variants={fadeUp}
+        transition={sectionTransition}
+      >
         <div className="max-w-5xl mx-auto px-4 md:px-8">
           <div className="text-center mb-12">
             <span className="section-badge mb-3 inline-block">Sicurezza</span>
@@ -981,22 +1156,36 @@ export default function Home() {
               I tuoi dati sono al sicuro
             </h2>
           </div>
-          <div className="flex flex-wrap justify-center gap-8 md:gap-12">
+          <motion.div
+            className="flex flex-wrap justify-center gap-8 md:gap-12"
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.15 }}
+          >
             {TRUST_BADGES.map((badge, i) => (
-              <div key={i} className="flex flex-col items-center text-center max-w-[120px]">
+              <motion.div key={i} className="flex flex-col items-center text-center max-w-[120px]" variants={scaleIn} transition={cardTransition}>
                 <div className="w-14 h-14 rounded-full bg-[#f7f4f0] border border-[#e5e0db] flex items-center justify-center mb-3">
                   <badge.icon className="h-6 w-6 text-[#1e3a5f]" />
                 </div>
                 <span className="text-sm font-semibold text-[#1a1a2e]">{badge.label}</span>
                 <span className="text-xs text-[#6b7280] mt-1">{badge.desc}</span>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
-      </Section>
+      </motion.section>
 
       {/* ═══ 15. FAQ ═══ */}
-      <Section className="py-20 md:py-28" id="faq">
+      <motion.section
+        className="py-20 md:py-28"
+        id="faq"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.15 }}
+        variants={fadeUp}
+        transition={sectionTransition}
+      >
         <div className="max-w-3xl mx-auto px-4 md:px-8">
           <div className="text-center mb-3">
             <span className="section-badge">FAQ</span>
@@ -1007,27 +1196,43 @@ export default function Home() {
           <p className="text-center text-[#6b7280] text-base mb-14 max-w-2xl mx-auto">
             Le risposte alle domande più comuni.
           </p>
-          <Accordion type="single" collapsible className="space-y-2">
-            {FAQ_DATA.map((f, i) => (
-              <AccordionItem
-                key={i}
-                value={`faq-${i}`}
-                className="border border-[#e5e0db] rounded-lg px-4 bg-white hover:border-[#f09133]/40 transition-colors"
-              >
-                <AccordionTrigger className="text-left text-base font-semibold hover:no-underline">
-                  {f.q}
-                </AccordionTrigger>
-                <AccordionContent className="text-[#6b7280] text-base leading-relaxed">
-                  {f.a}
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
+          <motion.div
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.15 }}
+          >
+            <Accordion type="single" collapsible className="space-y-2">
+              {FAQ_DATA.map((f, i) => (
+                <motion.div key={i} variants={fadeUp} transition={cardTransition}>
+                  <AccordionItem
+                    value={`faq-${i}`}
+                    className="border border-[#e5e0db] rounded-lg px-4 bg-white hover:border-[#f09133]/40 transition-colors"
+                  >
+                    <AccordionTrigger className="text-left text-base font-semibold hover:no-underline">
+                      {f.q}
+                    </AccordionTrigger>
+                    <AccordionContent className="text-[#6b7280] text-base leading-relaxed">
+                      {f.a}
+                    </AccordionContent>
+                  </AccordionItem>
+                </motion.div>
+              ))}
+            </Accordion>
+          </motion.div>
         </div>
-      </Section>
+      </motion.section>
 
-      {/* ═══ 11. CTA FINALE ═══ */}
-      <section id="cta-finale" className="px-4 md:px-8 py-8">
+      {/* ═══ 16. CTA FINALE ═══ */}
+      <motion.section
+        id="cta-finale"
+        className="px-4 md:px-8 py-8"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.15 }}
+        variants={fadeUp}
+        transition={sectionTransition}
+      >
         <div className="landing-hero-box py-16 md:py-24 text-center max-w-7xl mx-auto relative overflow-hidden">
           <div className="max-w-3xl mx-auto px-4 md:px-8 relative z-10">
             <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
@@ -1056,7 +1261,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* ═══ FOOTER ═══ */}
       <footer className="bg-[#1e3a5f] py-14 mt-8">
