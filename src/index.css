@@ -160,6 +160,18 @@
   }
 }
 
+/* Typewriter cursor blink */
+@keyframes blink-cursor {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.typing-cursor {
+  animation: blink-cursor 0.7s step-end infinite;
+  font-weight: normal;
+  color: #f09133;
+}
+
 /* Custom keyframes for Stress Zone animations */
 @keyframes shimmer {
   0% { transform: translateX(-100%); }
