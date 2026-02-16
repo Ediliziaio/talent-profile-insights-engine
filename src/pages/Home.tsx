@@ -704,26 +704,85 @@ export default function Home() {
               
               <div className="letter-style space-y-5">
                 <p className="text-lg">
-                  <strong className="text-[#1a1a2e]">So cosa stai passando.</strong>
+                  <strong className="text-[#1a1a2e]">So cosa stai passando. Ci siamo passati tutti.</strong>
                 </p>
                 <p>
-                  Hai assunto qualcuno che al colloquio sembrava perfetto. Motivato, competente, entusiasta. Poi, dopo tre mesi, ti sei chiesto: <em>"Ma chi ho preso?"</em>
+                  Hai assunto qualcuno che al colloquio sembrava perfetto. Motivato, competente, entusiasta. Diceva tutte le cose giuste. Ti guardava negli occhi con quella sicurezza che ti faceva pensare: <em>"Finalmente ho trovato la persona giusta."</em>
                 </p>
                 <p>
-                  Hai paura di sbagliare ancora. Di perdere tempo, soldi, energia. Di dover ricominciare da capo mentre il tuo team perde fiducia.
+                  Poi sono passate tre settimane. Forse tre mesi. E quella persona è diventata irriconoscibile. Ritardi. Scuse. Tensioni con il team. E tu, da solo nel tuo ufficio, a fissare il muro chiedendoti: <em>"Ma chi ho preso?"</em>
+                </p>
+                <p>
+                  Non è colpa tua. È un copione che si ripete migliaia di volte al giorno, in migliaia di aziende. Imprenditori come te, responsabili HR come te, che fanno del loro meglio con gli strumenti che hanno — e che continuano a sbattere contro lo stesso muro.
                 </p>
                 
                 <div className="bg-[#fef9c3]/60 border-l-4 border-[#f09133]/50 rounded-r-lg p-4 my-6">
                   <p className="text-[#1a1a2e] font-medium italic">
-                    "Il 73% degli HR manager ammette di aver fatto almeno un'assunzione sbagliata nell'ultimo anno. Non sei solo."
+                    "Il 73% degli HR manager ammette di aver fatto almeno un'assunzione sbagliata nell'ultimo anno."
                   </p>
                 </div>
                 
                 <p>
-                  Ho creato TalentProfile per una ragione semplice: <strong className="text-[#1a1a2e]">nessuna azienda dovrebbe decidere sulle persone al buio.</strong> Non con l'istinto. Non con le sensazioni. Con i dati.
+                  Sai qual è la parte peggiore? Non è solo lo stipendio buttato. Non sono solo i mesi persi. È quella vocina nella testa che ti dice: <em>"E se sbaglio di nuovo?"</em>
                 </p>
                 <p>
-                  Questa lettera è per te che vuoi smettere di sperare e iniziare a sapere.
+                  Quella paura ti frena. Ti fa tenere persone mediocri perché almeno "le conosci già". Ti fa rimandare assunzioni strategiche. Ti fa accontentare. E intanto il tuo team perde fiducia, i tuoi clienti lo percepiscono, e il tuo fatturato ne risente.
+                </p>
+                <p>
+                  <strong className="text-[#1a1a2e]">Ci siamo passati. Sappiamo esattamente come ci si sente.</strong>
+                </p>
+                <p>
+                  Ecco perché abbiamo creato <strong className="text-[#f09133]">TalentProfile</strong>.
+                </p>
+                <p>
+                  Non l'ennesimo test della personalità scaricato da internet. Non un questionario generico che ti dà risposte vaghe e inutilizzabili.
+                </p>
+                <p>
+                  TalentProfile è un sistema di profilazione psicologica sviluppato in collaborazione con psicologi del lavoro, psicoterapeuti e professionisti delle risorse umane — persone che studiano il comportamento umano da decenni, non marketer che si improvvisano esperti di selezione.
+                </p>
+                <p>
+                  È nato dall'incontro tra scienza e campo. Da una parte, le basi solide della psicologia comportamentale e organizzativa. Dall'altra, anni di esperienza diretta nelle assunzioni — compresi tutti gli errori che abbiamo pagato caro e le notti passate a chiederci <em>"come facciamo a non ripetere lo stesso sbaglio?"</em>
+                </p>
+                <p>
+                  Il risultato? Un sistema che analizza <strong className="text-[#1a1a2e]">15 tratti comportamentali</strong> e <strong className="text-[#1a1a2e]">5 dimensioni psicologiche</strong> di ogni candidato. Che ti mostra chi hai davvero di fronte — non chi quella persona finge di essere durante un colloquio di 45 minuti.
+                </p>
+                <p>
+                  Perché il problema non sei tu. Il problema è che un colloquio tradizionale è progettato per farti vedere solo quello che il candidato vuole mostrarti. È un palcoscenico. E i migliori attori non sono sempre i migliori lavoratori.
+                </p>
+                <p>
+                  Con TalentProfile smetti di decidere sulle persone al buio. Smetti di affidarti all'istinto, alle sensazioni, al <em>"mi sembra una brava persona"</em>. Inizi a decidere con i dati. Con la chiarezza. Con la sicurezza di chi sa — perché ha gli strumenti giusti per sapere.
+                </p>
+                <p>
+                  Non ti stiamo chiedendo di fidarti di noi. Ti stiamo chiedendo di fidarti della scienza. Degli stessi modelli psicologici usati nelle più grandi aziende del mondo, adattati e perfezionati per la realtà delle PMI italiane — per imprenditori che non hanno un reparto HR da 50 persone, ma che hanno bisogno delle stesse risposte.
+                </p>
+                <p>
+                  <strong className="text-[#1a1a2e]">Questa lettera è per te</strong> — che vuoi smettere di sperare e iniziare a sapere.
+                </p>
+                <p>
+                  Se sei arrivato fin qui, è perché qualcosa di quello che hai letto ti ha colpito. Forse ti ci sei rivisto. Forse hai pensato a quell'ultima assunzione che ti ha fatto perdere il sonno. Forse stai per assumere qualcuno proprio in queste settimane e vuoi essere sicuro di non ripetere gli stessi errori.
+                </p>
+                <p className="text-lg font-medium text-[#1a1a2e]">
+                  Allora fai una cosa semplice: <strong>provalo. Gratis.</strong>
+                </p>
+                <p>
+                  Nessun impegno, nessun vincolo, nessuna carta di credito. Solo la possibilità di vedere con i tuoi occhi cosa significa finalmente avere chiarezza sulle persone che entrano nella tua azienda.
+                </p>
+
+                <div className="text-center my-8">
+                  <a href="#cta-finale" className="inline-flex items-center gap-2 bg-[#f09133] hover:bg-[#d47a1f] text-white px-8 py-4 rounded-full font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300">
+                    Richiedi la tua prova gratuita ora
+                    <ArrowRight className="h-5 w-5" />
+                  </a>
+                </div>
+
+                <p>
+                  Perché la prossima assunzione che farai potrebbe essere quella giusta. O potrebbe essere l'ennesimo errore che ti costa mesi di frustrazione e migliaia di euro buttati.
+                </p>
+                <p>
+                  La differenza sta negli strumenti che usi per decidere.
+                </p>
+                <p className="text-xl font-bold text-[#1a1a2e] text-center mt-6">
+                  Scegli di sapere.
                 </p>
               </div>
               
