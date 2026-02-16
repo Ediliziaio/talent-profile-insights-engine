@@ -37,6 +37,10 @@ import {
   TrendingDown,
   Check,
   X,
+  Sparkles,
+  HelpCircle,
+  ChevronRight,
+  BadgeCheck,
 } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 
@@ -155,31 +159,37 @@ const FEATURES = [
     icon: Brain,
     title: 'Profilo Psicologico 360°',
     desc: '15 tratti, 3 macro-aree, 24 sindromi. Report esecutivo leggibile in 5 minuti.',
+    borderColor: 'border-l-[#f09133]',
   },
   {
     icon: Target,
     title: 'Mappa Interiore',
     desc: '7 profili profondi: identità, emozioni, stile di attaccamento, meccanismi difensivi.',
+    borderColor: 'border-l-[#1e3a5f]',
   },
   {
     icon: Users,
     title: 'Role Matching Automatico',
     desc: 'Compatibilità istantanea con 30+ ruoli aziendali. Scopri dove il candidato performa meglio.',
+    borderColor: 'border-l-green-500',
   },
   {
     icon: Lightbulb,
     title: 'Guida al Colloquio',
     desc: 'Domande personalizzate generate dall\'assessment. Sai esattamente cosa chiedere.',
+    borderColor: 'border-l-[#f09133]',
   },
   {
     icon: BarChart3,
     title: 'Confronto Candidati',
     desc: 'Confronta fino a 4 candidati fianco a fianco su tutte le dimensioni psicologiche.',
+    borderColor: 'border-l-[#1e3a5f]',
   },
   {
     icon: FileText,
     title: 'Report PDF Esecutivo',
     desc: 'Scaricabile, condivisibile, con piano d\'azione per i primi 90 giorni.',
+    borderColor: 'border-l-green-500',
   },
 ];
 
@@ -249,16 +259,19 @@ const PROBLEMS = [
     icon: TrendingDown,
     title: 'Turnover nei primi 6 mesi',
     desc: 'Il 46% dei neoassunti lascia entro 18 mesi. Ma il danno inizia molto prima: demotivazione, errori, team instabile.',
+    stat: '46%',
   },
   {
     icon: AlertTriangle,
     title: 'Colloqui basati sull\'istinto',
     desc: 'Senza dati oggettivi, le decisioni si basano su impressioni e bias cognitivi. Risultato: errori sistematici.',
+    stat: '73%',
   },
   {
     icon: Calculator,
     title: 'Costi nascosti delle assunzioni sbagliate',
     desc: 'Ogni errore di selezione costa in media €30.000 tra stipendio bruciato, formazione persa e riassunzione.',
+    stat: '€30K',
   },
 ];
 
@@ -343,11 +356,11 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-[#f7f4f0] text-[#1a1a2e] overflow-x-hidden">
-      {/* ═══ 1. NAVBAR ═══ */}
+      {/* ═══ 1. NAVBAR — Glassmorphism + animated underline ═══ */}
       <nav
         className={`sticky top-0 z-50 transition-all duration-300 ${
           scrolled
-            ? 'bg-white/95 backdrop-blur-md shadow-sm border-b border-[#e5e0db]'
+            ? 'bg-white/90 backdrop-blur-xl shadow-[0_1px_20px_rgba(0,0,0,0.06)] border-b border-[#e5e0db]'
             : 'bg-white border-b border-transparent'
         }`}
       >
@@ -355,7 +368,8 @@ export default function Home() {
           <img
             src="/talentprofile_logo_v3.png"
             alt="TalentProfile"
-            className="h-10 md:h-12"
+            className="h-10 md:h-12 hover:scale-105 transition-transform duration-200 cursor-pointer"
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           />
 
           {/* Desktop links */}
@@ -364,7 +378,7 @@ export default function Home() {
               <button
                 key={l.id}
                 onClick={() => scrollTo(l.id)}
-                className="text-sm font-medium text-[#6b7280] hover:text-[#f09133] transition-colors"
+                className="relative text-sm font-medium text-[#6b7280] hover:text-[#f09133] transition-colors after:content-[''] after:absolute after:bottom-[-4px] after:left-0 after:w-full after:h-[2px] after:bg-[#f09133] after:scale-x-0 after:origin-right after:transition-transform after:duration-300 hover:after:scale-x-100 hover:after:origin-left"
               >
                 {l.label}
               </button>
@@ -430,9 +444,14 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* ═══ 2. HERO — Split Layout (JetHR-style) ═══ */}
+      {/* ═══ 2. HERO — Radial gradient + decorative spheres ═══ */}
       <section className="px-4 md:px-8 pt-6 md:pt-10">
-        <div className="landing-hero-box max-w-7xl mx-auto py-16 md:py-24 px-6 md:px-16 relative overflow-hidden">
+        <div className="landing-hero-box max-w-7xl mx-auto py-16 md:py-24 px-6 md:px-16 relative overflow-hidden" style={{ background: 'radial-gradient(ellipse at 30% 50%, #2a4f7a 0%, #1e3a5f 70%)' }}>
+          {/* Decorative blurred spheres */}
+          <div className="absolute top-[-60px] right-[-40px] w-[200px] h-[200px] rounded-full bg-white/5 blur-3xl" />
+          <div className="absolute bottom-[-80px] left-[10%] w-[300px] h-[300px] rounded-full bg-[#f09133]/10 blur-3xl" />
+          <div className="absolute top-[40%] right-[20%] w-[150px] h-[150px] rounded-full bg-white/[0.03] blur-2xl" />
+
           <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16 relative z-10">
             {/* Left — Text */}
             <motion.div
@@ -461,7 +480,7 @@ export default function Home() {
                 <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                   <Button
                     size="lg"
-                    className="bg-white text-[#1e3a5f] hover:bg-white/90 rounded-xl px-8 font-semibold"
+                    className="bg-white text-[#1e3a5f] hover:bg-white/90 rounded-xl px-8 font-semibold shadow-lg"
                     onClick={() => scrollTo('metodo')}
                   >
                     Scopri di più
@@ -470,7 +489,7 @@ export default function Home() {
                 <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                   <Button
                     size="lg"
-                    className="bg-[#f09133] hover:bg-[#e07a1f] text-white rounded-xl px-8"
+                    className="bg-[#f09133] hover:bg-[#e07a1f] text-white rounded-xl px-8 shadow-[0_4px_20px_rgba(240,145,51,0.4)]"
                     onClick={() => scrollTo('cta-finale')}
                   >
                     Inizia ora <ArrowRight className="ml-2 h-4 w-4" />
@@ -491,14 +510,14 @@ export default function Home() {
               </motion.div>
             </motion.div>
 
-            {/* Right — Product Mockup */}
+            {/* Right — Product Mockup with glow shadow */}
             <motion.div
               className="flex-1 lg:max-w-[42%] w-full animate-float"
               initial={{ opacity: 0, x: 60, scale: 0.95 }}
               animate={{ opacity: 1, x: 0, scale: 1 }}
               transition={{ duration: 0.8, ease: 'easeOut', delay: 0.3 }}
             >
-              <div className="bg-white rounded-2xl shadow-2xl p-5 md:p-6">
+              <div className="bg-white rounded-2xl shadow-[0_20px_60px_-10px_rgba(0,0,0,0.3),0_0_40px_rgba(240,145,51,0.1)] p-5 md:p-6">
                 {/* Mockup header */}
                 <div className="flex items-center gap-2 mb-4">
                   <div className="w-3 h-3 rounded-full bg-red-400" />
@@ -536,8 +555,13 @@ export default function Home() {
                     ].map((t) => (
                       <div key={t.label} className="flex items-center gap-2">
                         <span className="text-xs text-[#6b7280] w-16">{t.label}</span>
-                        <div className="flex-1 h-2 rounded-full bg-gray-100">
-                          <div className="h-full rounded-full bg-[#f09133]" style={{ width: `${t.val}%` }} />
+                        <div className="flex-1 h-2 rounded-full bg-gray-100 overflow-hidden">
+                          <motion.div
+                            className="h-full rounded-full bg-gradient-to-r from-[#f09133] to-[#e07a1f]"
+                            initial={{ width: 0 }}
+                            animate={{ width: `${t.val}%` }}
+                            transition={{ duration: 1.2, delay: 0.8 + t.val * 0.005, ease: 'easeOut' }}
+                          />
                         </div>
                         <span className="text-xs font-semibold text-[#1a1a2e] w-8">{t.val}%</span>
                       </div>
@@ -550,9 +574,9 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═══ 3. LOGO BAR — Infinite Marquee ═══ */}
+      {/* ═══ 3. LOGO BAR — Separator + hover grayscale remove ═══ */}
       <motion.section
-        className="py-12 md:py-16"
+        className="py-12 md:py-16 bg-white"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.15 }}
@@ -560,26 +584,29 @@ export default function Home() {
         transition={sectionTransition}
       >
         <div className="max-w-6xl mx-auto px-4 md:px-8 text-center">
+          {/* Top separator */}
+          <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-[#f09133]/30 to-transparent mb-10" />
           <p className="text-sm text-[#6b7280] mb-8 font-medium">
             Scelto da più di 1.000 aziende italiane
           </p>
           <div className="logo-marquee-container overflow-hidden">
-            <div className="animate-marquee flex items-center gap-14 w-max hover:[animation-play-state:paused]">
-              {/* Duplicate logos twice for seamless loop */}
+            <div className="animate-marquee flex items-center gap-14 w-max hover:[animation-play-state:paused]" style={{ animationDuration: '20s' }}>
               {[...LOGO_COMPANIES, ...LOGO_COMPANIES, ...LOGO_COMPANIES].map((name, i) => (
-                <div key={`${name}-${i}`} className="flex items-center gap-2 opacity-50 grayscale shrink-0">
+                <div key={`${name}-${i}`} className="flex items-center gap-2 opacity-40 grayscale shrink-0 hover:opacity-100 hover:grayscale-0 transition-all duration-300 cursor-default">
                   <Building2 className="h-5 w-5 text-[#1a1a2e]" />
                   <span className="text-sm font-semibold text-[#1a1a2e] whitespace-nowrap">{name}</span>
                 </div>
               ))}
             </div>
           </div>
+          {/* Bottom separator */}
+          <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-[#f09133]/30 to-transparent mt-10" />
         </div>
       </motion.section>
 
-      {/* ═══ 4. PROBLEMA (NUOVA) ═══ */}
+      {/* ═══ 4. PROBLEMA — Stat decorations + thicker border ═══ */}
       <motion.section
-        className="py-16 md:py-20 bg-white relative"
+        className="py-16 md:py-20 bg-gradient-to-b from-white to-[#fefcfb] relative"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.15 }}
@@ -587,7 +614,6 @@ export default function Home() {
         transition={sectionTransition}
       >
         <div className="max-w-6xl mx-auto px-4 md:px-8 relative z-10">
-          <div className="dot-pattern" />
           <div className="text-center mb-3">
             <span className="section-badge">Il Problema</span>
           </div>
@@ -607,13 +633,15 @@ export default function Home() {
             {PROBLEMS.map((p, i) => (
               <motion.div
                 key={i}
-                className="landing-card p-6 border-l-4 border-l-red-400"
+                className="landing-card p-6 border-l-[6px] border-l-red-400 relative overflow-hidden"
                 variants={fadeUp}
                 transition={cardTransition}
                 whileHover={{ y: -5, boxShadow: '0 12px 40px rgba(0,0,0,0.08)' }}
               >
-                <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mb-4">
-                  <p.icon className="h-5 w-5 text-red-500" />
+                {/* Decorative stat number */}
+                <span className="absolute top-3 right-4 text-5xl font-black text-red-100/60 select-none pointer-events-none">{p.stat}</span>
+                <div className="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center mb-4">
+                  <p.icon className="h-7 w-7 text-red-500" />
                 </div>
                 <h3 className="text-lg font-bold mb-2">{p.title}</h3>
                 <p className="text-[#6b7280] text-sm leading-relaxed">{p.desc}</p>
@@ -623,7 +651,7 @@ export default function Home() {
         </div>
       </motion.section>
 
-      {/* ═══ 5. FUNZIONALITÀ (grid 3x3, badge "PIATTAFORMA") ═══ */}
+      {/* ═══ 5. FUNZIONALITÀ — Alternating borders + chevron ═══ */}
       <motion.section
         className="py-16 md:py-20 bg-gradient-to-b from-[#f7f4f0] to-[#faf8f5] relative"
         id="funzionalita"
@@ -653,18 +681,19 @@ export default function Home() {
             {FEATURES.map((f, i) => (
               <motion.div
                 key={i}
-                className="landing-card p-6 group cursor-pointer border-l-4 border-l-[#f09133]"
+                className={`landing-card p-6 group cursor-pointer border-l-4 ${f.borderColor} relative`}
                 variants={fadeUp}
                 transition={cardTransition}
-                whileHover={{ y: -5, boxShadow: '0 12px 40px rgba(0,0,0,0.08)' }}
+                whileHover={{ y: -6, boxShadow: '0 16px 50px rgba(0,0,0,0.1)' }}
               >
                 <motion.div
-                  className="w-12 h-12 rounded-full bg-[#f09133]/10 flex items-center justify-center mb-4 group-hover:bg-[#f09133]/20 transition-colors"
+                  className="w-12 h-12 rounded-full bg-[#f09133]/10 flex items-center justify-center mb-4 group-hover:bg-[#f09133]/20 transition-colors duration-300"
                 >
-                  <f.icon className="h-5 w-5 text-[#f09133] group-hover:scale-110 transition-transform" />
+                  <f.icon className="h-5 w-5 text-[#f09133] group-hover:scale-110 transition-transform duration-300" />
                 </motion.div>
                 <h3 className="text-lg font-bold mb-2">{f.title}</h3>
                 <p className="text-[#6b7280] text-sm leading-relaxed">{f.desc}</p>
+                <ChevronRight className="absolute bottom-4 right-4 h-4 w-4 text-[#e5e0db] group-hover:text-[#f09133] group-hover:translate-x-1 transition-all duration-300" />
               </motion.div>
             ))}
           </motion.div>
@@ -679,7 +708,7 @@ export default function Home() {
         </div>
       </motion.section>
 
-      {/* ═══ 6. MANIFESTO ═══ */}
+      {/* ═══ 6. MANIFESTO — Pattern + pulse brain + quote ═══ */}
       <motion.section
         className="py-16 md:py-20 bg-white"
         id="manifesto"
@@ -691,16 +720,26 @@ export default function Home() {
       >
         <div className="max-w-6xl mx-auto px-4 md:px-8">
           <div className="flex flex-col md:flex-row items-center gap-12 md:gap-16">
-            {/* Left — Image placeholder */}
+            {/* Left — Image with pattern */}
             <motion.div
               className="flex-1 w-full md:max-w-[45%]"
               variants={fadeLeft}
               transition={{ duration: 0.7, ease: 'easeOut' }}
             >
-              <div className="aspect-[4/3] rounded-2xl bg-gradient-to-br from-[#1e3a5f] to-[#2a4f7a] flex items-center justify-center p-8">
-                <div className="text-center text-white">
-                  <Brain className="h-16 w-16 mx-auto mb-4 opacity-60" />
+              <div className="aspect-[4/3] rounded-2xl bg-gradient-to-br from-[#1e3a5f] to-[#2a4f7a] flex items-center justify-center p-8 relative overflow-hidden shadow-[0_20px_50px_rgba(30,58,95,0.3)]">
+                {/* Geometric pattern */}
+                <div className="absolute inset-0 opacity-[0.06]" style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
+                <div className="absolute top-[-30px] right-[-30px] w-[120px] h-[120px] rounded-full bg-white/5 blur-xl" />
+                <div className="absolute bottom-[-20px] left-[-20px] w-[100px] h-[100px] rounded-full bg-[#f09133]/10 blur-xl" />
+                <div className="text-center text-white relative z-10">
+                  <motion.div
+                    animate={{ scale: [1, 1.05, 1] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+                  >
+                    <Brain className="h-20 w-20 mx-auto mb-4 opacity-70" />
+                  </motion.div>
                   <p className="text-lg font-semibold opacity-80">La scienza dietro le decisioni</p>
+                  <p className="text-sm italic text-white/50 mt-3">"La persona giusta al posto giusto cambia tutto."</p>
                 </div>
               </div>
             </motion.div>
@@ -718,7 +757,7 @@ export default function Home() {
               </p>
               <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                 <Button
-                  className="bg-[#f09133] hover:bg-[#e07a1f] text-white rounded-xl"
+                  className="bg-[#f09133] hover:bg-[#e07a1f] text-white rounded-xl shadow-[0_4px_20px_rgba(240,145,51,0.3)]"
                   onClick={() => scrollTo('cta-finale')}
                 >
                   Inizia ora <ArrowRight className="ml-2 h-4 w-4" />
@@ -729,7 +768,7 @@ export default function Home() {
         </div>
       </motion.section>
 
-      {/* ═══ 7. CTA INTERMEDIO (NUOVO) ═══ */}
+      {/* ═══ 7. CTA INTERMEDIO — Sparkles icon + stronger bg ═══ */}
       <motion.section
         className="py-10 md:py-14"
         initial="hidden"
@@ -739,7 +778,9 @@ export default function Home() {
         transition={sectionTransition}
       >
         <div className="max-w-4xl mx-auto px-4 md:px-8">
-          <div className="rounded-2xl bg-[#f09133]/5 border border-[#f09133]/20 py-10 px-6 md:px-12 text-center">
+          <div className="rounded-2xl bg-gradient-to-r from-[#f09133]/5 to-[#f09133]/10 border border-[#f09133]/30 py-10 px-6 md:px-12 text-center relative overflow-hidden">
+            <div className="absolute top-[-20px] right-[-20px] w-[100px] h-[100px] rounded-full bg-[#f09133]/5 blur-2xl" />
+            <Sparkles className="h-8 w-8 text-[#f09133]/60 mx-auto mb-4" />
             <h3 className="text-xl md:text-2xl font-bold mb-3">
               Vuoi vedere TalentProfile in azione?
             </h3>
@@ -748,7 +789,7 @@ export default function Home() {
             </p>
             <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
               <Button
-                className="bg-[#f09133] hover:bg-[#e07a1f] text-white rounded-xl px-8"
+                className="bg-[#f09133] hover:bg-[#e07a1f] text-white rounded-xl px-8 shadow-[0_4px_20px_rgba(240,145,51,0.3)]"
                 onClick={() => scrollTo('cta-finale')}
               >
                 Richiedi una demo gratuita <ArrowRight className="ml-2 h-4 w-4" />
@@ -758,7 +799,7 @@ export default function Home() {
         </div>
       </motion.section>
 
-      {/* ═══ 8. IL METODO (4 step) ═══ */}
+      {/* ═══ 8. IL METODO — Gradient timeline + glow circles + cards ═══ */}
       <motion.section
         className="py-16 md:py-20 bg-white"
         id="metodo"
@@ -772,7 +813,7 @@ export default function Home() {
           <div className="text-center mb-3">
             <span className="section-badge">Come Funziona</span>
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 accent-underline mx-auto w-fit">
             Il Metodo TalentProfile in 4 Step
           </h2>
           <p className="text-center text-[#6b7280] text-base mb-16 max-w-2xl mx-auto">
@@ -785,14 +826,16 @@ export default function Home() {
             whileInView="visible"
             viewport={{ once: true, amount: 0.15 }}
           >
-            <div className="absolute left-6 md:left-8 top-0 bottom-0 w-0.5 bg-[#e5e0db] hidden md:block" />
-            <div className="space-y-12">
+            {/* Gradient vertical line */}
+            <div className="absolute left-6 md:left-8 top-0 bottom-0 w-0.5 hidden md:block" style={{ background: 'linear-gradient(to bottom, #f09133, #1e3a5f)' }} />
+            <div className="space-y-10">
               {STEPS.map((s, i) => (
-                <motion.div key={i} className="flex items-start gap-6 md:gap-8" variants={fadeUp} transition={cardTransition}>
+                <motion.div key={i} className={`flex items-start gap-6 md:gap-8 rounded-xl p-4 md:p-5 ${i % 2 === 0 ? 'bg-[#faf8f5]' : 'bg-white'}`} variants={fadeUp} transition={cardTransition}>
                   <div className="shrink-0 relative z-10">
-                    <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-[#f09133] text-white flex items-center justify-center text-lg md:text-xl font-bold shadow-md">
+                    <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-[#f09133] text-white flex flex-col items-center justify-center text-lg md:text-xl font-bold shadow-[0_0_20px_rgba(240,145,51,0.35)]">
                       {String(i + 1).padStart(2, '0')}
                     </div>
+                    <s.icon className="h-4 w-4 text-[#f09133] mx-auto mt-1.5 opacity-60" />
                   </div>
                   <div className="pt-1 md:pt-3">
                     <h3 className="text-xl md:text-2xl font-bold mb-2">{s.title}</h3>
@@ -805,7 +848,7 @@ export default function Home() {
         </div>
       </motion.section>
 
-      {/* ═══ 9. CALCOLATORE (semplificato, sobrio) ═══ */}
+      {/* ═══ 9. CALCOLATORE — Orange border + dramatic result ═══ */}
       <motion.section
         className="py-16 md:py-20 bg-gradient-to-b from-[#f7f4f0] to-[#faf8f5]"
         id="calcolatore"
@@ -819,14 +862,14 @@ export default function Home() {
           <div className="text-center mb-3">
             <span className="section-badge">Calcolatore</span>
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 accent-underline mx-auto w-fit">
             Quanto costa un'assunzione sbagliata?
           </h2>
           <p className="text-center text-[#6b7280] text-base mb-14 max-w-2xl mx-auto">
             Sposta gli slider e scopri il costo reale di un errore di selezione.
           </p>
 
-          <div className="landing-card p-6 md:p-10 max-w-3xl mx-auto">
+          <div className="landing-card p-6 md:p-10 max-w-3xl mx-auto border-[#f09133]/20 shadow-[0_8px_40px_rgba(0,0,0,0.06)]">
             <div className="flex items-center gap-3 mb-8">
               <div className="w-11 h-11 rounded-full bg-[#f09133]/10 flex items-center justify-center">
                 <Calculator className="h-5 w-5 text-[#f09133]" />
@@ -874,8 +917,15 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Risultato */}
-            <div className="text-center py-6 px-4 rounded-xl bg-red-50 border border-red-200 mb-8">
+            {/* Risultato — gradient + alert icon */}
+            <div className="text-center py-6 px-4 rounded-xl bg-gradient-to-br from-red-50 to-red-100/50 border border-red-200 mb-8 relative">
+              <motion.div
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                className="absolute top-4 right-4"
+              >
+                <AlertTriangle className="h-5 w-5 text-red-400" />
+              </motion.div>
               <p className="text-sm font-semibold text-[#6b7280] mb-1 uppercase tracking-wide">Danno totale stimato</p>
               <p className="text-4xl md:text-5xl font-bold text-red-500">
                 €{Math.round(costi.totale).toLocaleString('it-IT')}
@@ -892,7 +942,7 @@ export default function Home() {
                       <span className="text-[#6b7280]">{item.label}</span>
                       <span className="font-semibold">€{Math.round(item.value).toLocaleString('it-IT')}</span>
                     </div>
-                    <div className="h-2 rounded-full bg-gray-100 overflow-hidden">
+                    <div className="h-2.5 rounded-full bg-gray-100 overflow-hidden">
                       <div
                         className={`h-full rounded-full ${item.color} transition-all duration-500`}
                         style={{ width: `${pct}%` }}
@@ -906,7 +956,7 @@ export default function Home() {
         </div>
       </motion.section>
 
-      {/* ═══ 10. TABELLA COMPARATIVA (NUOVA) ═══ */}
+      {/* ═══ 10. TABELLA COMPARATIVA — Zebra + badge + rounded ═══ */}
       <motion.section
         className="py-16 md:py-20 bg-white"
         initial="hidden"
@@ -919,20 +969,23 @@ export default function Home() {
           <div className="text-center mb-3">
             <span className="section-badge">Confronto</span>
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 accent-underline mx-auto w-fit">
             Metodo Tradizionale vs TalentProfile
           </h2>
           <p className="text-center text-[#6b7280] text-base mb-14 max-w-2xl mx-auto">
             Ecco perché i dati battono l'istinto.
           </p>
-          <div className="landing-card overflow-hidden">
+          <div className="landing-card overflow-hidden rounded-xl shadow-[0_4px_30px_rgba(0,0,0,0.06)]">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-[#e5e0db]">
+                  <tr className="border-b-2 border-[#e5e0db]">
                     <th className="text-left p-4 font-semibold text-[#6b7280]">Criterio</th>
-                    <th className="text-center p-4 font-semibold text-red-500 bg-red-50">Metodo Tradizionale</th>
-                    <th className="text-center p-4 font-semibold text-green-600 bg-green-50">TalentProfile</th>
+                    <th className="text-center p-4 font-semibold text-red-600 bg-red-100/70">Metodo Tradizionale</th>
+                    <th className="text-center p-4 font-semibold text-green-700 bg-green-100/70 relative">
+                      TalentProfile
+                      <span className="absolute top-1 right-2 text-[10px] bg-green-500 text-white px-1.5 py-0.5 rounded-full font-bold">✓ Vincitore</span>
+                    </th>
                   </tr>
                 </thead>
                 <motion.tbody
@@ -942,9 +995,9 @@ export default function Home() {
                   viewport={{ once: true, amount: 0.15 }}
                 >
                   {COMPARISON_ROWS.map((row, i) => (
-                    <motion.tr key={i} className="border-b border-[#e5e0db] last:border-0" variants={fadeUp} transition={cardTransition}>
+                    <motion.tr key={i} className={`border-b border-[#e5e0db] last:border-0 ${i % 2 === 0 ? 'bg-white' : 'bg-[#faf8f5]/50'}`} variants={fadeUp} transition={cardTransition}>
                       <td className="p-4 font-medium">{row.label}</td>
-                      <td className="p-4 text-center bg-red-50/50">
+                      <td className="p-4 text-center bg-red-50/30">
                         <motion.div
                           className="flex items-center justify-center gap-2"
                           initial={{ opacity: 0, x: -20 }}
@@ -952,11 +1005,13 @@ export default function Home() {
                           viewport={{ once: true }}
                           transition={{ delay: i * 0.05, duration: 0.4 }}
                         >
-                          <X className="h-4 w-4 text-red-400" />
+                          <div className="w-6 h-6 rounded-full bg-red-100 flex items-center justify-center shrink-0">
+                            <X className="h-3.5 w-3.5 text-red-500" />
+                          </div>
                           <span className="text-[#6b7280]">{row.trad}</span>
                         </motion.div>
                       </td>
-                      <td className="p-4 text-center bg-green-50/50">
+                      <td className="p-4 text-center bg-green-50/30">
                         <motion.div
                           className="flex items-center justify-center gap-2"
                           initial={{ opacity: 0, x: 20 }}
@@ -964,7 +1019,9 @@ export default function Home() {
                           viewport={{ once: true }}
                           transition={{ delay: i * 0.05, duration: 0.4 }}
                         >
-                          <Check className="h-4 w-4 text-green-500" />
+                          <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center shrink-0">
+                            <Check className="h-3.5 w-3.5 text-green-600" />
+                          </div>
                           <span className="text-[#1a1a2e] font-medium">{row.tp}</span>
                         </motion.div>
                       </td>
@@ -977,9 +1034,9 @@ export default function Home() {
         </div>
       </motion.section>
 
-      {/* ═══ 11. TESTIMONIANZE (stile LinkedIn) ═══ */}
+      {/* ═══ 11. TESTIMONIANZE — Quotes + orange avatar border + verified ═══ */}
       <motion.section
-        className="py-16 md:py-20 bg-gradient-to-b from-[#f7f4f0] to-[#faf8f5]"
+        className="py-16 md:py-20 bg-gradient-to-b from-[#f7f4f0] to-[#faf8f5] relative"
         id="testimonianze"
         initial="hidden"
         whileInView="visible"
@@ -987,11 +1044,12 @@ export default function Home() {
         variants={fadeUp}
         transition={sectionTransition}
       >
-        <div className="max-w-6xl mx-auto px-4 md:px-8">
+        <div className="dot-pattern" />
+        <div className="max-w-6xl mx-auto px-4 md:px-8 relative z-10">
           <div className="text-center mb-3">
             <span className="section-badge">Testimonianze</span>
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 accent-underline mx-auto w-fit">
             Chi usa TalentProfile non torna indietro
           </h2>
           <p className="text-center text-[#6b7280] text-base mb-14 max-w-2xl mx-auto">
@@ -1006,17 +1064,22 @@ export default function Home() {
             viewport={{ once: true, amount: 0.15 }}
           >
             {TESTIMONIALS.map((t, i) => (
-              <motion.div key={i} className="landing-card p-6" variants={fadeUp} transition={cardTransition} whileHover={{ y: -5, boxShadow: '0 12px 40px rgba(0,0,0,0.08)' }}>
+              <motion.div key={i} className="bg-white rounded-xl p-6 shadow-[0_4px_20px_rgba(0,0,0,0.06)] border border-[#e5e0db]/50 relative overflow-hidden" variants={fadeUp} transition={cardTransition} whileHover={{ y: -5, boxShadow: '0 16px 50px rgba(0,0,0,0.1)' }}>
+                {/* Decorative quote */}
+                <span className="absolute top-2 right-4 text-6xl font-serif text-[#e5e0db]/40 select-none pointer-events-none leading-none">"</span>
                 {/* LinkedIn-style header */}
                 <div className="flex items-start gap-3 mb-4">
                   <img
                     src={t.image}
                     alt={t.name}
-                    className="w-12 h-12 rounded-full object-cover"
+                    className="w-12 h-12 rounded-full object-cover ring-2 ring-[#f09133]/30 ring-offset-2"
                     loading="lazy"
                   />
                   <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-sm">{t.name}</div>
+                    <div className="font-semibold text-sm flex items-center gap-1.5">
+                      {t.name}
+                      <BadgeCheck className="h-4 w-4 text-[#1e3a5f]" />
+                    </div>
                     <div className="text-xs text-[#6b7280]">{t.role} — {t.company}</div>
                     <div className="text-xs text-[#6b7280]/60 mt-0.5">{t.date}</div>
                   </div>
@@ -1031,14 +1094,14 @@ export default function Home() {
                 </div>
 
                 {/* Text */}
-                <p className="text-[#6b7280] text-sm leading-relaxed">{t.text}</p>
+                <p className="text-[#6b7280] text-sm leading-relaxed relative z-10">{t.text}</p>
               </motion.div>
             ))}
           </motion.div>
         </div>
       </motion.section>
 
-      {/* ═══ 12. PER CHI È (NUOVA) ═══ */}
+      {/* ═══ 12. PER CHI È — Gradient cards + VS divider ═══ */}
       <motion.section
         className="py-16 md:py-20 bg-white relative"
         initial="hidden"
@@ -1048,20 +1111,21 @@ export default function Home() {
         transition={sectionTransition}
       >
         <div className="max-w-5xl mx-auto px-4 md:px-8 relative z-10">
-          <div className="dot-pattern" />
           <div className="text-center mb-3">
             <span className="section-badge">Per Chi È</span>
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 accent-underline mx-auto w-fit">
             TalentProfile è per te?
           </h2>
           <p className="text-center text-[#6b7280] text-base mb-14 max-w-2xl mx-auto">
             Scopri se il nostro sistema è adatto alle tue esigenze.
           </p>
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-2 gap-6 relative">
+            {/* VS divider */}
+            <div className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-[#1a1a2e] text-white items-center justify-center font-bold text-sm shadow-lg">VS</div>
             {/* Card Verde */}
             <motion.div
-              className="landing-card p-6 border-green-200 border-l-4 border-l-green-400"
+              className="landing-card p-6 border-l-4 border-l-green-400 bg-gradient-to-br from-green-50/50 to-white"
               variants={fadeLeft}
               initial="hidden"
               whileInView="visible"
@@ -1070,15 +1134,17 @@ export default function Home() {
               whileHover={{ y: -5, boxShadow: '0 12px 40px rgba(0,0,0,0.08)' }}
             >
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center">
-                  <CheckCircle2 className="h-5 w-5 text-green-500" />
+                <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
+                  <CheckCircle2 className="h-6 w-6 text-green-500" />
                 </div>
                 <h3 className="text-lg font-bold text-green-700">Per chi è TalentProfile</h3>
               </div>
               <ul className="space-y-3">
                 {TARGET_YES.map((item, i) => (
                   <li key={i} className="flex items-start gap-3">
-                    <Check className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
+                    <div className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center shrink-0 mt-0.5">
+                      <Check className="h-3 w-3 text-green-600" />
+                    </div>
                     <span className="text-[#6b7280] text-sm">{item}</span>
                   </li>
                 ))}
@@ -1086,7 +1152,7 @@ export default function Home() {
             </motion.div>
             {/* Card Rossa */}
             <motion.div
-              className="landing-card p-6 border-red-200 border-l-4 border-l-red-400"
+              className="landing-card p-6 border-l-4 border-l-red-400 bg-gradient-to-br from-red-50/50 to-white"
               variants={fadeRight}
               initial="hidden"
               whileInView="visible"
@@ -1095,15 +1161,17 @@ export default function Home() {
               whileHover={{ y: -5, boxShadow: '0 12px 40px rgba(0,0,0,0.08)' }}
             >
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center">
-                  <XCircle className="h-5 w-5 text-red-500" />
+                <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                  <XCircle className="h-6 w-6 text-red-500" />
                 </div>
                 <h3 className="text-lg font-bold text-red-700">Non fa per te se...</h3>
               </div>
               <ul className="space-y-3">
                 {TARGET_NO.map((item, i) => (
                   <li key={i} className="flex items-start gap-3">
-                    <X className="h-4 w-4 text-red-400 mt-0.5 shrink-0" />
+                    <div className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center shrink-0 mt-0.5">
+                      <X className="h-3 w-3 text-red-500" />
+                    </div>
                     <span className="text-[#6b7280] text-sm">{item}</span>
                   </li>
                 ))}
@@ -1113,7 +1181,7 @@ export default function Home() {
         </div>
       </motion.section>
 
-      {/* ═══ 13. NUMERI / CONTATORI ═══ */}
+      {/* ═══ 13. NUMERI / CONTATORI — Gradient + spheres + glow + separators + icons ═══ */}
       <motion.section
         className="py-0 md:py-0 px-4 md:px-8"
         id="numeri"
@@ -1123,7 +1191,11 @@ export default function Home() {
         variants={fadeUp}
         transition={sectionTransition}
       >
-        <div className="landing-counter-box py-16 md:py-24 max-w-7xl mx-auto relative overflow-hidden">
+        <div className="py-16 md:py-24 max-w-7xl mx-auto relative overflow-hidden rounded-[1.5rem]" style={{ background: 'linear-gradient(135deg, #1e3a5f 0%, #162d4a 100%)' }}>
+          {/* Decorative spheres */}
+          <div className="absolute top-[-50px] right-[10%] w-[200px] h-[200px] rounded-full bg-white/[0.04] blur-3xl" />
+          <div className="absolute bottom-[-60px] left-[5%] w-[250px] h-[250px] rounded-full bg-[#f09133]/[0.08] blur-3xl" />
+
           <div className="max-w-6xl mx-auto px-4 md:px-8 relative z-10">
             <p className="text-sm uppercase tracking-[0.2em] text-[#f09133] font-semibold text-center mb-3">
               I Numeri
@@ -1139,20 +1211,24 @@ export default function Home() {
               viewport={{ once: true, amount: 0.15 }}
             >
               {[
-                { ref: c1.ref, val: c1.value.toLocaleString('it-IT'), suffix: '+', label: 'Aziende clienti' },
-                { ref: c2.ref, val: c2.value.toLocaleString('it-IT'), suffix: '+', label: 'Assessment completati' },
-                { ref: c3.ref, val: c3.value, suffix: '+', label: 'Ruoli mappati' },
-                { ref: c4.ref, val: c4.value, suffix: ' min', label: 'Tempo per test' },
+                { ref: c1.ref, val: c1.value.toLocaleString('it-IT'), suffix: '+', label: 'Aziende clienti', icon: Building2 },
+                { ref: c2.ref, val: c2.value.toLocaleString('it-IT'), suffix: '+', label: 'Assessment completati', icon: ClipboardCheck },
+                { ref: c3.ref, val: c3.value, suffix: '+', label: 'Ruoli mappati', icon: Target },
+                { ref: c4.ref, val: c4.value, suffix: ' min', label: 'Tempo per test', icon: Clock },
               ].map((n, i) => (
-                <motion.div key={i} ref={n.ref} variants={scaleIn} transition={cardTransition}>
-                  <div className="text-4xl md:text-5xl font-bold text-[#f09133] mb-2">
+                <motion.div key={i} ref={n.ref} variants={scaleIn} transition={cardTransition} className="relative">
+                  {i > 0 && <div className="hidden md:block absolute left-0 top-1/4 bottom-1/4 w-px bg-white/10" />}
+                  <div className="text-4xl md:text-5xl font-bold text-[#f09133] mb-2" style={{ textShadow: '0 0 30px rgba(240,145,51,0.3)' }}>
                     {n.val}{n.suffix}
                   </div>
+                  <n.icon className="h-4 w-4 text-white/30 mx-auto mb-1" />
                   <div className="text-white/60 text-sm font-medium">{n.label}</div>
                 </motion.div>
               ))}
-              <motion.div variants={scaleIn} transition={cardTransition}>
-                <div className="text-4xl md:text-5xl font-bold text-[#f09133] mb-2">.75/1</div>
+              <motion.div variants={scaleIn} transition={cardTransition} className="relative">
+                <div className="hidden md:block absolute left-0 top-1/4 bottom-1/4 w-px bg-white/10" />
+                <div className="text-4xl md:text-5xl font-bold text-[#f09133] mb-2" style={{ textShadow: '0 0 30px rgba(240,145,51,0.3)' }}>.75/1</div>
+                <Star className="h-4 w-4 text-white/30 mx-auto mb-1" />
                 <div className="text-white/60 text-sm font-medium">Validazione scientifica</div>
               </motion.div>
             </motion.div>
@@ -1160,9 +1236,9 @@ export default function Home() {
         </div>
       </motion.section>
 
-      {/* ═══ 14. TRUST / SICUREZZA (NUOVA) ═══ */}
+      {/* ═══ 14. TRUST / SICUREZZA — Shield cards + orange ring + separators ═══ */}
       <motion.section
-        className="py-16 md:py-20 bg-white"
+        className="py-16 md:py-20 bg-gradient-to-b from-white to-[#faf8f5]"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.15 }}
@@ -1172,20 +1248,20 @@ export default function Home() {
         <div className="max-w-5xl mx-auto px-4 md:px-8">
           <div className="text-center mb-12">
             <span className="section-badge mb-3 inline-block">Sicurezza</span>
-            <h2 className="text-2xl md:text-3xl font-bold">
+            <h2 className="text-2xl md:text-3xl font-bold accent-underline mx-auto w-fit">
               I tuoi dati sono al sicuro
             </h2>
           </div>
           <motion.div
-            className="flex flex-wrap justify-center gap-8 md:gap-12"
+            className="flex flex-wrap justify-center gap-6 md:gap-4"
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, amount: 0.15 }}
           >
             {TRUST_BADGES.map((badge, i) => (
-              <motion.div key={i} className="flex flex-col items-center text-center max-w-[120px]" variants={scaleIn} transition={cardTransition}>
-                <div className="w-14 h-14 rounded-full bg-[#f7f4f0] border border-[#e5e0db] flex items-center justify-center mb-3">
+              <motion.div key={i} className="flex flex-col items-center text-center w-[140px] bg-white rounded-xl p-4 shadow-[0_2px_15px_rgba(0,0,0,0.04)] border border-[#e5e0db]/50" variants={scaleIn} transition={cardTransition}>
+                <div className="w-14 h-14 rounded-full bg-[#f7f4f0] border-2 border-[#f09133]/20 flex items-center justify-center mb-3">
                   <badge.icon className="h-6 w-6 text-[#1e3a5f]" />
                 </div>
                 <span className="text-sm font-semibold text-[#1a1a2e]">{badge.label}</span>
@@ -1196,9 +1272,9 @@ export default function Home() {
         </div>
       </motion.section>
 
-      {/* ═══ 15. FAQ ═══ */}
+      {/* ═══ 15. FAQ — Orange active border + ? icon ═══ */}
       <motion.section
-        className="py-16 md:py-20 bg-gradient-to-b from-[#faf8f5] to-[#f7f4f0]"
+        className="py-16 md:py-20 bg-gradient-to-b from-[#faf8f5] to-[#f7f4f0] relative"
         id="faq"
         initial="hidden"
         whileInView="visible"
@@ -1206,11 +1282,13 @@ export default function Home() {
         variants={fadeUp}
         transition={sectionTransition}
       >
-        <div className="max-w-3xl mx-auto px-4 md:px-8">
+        <div className="dot-pattern" />
+        <div className="max-w-3xl mx-auto px-4 md:px-8 relative z-10">
           <div className="text-center mb-3">
             <span className="section-badge">FAQ</span>
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 accent-underline mx-auto w-fit">
+            <HelpCircle className="inline-block h-8 w-8 text-[#f09133] mr-2 -mt-1" />
             Domande Frequenti
           </h2>
           <p className="text-center text-[#6b7280] text-base mb-14 max-w-2xl mx-auto">
@@ -1227,7 +1305,7 @@ export default function Home() {
                 <motion.div key={i} variants={fadeUp} transition={cardTransition}>
                   <AccordionItem
                     value={`faq-${i}`}
-                    className="border border-[#e5e0db] rounded-lg px-4 bg-white hover:border-[#f09133]/40 transition-colors"
+                    className="border border-[#e5e0db] rounded-lg px-4 bg-white hover:border-[#f09133]/40 hover:shadow-md transition-all duration-300 data-[state=open]:border-l-4 data-[state=open]:border-l-[#f09133] data-[state=open]:shadow-md"
                   >
                     <AccordionTrigger className="text-left text-base font-semibold hover:no-underline">
                       {f.q}
@@ -1243,7 +1321,7 @@ export default function Home() {
         </div>
       </motion.section>
 
-      {/* ═══ 16. CTA FINALE ═══ */}
+      {/* ═══ 16. CTA FINALE — Sparkles + glow button + urgency badge ═══ */}
       <motion.section
         id="cta-finale"
         className="px-4 md:px-8 py-8"
@@ -1253,10 +1331,48 @@ export default function Home() {
         variants={fadeUp}
         transition={sectionTransition}
       >
-        <div className="landing-hero-box py-16 md:py-24 text-center max-w-7xl mx-auto relative overflow-hidden">
+        <div className="py-16 md:py-24 text-center max-w-7xl mx-auto relative overflow-hidden rounded-[1.5rem]" style={{ background: 'radial-gradient(ellipse at 50% 30%, #2a4f7a 0%, #1e3a5f 60%, #162d4a 100%)' }}>
+          {/* Animated sparkles */}
+          <motion.div
+            className="absolute top-8 left-[15%]"
+            animate={{ opacity: [0.3, 0.8, 0.3], scale: [0.8, 1.2, 0.8] }}
+            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+          >
+            <Sparkles className="h-6 w-6 text-[#f09133]/40" />
+          </motion.div>
+          <motion.div
+            className="absolute bottom-12 right-[20%]"
+            animate={{ opacity: [0.2, 0.7, 0.2], scale: [1, 1.3, 1] }}
+            transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
+          >
+            <Sparkles className="h-5 w-5 text-white/20" />
+          </motion.div>
+          <motion.div
+            className="absolute top-[40%] right-[8%]"
+            animate={{ opacity: [0.4, 0.9, 0.4] }}
+            transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
+          >
+            <Star className="h-4 w-4 text-[#f09133]/30" />
+          </motion.div>
+
+          {/* Decorative spheres */}
+          <div className="absolute top-[-60px] right-[-40px] w-[200px] h-[200px] rounded-full bg-white/[0.04] blur-3xl" />
+          <div className="absolute bottom-[-80px] left-[10%] w-[300px] h-[300px] rounded-full bg-[#f09133]/[0.08] blur-3xl" />
+
           <div className="max-w-3xl mx-auto px-4 md:px-8 relative z-10">
+            {/* Urgency badge */}
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-1.5 mb-6"
+            >
+              <Zap className="h-3.5 w-3.5 text-[#f09133]" />
+              <span className="text-xs font-semibold text-white/80">Solo 5 demo disponibili questa settimana</span>
+            </motion.div>
             <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
-              Il futuro del tuo team inizia da qui.
+              Il futuro del tuo team inizia{' '}
+              <span className="text-[#f09133]">da qui.</span>
             </h2>
             <p className="text-base md:text-lg text-white/70 mb-10 leading-relaxed">
               La demo è gratuita, dura 30 minuti e ti mostra esattamente come funziona il sistema sulla tua realtà. Nessun impegno.
@@ -1264,7 +1380,7 @@ export default function Home() {
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
               <Button
                 size="lg"
-                className="bg-[#f09133] hover:bg-[#e07a1f] text-white text-lg px-10 py-7 rounded-xl shadow-lg"
+                className="bg-[#f09133] hover:bg-[#e07a1f] text-white text-lg px-10 py-7 rounded-xl shadow-[0_0_30px_rgba(240,145,51,0.4)] animate-[pulse_3s_ease-in-out_infinite]"
                 onClick={() => window.open('mailto:info@talentprofile.it?subject=Richiesta Demo TalentProfile', '_blank')}
               >
                 Richiedi una Demo Gratuita <ArrowRight className="ml-2 h-5 w-5" />
@@ -1285,8 +1401,10 @@ export default function Home() {
         </div>
       </motion.section>
 
-      {/* ═══ FOOTER ═══ */}
-      <footer className="bg-[#1e3a5f] py-14 mt-8">
+      {/* ═══ FOOTER — Gradient separator + social icons + glow logo ═══ */}
+      <footer className="bg-[#1e3a5f] py-14 mt-8 relative">
+        {/* Orange gradient separator */}
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#f09133] to-transparent" />
         <div className="max-w-6xl mx-auto px-4 md:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-10">
             {/* Col 1 — Logo + desc */}
@@ -1294,11 +1412,20 @@ export default function Home() {
               <img
                 src="/talentprofile_logo_v3.png"
                 alt="TalentProfile"
-                className="h-10 brightness-0 invert mb-4"
+                className="h-10 brightness-0 invert mb-4 drop-shadow-[0_0_8px_rgba(255,255,255,0.15)]"
               />
               <p className="text-sm text-white/50 leading-relaxed">
                 Psicologia del lavoro applicata alla realtà dell'impresa. Assessment scientifici per decisioni HR basate sui dati.
               </p>
+              {/* Social icons */}
+              <div className="flex items-center gap-3 mt-4">
+                <a href="#" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#f09133]/30 transition-colors">
+                  <Linkedin className="h-4 w-4 text-white/60" />
+                </a>
+                <a href="#" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#f09133]/30 transition-colors">
+                  <Mail className="h-4 w-4 text-white/60" />
+                </a>
+              </div>
             </div>
 
             {/* Col 2 — Link rapidi */}
