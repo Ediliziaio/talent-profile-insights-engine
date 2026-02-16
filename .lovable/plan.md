@@ -1,104 +1,108 @@
 
 
-# Aggiungere Sezioni Mancanti alla Landing Page
+# Animazioni Fluide con Framer Motion
 
 ## Panoramica
 
-La landing attuale ha 12 sezioni. Rispetto al funnel originale e al sito JetHR, mancano alcune sezioni chiave che rafforzano la conversione. Le aggiungiamo mantenendo lo stile JetHR (light, pulito, professionale).
+Aggiungere `framer-motion` per animazioni professionali su tutte le sezioni della landing page, incluso un carosello di loghi scorrevole infinito nella Logo Bar.
 
 ---
 
-## Sezioni da aggiungere (5 nuove)
+## Nuova dipendenza
 
-### A. Sezione Problema (dopo Logo Bar, prima di Funzionalita')
-
-3 card bianche con icone rosse che evidenziano i pain point HR:
-- "Turnover nei primi 6 mesi" 
-- "Colloqui basati sull'istinto"
-- "Costi nascosti delle assunzioni sbagliate"
-
-Badge: "IL PROBLEMA". Stile: card bianche con bordo `#e5e0db`, icone su sfondo rosso/5.
+- `framer-motion` (libreria di animazioni React)
 
 ---
 
-### B. Tabella Comparativa (dopo Calcolatore, prima di Testimonianze)
+## Modifiche in `src/pages/Home.tsx`
 
-Tabella "Metodo Tradizionale vs TalentProfile" con 6-7 righe di confronto:
-- CV + colloquio vs Assessment scientifico
-- Soggettivo vs 15 tratti misurati
-- Settimane vs 15 minuti
-- etc.
+### 1. Logo Bar -- Carosello scorrevole infinito
 
-Badge: "CONFRONTO". Colonna sinistra sfondo rosso/5 con X rosse, colonna destra sfondo green/5 con check verdi.
+Sostituire la griglia statica dei loghi con un marquee infinito CSS-based:
+- Duplicare la lista dei loghi 2 volte in un contenitore flex
+- Animazione CSS `@keyframes marquee` che trasla da 0 a -50% orizzontalmente
+- Effetto gradient fade sui bordi sinistro/destro (mask-image)
+- Pausa al hover (`hover:pause`)
 
----
+### 2. Componente Section animato
 
-### C. Sezione "Per Chi E'" (dopo Testimonianze, prima di Numeri)
+Sostituire il sistema `useScrollAnimation` (IntersectionObserver manuale) con `motion.div` + `whileInView`:
+- Ogni sezione usa `motion.section` con `initial={{ opacity: 0, y: 30 }}` e `whileInView={{ opacity: 1, y: 0 }}`
+- `viewport={{ once: true, amount: 0.15 }}`
+- Transizione: `duration: 0.6, ease: "easeOut"`
 
-Due card affiancate stile JetHR:
-- **Card verde** "Per chi e' TalentProfile": lista con check verdi (HR Manager, CEO PMI, recruiter, etc.)
-- **Card rossa** "Non fa per te se...": lista con X rosse (cerchi soluzioni gratuite, non credi nei dati, etc.)
+### 3. Stagger sulle card (Problema, Features, Trust, Per Chi E')
 
-Badge: "PER CHI E'".
+Per le griglie di card, usare `staggerChildren`:
+- Container: `motion.div` con `staggerChildren: 0.1`
+- Ogni card: `motion.div` con `variants` fade-up
+- Le card appaiono una dopo l'altra con effetto cascata
 
----
+### 4. Tabella Comparativa
 
-### D. Sezione Integrazioni / Sicurezza (dopo Numeri, prima di FAQ)
+- Ogni riga appare con stagger: `staggerChildren: 0.08`
+- Animazione slide-in da sinistra per la colonna rossa, da destra per la verde
 
-Riga con 4-5 badge/icone che comunicano trust:
-- GDPR Compliant
-- Server EU
-- Dati crittografati  
-- ISO 27001 (o simile)
-- Nessuna installazione
+### 5. Hero Section
 
-Sfondo bianco, icone Shield in cerchi, stile sobrio come JetHR.
+- Testo: fade-in + slide-up con delay progressivo (titolo, sottotitolo, bottoni)
+- Mockup: slide-in da destra con leggero scale
+- Social proof: fade-in con delay finale
 
----
+### 6. Numeri/Contatori
 
-### E. CTA Intermedio (dopo Manifesto, prima di Metodo)
+- Ogni numero appare con stagger + scale-in
+- Mantenere il sistema `useCountUp` esistente (si attiva quando visibile)
 
-Un piccolo banner inline con sfondo `#f09133/5`, testo centrato e bottone arancione:
-"Vuoi vedere TalentProfile in azione? Richiedi una demo gratuita."
+### 7. FAQ
 
-Leggero, non aggressivo, come i CTA intermedi di JetHR.
-
----
-
-## Ordine finale delle sezioni
-
-1. Navbar
-2. Hero (split layout)
-3. Logo Bar
-4. **Problema** (NUOVA)
-5. Funzionalita'
-6. Manifesto
-7. **CTA Intermedio** (NUOVO)
-8. Metodo (4 step)
-9. Calcolatore
-10. **Tabella Comparativa** (NUOVA)
-11. Testimonianze
-12. **Per Chi E'** (NUOVA)
-13. Numeri/Contatori
-14. **Trust / Sicurezza** (NUOVA)
-15. FAQ
-16. CTA Finale
-17. Footer
+- Ogni item appare con stagger leggero
 
 ---
 
-## Dettaglio tecnico
+## Modifiche in `src/index.css`
 
-### File: `src/pages/Home.tsx`
+### Aggiungere animazione marquee per Logo Bar
 
-- Aggiungere 5 nuove sezioni JSX tra quelle esistenti
-- Aggiungere i dati statici (PROBLEMS, COMPARISON_ROWS, TARGET_AUDIENCE) come costanti in cima al file
-- Nessun nuovo componente esterno necessario
-- Importare icone aggiuntive da lucide-react: `XCircle`, `AlertTriangle`, `Lock`, `Globe`, `Server`
+```css
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
 
-### File: `src/index.css`
+.animate-marquee {
+  animation: marquee 25s linear infinite;
+}
 
-- Nessuna modifica necessaria: le classi `.landing-card`, `.section-badge` esistenti coprono tutti i nuovi componenti
+.logo-marquee-container {
+  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+}
+```
 
-### Nessuna nuova dipendenza
+---
+
+## Struttura animazioni per sezione
+
+| Sezione | Tipo animazione | Dettaglio |
+|---|---|---|
+| Hero | Stagger sequenziale | Titolo, sottotitolo, CTA, mockup appaiono in sequenza |
+| Logo Bar | Marquee infinito | Loghi scorrono da destra a sinistra, loop continuo |
+| Problema | Stagger cards | 3 card appaiono una dopo l'altra |
+| Features | Stagger grid | 6 card con cascade 0.1s |
+| Manifesto | Fade parallelo | Immagine da sinistra, testo da destra |
+| CTA Intermedio | Fade-up semplice | Apparizione morbida |
+| Metodo | Stagger steps | 4 step appaiono in sequenza |
+| Calcolatore | Fade-up | Card singola |
+| Tabella | Stagger righe | Righe appaiono dall'alto in basso |
+| Testimonianze | Stagger cards | 3 card LinkedIn |
+| Per Chi E' | Fade parallelo | Card verde da sinistra, rossa da destra |
+| Numeri | Stagger + scale | Contatori appaiono con effetto pop |
+| Trust | Stagger badges | 5 badge in sequenza |
+| FAQ | Stagger items | Accordion items |
+| CTA Finale | Fade-up | Blocco singolo |
+
+---
+
+## Nessun altro file da modificare
 
