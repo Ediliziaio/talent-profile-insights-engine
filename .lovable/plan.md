@@ -1,156 +1,161 @@
 
 
-# Redesign Landing Page -- Stile JetHR con Colori TalentProfile
+# Redesign Landing Page -- Replica Esatta Stile JetHR.com
 
 ## Panoramica
 
-Trasformazione completa della landing page dallo stile dark aggressivo attuale a un design **light, pulito e professionale** ispirato a JetHR.com, mantenendo i colori del brand TalentProfile (Arancione #f09133 e Blu #1e3a5f).
+Riscrittura completa del layout e dello stile della landing page per replicare fedelmente la struttura visiva di JetHR.com, adattando contenuto e colori al brand TalentProfile.
 
 ---
 
-## Elementi chiave da JetHR da adottare
+## Differenze principali tra stato attuale e JetHR
 
-1. **Sfondo chiaro caldo** (crema/warm white, tipo `#f7f4f0`) invece del nero attuale
-2. **Hero contenuto in un box arrotondato** con sfondo scuro (blu brand), non full-width
-3. **Tipografia elegante e leggibile** -- grandi ma non aggressive, font-weight medio-bold
-4. **Molto spazio bianco** tra le sezioni -- sensazione ariosa e premium
-5. **Card pulite** con bordi sottili e ombre leggere, non glow effects
-6. **Badge/pill labels** per le sezioni (es. "PIATTAFORMA", "METODO") in cornicette arrotondate
-7. **Animazioni fluide** -- fade-in on scroll, hover lift sulle card, transizioni morbide
-8. **Navbar bianca** con logo a sinistra, link centrali, CTA a destra -- stile JetHR
-9. **Toni professionali** -- meno "aggressivo/vendita dura", piu' "autorevole/affidabile"
-
----
-
-## Palette colori
-
-| Elemento | Colore | Uso |
+| Elemento | Attuale TalentProfile | JetHR (target) |
 |---|---|---|
-| Sfondo pagina | `#f7f4f0` (crema caldo) | Background globale |
-| Hero sfondo | `#1e3a5f` (blu brand) | Box hero arrotondato |
-| Accent/CTA | `#f09133` (arancione brand) | Pulsanti, badge, highlight |
-| Testo primario | `#1a1a2e` | Titoli e body |
-| Testo secondario | `#6b7280` | Descrizioni, paragrafi |
-| Card | `#ffffff` | Card con shadow leggera |
-| Bordi | `#e5e0db` | Bordi card e separatori |
-
----
-
-## Modifiche per sezione
-
-### 1. Container principale
-- **Da:** `bg-[#0a0a0a] text-white` (nero)
-- **A:** `bg-[#f7f4f0] text-[#1a1a2e]` (crema caldo)
-
-### 2. Navbar
-- Sfondo bianco con bordo sottile in basso
-- Logo normale (rimuovere `brightness-0 invert`)
-- Link in grigio scuro, hover arancione
-- CTA "Richiedi una Demo" arancione pieno
-- Pulsante "Accedi" con bordo grigio
-
-### 3. Hero Section
-- **Contenuto in un div arrotondato** (`rounded-2xl` o `rounded-3xl`) con sfondo blu brand `#1e3a5f`
-- Testo bianco dentro il box blu
-- Margini laterali (non full-width, come JetHR)
-- Pre-titolo in arancione
-- Banner urgenza con sfondo arancione/10 dentro il box
-- Badges sotto in grigio chiaro
-
-### 4. Sezione Problema
-- Sfondo crema (uguale al body)
-- Card bianche con bordo grigio chiaro e shadow leggera
-- Icone rosse su sfondo rosso/5
-- Testo scuro
-
-### 5. Urgency Timeline
-- Sfondo bianco o leggermente diverso (`#ffffff`)
-- Timeline con colori originali ma su sfondo chiaro
-- Cerchi numerati colorati senza glow
-
-### 6. Calcolatore
-- Card bianca con shadow media, bordo arrotondato
-- Numero totale in rosso (senza glow/text-shadow)
-- Sfondo sezione crema
-
-### 7. Scenari
-- Card bianche con bordo sinistro colorato (rosso)
-- Testo scuro, importi in rosso
-
-### 8. Lettera Aperta
-- Sfondo bianco, testo scuro
-- Linea decorativa arancione sopra (mantenuta)
-- Stile corsivo elegante
-
-### 9. Buona Notizia
-- Card bianche con bordo verde leggero
-- Sfondo sezione leggermente tinto
-
-### 10. Metodo (4 Step)
-- Sfondo crema
-- Cerchi numerati arancione pieni
-- Timeline verticale grigia
-
-### 11. Funzionalita
-- Card bianche con hover lift (translateY -4px + shadow aumentata)
-- Icone arancione su sfondo arancione/5
-
-### 12. Tabella Comparativa
-- Tabella bianca con header arrotondato
-- Colonna rossa/verde con sfondo molto leggero
-
-### 13. Testimonianze + Casi Reali
-- Card bianche con shadow
-- Badge PRIMA/DOPO con sfondo leggero (rosso/verde)
-- Stelle arancione
-
-### 14. Numeri/Contatori
-- Sfondo blu brand `#1e3a5f` (come hero) in un box arrotondato
-- Numeri bianchi/arancione
-- Effetto premium come JetHR
-
-### 15. Per Chi E' / Non E'
-- Due card bianche con bordo sinistro rosso/verde
-
-### 16. FAQ
-- Accordion con sfondo bianco, bordi grigi
-- Hover con accento arancione
-
-### 17. Riquadro Costo Inazione
-- Card bianca con bordo rosso e sfondo rosso/5
-- Rimuovere animazione glow-pulse (troppo aggressiva)
-
-### 18. CTA Finale
-- Gradiente arancione mantenuto ma in un box arrotondato
-- Stile piu' elegante
-
-### 19. Footer
-- Sfondo `#1e3a5f` (blu brand)
-- Testo bianco/grigio chiaro
-
----
-
-## Animazioni (stile JetHR)
-
-- **Scroll fade-in**: mantenere il sistema attuale `useScrollAnimation` ma con `translateY(20px)` piu' morbido
-- **Card hover**: `hover:-translate-y-1 hover:shadow-lg transition-all duration-300`
-- **Navbar**: transizione sfondo su scroll con backdrop-blur (gia' presente, adattare colori)
-- **Counter animati**: mantenere `useCountUp` (gia' presente)
-- **Rimuovere**: glow effects, stat-glow, glow-pulse, glow-border-* (troppo aggressivi per un design light)
+| Hero layout | Testo centrato, no immagine | Testo a SINISTRA, screenshot prodotto a DESTRA |
+| Hero CTA | 2 bottoni centrati | 2 bottoni allineati a sinistra: outline + filled |
+| Social proof hero | Badge icona sotto | Widget Trustpilot-style sotto i CTA |
+| Logo bar | Assente | Carosello loghi "Scelto da 1000+ aziende" sotto hero |
+| Section badge | Pill con sfondo arancione/10 | Pill con BORDO, sfondo trasparente, testo nero |
+| Tipografia | font-black aggressiva (text-7xl) | Piu' elegante, font-bold (text-5xl/6xl max) |
+| Sezioni | Molte, funnel lungo | Piu' snello, meno sezioni visibili |
+| Card features | Grid 3 colonne con icone | Grid con icone SVG + testo, piu' spaziose |
+| Testimonianze | Card Prima/Dopo | Post LinkedIn con foto, nome, azienda, data |
+| Manifesto | Lettera aperta stile corsivo | Box con immagine + testo bold "Odiamo la burocrazia" |
+| Footer | Blu brand semplice | Piu' strutturato con colonne |
 
 ---
 
 ## File da modificare
 
-### `src/index.css`
-- Le classi `.landing-glow-card`, `.stat-glow`, `.glow-border-*` verranno sostituite con classi light:
-  - `.landing-card`: card bianca con shadow e hover
-  - `.section-badge`: pill label stile JetHR
+- `src/pages/Home.tsx` -- riscrittura completa del layout
+- `src/index.css` -- aggiornamento classi landing
 
-### `src/pages/Home.tsx`
-- Riscrittura completa degli stili inline (colori, sfondi, bordi)
-- Struttura e contenuto testuale invariati
-- Hero wrappato in un div arrotondato con margini
+---
 
-### Nessuna nuova dipendenza
+## Modifiche dettagliate
+
+### 1. Hero Section -- Split Layout (come JetHR)
+
+Trasformare da layout centrato a layout a due colonne:
+- **Sinistra (60%)**: Titolo (text-5xl/6xl, font-bold non font-black), sottotitolo, 2 bottoni affiancati ("Richiedi una demo" outline + "Inizia ora" filled arancione), widget social proof (stelle + "4.8 su 5 - Assessment validato scientificamente")
+- **Destra (40%)**: Immagine/mockup dello screenshot della dashboard TalentProfile (placeholder con un div stilizzato che simula l'interfaccia del report, simile allo screenshot prodotto di JetHR)
+- Sfondo: box arrotondato `rounded-3xl` con bg `#1e3a5f` e margini laterali
+- Rimuovere il banner urgency dal hero (troppo aggressivo per stile JetHR)
+
+### 2. Logo Bar sotto Hero
+
+Aggiungere sezione "Scelto da piu' di 1.000 aziende italiane":
+- Testo centrato grigio
+- Riga di loghi placeholder (icone Building2 ripetute con nomi fittizi) che simulano il carosello clienti
+- Sfondo crema (uguale al body)
+
+### 3. Navbar -- Identica a JetHR
+
+Gia' simile, piccoli aggiustamenti:
+- "Accedi" con bordo grigio sottile, stile outline
+- "Richiedi una demo" con sfondo scuro `#1e3a5f` (non arancione), testo bianco, bordo arrotondato `rounded-full`
+- Font piu' piccolo sui link (text-sm)
+
+### 4. Section Badges
+
+Cambiare da pill con sfondo arancione a pill con bordo:
+- `border border-[#1a1a2e] text-[#1a1a2e] bg-transparent px-3 py-1 rounded-md text-xs font-semibold uppercase tracking-wider`
+- Come JetHR: "PIATTAFORMA", "METODO", etc.
+
+### 5. Sezione Problema
+
+Mantenere ma rendere piu' elegante:
+- Titoli piu' piccoli (text-4xl max, font-bold non font-black)
+- Card con piu' padding e spacing
+- Rimuovere eccessi di copy emotivo nelle card
+
+### 6. Sezione Features (Funzionalita')
+
+Ridisegnare come JetHR:
+- Grid 3x3 con card linkabili
+- Ogni card: icona in cerchio + titolo bold + descrizione breve (2 righe max)
+- Hover: leggero lift e cambio colore bordo
+- Link "Scopri di piu'" sotto la grid
+
+### 7. Manifesto / Lettera Aperta
+
+Trasformare nello stile JetHR "Odiamo la burocrazia":
+- Layout a due colonne: immagine/illustrazione a sinistra, testo a destra
+- Titolo bold grande
+- Testo conciso e diretto (non corsivo lungo)
+- CTA "Inizia ora"
+
+### 8. Testimonianze
+
+Trasformare in stile post LinkedIn come JetHR:
+- Card con foto profilo, nome, ruolo, azienda, icona LinkedIn
+- Data del post
+- Testo della testimonianza (stile post social)
+- Layout a carosello orizzontale o griglia
+
+### 9. Numeri/Contatori
+
+Mantenere il box arrotondato blu ma con numeri piu' contenuti:
+- text-5xl invece di text-7xl
+- Font-bold invece di font-black
+- Piu' spazio tra i numeri
+
+### 10. FAQ
+
+Mantenere, stile gia' compatibile con JetHR.
+
+### 11. CTA Finale
+
+Piu' elegante:
+- Sfondo `#1e3a5f` (blu brand) invece di gradiente arancione
+- Testo bianco, bottone arancione
+- Piu' minimalista
+
+### 12. Footer
+
+Piu' strutturato con colonne:
+- Colonna 1: Logo + breve descrizione
+- Colonna 2: Link rapidi
+- Colonna 3: Contatti
+- Barra inferiore: Copyright + P.IVA + Privacy/Cookie
+
+### 13. Rimuovere sezioni troppo aggressive
+
+Per allinearsi allo stile JetHR (professionale, non "vendita dura"):
+- **Rimuovere**: Urgency Timeline (troppo fear-based)
+- **Rimuovere**: Scenari viscerali "Ti e' mai capitato?" (troppo emotivo)
+- **Rimuovere**: Riquadro "Costo dell'Inazione" con animazione
+- **Semplificare**: Calcolatore -- mantenerlo ma con stile piu' sobrio
+- **Rimuovere**: Sezione "Per chi e' / Non e'" (troppo diretto)
+- La landing diventa piu' corta e professionale, come JetHR
+
+### 14. CSS Updates
+
+Aggiornare `src/index.css`:
+- Aggiornare `.section-badge` da sfondo filled a bordo
+- Aggiornare `.landing-card` hover (piu' sottile)
+- Aggiungere `.logo-bar` per la sezione loghi clienti
+- Rimuovere classi inutilizzate (`.landing-hero-box`, `.landing-counter-box` da aggiornare)
+
+---
+
+## Struttura finale delle sezioni (ordine)
+
+1. Navbar (bianca, stile JetHR)
+2. Hero (split: testo sx + mockup dx, box blu arrotondato)
+3. Logo Bar clienti
+4. Funzionalita' (grid 3x3 con badge "PIATTAFORMA")
+5. Manifesto ("Odiamo le assunzioni sbagliate" -- stile JetHR)
+6. Metodo (4 step, badge "COME FUNZIONA")
+7. Calcolatore (semplificato, stile sobrio)
+8. Testimonianze (stile post LinkedIn)
+9. Numeri/Contatori (box blu arrotondato)
+10. FAQ
+11. CTA Finale (blu brand, elegante)
+12. Footer strutturato
+
+---
+
+## Nessuna nuova dipendenza richiesta
 
