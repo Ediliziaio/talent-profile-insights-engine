@@ -1,161 +1,104 @@
 
 
-# Redesign Landing Page -- Replica Esatta Stile JetHR.com
+# Aggiungere Sezioni Mancanti alla Landing Page
 
 ## Panoramica
 
-Riscrittura completa del layout e dello stile della landing page per replicare fedelmente la struttura visiva di JetHR.com, adattando contenuto e colori al brand TalentProfile.
+La landing attuale ha 12 sezioni. Rispetto al funnel originale e al sito JetHR, mancano alcune sezioni chiave che rafforzano la conversione. Le aggiungiamo mantenendo lo stile JetHR (light, pulito, professionale).
 
 ---
 
-## Differenze principali tra stato attuale e JetHR
+## Sezioni da aggiungere (5 nuove)
 
-| Elemento | Attuale TalentProfile | JetHR (target) |
-|---|---|---|
-| Hero layout | Testo centrato, no immagine | Testo a SINISTRA, screenshot prodotto a DESTRA |
-| Hero CTA | 2 bottoni centrati | 2 bottoni allineati a sinistra: outline + filled |
-| Social proof hero | Badge icona sotto | Widget Trustpilot-style sotto i CTA |
-| Logo bar | Assente | Carosello loghi "Scelto da 1000+ aziende" sotto hero |
-| Section badge | Pill con sfondo arancione/10 | Pill con BORDO, sfondo trasparente, testo nero |
-| Tipografia | font-black aggressiva (text-7xl) | Piu' elegante, font-bold (text-5xl/6xl max) |
-| Sezioni | Molte, funnel lungo | Piu' snello, meno sezioni visibili |
-| Card features | Grid 3 colonne con icone | Grid con icone SVG + testo, piu' spaziose |
-| Testimonianze | Card Prima/Dopo | Post LinkedIn con foto, nome, azienda, data |
-| Manifesto | Lettera aperta stile corsivo | Box con immagine + testo bold "Odiamo la burocrazia" |
-| Footer | Blu brand semplice | Piu' strutturato con colonne |
+### A. Sezione Problema (dopo Logo Bar, prima di Funzionalita')
+
+3 card bianche con icone rosse che evidenziano i pain point HR:
+- "Turnover nei primi 6 mesi" 
+- "Colloqui basati sull'istinto"
+- "Costi nascosti delle assunzioni sbagliate"
+
+Badge: "IL PROBLEMA". Stile: card bianche con bordo `#e5e0db`, icone su sfondo rosso/5.
 
 ---
 
-## File da modificare
+### B. Tabella Comparativa (dopo Calcolatore, prima di Testimonianze)
 
-- `src/pages/Home.tsx` -- riscrittura completa del layout
-- `src/index.css` -- aggiornamento classi landing
+Tabella "Metodo Tradizionale vs TalentProfile" con 6-7 righe di confronto:
+- CV + colloquio vs Assessment scientifico
+- Soggettivo vs 15 tratti misurati
+- Settimane vs 15 minuti
+- etc.
 
----
-
-## Modifiche dettagliate
-
-### 1. Hero Section -- Split Layout (come JetHR)
-
-Trasformare da layout centrato a layout a due colonne:
-- **Sinistra (60%)**: Titolo (text-5xl/6xl, font-bold non font-black), sottotitolo, 2 bottoni affiancati ("Richiedi una demo" outline + "Inizia ora" filled arancione), widget social proof (stelle + "4.8 su 5 - Assessment validato scientificamente")
-- **Destra (40%)**: Immagine/mockup dello screenshot della dashboard TalentProfile (placeholder con un div stilizzato che simula l'interfaccia del report, simile allo screenshot prodotto di JetHR)
-- Sfondo: box arrotondato `rounded-3xl` con bg `#1e3a5f` e margini laterali
-- Rimuovere il banner urgency dal hero (troppo aggressivo per stile JetHR)
-
-### 2. Logo Bar sotto Hero
-
-Aggiungere sezione "Scelto da piu' di 1.000 aziende italiane":
-- Testo centrato grigio
-- Riga di loghi placeholder (icone Building2 ripetute con nomi fittizi) che simulano il carosello clienti
-- Sfondo crema (uguale al body)
-
-### 3. Navbar -- Identica a JetHR
-
-Gia' simile, piccoli aggiustamenti:
-- "Accedi" con bordo grigio sottile, stile outline
-- "Richiedi una demo" con sfondo scuro `#1e3a5f` (non arancione), testo bianco, bordo arrotondato `rounded-full`
-- Font piu' piccolo sui link (text-sm)
-
-### 4. Section Badges
-
-Cambiare da pill con sfondo arancione a pill con bordo:
-- `border border-[#1a1a2e] text-[#1a1a2e] bg-transparent px-3 py-1 rounded-md text-xs font-semibold uppercase tracking-wider`
-- Come JetHR: "PIATTAFORMA", "METODO", etc.
-
-### 5. Sezione Problema
-
-Mantenere ma rendere piu' elegante:
-- Titoli piu' piccoli (text-4xl max, font-bold non font-black)
-- Card con piu' padding e spacing
-- Rimuovere eccessi di copy emotivo nelle card
-
-### 6. Sezione Features (Funzionalita')
-
-Ridisegnare come JetHR:
-- Grid 3x3 con card linkabili
-- Ogni card: icona in cerchio + titolo bold + descrizione breve (2 righe max)
-- Hover: leggero lift e cambio colore bordo
-- Link "Scopri di piu'" sotto la grid
-
-### 7. Manifesto / Lettera Aperta
-
-Trasformare nello stile JetHR "Odiamo la burocrazia":
-- Layout a due colonne: immagine/illustrazione a sinistra, testo a destra
-- Titolo bold grande
-- Testo conciso e diretto (non corsivo lungo)
-- CTA "Inizia ora"
-
-### 8. Testimonianze
-
-Trasformare in stile post LinkedIn come JetHR:
-- Card con foto profilo, nome, ruolo, azienda, icona LinkedIn
-- Data del post
-- Testo della testimonianza (stile post social)
-- Layout a carosello orizzontale o griglia
-
-### 9. Numeri/Contatori
-
-Mantenere il box arrotondato blu ma con numeri piu' contenuti:
-- text-5xl invece di text-7xl
-- Font-bold invece di font-black
-- Piu' spazio tra i numeri
-
-### 10. FAQ
-
-Mantenere, stile gia' compatibile con JetHR.
-
-### 11. CTA Finale
-
-Piu' elegante:
-- Sfondo `#1e3a5f` (blu brand) invece di gradiente arancione
-- Testo bianco, bottone arancione
-- Piu' minimalista
-
-### 12. Footer
-
-Piu' strutturato con colonne:
-- Colonna 1: Logo + breve descrizione
-- Colonna 2: Link rapidi
-- Colonna 3: Contatti
-- Barra inferiore: Copyright + P.IVA + Privacy/Cookie
-
-### 13. Rimuovere sezioni troppo aggressive
-
-Per allinearsi allo stile JetHR (professionale, non "vendita dura"):
-- **Rimuovere**: Urgency Timeline (troppo fear-based)
-- **Rimuovere**: Scenari viscerali "Ti e' mai capitato?" (troppo emotivo)
-- **Rimuovere**: Riquadro "Costo dell'Inazione" con animazione
-- **Semplificare**: Calcolatore -- mantenerlo ma con stile piu' sobrio
-- **Rimuovere**: Sezione "Per chi e' / Non e'" (troppo diretto)
-- La landing diventa piu' corta e professionale, come JetHR
-
-### 14. CSS Updates
-
-Aggiornare `src/index.css`:
-- Aggiornare `.section-badge` da sfondo filled a bordo
-- Aggiornare `.landing-card` hover (piu' sottile)
-- Aggiungere `.logo-bar` per la sezione loghi clienti
-- Rimuovere classi inutilizzate (`.landing-hero-box`, `.landing-counter-box` da aggiornare)
+Badge: "CONFRONTO". Colonna sinistra sfondo rosso/5 con X rosse, colonna destra sfondo green/5 con check verdi.
 
 ---
 
-## Struttura finale delle sezioni (ordine)
+### C. Sezione "Per Chi E'" (dopo Testimonianze, prima di Numeri)
 
-1. Navbar (bianca, stile JetHR)
-2. Hero (split: testo sx + mockup dx, box blu arrotondato)
-3. Logo Bar clienti
-4. Funzionalita' (grid 3x3 con badge "PIATTAFORMA")
-5. Manifesto ("Odiamo le assunzioni sbagliate" -- stile JetHR)
-6. Metodo (4 step, badge "COME FUNZIONA")
-7. Calcolatore (semplificato, stile sobrio)
-8. Testimonianze (stile post LinkedIn)
-9. Numeri/Contatori (box blu arrotondato)
-10. FAQ
-11. CTA Finale (blu brand, elegante)
-12. Footer strutturato
+Due card affiancate stile JetHR:
+- **Card verde** "Per chi e' TalentProfile": lista con check verdi (HR Manager, CEO PMI, recruiter, etc.)
+- **Card rossa** "Non fa per te se...": lista con X rosse (cerchi soluzioni gratuite, non credi nei dati, etc.)
+
+Badge: "PER CHI E'".
 
 ---
 
-## Nessuna nuova dipendenza richiesta
+### D. Sezione Integrazioni / Sicurezza (dopo Numeri, prima di FAQ)
+
+Riga con 4-5 badge/icone che comunicano trust:
+- GDPR Compliant
+- Server EU
+- Dati crittografati  
+- ISO 27001 (o simile)
+- Nessuna installazione
+
+Sfondo bianco, icone Shield in cerchi, stile sobrio come JetHR.
+
+---
+
+### E. CTA Intermedio (dopo Manifesto, prima di Metodo)
+
+Un piccolo banner inline con sfondo `#f09133/5`, testo centrato e bottone arancione:
+"Vuoi vedere TalentProfile in azione? Richiedi una demo gratuita."
+
+Leggero, non aggressivo, come i CTA intermedi di JetHR.
+
+---
+
+## Ordine finale delle sezioni
+
+1. Navbar
+2. Hero (split layout)
+3. Logo Bar
+4. **Problema** (NUOVA)
+5. Funzionalita'
+6. Manifesto
+7. **CTA Intermedio** (NUOVO)
+8. Metodo (4 step)
+9. Calcolatore
+10. **Tabella Comparativa** (NUOVA)
+11. Testimonianze
+12. **Per Chi E'** (NUOVA)
+13. Numeri/Contatori
+14. **Trust / Sicurezza** (NUOVA)
+15. FAQ
+16. CTA Finale
+17. Footer
+
+---
+
+## Dettaglio tecnico
+
+### File: `src/pages/Home.tsx`
+
+- Aggiungere 5 nuove sezioni JSX tra quelle esistenti
+- Aggiungere i dati statici (PROBLEMS, COMPARISON_ROWS, TARGET_AUDIENCE) come costanti in cima al file
+- Nessun nuovo componente esterno necessario
+- Importare icone aggiuntive da lucide-react: `XCircle`, `AlertTriangle`, `Lock`, `Globe`, `Server`
+
+### File: `src/index.css`
+
+- Nessuna modifica necessaria: le classi `.landing-card`, `.section-badge` esistenti coprono tutti i nuovi componenti
+
+### Nessuna nuova dipendenza
 
