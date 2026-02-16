@@ -458,21 +458,24 @@ export default function Home() {
               </motion.p>
 
               <motion.div variants={fadeUp} transition={{ duration: 0.5 }} className="flex flex-col sm:flex-row gap-3 mb-8">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="border-white/30 text-white hover:bg-white/10 rounded-xl px-8"
-                  onClick={() => scrollTo('metodo')}
-                >
-                  Scopri di più
-                </Button>
-                <Button
-                  size="lg"
-                  className="bg-[#f09133] hover:bg-[#e07a1f] text-white rounded-xl px-8"
-                  onClick={() => scrollTo('cta-finale')}
-                >
-                  Inizia ora <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
+                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                  <Button
+                    size="lg"
+                    className="bg-white text-[#1e3a5f] hover:bg-white/90 rounded-xl px-8 font-semibold"
+                    onClick={() => scrollTo('metodo')}
+                  >
+                    Scopri di più
+                  </Button>
+                </motion.div>
+                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                  <Button
+                    size="lg"
+                    className="bg-[#f09133] hover:bg-[#e07a1f] text-white rounded-xl px-8"
+                    onClick={() => scrollTo('cta-finale')}
+                  >
+                    Inizia ora <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </motion.div>
               </motion.div>
 
               {/* Social proof widget */}
@@ -490,7 +493,7 @@ export default function Home() {
 
             {/* Right — Product Mockup */}
             <motion.div
-              className="flex-1 lg:max-w-[42%] w-full"
+              className="flex-1 lg:max-w-[42%] w-full animate-float"
               initial={{ opacity: 0, x: 60, scale: 0.95 }}
               animate={{ opacity: 1, x: 0, scale: 1 }}
               transition={{ duration: 0.8, ease: 'easeOut', delay: 0.3 }}
@@ -563,7 +566,7 @@ export default function Home() {
           <div className="logo-marquee-container overflow-hidden">
             <div className="animate-marquee flex items-center gap-14 w-max hover:[animation-play-state:paused]">
               {/* Duplicate logos twice for seamless loop */}
-              {[...LOGO_COMPANIES, ...LOGO_COMPANIES].map((name, i) => (
+              {[...LOGO_COMPANIES, ...LOGO_COMPANIES, ...LOGO_COMPANIES].map((name, i) => (
                 <div key={`${name}-${i}`} className="flex items-center gap-2 opacity-50 grayscale shrink-0">
                   <Building2 className="h-5 w-5 text-[#1a1a2e]" />
                   <span className="text-sm font-semibold text-[#1a1a2e] whitespace-nowrap">{name}</span>
@@ -576,18 +579,19 @@ export default function Home() {
 
       {/* ═══ 4. PROBLEMA (NUOVA) ═══ */}
       <motion.section
-        className="py-20 md:py-28 bg-white"
+        className="py-16 md:py-20 bg-white relative"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.15 }}
         variants={fadeUp}
         transition={sectionTransition}
       >
-        <div className="max-w-6xl mx-auto px-4 md:px-8">
+        <div className="max-w-6xl mx-auto px-4 md:px-8 relative z-10">
+          <div className="dot-pattern" />
           <div className="text-center mb-3">
             <span className="section-badge">Il Problema</span>
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 accent-underline mx-auto w-fit">
             Perché le aziende continuano a sbagliare assunzioni
           </h2>
           <p className="text-center text-[#6b7280] text-base mb-14 max-w-2xl mx-auto">
@@ -601,7 +605,13 @@ export default function Home() {
             viewport={{ once: true, amount: 0.15 }}
           >
             {PROBLEMS.map((p, i) => (
-              <motion.div key={i} className="landing-card p-6" variants={fadeUp} transition={cardTransition}>
+              <motion.div
+                key={i}
+                className="landing-card p-6 border-l-4 border-l-red-400"
+                variants={fadeUp}
+                transition={cardTransition}
+                whileHover={{ y: -5, boxShadow: '0 12px 40px rgba(0,0,0,0.08)' }}
+              >
                 <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mb-4">
                   <p.icon className="h-5 w-5 text-red-500" />
                 </div>
@@ -615,7 +625,7 @@ export default function Home() {
 
       {/* ═══ 5. FUNZIONALITÀ (grid 3x3, badge "PIATTAFORMA") ═══ */}
       <motion.section
-        className="py-20 md:py-28"
+        className="py-16 md:py-20 bg-gradient-to-b from-[#f7f4f0] to-[#faf8f5] relative"
         id="funzionalita"
         initial="hidden"
         whileInView="visible"
@@ -627,7 +637,7 @@ export default function Home() {
           <div className="text-center mb-3">
             <span className="section-badge">Piattaforma</span>
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 accent-underline mx-auto w-fit">
             Tutto quello che ti serve per assumere meglio
           </h2>
           <p className="text-center text-[#6b7280] text-base mb-14 max-w-2xl mx-auto">
@@ -643,13 +653,16 @@ export default function Home() {
             {FEATURES.map((f, i) => (
               <motion.div
                 key={i}
-                className="landing-card p-6 group cursor-pointer"
+                className="landing-card p-6 group cursor-pointer border-l-4 border-l-[#f09133]"
                 variants={fadeUp}
                 transition={cardTransition}
+                whileHover={{ y: -5, boxShadow: '0 12px 40px rgba(0,0,0,0.08)' }}
               >
-                <div className="w-12 h-12 rounded-full bg-[#f09133]/10 flex items-center justify-center mb-4 group-hover:bg-[#f09133]/20 transition-colors">
-                  <f.icon className="h-5 w-5 text-[#f09133]" />
-                </div>
+                <motion.div
+                  className="w-12 h-12 rounded-full bg-[#f09133]/10 flex items-center justify-center mb-4 group-hover:bg-[#f09133]/20 transition-colors"
+                >
+                  <f.icon className="h-5 w-5 text-[#f09133] group-hover:scale-110 transition-transform" />
+                </motion.div>
                 <h3 className="text-lg font-bold mb-2">{f.title}</h3>
                 <p className="text-[#6b7280] text-sm leading-relaxed">{f.desc}</p>
               </motion.div>
@@ -668,7 +681,7 @@ export default function Home() {
 
       {/* ═══ 6. MANIFESTO ═══ */}
       <motion.section
-        className="py-20 md:py-28 bg-white"
+        className="py-16 md:py-20 bg-white"
         id="manifesto"
         initial="hidden"
         whileInView="visible"
@@ -703,12 +716,14 @@ export default function Home() {
               <p className="text-[#6b7280] text-base leading-relaxed mb-8">
                 TalentProfile nasce per una ragione semplice: dare alle aziende italiane gli strumenti scientifici per decidere sulle persone. Non opinioni, non sensazioni. Dati.
               </p>
-              <Button
-                className="bg-[#f09133] hover:bg-[#e07a1f] text-white rounded-xl"
-                onClick={() => scrollTo('cta-finale')}
-              >
-                Inizia ora <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
+              <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                <Button
+                  className="bg-[#f09133] hover:bg-[#e07a1f] text-white rounded-xl"
+                  onClick={() => scrollTo('cta-finale')}
+                >
+                  Inizia ora <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </motion.div>
             </motion.div>
           </div>
         </div>
@@ -731,19 +746,21 @@ export default function Home() {
             <p className="text-[#6b7280] text-base mb-6 max-w-xl mx-auto">
               Richiedi una demo gratuita e scopri come funziona sulla tua realtà aziendale.
             </p>
-            <Button
-              className="bg-[#f09133] hover:bg-[#e07a1f] text-white rounded-xl px-8"
-              onClick={() => scrollTo('cta-finale')}
-            >
-              Richiedi una demo gratuita <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
+            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+              <Button
+                className="bg-[#f09133] hover:bg-[#e07a1f] text-white rounded-xl px-8"
+                onClick={() => scrollTo('cta-finale')}
+              >
+                Richiedi una demo gratuita <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </motion.div>
           </div>
         </div>
       </motion.section>
 
       {/* ═══ 8. IL METODO (4 step) ═══ */}
       <motion.section
-        className="py-20 md:py-28"
+        className="py-16 md:py-20 bg-white"
         id="metodo"
         initial="hidden"
         whileInView="visible"
@@ -790,7 +807,7 @@ export default function Home() {
 
       {/* ═══ 9. CALCOLATORE (semplificato, sobrio) ═══ */}
       <motion.section
-        className="py-20 md:py-28 bg-white"
+        className="py-16 md:py-20 bg-gradient-to-b from-[#f7f4f0] to-[#faf8f5]"
         id="calcolatore"
         initial="hidden"
         whileInView="visible"
@@ -891,7 +908,7 @@ export default function Home() {
 
       {/* ═══ 10. TABELLA COMPARATIVA (NUOVA) ═══ */}
       <motion.section
-        className="py-20 md:py-28"
+        className="py-16 md:py-20 bg-white"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.15 }}
@@ -962,7 +979,7 @@ export default function Home() {
 
       {/* ═══ 11. TESTIMONIANZE (stile LinkedIn) ═══ */}
       <motion.section
-        className="py-20 md:py-28 bg-white"
+        className="py-16 md:py-20 bg-gradient-to-b from-[#f7f4f0] to-[#faf8f5]"
         id="testimonianze"
         initial="hidden"
         whileInView="visible"
@@ -989,7 +1006,7 @@ export default function Home() {
             viewport={{ once: true, amount: 0.15 }}
           >
             {TESTIMONIALS.map((t, i) => (
-              <motion.div key={i} className="landing-card p-6" variants={fadeUp} transition={cardTransition}>
+              <motion.div key={i} className="landing-card p-6" variants={fadeUp} transition={cardTransition} whileHover={{ y: -5, boxShadow: '0 12px 40px rgba(0,0,0,0.08)' }}>
                 {/* LinkedIn-style header */}
                 <div className="flex items-start gap-3 mb-4">
                   <img
@@ -1023,14 +1040,15 @@ export default function Home() {
 
       {/* ═══ 12. PER CHI È (NUOVA) ═══ */}
       <motion.section
-        className="py-20 md:py-28"
+        className="py-16 md:py-20 bg-white relative"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.15 }}
         variants={fadeUp}
         transition={sectionTransition}
       >
-        <div className="max-w-5xl mx-auto px-4 md:px-8">
+        <div className="max-w-5xl mx-auto px-4 md:px-8 relative z-10">
+          <div className="dot-pattern" />
           <div className="text-center mb-3">
             <span className="section-badge">Per Chi È</span>
           </div>
@@ -1043,12 +1061,13 @@ export default function Home() {
           <div className="grid md:grid-cols-2 gap-6">
             {/* Card Verde */}
             <motion.div
-              className="landing-card p-6 border-green-200"
+              className="landing-card p-6 border-green-200 border-l-4 border-l-green-400"
               variants={fadeLeft}
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true, amount: 0.15 }}
               transition={{ duration: 0.6, ease: 'easeOut' }}
+              whileHover={{ y: -5, boxShadow: '0 12px 40px rgba(0,0,0,0.08)' }}
             >
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center">
@@ -1067,12 +1086,13 @@ export default function Home() {
             </motion.div>
             {/* Card Rossa */}
             <motion.div
-              className="landing-card p-6 border-red-200"
+              className="landing-card p-6 border-red-200 border-l-4 border-l-red-400"
               variants={fadeRight}
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true, amount: 0.15 }}
               transition={{ duration: 0.6, ease: 'easeOut' }}
+              whileHover={{ y: -5, boxShadow: '0 12px 40px rgba(0,0,0,0.08)' }}
             >
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center">
@@ -1178,7 +1198,7 @@ export default function Home() {
 
       {/* ═══ 15. FAQ ═══ */}
       <motion.section
-        className="py-20 md:py-28"
+        className="py-16 md:py-20 bg-gradient-to-b from-[#faf8f5] to-[#f7f4f0]"
         id="faq"
         initial="hidden"
         whileInView="visible"
@@ -1241,13 +1261,15 @@ export default function Home() {
             <p className="text-base md:text-lg text-white/70 mb-10 leading-relaxed">
               La demo è gratuita, dura 30 minuti e ti mostra esattamente come funziona il sistema sulla tua realtà. Nessun impegno.
             </p>
-            <Button
-              size="lg"
-              className="bg-[#f09133] hover:bg-[#e07a1f] text-white text-lg px-10 py-7 rounded-xl shadow-lg"
-              onClick={() => window.open('mailto:info@talentprofile.it?subject=Richiesta Demo TalentProfile', '_blank')}
-            >
-              Richiedi una Demo Gratuita <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
+              <Button
+                size="lg"
+                className="bg-[#f09133] hover:bg-[#e07a1f] text-white text-lg px-10 py-7 rounded-xl shadow-lg"
+                onClick={() => window.open('mailto:info@talentprofile.it?subject=Richiesta Demo TalentProfile', '_blank')}
+              >
+                Richiedi una Demo Gratuita <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </motion.div>
             <div className="flex flex-wrap justify-center gap-6 mt-8">
               <span className="flex items-center gap-2 text-sm text-white/60">
                 <Clock className="h-4 w-4" /> Risposta in 24h
