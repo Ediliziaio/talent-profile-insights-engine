@@ -65,6 +65,19 @@ const LABELS_PAGAMENTI: Record<string, string> = {
   rimborsato: 'Rimborsato',
 };
 
+function DeltaBadge({ delta, invertColor }: { delta: number | null; invertColor?: boolean }) {
+  if (delta === null) return null;
+  const isPositive = delta >= 0;
+  const isGood = invertColor ? !isPositive : isPositive;
+  const Icon = isPositive ? TrendingUp : TrendingDown;
+  return (
+    <span className={`inline-flex items-center gap-0.5 text-xs font-medium ${isGood ? 'text-green-600' : 'text-destructive'}`}>
+      <Icon className="h-3 w-3" />
+      {isPositive ? '+' : ''}{delta.toFixed(0)}%
+    </span>
+  );
+}
+
 function MiniSparkline({ data, color }: { data: { value: number }[]; color: string }) {
   if (!data || data.length < 2) return null;
   return (
@@ -132,7 +145,11 @@ export function PagamentiReportistica({ abbonamenti, pagamentiAll, candidatiAll,
       const azPaganti = new Set(inRange.filter(p => p.stato === 'completato').map(p => p.azienda_id)).size;
       arpa.push({ value: azPaganti > 0 ? rev / azPaganti : 0 });
     });
-    return { ricavo, falliti, arpa, ricavoCumulativo };
+    const calcDelta = (arr: { value: number }[]) => {
+      const prev = arr[4].value, curr = arr[5].value;
+      return prev > 0 ? ((curr - prev) / prev) * 100 : null;
+    };
+    return { ricavo, falliti, arpa, ricavoCumulativo, deltaRicavo: calcDelta(ricavo), deltaFalliti: calcDelta(falliti), deltaArpa: calcDelta(arpa), deltaRicavoCumulativo: calcDelta(ricavoCumulativo) };
   }, [pagamentiAll]);
 
   // --- Distribuzione stato abbonamenti ---
@@ -271,7 +288,10 @@ export function PagamentiReportistica({ abbonamenti, pagamentiAll, candidatiAll,
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">€{extraMetrics.mrr.toLocaleString('it-IT')}</div>
-            <MiniSparkline data={sparklineData.ricavo} color="hsl(142, 71%, 45%)" />
+            <div className="flex items-center gap-2 mt-1">
+              <DeltaBadge delta={sparklineData.deltaRicavo} />
+              <div className="flex-1"><MiniSparkline data={sparklineData.ricavo} color="hsl(142, 71%, 45%)" /></div>
+            </div>
           </CardContent>
         </Card>
         <Card>
@@ -281,7 +301,10 @@ export function PagamentiReportistica({ abbonamenti, pagamentiAll, candidatiAll,
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-destructive">{extraMetrics.pagamentiFalliti}</div>
-            <MiniSparkline data={sparklineData.falliti} color="hsl(0, 84%, 60%)" />
+            <div className="flex items-center gap-2 mt-1">
+              <DeltaBadge delta={sparklineData.deltaFalliti} invertColor />
+              <div className="flex-1"><MiniSparkline data={sparklineData.falliti} color="hsl(0, 84%, 60%)" /></div>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -295,7 +318,10 @@ export function PagamentiReportistica({ abbonamenti, pagamentiAll, candidatiAll,
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">€{extraMetrics.ricavoTotale.toLocaleString('it-IT')}</div>
-            <MiniSparkline data={sparklineData.ricavoCumulativo} color="hsl(142, 71%, 45%)" />
+            <div className="flex items-center gap-2 mt-1">
+              <DeltaBadge delta={sparklineData.deltaRicavoCumulativo} />
+              <div className="flex-1"><MiniSparkline data={sparklineData.ricavoCumulativo} color="hsl(142, 71%, 45%)" /></div>
+            </div>
           </CardContent>
         </Card>
         <Card>
@@ -305,7 +331,10 @@ export function PagamentiReportistica({ abbonamenti, pagamentiAll, candidatiAll,
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">€{extraMetrics.arpa.toFixed(0)}</div>
-            <MiniSparkline data={sparklineData.arpa} color="hsl(217, 91%, 60%)" />
+            <div className="flex items-center gap-2 mt-1">
+              <DeltaBadge delta={sparklineData.deltaArpa} />
+              <div className="flex-1"><MiniSparkline data={sparklineData.arpa} color="hsl(217, 91%, 60%)" /></div>
+            </div>
           </CardContent>
         </Card>
         <Card>
