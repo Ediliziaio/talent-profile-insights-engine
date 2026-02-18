@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { DollarSign, Users, AlertTriangle, TrendingUp, Eye, Edit, Plus, Search, CreditCard, Trash2 } from 'lucide-react';
+import { NuovoAbbonamentoDialog } from '@/components/NuovoAbbonamentoDialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
@@ -42,6 +43,7 @@ export default function Pagamenti() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editDialog, setEditDialog] = useState<Abbonamento | null>(null);
   const [nuovoPagamentoDialog, setNuovoPagamentoDialog] = useState(false);
+  const [nuovoAbbonamentoDialog, setNuovoAbbonamentoDialog] = useState(false);
 
   // Fetch abbonamenti with azienda name
   const { data: abbonamenti = [], isLoading } = useQuery({
@@ -53,6 +55,16 @@ export default function Pagamenti() {
         .order('created_at', { ascending: false });
       if (error) throw error;
       return (data as any[]).map(a => ({ ...a, stato: a.stato as StatoAbbonamento })) as Abbonamento[];
+    },
+  });
+
+  // Fetch aziende for new subscription dialog
+  const { data: aziende = [] } = useQuery({
+    queryKey: ['aziende-list'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('aziende').select('*').order('nome');
+      if (error) throw error;
+      return data as any[];
     },
   });
 
@@ -150,6 +162,19 @@ export default function Pagamenti() {
     },
   });
 
+  // Insert abbonamento
+  const insertAbbonamentoMutation = useMutation({
+    mutationFn: async (data: { azienda_id: string; stato: string; importo_mensile: number; data_inizio: string; data_scadenza: string; note: string | null }) => {
+      const { error } = await supabase.from('abbonamenti').insert(data as any);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['abbonamenti'] });
+      toast({ title: 'Abbonamento creato' });
+      setNuovoAbbonamentoDialog(false);
+    },
+  });
+
   // Metrics
   const metrics = useMemo(() => {
     const attivi = abbonamenti.filter(a => a.stato === 'attivo');
@@ -242,6 +267,9 @@ export default function Pagamenti() {
               <SelectItem value="sospeso">Sospeso</SelectItem>
             </SelectContent>
           </Select>
+          <Button onClick={() => setNuovoAbbonamentoDialog(true)} className="gap-1">
+            <Plus className="h-4 w-4" /> Nuovo Abbonamento
+          </Button>
         </div>
 
         {/* Table */}
@@ -386,10 +414,23 @@ export default function Pagamenti() {
             loading={insertPagamentoMutation.isPending}
           />
         )}
+
+        {/* Nuovo Abbonamento Dialog */}
+        {nuovoAbbonamentoDialog && (
+          <NuovoAbbonamentoDialog
+            aziende={aziende}
+            abbonamenti={abbonamenti}
+            onClose={() => setNuovoAbbonamentoDialog(false)}
+            onSave={data => insertAbbonamentoMutation.mutate(data)}
+            loading={insertAbbonamentoMutation.isPending}
+          />
+        )}
       </div>
     </NotionLayout>
   );
 }
+
+
 
 // --- Sub-components ---
 
