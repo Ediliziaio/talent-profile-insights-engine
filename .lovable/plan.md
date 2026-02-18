@@ -1,78 +1,36 @@
 
 
-# Pagamenti: Dati di Prova + Checkout Stripe Integrato
+# Aggiungere "Crea Nuovo Abbonamento" alla pagina Pagamenti
 
-## Verifica Struttura (Completata)
+## Cosa cambia
 
-La pagina /pagamenti funziona correttamente:
-- 4 card metriche visibili (Entrate Mensili, Abbonamenti Attivi, Scaduti, Incassi)
-- Filtri per nome azienda e stato funzionanti
-- Tabella con colonne corrette
-- La tabella e' vuota perche' non ci sono ancora abbonamenti nel database
+Un bottone "Nuovo Abbonamento" accanto ai filtri che apre un dialog per creare un abbonamento per un'azienda che non ne ha ancora uno.
 
----
+## Funzionamento
 
-## Fase 1: Inserire abbonamenti di prova
+1. Il Superadmin clicca il bottone "Nuovo Abbonamento"
+2. Si apre un dialog con:
+   - **Azienda**: dropdown che mostra solo le aziende che NON hanno gia' un abbonamento
+   - **Stato**: selezionabile tra attivo, trial, scaduto, sospeso (default: trial)
+   - **Importo mensile**: precompilato a 97.00 EUR, modificabile
+   - **Data inizio**: campo data (default: oggi)
+   - **Data scadenza**: campo data (default: +1 mese)
+   - **Note**: campo testo opzionale
+3. Al salvataggio, il record viene inserito in `abbonamenti` e la tabella si aggiorna
 
-Creare un abbonamento per ognuna delle 3 aziende esistenti (Clientium, Manuel Sechi, Teknofinestre) con stati diversi per testare le metriche:
+## Dettagli tecnici
 
-| Azienda | Stato | Data Inizio | Scadenza |
-|---|---|---|---|
-| Clientium | attivo | 1 gen 2026 | 1 mar 2026 |
-| Manuel Sechi | trial | 1 feb 2026 | 1 mar 2026 |
-| Teknofinestre | scaduto | 1 nov 2025 | 1 gen 2026 |
+**File da modificare:** `src/pages/Pagamenti.tsx`
 
-Inserire anche 2-3 pagamenti di esempio per Clientium (completato) e Teknofinestre (fallito) per popolare le metriche "Incassi Ultimo Mese".
+**Modifiche:**
+1. Aggiungere stato `nuovoAbbonamentoDialog` (boolean)
+2. Aggiungere query per caricare la lista aziende (`aziende`)
+3. Aggiungere mutation `insertAbbonamentoMutation` che inserisce in `abbonamenti`
+4. Aggiungere bottone "Nuovo Abbonamento" nella barra filtri (accanto al Select dello stato)
+5. Creare componente `NuovoAbbonamentoDialog` che:
+   - Riceve la lista aziende e la lista abbonamenti esistenti
+   - Filtra le aziende gia' con abbonamento dal dropdown
+   - Inserisce il nuovo record con i campi compilati
 
----
+**Nessuna modifica al database** -- la tabella `abbonamenti` ha gia' tutti i campi necessari e le RLS policies per il superadmin sono gia' attive.
 
-## Fase 2: Checkout Stripe integrato
-
-### Flusso utente
-1. Il Superadmin dalla pagina Pagamenti clicca "Attiva Abbonamento" su un'azienda
-2. Si apre la pagina di Stripe Checkout (hosted) con il prodotto da 97 EUR/mese preconfigurato
-3. L'azienda (o il superadmin per conto dell'azienda) completa il pagamento
-4. Stripe chiama un webhook che aggiorna lo stato dell'abbonamento nel database
-
-### Prerequisito: abilitare Stripe
-Prima di scrivere codice, abilitare l'integrazione Stripe per ottenere la chiave API. Questo sblocchera' gli strumenti avanzati per creare prodotti e prezzi direttamente.
-
-### Cosa verra' creato
-
-**1. Prodotto Stripe**
-- Nome: "TalentProfile - Abbonamento Mensile"
-- Prezzo: 97 EUR/mese, ricorrente
-
-**2. Edge function `create-checkout-session`**
-- Riceve `azienda_id` dal frontend
-- Crea (o recupera) un Stripe Customer associato all'azienda
-- Crea una Checkout Session con il prezzo ricorrente da 97 EUR
-- Salva `stripe_customer_id` nell'abbonamento
-- Ritorna l'URL della sessione Checkout
-
-**3. Edge function `stripe-webhook`**
-- Ascolta eventi Stripe: `checkout.session.completed`, `invoice.paid`, `invoice.payment_failed`, `customer.subscription.deleted`
-- Aggiorna automaticamente stato abbonamento e registra pagamenti nella tabella `pagamenti`
-
-**4. Modifiche UI (`Pagamenti.tsx`)**
-- Aggiungere bottone "Attiva Abbonamento Stripe" nella riga di ogni azienda con stato `trial` o `scaduto`
-- Il bottone apre Stripe Checkout in una nuova finestra
-- Aggiungere un bottone "Crea Abbonamento" in alto per aziende che non hanno ancora un abbonamento
-
-### Dettagli tecnici
-
-**File da creare:**
-- `supabase/functions/create-checkout-session/index.ts`
-- `supabase/functions/stripe-webhook/index.ts`
-
-**File da modificare:**
-- `src/pages/Pagamenti.tsx` -- aggiunta bottoni Checkout
-- `supabase/config.toml` -- configurazione JWT per le nuove functions
-
-**Sequenza implementazione:**
-1. Abilitare Stripe (raccolta chiave API)
-2. Inserire dati di prova nel database
-3. Creare prodotto e prezzo su Stripe
-4. Creare edge function `create-checkout-session`
-5. Creare edge function `stripe-webhook`
-6. Aggiornare la UI con i bottoni di checkout
