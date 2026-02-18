@@ -13,7 +13,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { DollarSign, Users, AlertTriangle, TrendingUp, Eye, Edit, Plus, Search, CreditCard } from 'lucide-react';
+import { DollarSign, Users, AlertTriangle, TrendingUp, Eye, Edit, Plus, Search, CreditCard, Trash2 } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 import type { Abbonamento, Pagamento, StatoAbbonamento, StatoPagamento, MetodoPagamento } from '@/types/database';
@@ -104,6 +105,34 @@ export default function Pagamenti() {
       queryClient.invalidateQueries({ queryKey: ['abbonamenti'] });
       toast({ title: 'Stato aggiornato' });
       setEditDialog(null);
+    },
+  });
+
+  // Delete abbonamento
+  const deleteAbbonamentoMutation = useMutation({
+    mutationFn: async (id: string) => {
+      // Delete related pagamenti first
+      await supabase.from('pagamenti').delete().eq('abbonamento_id', id);
+      const { error } = await supabase.from('abbonamenti').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['abbonamenti'] });
+      queryClient.invalidateQueries({ queryKey: ['pagamenti-ultimo-mese'] });
+      toast({ title: 'Abbonamento eliminato' });
+    },
+  });
+
+  // Delete pagamento
+  const deletePagamentoMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('pagamenti').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pagamenti'] });
+      queryClient.invalidateQueries({ queryKey: ['pagamenti-ultimo-mese'] });
+      toast({ title: 'Pagamento eliminato' });
     },
   });
 
@@ -252,6 +281,27 @@ export default function Pagamenti() {
                         <Button size="icon" variant="ghost" onClick={() => { setSelectedAbbonamento(abb); setDrawerOpen(true); }} title="Storico pagamenti">
                           <Eye className="h-4 w-4" />
                         </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button size="icon" variant="ghost" title="Elimina abbonamento" className="text-destructive hover:text-destructive">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Eliminare abbonamento?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Verranno eliminati anche tutti i pagamenti associati a {abb.aziende?.nome}. L'azione è irreversibile.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Annulla</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => deleteAbbonamentoMutation.mutate(abb.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                Elimina
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </TableCell>
                     </TableRow>
                   );
@@ -295,7 +345,28 @@ export default function Pagamenti() {
                             <p className="text-xs text-muted-foreground">{formatDate(p.data_pagamento)} · {p.metodo}</p>
                             {p.note && <p className="text-xs text-muted-foreground mt-1">{p.note}</p>}
                           </div>
-                          <Badge className={pBadge.className} variant="outline">{pBadge.label}</Badge>
+                          <div className="flex items-center gap-2">
+                            <Badge className={pBadge.className} variant="outline">{pBadge.label}</Badge>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive hover:text-destructive">
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Eliminare pagamento?</AlertDialogTitle>
+                                  <AlertDialogDescription>Questa azione è irreversibile.</AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Annulla</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => deletePagamentoMutation.mutate(p.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                    Elimina
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
                         </CardContent>
                       </Card>
                     );
