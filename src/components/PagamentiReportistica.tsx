@@ -6,8 +6,8 @@ import {
   PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid,
   Tooltip, Legend, ResponsiveContainer,
 } from 'recharts';
-import { TrendingUp, BarChart3, PieChart as PieChartIcon, AlertCircle } from 'lucide-react';
-import { format, subMonths, startOfMonth } from 'date-fns';
+import { TrendingUp, BarChart3, PieChart as PieChartIcon, AlertCircle, TrendingDown, DollarSign, Building } from 'lucide-react';
+import { format, subMonths, startOfMonth, differenceInMonths, addMonths } from 'date-fns';
 import { it } from 'date-fns/locale';
 import type { Abbonamento, StatoAbbonamento } from '@/types/database';
 
@@ -33,6 +33,8 @@ interface Props {
   pagamentiAll: PagamentoRecord[];
   candidatiAll: Candidato[];
   aziende: Azienda[];
+  fromDate?: Date;
+  toDate?: Date;
 }
 
 const STATO_BADGE: Record<StatoAbbonamento, { label: string; className: string }> = {
@@ -63,19 +65,34 @@ const LABELS_PAGAMENTI: Record<string, string> = {
   rimborsato: 'Rimborsato',
 };
 
-export function PagamentiReportistica({ abbonamenti, pagamentiAll, candidatiAll, aziende }: Props) {
-  // --- KPI aggiuntivi ---
+export function PagamentiReportistica({ abbonamenti, pagamentiAll, candidatiAll, aziende, fromDate, toDate }: Props) {
+  // --- Filtered pagamenti by date range ---
+  const filteredPagamenti = useMemo(() => {
+    if (!fromDate && !toDate) return pagamentiAll;
+    return pagamentiAll.filter(p => {
+      const d = new Date(p.data_pagamento);
+      if (fromDate && d < fromDate) return false;
+      if (toDate && d > toDate) return false;
+      return true;
+    });
+  }, [pagamentiAll, fromDate, toDate]);
+
+  // --- KPI ---
   const extraMetrics = useMemo(() => {
     const totalAbb = abbonamenti.length;
     const attivi = abbonamenti.filter(a => a.stato === 'attivo').length;
     const trial = abbonamenti.filter(a => a.stato === 'trial').length;
+    const scaduti = abbonamenti.filter(a => a.stato === 'scaduto').length;
+    const sospesi = abbonamenti.filter(a => a.stato === 'sospeso').length;
     const tassoConversione = (attivi + trial) > 0 ? Math.round((attivi / (attivi + trial)) * 100) : 0;
-    const importoMedio = totalAbb > 0
-      ? abbonamenti.reduce((s, a) => s + Number(a.importo_mensile), 0) / totalAbb
-      : 0;
-    const pagamentiFalliti = pagamentiAll.filter(p => p.stato === 'fallito').length;
-    return { totalAbb, tassoConversione, importoMedio, pagamentiFalliti };
-  }, [abbonamenti, pagamentiAll]);
+    const churnRate = totalAbb > 0 ? Math.round(((scaduti + sospesi) / totalAbb) * 100) : 0;
+    const mrr = abbonamenti.filter(a => a.stato === 'attivo').reduce((s, a) => s + Number(a.importo_mensile), 0);
+    const pagamentiFalliti = filteredPagamenti.filter(p => p.stato === 'fallito').length;
+    const ricavoTotale = filteredPagamenti.filter(p => p.stato === 'completato').reduce((s, p) => s + Number(p.importo), 0);
+    const aziendeConPagamenti = new Set(filteredPagamenti.filter(p => p.stato === 'completato').map(p => p.azienda_id)).size;
+    const arpa = aziendeConPagamenti > 0 ? ricavoTotale / aziendeConPagamenti : 0;
+    return { totalAbb, tassoConversione, churnRate, mrr, pagamentiFalliti, ricavoTotale, arpa };
+  }, [abbonamenti, filteredPagamenti]);
 
   // --- Distribuzione stato abbonamenti ---
   const statoAbbonamentiData = useMemo(() => {
@@ -88,43 +105,76 @@ export function PagamentiReportistica({ abbonamenti, pagamentiAll, candidatiAll,
     }));
   }, [abbonamenti]);
 
-  // --- Incassi mensili (ultimi 6 mesi) ---
+  // --- Dynamic month range for incassi ---
   const incassiMensiliData = useMemo(() => {
     const now = new Date();
-    const months: { key: string; label: string; start: Date; end: Date }[] = [];
-    for (let i = 5; i >= 0; i--) {
-      const d = subMonths(now, i);
-      const start = startOfMonth(d);
-      const end = i > 0 ? startOfMonth(subMonths(now, i - 1)) : new Date(now.getFullYear(), now.getMonth() + 1, 1);
-      months.push({
-        key: format(d, 'yyyy-MM'),
-        label: format(d, 'MMM yyyy', { locale: it }),
-        start,
-        end,
-      });
-    }
-    return months.map(m => {
-      const totale = pagamentiAll
-        .filter(p => p.stato === 'completato')
-        .filter(p => {
-          const dp = new Date(p.data_pagamento);
-          return dp >= m.start && dp < m.end;
-        })
-        .reduce((s, p) => s + Number(p.importo), 0);
-      return { name: m.label, totale };
-    });
-  }, [pagamentiAll]);
+    let months: { key: string; label: string; start: Date; end: Date }[] = [];
 
-  // --- Stato pagamenti ---
+    if (fromDate || toDate) {
+      const rangeStart = startOfMonth(fromDate || subMonths(now, 5));
+      const rangeEnd = toDate || now;
+      const numMonths = Math.max(1, differenceInMonths(rangeEnd, rangeStart) + 1);
+      for (let i = 0; i < numMonths; i++) {
+        const d = addMonths(rangeStart, i);
+        const start = startOfMonth(d);
+        const end = startOfMonth(addMonths(d, 1));
+        months.push({ key: format(d, 'yyyy-MM'), label: format(d, 'MMM yy', { locale: it }), start, end });
+      }
+    } else {
+      for (let i = 5; i >= 0; i--) {
+        const d = subMonths(now, i);
+        const start = startOfMonth(d);
+        const end = i > 0 ? startOfMonth(subMonths(now, i - 1)) : new Date(now.getFullYear(), now.getMonth() + 1, 1);
+        months.push({ key: format(d, 'yyyy-MM'), label: format(d, 'MMM yy', { locale: it }), start, end });
+      }
+    }
+
+    return months.map(m => {
+      const completati = filteredPagamenti.filter(p => p.stato === 'completato').filter(p => { const dp = new Date(p.data_pagamento); return dp >= m.start && dp < m.end; }).reduce((s, p) => s + Number(p.importo), 0);
+      return { name: m.label, totale: completati };
+    });
+  }, [filteredPagamenti, fromDate, toDate]);
+
+  // --- Stato pagamenti (filtered) ---
   const statoPagamentiData = useMemo(() => {
     const counts: Record<string, number> = {};
-    pagamentiAll.forEach(p => { counts[p.stato] = (counts[p.stato] || 0) + 1; });
+    filteredPagamenti.forEach(p => { counts[p.stato] = (counts[p.stato] || 0) + 1; });
     return Object.entries(counts).map(([stato, value]) => ({
       name: LABELS_PAGAMENTI[stato] || stato,
       value,
       fill: PIE_COLORS_PAGAMENTI[stato] || 'hsl(220, 9%, 46%)',
     }));
-  }, [pagamentiAll]);
+  }, [filteredPagamenti]);
+
+  // --- Trend Completati vs Falliti (stacked bar) ---
+  const trendCompletatiVsFallitiData = useMemo(() => {
+    const now = new Date();
+    let months: { label: string; start: Date; end: Date }[] = [];
+
+    if (fromDate || toDate) {
+      const rangeStart = startOfMonth(fromDate || subMonths(now, 5));
+      const rangeEnd = toDate || now;
+      const numMonths = Math.max(1, differenceInMonths(rangeEnd, rangeStart) + 1);
+      for (let i = 0; i < numMonths; i++) {
+        const d = addMonths(rangeStart, i);
+        months.push({ label: format(d, 'MMM yy', { locale: it }), start: startOfMonth(d), end: startOfMonth(addMonths(d, 1)) });
+      }
+    } else {
+      for (let i = 5; i >= 0; i--) {
+        const d = subMonths(now, i);
+        months.push({ label: format(d, 'MMM yy', { locale: it }), start: startOfMonth(d), end: i > 0 ? startOfMonth(subMonths(now, i - 1)) : new Date(now.getFullYear(), now.getMonth() + 1, 1) });
+      }
+    }
+
+    return months.map(m => {
+      const inRange = filteredPagamenti.filter(p => { const dp = new Date(p.data_pagamento); return dp >= m.start && dp < m.end; });
+      return {
+        name: m.label,
+        completati: inRange.filter(p => p.stato === 'completato').length,
+        falliti: inRange.filter(p => p.stato === 'fallito').length,
+      };
+    });
+  }, [filteredPagamenti, fromDate, toDate]);
 
   // --- Utilizzo per azienda ---
   const utilizzoAziendeData = useMemo(() => {
@@ -134,13 +184,13 @@ export function PagamentiReportistica({ abbonamenti, pagamentiAll, candidatiAll,
     }).sort((a, b) => b.candidati - a.candidati).slice(0, 10);
   }, [aziende, candidatiAll]);
 
-  // --- Tabella riepilogo ---
+  // --- Tabella riepilogo (con filteredPagamenti) ---
   const riepilogoData = useMemo(() => {
     return aziende.map(az => {
       const abb = abbonamenti.find(a => a.azienda_id === az.id);
       const cands = candidatiAll.filter(c => c.azienda_id === az.id);
       const completati = cands.filter(c => c.test_completato).length;
-      const pagCompletati = pagamentiAll.filter(p => p.azienda_id === az.id && p.stato === 'completato');
+      const pagCompletati = filteredPagamenti.filter(p => p.azienda_id === az.id && p.stato === 'completato');
       const totalePagato = pagCompletati.reduce((s, p) => s + Number(p.importo), 0);
       return {
         id: az.id,
@@ -153,51 +203,68 @@ export function PagamentiReportistica({ abbonamenti, pagamentiAll, candidatiAll,
         totalePagato,
       };
     }).sort((a, b) => b.candidatiTotali - a.candidatiTotali);
-  }, [aziende, abbonamenti, candidatiAll, pagamentiAll]);
+  }, [aziende, abbonamenti, candidatiAll, filteredPagamenti]);
 
   return (
     <div className="space-y-6">
-      {/* KPI aggiuntivi */}
+      {/* KPI row 1 */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Conversione Trial→Attivo</CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{extraMetrics.tassoConversione}%</div>
-          </CardContent>
+          <CardContent><div className="text-2xl font-bold">{extraMetrics.tassoConversione}%</div></CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Abbonamenti Totali</CardTitle>
-            <BarChart3 className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-muted-foreground">Churn Rate</CardTitle>
+            <TrendingDown className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{extraMetrics.totalAbb}</div>
-          </CardContent>
+          <CardContent><div className="text-2xl font-bold text-destructive">{extraMetrics.churnRate}%</div></CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Importo Medio</CardTitle>
-            <PieChartIcon className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-muted-foreground">MRR</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">€{extraMetrics.importoMedio.toFixed(0)}</div>
-          </CardContent>
+          <CardContent><div className="text-2xl font-bold">€{extraMetrics.mrr.toLocaleString('it-IT')}</div></CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Pagamenti Falliti</CardTitle>
             <AlertCircle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-destructive">{extraMetrics.pagamentiFalliti}</div>
-          </CardContent>
+          <CardContent><div className="text-2xl font-bold text-destructive">{extraMetrics.pagamentiFalliti}</div></CardContent>
         </Card>
       </div>
 
-      {/* Grafici riga 1 */}
+      {/* KPI row 2 */}
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Ricavo Totale</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent><div className="text-2xl font-bold">€{extraMetrics.ricavoTotale.toLocaleString('it-IT')}</div></CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">ARPA</CardTitle>
+            <Building className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent><div className="text-2xl font-bold">€{extraMetrics.arpa.toFixed(0)}</div></CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Abbonamenti Totali</CardTitle>
+            <BarChart3 className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent><div className="text-2xl font-bold">{extraMetrics.totalAbb}</div></CardContent>
+        </Card>
+      </div>
+
+      {/* Charts row 1 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card>
           <CardHeader><CardTitle className="text-base">Distribuzione Abbonamenti</CardTitle></CardHeader>
@@ -219,7 +286,7 @@ export function PagamentiReportistica({ abbonamenti, pagamentiAll, candidatiAll,
         </Card>
 
         <Card>
-          <CardHeader><CardTitle className="text-base">Incassi Mensili (6 mesi)</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-base">Incassi Mensili{fromDate || toDate ? ' (filtrato)' : ' (6 mesi)'}</CardTitle></CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={incassiMensiliData}>
@@ -234,10 +301,10 @@ export function PagamentiReportistica({ abbonamenti, pagamentiAll, candidatiAll,
         </Card>
       </div>
 
-      {/* Grafici riga 2 */}
+      {/* Charts row 2 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card>
-          <CardHeader><CardTitle className="text-base">Stato Pagamenti</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-base">Stato Pagamenti{fromDate || toDate ? ' (filtrato)' : ''}</CardTitle></CardHeader>
           <CardContent>
             {statoPagamentiData.length === 0 ? (
               <p className="text-sm text-muted-foreground text-center py-8">Nessun dato</p>
@@ -256,28 +323,46 @@ export function PagamentiReportistica({ abbonamenti, pagamentiAll, candidatiAll,
         </Card>
 
         <Card>
-          <CardHeader><CardTitle className="text-base">Utilizzo per Azienda (Top 10)</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-base">Trend Completati vs Falliti</CardTitle></CardHeader>
           <CardContent>
-            {utilizzoAziendeData.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-8">Nessun dato</p>
-            ) : (
-              <ResponsiveContainer width="100%" height={250}>
-                <BarChart data={utilizzoAziendeData} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-border/50" />
-                  <XAxis type="number" tick={{ fontSize: 11 }} />
-                  <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={120} />
-                  <Tooltip />
-                  <Bar dataKey="candidati" fill="hsl(217, 91%, 60%)" radius={[0, 4, 4, 0]} name="Candidati" />
-                </BarChart>
-              </ResponsiveContainer>
-            )}
+            <ResponsiveContainer width="100%" height={250}>
+              <BarChart data={trendCompletatiVsFallitiData}>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-border/50" />
+                <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+                <YAxis tick={{ fontSize: 11 }} />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="completati" stackId="a" fill="hsl(142, 71%, 45%)" name="Completati" radius={[0, 0, 0, 0]} />
+                <Bar dataKey="falliti" stackId="a" fill="hsl(0, 84%, 60%)" name="Falliti" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
           </CardContent>
         </Card>
       </div>
 
+      {/* Charts row 3 - Utilizzo */}
+      <Card>
+        <CardHeader><CardTitle className="text-base">Utilizzo per Azienda (Top 10)</CardTitle></CardHeader>
+        <CardContent>
+          {utilizzoAziendeData.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-8">Nessun dato</p>
+          ) : (
+            <ResponsiveContainer width="100%" height={250}>
+              <BarChart data={utilizzoAziendeData} layout="vertical">
+                <CartesianGrid strokeDasharray="3 3" className="stroke-border/50" />
+                <XAxis type="number" tick={{ fontSize: 11 }} />
+                <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={120} />
+                <Tooltip />
+                <Bar dataKey="candidati" fill="hsl(217, 91%, 60%)" radius={[0, 4, 4, 0]} name="Candidati" />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Tabella riepilogo */}
       <Card>
-        <CardHeader><CardTitle className="text-base">Riepilogo Utilizzo per Azienda</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-base">Riepilogo Utilizzo per Azienda{fromDate || toDate ? ' (pagamenti filtrati)' : ''}</CardTitle></CardHeader>
         <CardContent className="p-0">
           <Table>
             <TableHeader>

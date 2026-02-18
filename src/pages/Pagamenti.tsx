@@ -16,6 +16,7 @@ import { useToast } from '@/hooks/use-toast';
 import { DollarSign, Users, AlertTriangle, TrendingUp, Eye, Edit, Plus, Search, CreditCard, Trash2 } from 'lucide-react';
 import { NuovoAbbonamentoDialog } from '@/components/NuovoAbbonamentoDialog';
 import { PagamentiReportistica } from '@/components/PagamentiReportistica';
+import { DateRangePicker } from '@/components/DateRangePicker';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
@@ -45,6 +46,8 @@ export default function Pagamenti() {
   const [editDialog, setEditDialog] = useState<Abbonamento | null>(null);
   const [nuovoPagamentoDialog, setNuovoPagamentoDialog] = useState(false);
   const [nuovoAbbonamentoDialog, setNuovoAbbonamentoDialog] = useState(false);
+  const [reportFromDate, setReportFromDate] = useState<Date | undefined>(undefined);
+  const [reportToDate, setReportToDate] = useState<Date | undefined>(undefined);
 
   // Fetch abbonamenti with azienda name
   const { data: abbonamenti = [], isLoading } = useQuery({
@@ -365,12 +368,27 @@ export default function Pagamenti() {
         </Card>
 
         {/* Reportistica Completa */}
-        <PagamentiReportistica
-          abbonamenti={abbonamenti}
-          pagamentiAll={pagamentiAll}
-          candidatiAll={candidatiAll}
-          aziende={aziende}
-        />
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-foreground">Reportistica Avanzata</h2>
+            <DateRangePicker
+              label="Filtra periodo"
+              fromDate={reportFromDate}
+              toDate={reportToDate}
+              onFromChange={setReportFromDate}
+              onToChange={setReportToDate}
+              className="w-auto"
+            />
+          </div>
+          <PagamentiReportistica
+            abbonamenti={abbonamenti}
+            pagamentiAll={pagamentiAll}
+            candidatiAll={candidatiAll}
+            aziende={aziende}
+            fromDate={reportFromDate}
+            toDate={reportToDate}
+          />
+        </div>
 
         {/* Edit Stato Dialog */}
         {editDialog && (
