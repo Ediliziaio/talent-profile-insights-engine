@@ -15,6 +15,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { DollarSign, Users, AlertTriangle, TrendingUp, Eye, Edit, Plus, Search, CreditCard, Trash2 } from 'lucide-react';
 import { NuovoAbbonamentoDialog } from '@/components/NuovoAbbonamentoDialog';
+import { PagamentiReportistica } from '@/components/PagamentiReportistica';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
@@ -101,6 +102,30 @@ export default function Pagamenti() {
         .eq('stato', 'completato');
       if (error) throw error;
       return data || [];
+    },
+  });
+
+  // Fetch ALL pagamenti for reporting charts
+  const { data: pagamentiAll = [] } = useQuery({
+    queryKey: ['pagamenti-all'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('pagamenti')
+        .select('importo, stato, data_pagamento, azienda_id');
+      if (error) throw error;
+      return (data || []) as { importo: number; stato: string; data_pagamento: string; azienda_id: string }[];
+    },
+  });
+
+  // Fetch candidati per azienda for usage reporting
+  const { data: candidatiAll = [] } = useQuery({
+    queryKey: ['candidati-per-azienda'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('candidati')
+        .select('azienda_id, test_completato');
+      if (error) throw error;
+      return (data || []) as { azienda_id: string; test_completato: boolean | null }[];
     },
   });
 
@@ -338,6 +363,14 @@ export default function Pagamenti() {
             </Table>
           </CardContent>
         </Card>
+
+        {/* Reportistica Completa */}
+        <PagamentiReportistica
+          abbonamenti={abbonamenti}
+          pagamentiAll={pagamentiAll}
+          candidatiAll={candidatiAll}
+          aziende={aziende}
+        />
 
         {/* Edit Stato Dialog */}
         {editDialog && (
