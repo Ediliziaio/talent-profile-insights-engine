@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tooltip as UiTooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -65,16 +66,30 @@ const LABELS_PAGAMENTI: Record<string, string> = {
   rimborsato: 'Rimborsato',
 };
 
-function DeltaBadge({ delta, invertColor }: { delta: number | null; invertColor?: boolean }) {
+function DeltaBadge({ delta, invertColor, currValue, prevValue, formatter }: { delta: number | null; invertColor?: boolean; currValue?: number; prevValue?: number; formatter?: (v: number) => string }) {
   if (delta === null) return null;
   const isPositive = delta >= 0;
   const isGood = invertColor ? !isPositive : isPositive;
   const Icon = isPositive ? TrendingUp : TrendingDown;
-  return (
-    <span className={`inline-flex items-center gap-0.5 text-xs font-medium ${isGood ? 'text-green-600' : 'text-destructive'}`}>
+  const fmt = formatter || ((v: number) => String(v));
+  const hasDetail = currValue !== undefined && prevValue !== undefined;
+  const badge = (
+    <span className={`inline-flex items-center gap-0.5 text-xs font-medium cursor-default ${isGood ? 'text-green-600' : 'text-destructive'}`}>
       <Icon className="h-3 w-3" />
       {isPositive ? '+' : ''}{delta.toFixed(0)}%
     </span>
+  );
+  if (!hasDetail) return badge;
+  return (
+    <TooltipProvider delayDuration={200}>
+      <UiTooltip>
+        <TooltipTrigger asChild>{badge}</TooltipTrigger>
+        <TooltipContent side="top" className="text-xs">
+          <p>Mese corrente: <strong>{fmt(currValue!)}</strong></p>
+          <p>Mese precedente: <strong>{fmt(prevValue!)}</strong></p>
+        </TooltipContent>
+      </UiTooltip>
+    </TooltipProvider>
   );
 }
 
@@ -289,7 +304,7 @@ export function PagamentiReportistica({ abbonamenti, pagamentiAll, candidatiAll,
           <CardContent>
             <div className="text-2xl font-bold">€{extraMetrics.mrr.toLocaleString('it-IT')}</div>
             <div className="flex items-center gap-2 mt-1">
-              <DeltaBadge delta={sparklineData.deltaRicavo} />
+              <DeltaBadge delta={sparklineData.deltaRicavo} currValue={sparklineData.ricavo[5]?.value} prevValue={sparklineData.ricavo[4]?.value} formatter={v => `€${v.toLocaleString('it-IT')}`} />
               <div className="flex-1"><MiniSparkline data={sparklineData.ricavo} color="hsl(142, 71%, 45%)" /></div>
             </div>
           </CardContent>
@@ -302,7 +317,7 @@ export function PagamentiReportistica({ abbonamenti, pagamentiAll, candidatiAll,
           <CardContent>
             <div className="text-2xl font-bold text-destructive">{extraMetrics.pagamentiFalliti}</div>
             <div className="flex items-center gap-2 mt-1">
-              <DeltaBadge delta={sparklineData.deltaFalliti} invertColor />
+              <DeltaBadge delta={sparklineData.deltaFalliti} invertColor currValue={sparklineData.falliti[5]?.value} prevValue={sparklineData.falliti[4]?.value} />
               <div className="flex-1"><MiniSparkline data={sparklineData.falliti} color="hsl(0, 84%, 60%)" /></div>
             </div>
           </CardContent>
@@ -319,7 +334,7 @@ export function PagamentiReportistica({ abbonamenti, pagamentiAll, candidatiAll,
           <CardContent>
             <div className="text-2xl font-bold">€{extraMetrics.ricavoTotale.toLocaleString('it-IT')}</div>
             <div className="flex items-center gap-2 mt-1">
-              <DeltaBadge delta={sparklineData.deltaRicavoCumulativo} />
+              <DeltaBadge delta={sparklineData.deltaRicavoCumulativo} currValue={sparklineData.ricavoCumulativo[5]?.value} prevValue={sparklineData.ricavoCumulativo[4]?.value} formatter={v => `€${v.toLocaleString('it-IT')}`} />
               <div className="flex-1"><MiniSparkline data={sparklineData.ricavoCumulativo} color="hsl(142, 71%, 45%)" /></div>
             </div>
           </CardContent>
@@ -332,7 +347,7 @@ export function PagamentiReportistica({ abbonamenti, pagamentiAll, candidatiAll,
           <CardContent>
             <div className="text-2xl font-bold">€{extraMetrics.arpa.toFixed(0)}</div>
             <div className="flex items-center gap-2 mt-1">
-              <DeltaBadge delta={sparklineData.deltaArpa} />
+              <DeltaBadge delta={sparklineData.deltaArpa} currValue={sparklineData.arpa[5]?.value} prevValue={sparklineData.arpa[4]?.value} formatter={v => `€${v.toFixed(0)}`} />
               <div className="flex-1"><MiniSparkline data={sparklineData.arpa} color="hsl(217, 91%, 60%)" /></div>
             </div>
           </CardContent>
