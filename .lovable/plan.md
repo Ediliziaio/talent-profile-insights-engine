@@ -1,59 +1,45 @@
 
 
-# Reportistica Completa Pagamenti
+# Filtro Date + Miglioramenti Reportistica Pagamenti
 
-## Cosa viene aggiunto
+## Cosa cambia
 
-Una sezione di reportistica avanzata sotto le metriche KPI esistenti, con grafici e tabelle riepilogative che coprono: stato abbonamenti, andamento incassi, utilizzo piattaforma per azienda e overview finanziaria.
+### 1. Filtro intervallo date sulla reportistica
+Un componente `DateRangePicker` (gia' esistente nel progetto) viene aggiunto sopra la sezione reportistica. Quando si seleziona un intervallo:
+- I KPI (pagamenti falliti, importo medio) si ricalcolano sul periodo
+- Il grafico "Incassi Mensili" mostra solo i mesi nell'intervallo
+- Il grafico "Stato Pagamenti" filtra i pagamenti nel periodo
+- La tabella riepilogo "Tot. Pagato" riflette solo i pagamenti nel range
+- Senza filtro attivo, tutto rimane come ora (dati completi)
 
-## Struttura della reportistica
+### 2. Metriche mancanti da aggiungere
 
-### 1. KPI aggiuntivi (nuova riga di cards)
-- **Tasso Conversione Trial->Attivo**: percentuale di aziende passate da trial ad attivo
-- **Abbonamenti Totali**: conteggio complessivo
-- **Importo Medio**: media degli importi mensili
-- **Pagamenti Falliti**: conteggio pagamenti con stato "fallito"
+- **MRR (Monthly Recurring Revenue)**: somma importi mensili degli abbonamenti attivi -- gia' presente come "Entrate Mensili" nella sezione KPI principale, ma mancante nella reportistica
+- **Churn Rate**: percentuale abbonamenti scaduti/sospesi sul totale
+- **Ricavo Totale**: somma di tutti i pagamenti completati (nel periodo filtrato)
+- **Incasso Medio per Azienda**: ricavo totale diviso numero aziende con almeno un pagamento
 
-### 2. Grafici (2 righe da 2 colonne)
+### 3. Miglioramenti grafici
 
-**Riga 1:**
-- **Distribuzione Stato Abbonamenti** (PieChart): spicchi colorati per attivo/trial/scaduto/sospeso
-- **Incassi Mensili** (BarChart): importi incassati raggruppati per mese (ultimi 6 mesi)
-
-**Riga 2:**
-- **Stato Pagamenti** (PieChart): completato/fallito/in_attesa/rimborsato
-- **Utilizzo per Azienda** (BarChart orizzontale): numero candidati per azienda, con indicazione dello stato abbonamento
-
-### 3. Tabella Riepilogo Utilizzo per Azienda
-Una tabella che mostra per ogni azienda:
-- Nome azienda
-- Stato abbonamento
-- Numero candidati totali
-- Candidati con test completato
-- Tasso completamento %
-- Importo mensile
-- Pagamenti completati totali
+- Il grafico "Incassi Mensili" diventa dinamico: se il filtro date copre piu' di 6 mesi, mostra tutti i mesi nel range; se meno, mostra solo quelli nel range
+- Aggiunta di un grafico **Trend Pagamenti Falliti vs Completati** (BarChart stacked) per visualizzare l'andamento della qualita' degli incassi nel tempo
 
 ## Dettagli tecnici
 
-**File da modificare:** `src/pages/Pagamenti.tsx`
+**File da modificare:**
 
-**Nuove query:**
-1. `pagamenti-all` -- fetch di tutti i pagamenti per costruire i grafici (importo, stato, metodo, data_pagamento, azienda_id)
-2. `candidati-per-azienda` -- fetch candidati raggruppati per azienda_id con conteggio test_completato (riutilizza la query gia' presente nella rete: `candidati?select=azienda_id,test_completato`)
+### `src/components/PagamentiReportistica.tsx`
+1. Aggiungere props `fromDate` e `toDate` (opzionali) all'interfaccia Props
+2. Creare un `filteredPagamenti` con `useMemo` che filtra `pagamentiAll` per intervallo date
+3. Usare `filteredPagamenti` al posto di `pagamentiAll` in tutti i calcoli (KPI, grafici, tabella)
+4. Aggiungere nuove KPI cards: Churn Rate, Ricavo Totale, Incasso Medio per Azienda
+5. Aggiungere grafico stacked bar "Completati vs Falliti per Mese"
+6. Rendere dinamico il range mesi del grafico incassi (basato su filtro date se attivo, altrimenti ultimi 6 mesi)
 
-**Nuove dipendenze:** nessuna -- recharts e date-fns sono gia' installati.
+### `src/pages/Pagamenti.tsx`
+1. Aggiungere stati `reportFromDate` e `reportToDate` (useState)
+2. Importare e renderizzare il `DateRangePicker` sopra il componente `PagamentiReportistica`
+3. Passare `fromDate` e `toDate` come props a `PagamentiReportistica`
 
-**Modifiche al componente:**
-1. Aggiungere le query `pagamenti-all` e `candidati-per-azienda` con `useQuery`
-2. Calcolare metriche aggiuntive con `useMemo` (tasso conversione, importo medio, pagamenti falliti)
-3. Preparare dati per i grafici con `useMemo`:
-   - `statoAbbonamentiData` -- raggruppa abbonamenti per stato
-   - `incassiMensiliData` -- raggruppa pagamenti completati per mese (ultimi 6 mesi)
-   - `statoPagamentiData` -- raggruppa pagamenti per stato
-   - `utilizzoAziendeData` -- unisce aziende + candidati + abbonamento
-4. Renderizzare i grafici usando `recharts` (PieChart, BarChart, ResponsiveContainer, Tooltip, Legend, Cell)
-5. Renderizzare la tabella riepilogo utilizzo sotto i grafici
-
-**Pattern UI:** Stesso stile gradient cards e layout responsive gia' usato nel Dashboard principale (grid-cols-2 su mobile, grid-cols-4 su desktop per le KPI; grid-cols-1 md:grid-cols-2 per i grafici).
+**Nessuna modifica al database** -- tutti i dati necessari sono gia' disponibili nelle query esistenti.
 
