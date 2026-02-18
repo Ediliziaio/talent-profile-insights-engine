@@ -14,6 +14,56 @@ export type Database = {
   }
   public: {
     Tables: {
+      abbonamenti: {
+        Row: {
+          azienda_id: string
+          created_at: string
+          data_inizio: string | null
+          data_scadenza: string | null
+          id: string
+          importo_mensile: number
+          note: string | null
+          stato: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          azienda_id: string
+          created_at?: string
+          data_inizio?: string | null
+          data_scadenza?: string | null
+          id?: string
+          importo_mensile?: number
+          note?: string | null
+          stato?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          azienda_id?: string
+          created_at?: string
+          data_inizio?: string | null
+          data_scadenza?: string | null
+          id?: string
+          importo_mensile?: number
+          note?: string | null
+          stato?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "abbonamenti_azienda_id_fkey"
+            columns: ["azienda_id"]
+            isOneToOne: true
+            referencedRelation: "aziende"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       accessi_azienda: {
         Row: {
           attivo: boolean | null
@@ -247,6 +297,60 @@ export type Database = {
           testo?: string
         }
         Relationships: []
+      }
+      pagamenti: {
+        Row: {
+          abbonamento_id: string
+          azienda_id: string
+          created_at: string
+          data_pagamento: string
+          id: string
+          importo: number
+          metodo: string
+          note: string | null
+          stato: string
+          stripe_payment_id: string | null
+        }
+        Insert: {
+          abbonamento_id: string
+          azienda_id: string
+          created_at?: string
+          data_pagamento?: string
+          id?: string
+          importo: number
+          metodo?: string
+          note?: string | null
+          stato?: string
+          stripe_payment_id?: string | null
+        }
+        Update: {
+          abbonamento_id?: string
+          azienda_id?: string
+          created_at?: string
+          data_pagamento?: string
+          id?: string
+          importo?: number
+          metodo?: string
+          note?: string | null
+          stato?: string
+          stripe_payment_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pagamenti_abbonamento_id_fkey"
+            columns: ["abbonamento_id"]
+            isOneToOne: false
+            referencedRelation: "abbonamenti"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pagamenti_azienda_id_fkey"
+            columns: ["azienda_id"]
+            isOneToOne: false
+            referencedRelation: "aziende"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {

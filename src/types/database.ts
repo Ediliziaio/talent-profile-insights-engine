@@ -260,3 +260,38 @@ export const FUNZIONI = [
   'Ufficio tecnico',
   'Ufficio vendite',
 ];
+
+// Abbonamento (subscription) interface
+export type StatoAbbonamento = 'attivo' | 'scaduto' | 'sospeso' | 'trial';
+
+export interface Abbonamento {
+  id: string;
+  azienda_id: string;
+  stato: StatoAbbonamento;
+  importo_mensile: number;
+  data_inizio: string | null;
+  data_scadenza: string | null;
+  stripe_customer_id: string | null;
+  stripe_subscription_id: string | null;
+  note: string | null;
+  created_at: string;
+  updated_at: string;
+  aziende?: { nome: string };
+}
+
+// Pagamento (payment) interface
+export type StatoPagamento = 'completato' | 'fallito' | 'in_attesa' | 'rimborsato';
+export type MetodoPagamento = 'stripe' | 'bonifico' | 'manuale';
+
+export interface Pagamento {
+  id: string;
+  abbonamento_id: string;
+  azienda_id: string;
+  importo: number;
+  stato: StatoPagamento;
+  data_pagamento: string;
+  metodo: MetodoPagamento;
+  stripe_payment_id: string | null;
+  note: string | null;
+  created_at: string;
+}
