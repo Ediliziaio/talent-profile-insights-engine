@@ -1,7 +1,7 @@
 import { ReactNode, useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
-import { LogOut, Home, Users, BarChart3, Settings, BookOpen, ChevronLeft, ChevronRight, Menu } from 'lucide-react';
+import { LogOut, Home, Users, BarChart3, Settings, BookOpen, ChevronLeft, ChevronRight, Menu, CreditCard } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
@@ -26,6 +26,7 @@ export function NotionLayout({ children }: NotionLayoutProps) {
     { href: '/', label: 'Dashboard', icon: Home, show: true },
     { href: '/candidati', label: 'Candidati', icon: Users, show: isSuperadmin || isAzienda },
     { href: '/aziende', label: 'Aziende', icon: BarChart3, show: isSuperadmin },
+    { href: '/pagamenti', label: 'Pagamenti', icon: CreditCard, show: isSuperadmin },
     { href: '/impostazioni', label: 'Impostazioni', icon: Settings, show: false },
     { href: '/metodologia', label: 'Metodologia', icon: BookOpen, show: false },
   ];

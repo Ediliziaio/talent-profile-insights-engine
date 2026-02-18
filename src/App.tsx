@@ -33,6 +33,7 @@ const Questionario = lazy(() => import('./pages/Questionario'));
 const TestCompletato = lazy(() => import('./pages/TestCompletato'));
 const FormAnagrafico = lazy(() => import('./pages/FormAnagrafico'));
 const Home = lazy(() => import('./pages/Home'));
+const Pagamenti = lazy(() => import('./pages/Pagamenti'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -102,6 +103,11 @@ const App = () => (
               <Route path="/candidati/:id/storico" element={
                 <Suspense fallback={<CandidatoDettaglioSkeleton />}>
                   <StoricoCandidato />
+                </Suspense>
+              } />
+              <Route path="/pagamenti" element={
+                <Suspense fallback={<DashboardSkeleton />}>
+                  <Pagamenti />
                 </Suspense>
               } />
               <Route path="/confronto" element={
