@@ -1,48 +1,93 @@
 
-# Animazione Typing per "So cosa stai passando" + Conferma Mobile
 
-## Verifica Mobile Completata
+# Struttura Pagamenti Aziende (Superadmin)
 
-Entrambe le sezioni sono state verificate su mobile (390x844):
+## Panoramica
 
-**Sezione Paura (L'Incubo che Conosci)**:
-- Le 4 fear-card sono ben formattate in colonna singola
-- Icone rosse visibili e testo bianco leggibile
-- Bordi rossi pulsanti funzionanti
-- Spaziatura corretta tra le card
+Creare una nuova sezione "Pagamenti" nell'area Superadmin per gestire e monitorare gli abbonamenti delle aziende. L'abbonamento e' fisso a 97 EUR/mese. L'integrazione Stripe verra' collegata in un secondo momento; ora si costruisce solo la struttura dati e l'interfaccia.
 
-**Storie di Successo**:
-- Le 3 case study card si impilano correttamente
-- Before/After con numeri grandi ben visibili
-- Progress bar e badge "Caso Reale" correttamente posizionati
-- Testo "La Sfida" / "La Soluzione" leggibile
+## 1. Nuova tabella database: `abbonamenti`
 
-Nessun problema di formattazione riscontrato su mobile.
+Tabella che traccia lo stato dell'abbonamento di ogni azienda:
 
----
+| Colonna | Tipo | Note |
+|---|---|---|
+| id | uuid | PK, default gen_random_uuid() |
+| azienda_id | uuid | FK verso aziende, NOT NULL, UNIQUE |
+| stato | varchar | 'attivo', 'scaduto', 'sospeso', 'trial', default 'trial' |
+| importo_mensile | numeric | default 97.00 |
+| data_inizio | timestamptz | inizio abbonamento |
+| data_scadenza | timestamptz | prossima scadenza |
+| stripe_customer_id | text | nullable, per futuro collegamento Stripe |
+| stripe_subscription_id | text | nullable, per futuro collegamento Stripe |
+| note | text | nullable, note libere superadmin |
+| created_at | timestamptz | default now() |
+| updated_at | timestamptz | default now() |
 
-## Animazione Typing: Implementazione
+RLS: solo superadmin puo' leggere/scrivere.
 
-### Cosa cambia
-Il titolo "So cosa stai passando. Ci siamo passati tutti." nella sezione Lettera al Lettore avra' un effetto macchina da scrivere: il testo apparira' carattere per carattere quando la sezione entra nel viewport.
+## 2. Nuova tabella database: `pagamenti`
 
-### Dettagli tecnici
+Storico singoli pagamenti:
 
-**File: `src/pages/Home.tsx`**
+| Colonna | Tipo | Note |
+|---|---|---|
+| id | uuid | PK |
+| abbonamento_id | uuid | FK verso abbonamenti |
+| azienda_id | uuid | FK logica |
+| importo | numeric | NOT NULL |
+| stato | varchar | 'completato', 'fallito', 'in_attesa', 'rimborsato' |
+| data_pagamento | timestamptz | default now() |
+| metodo | varchar | 'stripe', 'bonifico', 'manuale' |
+| stripe_payment_id | text | nullable |
+| note | text | nullable |
+| created_at | timestamptz | default now() |
 
-1. Creare un componente inline `TypewriterText` che:
-   - Usa `useState` per tracciare il numero di caratteri visibili
-   - Usa `useEffect` con `setInterval` per incrementare i caratteri (velocita': ~50ms per carattere)
-   - Usa Intersection Observer (o il prop `whileInView` di framer-motion) per avviare l'animazione solo quando la sezione e' visibile
-   - Mostra un cursore lampeggiante `|` alla fine del testo durante la digitazione
+RLS: solo superadmin.
 
-2. Sostituire il tag `<strong>` statico (riga ~707) con il componente `<TypewriterText />`
+## 3. Nuova pagina: `src/pages/Pagamenti.tsx`
 
-3. Il cursore scomparira' dopo che il testo e' completamente digitato (dopo ~500ms)
+Pagina accessibile solo al Superadmin con:
 
-**File: `src/index.css`**
-- Aggiungere `@keyframes blink-cursor` per il cursore lampeggiante
-- Classe `.typing-cursor` con animazione blink
+**Header metriche (4 card)**:
+- Entrate mensili totali (somma abbonamenti attivi x 97 EUR)
+- Aziende con abbonamento attivo (conteggio)
+- Pagamenti in ritardo / scaduti
+- Incassi ultimo mese (dalla tabella pagamenti)
 
-### Nessuna nuova dipendenza
-L'animazione usa solo React hooks nativi (`useState`, `useEffect`, `useRef`) e CSS.
+**Tabella abbonamenti** con colonne:
+- Azienda (nome)
+- Stato (badge colorato: verde=attivo, giallo=trial, rosso=scaduto, grigio=sospeso)
+- Importo mensile
+- Data inizio
+- Prossima scadenza
+- Azioni (modifica stato, vedi storico pagamenti)
+
+**Drawer storico pagamenti** per singola azienda:
+- Lista pagamenti con data, importo, stato, metodo
+- Possibilita' di registrare un pagamento manuale
+
+**Filtri**: ricerca per nome azienda, filtro per stato abbonamento
+
+## 4. Navigazione
+
+- Aggiungere voce "Pagamenti" nella sidebar (`NotionLayout.tsx`) con icona `CreditCard`, visibile solo al superadmin
+- Aggiungere rotta `/pagamenti` in `App.tsx`
+
+## 5. Dettagli tecnici
+
+### File da creare:
+- `src/pages/Pagamenti.tsx` -- pagina principale
+
+### File da modificare:
+- `src/components/NotionLayout.tsx` -- aggiunta voce menu
+- `src/App.tsx` -- aggiunta rotta
+- `src/types/database.ts` -- interfacce TypeScript per Abbonamento e Pagamento
+
+### Migrazione SQL:
+- Creazione tabelle `abbonamenti` e `pagamenti`
+- RLS policies (solo superadmin)
+- Trigger `update_updated_at_column` su `abbonamenti`
+
+### Nessuna nuova dipendenza necessaria
+Usa gli stessi componenti UI gia' presenti (Card, Table, Badge, Sheet, Dialog).
