@@ -1,63 +1,56 @@
 
-
-# Sparkline nei KPI Cards della Reportistica Pagamenti
+# Indicatore Variazione % Mese Precedente nelle KPI Cards
 
 ## Cosa cambia
 
-Ogni card KPI nella reportistica mostra un piccolo grafico sparkline (linea sottile) sotto il valore numerico, rappresentando il trend degli ultimi 6 mesi per quella metrica. Questo permette di capire a colpo d'occhio se una metrica sta migliorando o peggiorando.
+Ogni KPI card che ha dati storici mostra un indicatore di variazione percentuale rispetto al mese precedente, con icona freccia su/giu e colore verde (positivo) o rosso (negativo). Le KPI senza serie temporale (Conversione, Churn, Abbonamenti Totali) non avranno l'indicatore.
 
-## Sparkline per ogni KPI
+## Cards con indicatore
 
-| KPI | Dati sparkline |
-|-----|---------------|
-| Conversione Trial->Attivo | % conversione calcolata mese per mese (non applicabile storicamente, mostra valore fisso) |
-| Churn Rate | Stesso, valore statico dagli abbonamenti attuali |
-| MRR | Somma incassi completati per mese (ultimi 6 mesi) -- proxy del MRR |
-| Pagamenti Falliti | Conteggio falliti per mese |
-| Ricavo Totale | Incassi cumulativi per mese |
-| ARPA | Incasso medio per azienda per mese |
-| Abbonamenti Totali | Non ha trend mensile, nessuna sparkline |
+| KPI | Calcolo variazione |
+|-----|-------------------|
+| MRR | Ricavo mese corrente vs mese precedente |
+| Pagamenti Falliti | Conteggio falliti mese corrente vs precedente (inversione colore: rosso se aumenta) |
+| Ricavo Totale | Ricavo mese corrente vs precedente |
+| ARPA | ARPA mese corrente vs precedente |
 
-Le sparkline con dati significativi saranno: **MRR**, **Pagamenti Falliti**, **Ricavo Totale** e **ARPA**. Le altre KPI (Conversione, Churn, Abbonamenti Totali) sono snapshot e non hanno serie temporali -- verranno mostrate senza sparkline.
+## Aspetto visivo
+
+```text
++----------------------------------+
+| MRR                        $     |
+| EUR 4.200                        |
+| +12% ^   ~~~/\___/~~~ sparkline  |
++----------------------------------+
+```
+
+- Freccia verso l'alto (TrendingUp) + testo verde per variazione positiva
+- Freccia verso il basso (TrendingDown) + testo rosso per variazione negativa
+- Per "Pagamenti Falliti" la logica colore e' invertita (meno falliti = verde)
+- Testo piccolo (`text-xs`) accanto alla sparkline
+- Se il mese precedente ha valore 0, mostra "N/A" o nessun indicatore
 
 ## Dettagli tecnici
 
 **File da modificare:** `src/components/PagamentiReportistica.tsx`
 
-### 1. Calcolo dati sparkline (useMemo)
-Aggiungere un `useMemo` che calcola, per gli ultimi 6 mesi, i valori mensili di:
-- `ricavoMensile[]` -- somma pagamenti completati per mese
-- `fallitiMensile[]` -- conteggio pagamenti falliti per mese
-- `arpaMensile[]` -- ricavo / numero aziende paganti per mese
+### 1. Calcolo variazioni (useMemo)
+Estendere il `useMemo` `sparklineData` esistente per restituire anche le variazioni percentuali. I dati degli ultimi 2 mesi (indici 4 e 5 nell'array da 6 elementi) vengono confrontati:
 
-Struttura dati: `{ month: string, value: number }[]` per ciascuna serie.
-
-### 2. Componente Sparkline inline
-Creare un piccolo componente `MiniSparkline` interno al file che usa recharts `LineChart` + `Line` con:
-- `ResponsiveContainer` altezza 30px
-- Nessun asse, nessun tooltip, nessuna griglia
-- Linea sottile (strokeWidth 1.5) con colore passato come prop
-- Dati passati come array di `{ value: number }`
-
-```text
-+----------------------------------+
-| Ricavo Totale            $       |
-| EUR 12.500                       |
-| ~~~/\___/~~~  (sparkline)        |
-+----------------------------------+
+```
+const prevMonth = ricavo[4].value;
+const currMonth = ricavo[5].value;
+const deltaRicavo = prevMonth > 0 ? ((currMonth - prevMonth) / prevMonth) * 100 : null;
 ```
 
+Stesso calcolo per `falliti`, `arpa`. Aggiungere queste variazioni all'oggetto restituito da `sparklineData`.
+
+### 2. Componente DeltaBadge inline
+Creare un piccolo componente interno `DeltaBadge` che riceve:
+- `delta: number | null` -- variazione percentuale
+- `invertColor?: boolean` -- per Pagamenti Falliti (aumento = negativo)
+
+Renderizza: icona `TrendingUp`/`TrendingDown` (12px) + `+X%` o `-X%` con colori appropriati. Se `delta` e' `null`, non renderizza nulla.
+
 ### 3. Integrazione nelle KPI cards
-- **MRR card**: sparkline verde con `ricavoMensile`
-- **Pagamenti Falliti card**: sparkline rossa con `fallitiMensile`
-- **Ricavo Totale card**: sparkline verde con `ricavoMensile` (cumulativo)
-- **ARPA card**: sparkline blu con `arpaMensile`
-- Le altre 3 cards restano invariate (senza sparkline)
-
-Ogni sparkline viene aggiunta sotto il valore `text-2xl` dentro `CardContent`, con un `div` wrapper alto 30px e margine top minimo.
-
-### 4. Import aggiuntivi da recharts
-Aggiungere `LineChart, Line` agli import esistenti di recharts.
-
-**Nessuna modifica al database o ad altri file.**
-
+Aggiungere `<DeltaBadge>` dentro `CardContent` di MRR, Pagamenti Falliti, Ricavo Totale e ARPA, posizionato tra il valore numerico e la sparkline, in un `div` con `flex items-center gap-2`.
