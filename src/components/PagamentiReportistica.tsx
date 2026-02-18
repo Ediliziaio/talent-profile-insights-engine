@@ -4,7 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import {
   PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid,
-  Tooltip, Legend, ResponsiveContainer,
+  Tooltip, Legend, ResponsiveContainer, LineChart, Line,
 } from 'recharts';
 import { TrendingUp, BarChart3, PieChart as PieChartIcon, AlertCircle, TrendingDown, DollarSign, Building } from 'lucide-react';
 import { format, subMonths, startOfMonth, differenceInMonths, addMonths } from 'date-fns';
@@ -65,6 +65,19 @@ const LABELS_PAGAMENTI: Record<string, string> = {
   rimborsato: 'Rimborsato',
 };
 
+function MiniSparkline({ data, color }: { data: { value: number }[]; color: string }) {
+  if (!data || data.length < 2) return null;
+  return (
+    <div className="mt-1 h-[30px] w-full">
+      <ResponsiveContainer width="100%" height={30}>
+        <LineChart data={data}>
+          <Line type="monotone" dataKey="value" stroke={color} strokeWidth={1.5} dot={false} />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
 export function PagamentiReportistica({ abbonamenti, pagamentiAll, candidatiAll, aziende, fromDate, toDate }: Props) {
   // --- Filtered pagamenti by date range ---
   const filteredPagamenti = useMemo(() => {
@@ -93,6 +106,34 @@ export function PagamentiReportistica({ abbonamenti, pagamentiAll, candidatiAll,
     const arpa = aziendeConPagamenti > 0 ? ricavoTotale / aziendeConPagamenti : 0;
     return { totalAbb, tassoConversione, churnRate, mrr, pagamentiFalliti, ricavoTotale, arpa };
   }, [abbonamenti, filteredPagamenti]);
+
+  // --- Sparkline data (last 6 months) ---
+  const sparklineData = useMemo(() => {
+    const now = new Date();
+    const months: { start: Date; end: Date }[] = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = subMonths(now, i);
+      const start = startOfMonth(d);
+      const end = i > 0 ? startOfMonth(subMonths(now, i - 1)) : new Date(now.getFullYear(), now.getMonth() + 1, 1);
+      months.push({ start, end });
+    }
+    const ricavo: { value: number }[] = [];
+    const falliti: { value: number }[] = [];
+    const arpa: { value: number }[] = [];
+    let cumulative = 0;
+    const ricavoCumulativo: { value: number }[] = [];
+    months.forEach(m => {
+      const inRange = pagamentiAll.filter(p => { const dp = new Date(p.data_pagamento); return dp >= m.start && dp < m.end; });
+      const rev = inRange.filter(p => p.stato === 'completato').reduce((s, p) => s + Number(p.importo), 0);
+      ricavo.push({ value: rev });
+      cumulative += rev;
+      ricavoCumulativo.push({ value: cumulative });
+      falliti.push({ value: inRange.filter(p => p.stato === 'fallito').length });
+      const azPaganti = new Set(inRange.filter(p => p.stato === 'completato').map(p => p.azienda_id)).size;
+      arpa.push({ value: azPaganti > 0 ? rev / azPaganti : 0 });
+    });
+    return { ricavo, falliti, arpa, ricavoCumulativo };
+  }, [pagamentiAll]);
 
   // --- Distribuzione stato abbonamenti ---
   const statoAbbonamentiData = useMemo(() => {
@@ -228,14 +269,20 @@ export function PagamentiReportistica({ abbonamenti, pagamentiAll, candidatiAll,
             <CardTitle className="text-sm font-medium text-muted-foreground">MRR</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent><div className="text-2xl font-bold">€{extraMetrics.mrr.toLocaleString('it-IT')}</div></CardContent>
+          <CardContent>
+            <div className="text-2xl font-bold">€{extraMetrics.mrr.toLocaleString('it-IT')}</div>
+            <MiniSparkline data={sparklineData.ricavo} color="hsl(142, 71%, 45%)" />
+          </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Pagamenti Falliti</CardTitle>
             <AlertCircle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent><div className="text-2xl font-bold text-destructive">{extraMetrics.pagamentiFalliti}</div></CardContent>
+          <CardContent>
+            <div className="text-2xl font-bold text-destructive">{extraMetrics.pagamentiFalliti}</div>
+            <MiniSparkline data={sparklineData.falliti} color="hsl(0, 84%, 60%)" />
+          </CardContent>
         </Card>
       </div>
 
@@ -246,14 +293,20 @@ export function PagamentiReportistica({ abbonamenti, pagamentiAll, candidatiAll,
             <CardTitle className="text-sm font-medium text-muted-foreground">Ricavo Totale</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent><div className="text-2xl font-bold">€{extraMetrics.ricavoTotale.toLocaleString('it-IT')}</div></CardContent>
+          <CardContent>
+            <div className="text-2xl font-bold">€{extraMetrics.ricavoTotale.toLocaleString('it-IT')}</div>
+            <MiniSparkline data={sparklineData.ricavoCumulativo} color="hsl(142, 71%, 45%)" />
+          </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">ARPA</CardTitle>
             <Building className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent><div className="text-2xl font-bold">€{extraMetrics.arpa.toFixed(0)}</div></CardContent>
+          <CardContent>
+            <div className="text-2xl font-bold">€{extraMetrics.arpa.toFixed(0)}</div>
+            <MiniSparkline data={sparklineData.arpa} color="hsl(217, 91%, 60%)" />
+          </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
