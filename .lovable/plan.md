@@ -1,93 +1,78 @@
 
 
-# Struttura Pagamenti Aziende (Superadmin)
+# Pagamenti: Dati di Prova + Checkout Stripe Integrato
 
-## Panoramica
+## Verifica Struttura (Completata)
 
-Creare una nuova sezione "Pagamenti" nell'area Superadmin per gestire e monitorare gli abbonamenti delle aziende. L'abbonamento e' fisso a 97 EUR/mese. L'integrazione Stripe verra' collegata in un secondo momento; ora si costruisce solo la struttura dati e l'interfaccia.
+La pagina /pagamenti funziona correttamente:
+- 4 card metriche visibili (Entrate Mensili, Abbonamenti Attivi, Scaduti, Incassi)
+- Filtri per nome azienda e stato funzionanti
+- Tabella con colonne corrette
+- La tabella e' vuota perche' non ci sono ancora abbonamenti nel database
 
-## 1. Nuova tabella database: `abbonamenti`
+---
 
-Tabella che traccia lo stato dell'abbonamento di ogni azienda:
+## Fase 1: Inserire abbonamenti di prova
 
-| Colonna | Tipo | Note |
-|---|---|---|
-| id | uuid | PK, default gen_random_uuid() |
-| azienda_id | uuid | FK verso aziende, NOT NULL, UNIQUE |
-| stato | varchar | 'attivo', 'scaduto', 'sospeso', 'trial', default 'trial' |
-| importo_mensile | numeric | default 97.00 |
-| data_inizio | timestamptz | inizio abbonamento |
-| data_scadenza | timestamptz | prossima scadenza |
-| stripe_customer_id | text | nullable, per futuro collegamento Stripe |
-| stripe_subscription_id | text | nullable, per futuro collegamento Stripe |
-| note | text | nullable, note libere superadmin |
-| created_at | timestamptz | default now() |
-| updated_at | timestamptz | default now() |
+Creare un abbonamento per ognuna delle 3 aziende esistenti (Clientium, Manuel Sechi, Teknofinestre) con stati diversi per testare le metriche:
 
-RLS: solo superadmin puo' leggere/scrivere.
+| Azienda | Stato | Data Inizio | Scadenza |
+|---|---|---|---|
+| Clientium | attivo | 1 gen 2026 | 1 mar 2026 |
+| Manuel Sechi | trial | 1 feb 2026 | 1 mar 2026 |
+| Teknofinestre | scaduto | 1 nov 2025 | 1 gen 2026 |
 
-## 2. Nuova tabella database: `pagamenti`
+Inserire anche 2-3 pagamenti di esempio per Clientium (completato) e Teknofinestre (fallito) per popolare le metriche "Incassi Ultimo Mese".
 
-Storico singoli pagamenti:
+---
 
-| Colonna | Tipo | Note |
-|---|---|---|
-| id | uuid | PK |
-| abbonamento_id | uuid | FK verso abbonamenti |
-| azienda_id | uuid | FK logica |
-| importo | numeric | NOT NULL |
-| stato | varchar | 'completato', 'fallito', 'in_attesa', 'rimborsato' |
-| data_pagamento | timestamptz | default now() |
-| metodo | varchar | 'stripe', 'bonifico', 'manuale' |
-| stripe_payment_id | text | nullable |
-| note | text | nullable |
-| created_at | timestamptz | default now() |
+## Fase 2: Checkout Stripe integrato
 
-RLS: solo superadmin.
+### Flusso utente
+1. Il Superadmin dalla pagina Pagamenti clicca "Attiva Abbonamento" su un'azienda
+2. Si apre la pagina di Stripe Checkout (hosted) con il prodotto da 97 EUR/mese preconfigurato
+3. L'azienda (o il superadmin per conto dell'azienda) completa il pagamento
+4. Stripe chiama un webhook che aggiorna lo stato dell'abbonamento nel database
 
-## 3. Nuova pagina: `src/pages/Pagamenti.tsx`
+### Prerequisito: abilitare Stripe
+Prima di scrivere codice, abilitare l'integrazione Stripe per ottenere la chiave API. Questo sblocchera' gli strumenti avanzati per creare prodotti e prezzi direttamente.
 
-Pagina accessibile solo al Superadmin con:
+### Cosa verra' creato
 
-**Header metriche (4 card)**:
-- Entrate mensili totali (somma abbonamenti attivi x 97 EUR)
-- Aziende con abbonamento attivo (conteggio)
-- Pagamenti in ritardo / scaduti
-- Incassi ultimo mese (dalla tabella pagamenti)
+**1. Prodotto Stripe**
+- Nome: "TalentProfile - Abbonamento Mensile"
+- Prezzo: 97 EUR/mese, ricorrente
 
-**Tabella abbonamenti** con colonne:
-- Azienda (nome)
-- Stato (badge colorato: verde=attivo, giallo=trial, rosso=scaduto, grigio=sospeso)
-- Importo mensile
-- Data inizio
-- Prossima scadenza
-- Azioni (modifica stato, vedi storico pagamenti)
+**2. Edge function `create-checkout-session`**
+- Riceve `azienda_id` dal frontend
+- Crea (o recupera) un Stripe Customer associato all'azienda
+- Crea una Checkout Session con il prezzo ricorrente da 97 EUR
+- Salva `stripe_customer_id` nell'abbonamento
+- Ritorna l'URL della sessione Checkout
 
-**Drawer storico pagamenti** per singola azienda:
-- Lista pagamenti con data, importo, stato, metodo
-- Possibilita' di registrare un pagamento manuale
+**3. Edge function `stripe-webhook`**
+- Ascolta eventi Stripe: `checkout.session.completed`, `invoice.paid`, `invoice.payment_failed`, `customer.subscription.deleted`
+- Aggiorna automaticamente stato abbonamento e registra pagamenti nella tabella `pagamenti`
 
-**Filtri**: ricerca per nome azienda, filtro per stato abbonamento
+**4. Modifiche UI (`Pagamenti.tsx`)**
+- Aggiungere bottone "Attiva Abbonamento Stripe" nella riga di ogni azienda con stato `trial` o `scaduto`
+- Il bottone apre Stripe Checkout in una nuova finestra
+- Aggiungere un bottone "Crea Abbonamento" in alto per aziende che non hanno ancora un abbonamento
 
-## 4. Navigazione
+### Dettagli tecnici
 
-- Aggiungere voce "Pagamenti" nella sidebar (`NotionLayout.tsx`) con icona `CreditCard`, visibile solo al superadmin
-- Aggiungere rotta `/pagamenti` in `App.tsx`
+**File da creare:**
+- `supabase/functions/create-checkout-session/index.ts`
+- `supabase/functions/stripe-webhook/index.ts`
 
-## 5. Dettagli tecnici
+**File da modificare:**
+- `src/pages/Pagamenti.tsx` -- aggiunta bottoni Checkout
+- `supabase/config.toml` -- configurazione JWT per le nuove functions
 
-### File da creare:
-- `src/pages/Pagamenti.tsx` -- pagina principale
-
-### File da modificare:
-- `src/components/NotionLayout.tsx` -- aggiunta voce menu
-- `src/App.tsx` -- aggiunta rotta
-- `src/types/database.ts` -- interfacce TypeScript per Abbonamento e Pagamento
-
-### Migrazione SQL:
-- Creazione tabelle `abbonamenti` e `pagamenti`
-- RLS policies (solo superadmin)
-- Trigger `update_updated_at_column` su `abbonamenti`
-
-### Nessuna nuova dipendenza necessaria
-Usa gli stessi componenti UI gia' presenti (Card, Table, Badge, Sheet, Dialog).
+**Sequenza implementazione:**
+1. Abilitare Stripe (raccolta chiave API)
+2. Inserire dati di prova nel database
+3. Creare prodotto e prezzo su Stripe
+4. Creare edge function `create-checkout-session`
+5. Creare edge function `stripe-webhook`
+6. Aggiornare la UI con i bottoni di checkout
