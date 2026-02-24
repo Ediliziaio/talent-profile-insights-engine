@@ -1,62 +1,38 @@
 
 
-# Fix: Spinner infinito su /test/privacy
+# Rimozione "Report Sindromi" e "Report Colloquio" dai PDF
 
-## Problema identificato
+## Cosa viene rimosso
 
-Dopo la registrazione candidato, la pagina `/test/privacy` resta con lo spinner infinito. La causa principale e una **race condition + mancata gestione errori**:
+Il candidato dettaglio attualmente mostra 4 pulsanti PDF nel header (desktop):
+1. **Report Colloquio** (`PDFReportButton`) -- DA RIMUOVERE
+2. **Report Sindromi** (`PDFSyndromeReportButton`) -- DA RIMUOVERE
+3. **Scheda Colloquio** (`InterviewSheetPDFButton`) -- resta
+4. **Scarica PDF** (`PDFExportButton`) -- resta
 
-1. **`FormAnagrafico.tsx` (linea 119-123)**: `supabase.auth.signInWithPassword()` restituisce `{ data, error }` ma il codice **non controlla l'errore**. Se il sign-in fallisce (per qualsiasi motivo), il codice prosegue comunque con `navigate('/test/privacy')` senza che l'utente sia autenticato.
+## Modifiche
 
-2. **`ConsensoPrivacy.tsx` (linea 19-20)**: L'useEffect che controlla lo stato del test ha la condizione `if (!user || loading) return`. Se `user` e `null` (perche il sign-in e fallito), l'effect non procede mai e `checkingTest` resta `true` per sempre → **spinner infinito**.
+### 1. `src/pages/CandidatoDettaglio.tsx`
+- Rimuovere l'import di `PDFReportButton` e `PDFSyndromeReportButton`
+- Rimuovere il blocco `<PDFReportButton .../>` (linee 183-196)
+- Rimuovere il blocco condizionale `{isV5 && syndromes.length > 0 && <PDFSyndromeReportButton .../>}` (linee 197-206)
+- Rimuovere le variabili usate solo da questi componenti se non servono altrove (verifico: `profiloTipo`, `scalePunteggi`, `stressZone`, `schematicita` sono usati anche da altri componenti, quindi restano)
 
-## Soluzione
+### 2. `src/components/PDFExportButton.tsx`
+- Rimuovere `PDFReportButton` (linee 18-347): interfaccia, funzione, export
+- Rimuovere `PDFSyndromeReportButton` (linee 349-512): interfaccia, funzione, export
+- Rimuovere gli import non piu necessari: `PDFReportLayout`, `PDFSyndromeReportLayout`, `ProfiloTipo`, `SyndromeResult` (se non usati da InterviewSheetPDFButton -- `SyndromeResult` e usato da InterviewSheetPDFButton, quindi resta)
+- Rimuovere import `ProfiloTipo` (usato solo da PDFReportButton)
 
-### File: `src/pages/FormAnagrafico.tsx`
+### 3. File da eliminare (codice morto)
+- `src/components/PDFReportLayout.tsx` -- usato solo da PDFReportButton
+- `src/components/PDFSyndromeReportLayout.tsx` -- usato solo da PDFSyndromeReportButton
 
-Aggiungere controllo errore sul sign-in e attendere conferma autenticazione:
+### 4. Import cleanup in CandidatoDettaglio
+- Rimuovere variabili/import non piu necessari dopo la rimozione (es. `ProfiloTipo` se non usato altrove nel file -- verifico: `profiloTipo` e tipizzato come `ProfiloTipo` alla linea 89, ma con la rimozione di PDFReportButton non serve piu passarlo. Tuttavia `profiloTipo` e ancora definito alla linea 89 e potrebbe essere usato altrove -- controllo: non e usato in nessun altro componente nel file. Lo rimuovo.)
 
-```typescript
-// PRIMA (senza controllo errore):
-await supabase.auth.signInWithPassword({
-  email: responseData.credentials.internalEmail,
-  password: responseData.credentials.password,
-});
-
-// DOPO (con controllo errore):
-const { error: signInError } = await supabase.auth.signInWithPassword({
-  email: responseData.credentials.internalEmail,
-  password: responseData.credentials.password,
-});
-if (signInError) {
-  throw new Error('Errore di autenticazione: ' + signInError.message);
-}
-```
-
-### File: `src/pages/ConsensoPrivacy.tsx`
-
-Gestire il caso in cui `user` e `null` dopo che `loading` diventa `false`. Se non c'e utente autenticato, redirect al login invece di spinner infinito:
-
-```typescript
-// Dopo il check loading || checkingTest, PRIMA del check ruolo:
-if (!user) {
-  return <Navigate to="/auth" replace />;
-}
-```
-
-Inoltre, modificare l'useEffect per gestire il caso `user` null dopo il loading:
-
-```typescript
-useEffect(() => {
-  if (loading) return;
-  if (!user) return; // will be handled by the redirect above
-  // ... rest of checkTestStatus
-}, [user, loading, navigate]);
-```
-
-## Risultato atteso
-
-- Se il sign-in fallisce: errore mostrato all'utente nel form anagrafico (toast), non naviga
-- Se l'utente arriva su `/test/privacy` senza autenticazione: redirect a `/auth` invece di spinner infinito
-- Flusso normale: registrazione → sign-in → navigate → pagina privacy si carica correttamente
+## Cosa resta invariato
+- `PDFExportButton` (Scarica PDF generico dalla pagina)
+- `InterviewSheetPDFButton` (Scheda Colloquio)
+- Tutti i tab, hero card, alert banner, gestione avanzata, etc.
 
