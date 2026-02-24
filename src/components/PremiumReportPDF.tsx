@@ -375,6 +375,115 @@ function ReliabilityIndicator({ reliability }: { reliability?: ReliabilityIndex 
   );
 }
 
+// ─── Radar Chart SVG (Pentagon) ──────────────────────
+
+function RadarChartSVG({ dimensions }: { dimensions: { name: string; value: number; max: number; color: string }[] }) {
+  const cx = 150, cy = 150, maxR = 110;
+  const n = dimensions.length;
+  const angles = dimensions.map((_, i) => (Math.PI * 2 * i) / n - Math.PI / 2);
+
+  const getPoint = (angle: number, r: number) => ({
+    x: cx + r * Math.cos(angle),
+    y: cy + r * Math.sin(angle),
+  });
+
+  // Grid rings
+  const rings = [0.25, 0.5, 0.75, 1.0];
+  const gridPaths = rings.map(pct => {
+    const pts = angles.map(a => getPoint(a, maxR * pct));
+    return pts.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ') + ' Z';
+  });
+
+  // Data polygon
+  const dataPoints = dimensions.map((d, i) => {
+    const ratio = Math.max(0, Math.min(1, d.value / d.max));
+    return getPoint(angles[i], maxR * ratio);
+  });
+  const dataPath = dataPoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ') + ' Z';
+
+  // Axis lines
+  const axisLines = angles.map(a => getPoint(a, maxR));
+
+  // Labels
+  const labelPoints = dimensions.map((d, i) => {
+    const p = getPoint(angles[i], maxR + 28);
+    return { ...p, name: d.name, value: d.value, max: d.max, color: d.color };
+  });
+
+  return (
+    <svg width={300} height={300} viewBox="0 0 300 300" style={{ display: 'block', margin: '0 auto' }}>
+      {/* Grid */}
+      {gridPaths.map((path, i) => (
+        <path key={i} d={path} fill="none" stroke="#e5e7eb" strokeWidth={i === rings.length - 1 ? 1.5 : 0.8} />
+      ))}
+      {/* Axes */}
+      {axisLines.map((p, i) => (
+        <line key={i} x1={cx} y1={cy} x2={p.x} y2={p.y} stroke="#d1d5db" strokeWidth={0.8} />
+      ))}
+      {/* Data polygon */}
+      <path d={dataPath} fill={`${BRAND_BLUE}22`} stroke={BRAND_BLUE} strokeWidth={2.5} strokeLinejoin="round" />
+      {/* Data points */}
+      {dataPoints.map((p, i) => (
+        <circle key={i} cx={p.x} cy={p.y} r={4} fill={dimensions[i].color} stroke="#fff" strokeWidth={2} />
+      ))}
+      {/* Labels */}
+      {labelPoints.map((lp, i) => (
+        <g key={i}>
+          <text x={lp.x} y={lp.y - 6} textAnchor="middle" fontSize="8" fontWeight="700" fill={BRAND_BLUE}>{lp.name}</text>
+          <text x={lp.x} y={lp.y + 6} textAnchor="middle" fontSize="9" fontWeight="800" fill={lp.color}>{lp.value}/{lp.max}</text>
+        </g>
+      ))}
+    </svg>
+  );
+}
+
+// ─── Colloquio Signal Helper ────────────────────────
+
+function getColloquioSignals(areaId: string): { positivo: string; negativo: string; osservare: string } {
+  const signals: Record<string, { positivo: string; negativo: string; osservare: string }> = {
+    pressioni: {
+      positivo: 'Riconosce lo stress e ha strategie per gestirlo. Parla apertamente delle difficoltà.',
+      negativo: 'Minimizza tutto, evita il contatto visivo, cambia discorso rapidamente.',
+      osservare: 'Tensione nel corpo, risposte generiche, tendenza a spostare la colpa.',
+    },
+    org: {
+      positivo: 'Descrive un metodo chiaro, usa strumenti specifici, dà esempi concreti di pianificazione.',
+      negativo: 'Risposte vaghe su come organizza il lavoro, non riesce a dare priorità.',
+      osservare: 'Coerenza tra ciò che dice e come si presenta (puntualità, ordine nei documenti).',
+    },
+    critiche: {
+      positivo: 'Racconta un episodio di critica ricevuta e cosa ha imparato. Dimostra auto-riflessione.',
+      negativo: 'Si irrigidisce, nega di aver ricevuto critiche, o le attribuisce a incomprensioni altrui.',
+      osservare: 'Reazione emotiva alla domanda stessa: è già un indicatore importante.',
+    },
+    cambiamento: {
+      positivo: 'Descrive cambiamenti affrontati con metodo. Bilancia cautela e apertura.',
+      negativo: 'Rigidità verbale ("si è sempre fatto così") o impulsività ("cambio tutto subito").',
+      osservare: 'Capacità di distinguere cambiamenti utili da quelli imposti senza logica.',
+    },
+    comunicazione: {
+      positivo: 'Racconta un episodio in cui ha detto qualcosa di scomodo con rispetto e risultati.',
+      negativo: 'Non riesce a citare un esempio, o descrive solo situazioni di evitamento.',
+      osservare: 'Linguaggio del corpo durante risposte su conflitti: evitamento o gestione.',
+    },
+    relazioni: {
+      positivo: 'Descrive relazioni professionali costruttive con persone diverse da sé.',
+      negativo: 'Parla solo di relazioni funzionali o strumentali. Fatica a descrivere legami.',
+      osservare: 'Ricchezza vs povertà del vocabolario relazionale.',
+    },
+    motivazione: {
+      positivo: 'Ha obiettivi chiari, sa cosa lo appassiona, connette motivazione e lavoro.',
+      negativo: 'Risposte generiche ("crescere", "fare bene"), nessun piano concreto.',
+      osservare: 'Energia e luce negli occhi quando parla dei propri obiettivi.',
+    },
+  };
+  return signals[areaId] || {
+    positivo: 'Coerenza tra risposte verbali e comportamento non verbale.',
+    negativo: 'Incongruenze tra ciò che dice e come lo dice.',
+    osservare: 'Livello di auto-consapevolezza e capacità di introspezione.',
+  };
+}
+
 // ─── Premium Horizontal Bar ─────────────────────────
 
 function PremiumBar({ label, value, max = 100, color, showThreshold, threshold }: {
@@ -1019,17 +1128,22 @@ export function PremiumReportPDF(props: PremiumReportPDFProps) {
         <div style={{ padding: PAGE_PADDING }}>
           <SectionTitle number="03">Area Gestione</SectionTitle>
 
-          {/* Management Tips */}
+          {/* Management Tips — structured boxes */}
           {managementTips && managementTips.length > 0 && (
             <>
               <SubTitle>Consigli di Management</SubTitle>
               {managementTips.map((tip, i) => (
-                <AccentBox key={i} borderColor={tip.isPriorityOne ? COLOR_RED : BRAND_BLUE}>
-                  {tip.isPriorityOne && (
-                    <Badge2 text="PRIORITÀ ASSOLUTA" color="#fff" bg={COLOR_RED} />
-                  )}
-                  <BodyText>{tip.testo}</BodyText>
-                </AccentBox>
+                <div key={i} style={{ display: 'flex', gap: 12, marginBottom: 12, padding: 14, borderLeft: `4px solid ${tip.isPriorityOne ? COLOR_RED : BRAND_BLUE}`, background: '#fff', borderRadius: '0 8px 8px 0', border: `1px solid ${BORDER_LIGHT}`, borderLeftWidth: 4, borderLeftColor: tip.isPriorityOne ? COLOR_RED : BRAND_BLUE }}>
+                  <div style={{ width: 36, height: 36, borderRadius: '50%', background: tip.isPriorityOne ? '#fef2f2' : '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, flexShrink: 0 }}>
+                    {tip.isPriorityOne ? '🚨' : `${i + 1}`}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    {tip.isPriorityOne && (
+                      <div style={{ fontSize: 9, fontWeight: 700, color: COLOR_RED, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 4 }}>PRIORITÀ ASSOLUTA</div>
+                    )}
+                    <BodyText>{tip.testo}</BodyText>
+                  </div>
+                </div>
               ))}
               {managementClosingText && (
                 <AccentBox borderColor={BRAND_BLUE} style={{ marginTop: 10 }}>
@@ -1040,67 +1154,81 @@ export function PremiumReportPDF(props: PremiumReportPDFProps) {
             </>
           )}
 
-          {/* Action Plan */}
+          {/* Action Plan — premium table */}
           {actionPlan && actionPlan.length > 0 && (
             <>
               <SubTitle>Piano d'Azione</SubTitle>
               <div style={{ borderRadius: 8, overflow: 'hidden', border: `1px solid ${BORDER_LIGHT}` }}>
-                <div style={{ display: 'flex', borderBottom: `2px solid ${BRAND_BLUE}`, fontSize: FONT_CAPTION, fontWeight: 700, padding: '8px 12px', color: BRAND_BLUE }}>
-                  <div style={{ width: 40 }}>P</div>
-                  <div style={{ width: 100 }}>Area</div>
+                <div style={{ display: 'flex', padding: '10px 14px', borderBottom: `2px solid ${BRAND_BLUE}`, fontSize: FONT_CAPTION, fontWeight: 700, color: BRAND_BLUE }}>
+                  <div style={{ width: 44 }}>Prior.</div>
+                  <div style={{ width: 110 }}>Area</div>
                   <div style={{ flex: 1 }}>Azione</div>
-                  <div style={{ width: 80 }}>Timeline</div>
-                  <div style={{ width: 65 }}>Resp.</div>
+                  <div style={{ width: 80, textAlign: 'center' }}>Timeline</div>
+                  <div style={{ width: 60, textAlign: 'center' }}>Resp.</div>
                 </div>
                 {actionPlan.map((a, i) => (
-                  <div key={i} style={{ display: 'flex', fontSize: FONT_CAPTION, padding: '6px 12px', borderBottom: `1px solid ${BORDER_LIGHT}`, background: i % 2 === 0 ? '#fff' : BG_SUBTLE }}>
-                    <div style={{ width: 40 }}>
-                      <Badge2 text={a.priority} color={a.priority === 'P1' ? '#fff' : '#333'} bg={a.priority === 'P1' ? COLOR_RED : a.priority === 'P2' ? '#fed7aa' : '#e5e7eb'} />
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', fontSize: FONT_CAPTION, padding: '8px 14px', borderBottom: `1px solid ${BORDER_LIGHT}`, background: i % 2 === 0 ? '#fff' : BG_SUBTLE }}>
+                    <div style={{ width: 44 }}>
+                      <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 10, fontSize: 8, fontWeight: 700, color: a.priority === 'P1' ? '#fff' : TEXT_BODY, background: a.priority === 'P1' ? COLOR_RED : a.priority === 'P2' ? '#fed7aa' : '#e5e7eb' }}>{a.priority}</span>
                     </div>
-                    <div style={{ width: 100, fontWeight: 500, color: TEXT_BODY }}>{a.area}</div>
+                    <div style={{ width: 110, fontWeight: 600, color: TEXT_BODY }}>{a.area}</div>
                     <div style={{ flex: 1, color: TEXT_BODY, lineHeight: 1.5 }}>{a.action}</div>
-                    <div style={{ width: 80, color: TEXT_CAPTION }}>{a.timeline}</div>
-                    <div style={{ width: 65, color: TEXT_CAPTION }}>{a.responsible}</div>
+                    <div style={{ width: 80, textAlign: 'center', color: TEXT_CAPTION, fontSize: 9 }}>{a.timeline}</div>
+                    <div style={{ width: 60, textAlign: 'center', color: TEXT_CAPTION, fontSize: 9 }}>{a.responsible}</div>
                   </div>
                 ))}
               </div>
             </>
           )}
 
-          {/* Growth Plan */}
+          {/* Growth Plan — Quadro Psicologico */}
           {growthPlan && (
             <>
               <SubTitle>Quadro Psicologico</SubTitle>
-              <div style={{ marginBottom: 16 }}>
-                <AccentBox borderColor={COLOR_RED}>
-                  <div style={{ fontSize: 10, fontWeight: 700, color: COLOR_RED, marginBottom: 4 }}>RADICE DEL PROBLEMA</div>
-                  <BodyText>{growthPlan.rootCause}</BodyText>
-                </AccentBox>
-
-                <AccentBox borderColor={COLOR_GREEN}>
-                  <div style={{ fontSize: 10, fontWeight: 700, color: COLOR_GREEN, marginBottom: 4 }}>RISORSA NASCOSTA</div>
-                  <BodyText>{growthPlan.hiddenResource}</BodyText>
-                </AccentBox>
-
-                {growthPlan.viciouscircles.length > 0 && (
-                  <AccentBox borderColor={COLOR_AMBER}>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: COLOR_AMBER, marginBottom: 4 }}>CIRCOLI VIZIOSI</div>
-                    {growthPlan.viciouscircles.map((c, i) => (
-                      <div key={i} style={{ fontSize: 10, color: TEXT_BODY, marginBottom: 3, lineHeight: 1.5 }}>• {c}</div>
-                    ))}
+              <div style={{ display: 'flex', gap: 16, marginBottom: 16 }}>
+                <div style={{ flex: 1 }}>
+                  <AccentBox borderColor={COLOR_RED}>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: COLOR_RED, marginBottom: 4 }}>RADICE DEL PROBLEMA</div>
+                    <BodyText>{growthPlan.rootCause}</BodyText>
                   </AccentBox>
-                )}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <AccentBox borderColor={COLOR_GREEN}>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: COLOR_GREEN, marginBottom: 4 }}>RISORSA NASCOSTA</div>
+                    <BodyText>{growthPlan.hiddenResource}</BodyText>
+                  </AccentBox>
+                </div>
               </div>
 
+              {growthPlan.viciouscircles.length > 0 && (
+                <AccentBox borderColor={COLOR_AMBER}>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: COLOR_AMBER, marginBottom: 4 }}>CIRCOLI VIZIOSI</div>
+                  {growthPlan.viciouscircles.map((c, i) => (
+                    <div key={i} style={{ fontSize: 10, color: TEXT_BODY, marginBottom: 3, lineHeight: 1.5 }}>• {c}</div>
+                  ))}
+                </AccentBox>
+              )}
+
+              {/* Growth Plan — Vertical Timeline */}
               {growthPlan.phases.length > 0 && (
                 <>
                   <SubTitle>Piano di Crescita</SubTitle>
-                  <div style={{ display: 'flex', gap: 10 }}>
+                  <div style={{ position: 'relative', paddingLeft: 30, marginTop: 8 }}>
+                    {/* Vertical line */}
+                    <div style={{ position: 'absolute', left: 11, top: 6, bottom: 6, width: 2, background: `linear-gradient(to bottom, ${BRAND_ORANGE}, ${BRAND_BLUE})` }} />
                     {growthPlan.phases.map((phase, i) => (
-                      <div key={i} style={{ flex: 1, padding: 14, border: `1px solid ${BORDER_LIGHT}`, borderRadius: 8, borderTop: `3px solid ${BRAND_ORANGE}` }}>
-                        <div style={{ fontSize: FONT_CAPTION, fontWeight: 700, color: BRAND_ORANGE, marginBottom: 4 }}>FASE {i + 1}</div>
-                        <div style={{ fontSize: FONT_BODY, fontWeight: 600, color: BRAND_BLUE, marginBottom: 6 }}>{phase.name}</div>
-                        <div style={{ fontSize: FONT_CAPTION, color: TEXT_BODY, lineHeight: 1.5 }}>{phase.description}</div>
+                      <div key={i} style={{ position: 'relative', marginBottom: 18, paddingBottom: 2 }}>
+                        {/* Circle connector */}
+                        <div style={{
+                          position: 'absolute', left: -24, top: 2,
+                          width: 20, height: 20, borderRadius: '50%',
+                          background: i === 0 ? BRAND_ORANGE : i === growthPlan.phases.length - 1 ? BRAND_BLUE : '#fff',
+                          border: `3px solid ${i <= 1 ? BRAND_ORANGE : BRAND_BLUE}`,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontSize: 9, fontWeight: 700, color: i === 0 || i === growthPlan.phases.length - 1 ? '#fff' : BRAND_BLUE,
+                        }}>{i + 1}</div>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: BRAND_BLUE, marginBottom: 4 }}>{phase.name}</div>
+                        <div style={{ fontSize: 10, color: TEXT_BODY, lineHeight: 1.6 }}>{phase.description}</div>
                       </div>
                     ))}
                   </div>
@@ -1118,65 +1246,42 @@ export function PremiumReportPDF(props: PremiumReportPDFProps) {
         <Section id="mappa-interiore">
           <div style={{ padding: PAGE_PADDING }}>
             <SectionTitle number="04">Mappa Interiore</SectionTitle>
+            <BodyText style={{ marginBottom: 20 }}>
+              Analisi delle dimensioni psicologiche profonde. Il grafico radar mostra l'equilibrio tra le cinque aree fondamentali della personalità.
+            </BodyText>
 
-            {/* Dimensions */}
-            <SubTitle>Panoramica Dimensioni</SubTitle>
-            <div style={{ marginBottom: 16 }}>
-              {getDimensioniChartData(mappaInteriore).map(dim => (
-                <div key={dim.name} style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
-                  <div style={{ width: 140, fontSize: 10, fontWeight: 500, color: TEXT_BODY }}>{dim.name}</div>
-                  <div style={{ flex: 1, height: 18, background: '#eef1f5', borderRadius: 9, position: 'relative', overflow: 'hidden' }}>
-                    <div style={{
-                      width: `${dim.value * 10}%`, height: '100%', background: dim.color, borderRadius: 9,
-                      display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: 6,
-                    }}>
-                      <span style={{ fontSize: 8, fontWeight: 700, color: '#fff' }}>{dim.value}/10</span>
-                    </div>
-                  </div>
-                  <div style={{ width: 170, paddingLeft: 10, color: TEXT_CAPTION, fontSize: FONT_CAPTION }}>{dim.label}</div>
-                </div>
-              ))}
-            </div>
+            {/* Radar Chart SVG */}
+            {(() => {
+              const chartData = getDimensioniChartData(mappaInteriore);
+              const radarDims = chartData.map(d => ({
+                name: d.name.split(' ').slice(0, 2).join(' '),
+                value: d.value,
+                max: 10,
+                color: d.color,
+              }));
+              return <RadarChartSVG dimensions={radarDims} />;
+            })()}
 
             {/* Pillole */}
-            <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
-              <div style={{ flex: 1, padding: 12, border: `1px solid ${BORDER_LIGHT}`, borderRadius: 8, borderTop: `3px solid ${BRAND_BLUE}` }}>
-                <div style={{ fontSize: FONT_CAPTION, fontWeight: 700, color: BRAND_BLUE, marginBottom: 4 }}>STILE RELAZIONALE</div>
-                <div style={{ fontSize: FONT_BODY, color: TEXT_BODY }}>{ATTACCAMENTO_FRONTEND[mappaInteriore.dimensioni.attaccamento.dominante]}</div>
+            <div style={{ display: 'flex', gap: 12, marginTop: 20, marginBottom: 16 }}>
+              <div style={{ flex: 1, padding: 14, border: `1px solid ${BORDER_LIGHT}`, borderRadius: 8, borderTop: `3px solid ${BRAND_BLUE}` }}>
+                <div style={{ fontSize: FONT_CAPTION, fontWeight: 700, color: BRAND_BLUE, marginBottom: 4, letterSpacing: 0.5 }}>STILE RELAZIONALE</div>
+                <div style={{ fontSize: FONT_BODY, color: TEXT_BODY, fontWeight: 600 }}>{ATTACCAMENTO_FRONTEND[mappaInteriore.dimensioni.attaccamento.dominante]}</div>
               </div>
-              <div style={{ flex: 1, padding: 12, border: `1px solid ${BORDER_LIGHT}`, borderRadius: 8, borderTop: `3px solid ${BRAND_ORANGE}` }}>
-                <div style={{ fontSize: FONT_CAPTION, fontWeight: 700, color: BRAND_ORANGE, marginBottom: 4 }}>MECCANISMO DI DIFESA</div>
-                <div style={{ fontSize: FONT_BODY, color: TEXT_BODY }}>
+              <div style={{ flex: 1, padding: 14, border: `1px solid ${BORDER_LIGHT}`, borderRadius: 8, borderTop: `3px solid ${BRAND_ORANGE}` }}>
+                <div style={{ fontSize: FONT_CAPTION, fontWeight: 700, color: BRAND_ORANGE, marginBottom: 4, letterSpacing: 0.5 }}>MECCANISMO DI DIFESA</div>
+                <div style={{ fontSize: FONT_BODY, color: TEXT_BODY, fontWeight: 600 }}>
                   {mappaInteriore.dimensioni.difesa.dominante?.frontend || 'Equilibrate'}
                 </div>
               </div>
-              <div style={{ flex: 1, padding: 12, border: `1px solid ${BORDER_LIGHT}`, borderRadius: 8, borderTop: `3px solid #8b5cf6` }}>
-                <div style={{ fontSize: FONT_CAPTION, fontWeight: 700, color: '#8b5cf6', marginBottom: 4 }}>BISOGNO PRIMARIO</div>
-                <div style={{ fontSize: FONT_BODY, color: TEXT_BODY }}>{mappaInteriore.dimensioni.bisogno.primario.frontend}</div>
+              <div style={{ flex: 1, padding: 14, border: `1px solid ${BORDER_LIGHT}`, borderRadius: 8, borderTop: `3px solid #8b5cf6` }}>
+                <div style={{ fontSize: FONT_CAPTION, fontWeight: 700, color: '#8b5cf6', marginBottom: 4, letterSpacing: 0.5 }}>BISOGNO PRIMARIO</div>
+                <div style={{ fontSize: FONT_BODY, color: TEXT_BODY, fontWeight: 600 }}>{mappaInteriore.dimensioni.bisogno.primario.frontend}</div>
               </div>
             </div>
 
-            {/* Narratives */}
-            <SubTitle>Chi è {candidato.nome} nel profondo</SubTitle>
-            <BodyText>{mappaInteriore.narrativa.chi_e_nel_profondo}</BodyText>
-
-            <SubTitle>Cosa lo guida</SubTitle>
-            <BodyText>{mappaInteriore.narrativa.cosa_lo_guida}</BodyText>
-
-            <SubTitle>Cosa lo blocca</SubTitle>
-            <BodyText>{mappaInteriore.narrativa.cosa_lo_blocca}</BodyText>
-
-            <SubTitle>Potenziale inespresso</SubTitle>
-            <BodyText>{mappaInteriore.narrativa.potenziale_inespresso}</BodyText>
-
-            {/* La Chiave — premium full-width */}
-            <div style={{ marginTop: 20, padding: 20, borderLeft: `5px solid ${BRAND_ORANGE}`, background: '#fff', borderRadius: '0 8px 8px 0', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: BRAND_ORANGE, marginBottom: 8, letterSpacing: 1 }}>🔑 LA CHIAVE</div>
-              <div style={{ fontSize: 14, fontWeight: 600, color: BRAND_BLUE, lineHeight: 1.6 }}>{mappaInteriore.narrativa.la_chiave}</div>
-            </div>
-
-            {/* Motiva / Blocca / Teme */}
-            <div style={{ display: 'flex', gap: 12, marginTop: 20 }}>
+            {/* 4 Box: Motiva / Blocca / Teme / Potenziale */}
+            <div style={{ display: 'flex', gap: 12, marginBottom: 20 }}>
               <div style={{ flex: 1 }}>
                 <AccentBox borderColor={COLOR_GREEN}>
                   <div style={{ fontSize: 10, fontWeight: 700, color: COLOR_GREEN, marginBottom: 6 }}>COSA LO MOTIVA</div>
@@ -1201,11 +1306,33 @@ export function PremiumReportPDF(props: PremiumReportPDFProps) {
                   ))}
                 </AccentBox>
               </div>
+              <div style={{ flex: 1 }}>
+                <AccentBox borderColor={BRAND_BLUE}>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: BRAND_BLUE, marginBottom: 6 }}>POTENZIALE INESPRESSO</div>
+                  <div style={{ fontSize: 10, color: TEXT_BODY, lineHeight: 1.5 }}>{mappaInteriore.narrativa.potenziale_inespresso}</div>
+                </AccentBox>
+              </div>
+            </div>
+
+            {/* Narratives */}
+            <SubTitle>Chi è {candidato.nome} nel profondo</SubTitle>
+            <BodyText>{mappaInteriore.narrativa.chi_e_nel_profondo}</BodyText>
+
+            <SubTitle>Cosa lo guida</SubTitle>
+            <BodyText>{mappaInteriore.narrativa.cosa_lo_guida}</BodyText>
+
+            <SubTitle>Cosa lo blocca</SubTitle>
+            <BodyText>{mappaInteriore.narrativa.cosa_lo_blocca}</BodyText>
+
+            {/* LA CHIAVE — elemento centrale premium */}
+            <div style={{ marginTop: 24, padding: 24, borderLeft: `6px solid ${BRAND_ORANGE}`, background: '#fff', borderRadius: '0 8px 8px 0', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+              <div style={{ fontSize: 12, fontWeight: 800, color: BRAND_ORANGE, marginBottom: 10, letterSpacing: 2, textTransform: 'uppercase' }}>🔑 LA CHIAVE</div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: BRAND_BLUE, lineHeight: 1.7 }}>{mappaInteriore.narrativa.la_chiave}</div>
             </div>
 
             {/* Errori da Non Fare */}
             {mappaInteriore.errori_da_evitare.length > 0 && (
-              <AccentBox borderColor={COLOR_RED} style={{ marginTop: 16 }}>
+              <AccentBox borderColor={COLOR_RED} style={{ marginTop: 20 }}>
                 <div style={{ fontSize: FONT_BODY, fontWeight: 700, color: COLOR_RED, marginBottom: 6 }}>🚫 3 Errori da Non Fare Mai</div>
                 {mappaInteriore.errori_da_evitare.map((e, i) => (
                   <div key={i} style={{ fontSize: 10, color: TEXT_BODY, marginBottom: 4, lineHeight: 1.5 }}>{i + 1}. {e}</div>
@@ -1231,39 +1358,71 @@ export function PremiumReportPDF(props: PremiumReportPDFProps) {
 
       <PageBreak />
 
-      {/* ═══════════════ COLLOQUIO ═══════════════ */}
+      {/* ═══════════════ COLLOQUIO — GUIDA OPERATIVA HR ═══════════════ */}
       <Section id="colloquio">
         <div style={{ padding: PAGE_PADDING }}>
-          <SectionTitle number="05">Colloquio</SectionTitle>
+          <SectionTitle number="05">Guida al Colloquio</SectionTitle>
+          <BodyText style={{ marginBottom: 20 }}>
+            Guida operativa strutturata per il colloquio con {candidato.nome}. Per ogni area critica: motivazione, domande mirate, segnali da osservare.
+          </BodyText>
 
           {colloquioAreas && colloquioAreas.length > 0 ? (
             <>
-              <SubTitle>Domande Personalizzate per Area</SubTitle>
-              {colloquioAreas.map(area => (
-                <div key={area.id} style={{ marginBottom: 14, padding: 16, border: `1px solid ${BORDER_LIGHT}`, borderRadius: 8, borderLeft: `4px solid ${area.priorita === 'ALTA' ? COLOR_RED : COLOR_AMBER}` }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                    <Badge2
-                      text={area.priorita}
-                      color={area.priorita === 'ALTA' ? '#fff' : '#92400e'}
-                      bg={area.priorita === 'ALTA' ? COLOR_RED : COLOR_AMBER}
-                    />
-                    <span style={{ fontSize: 13, fontWeight: 600, color: BRAND_BLUE }}>{area.area}</span>
-                  </div>
-                  <div style={{ fontSize: 10, color: TEXT_CAPTION, fontStyle: 'italic', marginBottom: 10 }}>{area.motivazione}</div>
-                  {area.domande.map((d, j) => (
-                    <div key={j} style={{ fontSize: 10, color: TEXT_BODY, marginBottom: 4, paddingLeft: 10, lineHeight: 1.5 }}>
-                      {j + 1}. "{d}"
+              {colloquioAreas.map(area => {
+                const signals = getColloquioSignals(area.id);
+                return (
+                  <div key={area.id} style={{ marginBottom: 20, padding: 18, border: `1px solid ${BORDER_LIGHT}`, borderRadius: 8, borderLeft: `5px solid ${area.priorita === 'ALTA' ? COLOR_RED : COLOR_AMBER}` }}>
+                    {/* Header */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                      <Badge2
+                        text={area.priorita}
+                        color={area.priorita === 'ALTA' ? '#fff' : '#92400e'}
+                        bg={area.priorita === 'ALTA' ? COLOR_RED : COLOR_AMBER}
+                      />
+                      <span style={{ fontSize: 14, fontWeight: 700, color: BRAND_BLUE }}>{area.area}</span>
                     </div>
-                  ))}
-                </div>
-              ))}
+
+                    {/* Perché è critica */}
+                    <div style={{ fontSize: 10, color: TEXT_BODY, fontStyle: 'italic', marginBottom: 12, lineHeight: 1.6, padding: '6px 12px', background: BG_SUBTLE, borderRadius: 4 }}>
+                      <strong>Perché è critica:</strong> {area.motivazione}
+                    </div>
+
+                    {/* Domande */}
+                    <div style={{ marginBottom: 12 }}>
+                      <div style={{ fontSize: 10, fontWeight: 700, color: BRAND_BLUE, marginBottom: 6 }}>Domande da porre:</div>
+                      {area.domande.map((d, j) => (
+                        <div key={j} style={{ fontSize: 10, color: TEXT_BODY, marginBottom: 5, paddingLeft: 12, lineHeight: 1.5 }}>
+                          {j + 1}. <em>"{d}"</em>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Signals row */}
+                    <div style={{ display: 'flex', gap: 10 }}>
+                      <div style={{ flex: 1, padding: 10, background: '#f0fdf4', borderRadius: 6 }}>
+                        <div style={{ fontSize: 9, fontWeight: 700, color: COLOR_GREEN, marginBottom: 4 }}>✅ Segnale Positivo</div>
+                        <div style={{ fontSize: 9, color: TEXT_BODY, lineHeight: 1.5 }}>{signals.positivo}</div>
+                      </div>
+                      <div style={{ flex: 1, padding: 10, background: '#fef2f2', borderRadius: 6 }}>
+                        <div style={{ fontSize: 9, fontWeight: 700, color: COLOR_RED, marginBottom: 4 }}>⚠️ Segnale Negativo</div>
+                        <div style={{ fontSize: 9, color: TEXT_BODY, lineHeight: 1.5 }}>{signals.negativo}</div>
+                      </div>
+                      <div style={{ flex: 1, padding: 10, background: '#eff6ff', borderRadius: 6 }}>
+                        <div style={{ fontSize: 9, fontWeight: 700, color: BRAND_BLUE, marginBottom: 4 }}>👁 Cosa Osservare</div>
+                        <div style={{ fontSize: 9, color: TEXT_BODY, lineHeight: 1.5 }}>{signals.osservare}</div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </>
           ) : (
             <BodyText>Il profilo non evidenzia aree che richiedano domande specifiche. Procedere con colloquio standard.</BodyText>
           )}
 
-          {/* Segnali */}
-          <div style={{ display: 'flex', gap: 16, marginTop: 20 }}>
+          {/* Segnali Generali */}
+          <SubTitle>Segnali Generali da Monitorare</SubTitle>
+          <div style={{ display: 'flex', gap: 16, marginTop: 8 }}>
             <div style={{ flex: 1 }}>
               <AccentBox borderColor={COLOR_RED}>
                 <div style={{ fontSize: FONT_BODY, fontWeight: 700, color: COLOR_RED, marginBottom: 8 }}>⚠️ Segnali d'Allarme</div>
@@ -1308,18 +1467,28 @@ export function PremiumReportPDF(props: PremiumReportPDFProps) {
           </BodyText>
 
           <SubTitle>Significato dei Punteggi</SubTitle>
-          <div style={{ display: 'flex', gap: 0, marginBottom: 14, borderRadius: 8, overflow: 'hidden', border: `1px solid ${BORDER_LIGHT}` }}>
-            {[
-              { range: '> 40', label: 'Eccellente', color: COLOR_GREEN, bg: '#f0fdf4' },
-              { range: '20 - 40', label: 'Adeguato', color: COLOR_AMBER, bg: '#fffbeb' },
-              { range: '0 - 20', label: 'Mediocre', color: BRAND_ORANGE, bg: '#fff7ed' },
-              { range: '< 0', label: 'Critico', color: COLOR_RED, bg: '#fef2f2' },
-            ].map((s, i) => (
-              <div key={s.range} style={{ flex: 1, padding: 12, textAlign: 'center', background: s.bg, borderRight: i < 3 ? `1px solid ${BORDER_LIGHT}` : 'none' }}>
-                <div style={{ fontSize: 14, fontWeight: 700, color: s.color }}>{s.range}</div>
-                <div style={{ fontSize: FONT_CAPTION, color: TEXT_CAPTION, marginTop: 2 }}>{s.label}</div>
+          {/* Visual score bar — gradient */}
+          <div style={{ marginBottom: 14 }}>
+            <div style={{ display: 'flex', height: 28, borderRadius: 14, overflow: 'hidden', marginBottom: 8 }}>
+              <div style={{ flex: 1, background: COLOR_RED, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ fontSize: 9, fontWeight: 700, color: '#fff' }}>{'< 0'}</span>
               </div>
-            ))}
+              <div style={{ flex: 1, background: BRAND_ORANGE, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ fontSize: 9, fontWeight: 700, color: '#fff' }}>0 – 20</span>
+              </div>
+              <div style={{ flex: 1, background: COLOR_AMBER, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ fontSize: 9, fontWeight: 700, color: '#fff' }}>20 – 40</span>
+              </div>
+              <div style={{ flex: 1, background: COLOR_GREEN, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ fontSize: 9, fontWeight: 700, color: '#fff' }}>{'> 40'}</span>
+              </div>
+            </div>
+            <div style={{ display: 'flex' }}>
+              <div style={{ flex: 1, textAlign: 'center', fontSize: 9, color: COLOR_RED, fontWeight: 600 }}>Critico</div>
+              <div style={{ flex: 1, textAlign: 'center', fontSize: 9, color: BRAND_ORANGE, fontWeight: 600 }}>Mediocre</div>
+              <div style={{ flex: 1, textAlign: 'center', fontSize: 9, color: COLOR_AMBER, fontWeight: 600 }}>Adeguato</div>
+              <div style={{ flex: 1, textAlign: 'center', fontSize: 9, color: COLOR_GREEN, fontWeight: 600 }}>Eccellente</div>
+            </div>
           </div>
           <BodyText>
             I punteggi dei tratti vanno da -100 a +100. Le macro-aree (ESSERE, FARE, AVERE) sono espresse
@@ -1327,14 +1496,22 @@ export function PremiumReportPDF(props: PremiumReportPDFProps) {
           </BodyText>
 
           <SubTitle>Scale e Macro-Aree</SubTitle>
-          <div style={{ fontSize: 10, color: TEXT_BODY, lineHeight: 1.7 }}>
-            <strong>ESSERE</strong> (Concentrazione sugli obiettivi): ORG, AUT, GP<br />
-            <strong>FARE</strong> (Azioni concrete): ADS, DET, VEN, HRM<br />
-            <strong>AVERE</strong> (Relazioni di valore): LDR, PRO, COM, ESP<br />
-            <strong>Indicatori</strong>: RC (Resistenza al Cambiamento), FIN (Finanze), SUC (Successo), PRI (Principi)
+          <div style={{ borderRadius: 8, overflow: 'hidden', border: `1px solid ${BORDER_LIGHT}`, marginBottom: 16 }}>
+            {[
+              { area: 'ESSERE', desc: 'Concentrazione sugli obiettivi', traits: 'ORG, AUT, GP', color: BRAND_BLUE },
+              { area: 'FARE', desc: 'Azioni concrete', traits: 'ADS, DET, VEN, HRM', color: BRAND_ORANGE },
+              { area: 'AVERE', desc: 'Relazioni di valore', traits: 'LDR, PRO, COM, ESP', color: '#8b5cf6' },
+              { area: 'Indicatori', desc: 'Resilienza, focus e valori', traits: 'RC, FIN, SUC, PRI', color: TEXT_CAPTION },
+            ].map((row, i) => (
+              <div key={row.area} style={{ display: 'flex', alignItems: 'center', padding: '10px 14px', background: i % 2 === 0 ? '#fff' : BG_SUBTLE, borderBottom: `1px solid ${BORDER_LIGHT}` }}>
+                <div style={{ width: 90, fontSize: 11, fontWeight: 700, color: row.color }}>{row.area}</div>
+                <div style={{ flex: 1, fontSize: 10, color: TEXT_BODY }}>{row.desc}</div>
+                <div style={{ fontSize: 10, color: TEXT_CAPTION, fontFamily: 'monospace' }}>{row.traits}</div>
+              </div>
+            ))}
           </div>
 
-          {/* Technical data table */}
+          {/* Technical data table — elegant alternating */}
           <SubTitle>Dati Tecnici del Report</SubTitle>
           <div style={{ borderRadius: 8, overflow: 'hidden', border: `1px solid ${BORDER_LIGHT}` }}>
             {[
@@ -1348,7 +1525,7 @@ export function PremiumReportPDF(props: PremiumReportPDFProps) {
               ['Attendibilità', getReliabilityLabel(reliabilityIndex)],
               ['Profilo Tipo', profiloExt?.label || 'N/D'],
             ].map(([k, v], i) => (
-              <div key={k} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 14px', fontSize: 10, background: i % 2 === 0 ? '#fff' : BG_SUBTLE, borderBottom: `1px solid ${BORDER_LIGHT}` }}>
+              <div key={k} style={{ display: 'flex', justifyContent: 'space-between', padding: '9px 14px', fontSize: 10, background: i % 2 === 0 ? '#fff' : BG_SUBTLE, borderBottom: i < 8 ? `1px solid ${BORDER_LIGHT}` : 'none' }}>
                 <span style={{ color: TEXT_CAPTION, fontWeight: 500 }}>{k}</span>
                 <span style={{ fontWeight: 600, color: TEXT_BODY }}>{v}</span>
               </div>

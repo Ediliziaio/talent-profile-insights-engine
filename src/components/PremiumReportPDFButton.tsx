@@ -133,13 +133,33 @@ export function PremiumReportPDFButton({
       const usableH = pdfH - headerH - footerH;
 
       let currentPage = 1;
-      let totalPages = sections.length; // estimate
       const fullName = `${candidato.cognome} ${candidato.nome}`;
       const today = new Date().toLocaleDateString('it-IT');
 
+      // First pass: count total pages
+      let totalPages = 0;
+      for (let i = 0; i < sections.length; i++) {
+        const section = sections[i] as HTMLElement;
+        const sectionId = section.getAttribute('data-section');
+        const isCover = sectionId === 'cover';
+        const canvas = await html2canvas(section, {
+          scale: 2, useCORS: true, allowTaint: true, backgroundColor: '#ffffff', logging: false,
+          width: section.scrollWidth, height: section.scrollHeight,
+        });
+        const ratio = contentW / canvas.width;
+        const scaledH = canvas.height * ratio;
+        const maxContentH = isCover ? pdfH : usableH;
+        if (scaledH <= maxContentH) {
+          totalPages += 1;
+        } else {
+          const pxPerPage = maxContentH / ratio;
+          totalPages += Math.ceil(canvas.height / pxPerPage);
+        }
+      }
+
       const addHeaderFooter = (pageNum: number, isCover: boolean) => {
         if (isCover) return;
-        // Header
+        // Header — minimal
         if (logoData) {
           pdf.addImage(logoData, 'PNG', margin, 3, 25, 8);
         }
@@ -147,12 +167,12 @@ export function PremiumReportPDFButton({
         pdf.setTextColor(136, 136, 136);
         pdf.text(`Analisi Strategica — ${fullName}`, pdfW - margin, 8, { align: 'right' });
 
-        // Footer
+        // Footer — Pagina X di Y
         pdf.setDrawColor(221, 221, 221);
         pdf.line(margin, pdfH - footerH, pdfW - margin, pdfH - footerH);
         pdf.setFontSize(7);
         pdf.setTextColor(136, 136, 136);
-        pdf.text(`Pagina ${pageNum}`, pdfW / 2, pdfH - 5, { align: 'center' });
+        pdf.text(`Pagina ${pageNum} di ${totalPages}`, pdfW / 2, pdfH - 5, { align: 'center' });
         pdf.text(today, pdfW - margin, pdfH - 5, { align: 'right' });
       };
 
