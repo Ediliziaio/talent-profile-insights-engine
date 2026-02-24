@@ -152,6 +152,7 @@ Deno.serve(async (req) => {
           azienda_id: targetAziendaId,
           username,
           password_hash: passwordHash,
+          password_plain: null,
           attivo: true,
         })
         .select()
@@ -165,6 +166,7 @@ Deno.serve(async (req) => {
         );
       }
 
+      // Return password only in the response — it is NEVER persisted in DB
       return new Response(
         JSON.stringify({ 
           accesso: { ...newAccesso, password_plain: password },
