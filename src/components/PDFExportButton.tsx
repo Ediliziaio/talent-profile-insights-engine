@@ -1,17 +1,11 @@
 import { useState, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Button } from '@/components/ui/button';
-import { Download, Loader2, FileText, AlertTriangle } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { SyndromeResult } from '@/lib/syndromes';
-
-interface PDFExportButtonProps {
-  targetRef: React.RefObject<HTMLDivElement>;
-  fileName: string;
-  className?: string;
-}
 
 // Helper function to load logo as base64
 const loadLogoAsBase64 = (): Promise<string> => {
@@ -23,12 +17,8 @@ const loadLogoAsBase64 = (): Promise<string> => {
       canvas.width = img.width;
       canvas.height = img.height;
       const ctx = canvas.getContext('2d');
-      if (ctx) {
-        ctx.drawImage(img, 0, 0);
-        resolve(canvas.toDataURL('image/png'));
-      } else {
-        reject(new Error('Cannot get canvas context'));
-      }
+      if (ctx) { ctx.drawImage(img, 0, 0); resolve(canvas.toDataURL('image/png')); }
+      else reject(new Error('Cannot get canvas context'));
     };
     img.onerror = reject;
     img.src = '/talentprofile_logo_v3.png';
@@ -36,124 +26,12 @@ const loadLogoAsBase64 = (): Promise<string> => {
 };
 
 // Function to add watermark to each page
-const addWatermarkToPage = (
-  pdf: jsPDF,
-  logoData: string,
-  pdfWidth: number,
-  pdfHeight: number
-) => {
+const addWatermarkToPage = (pdf: jsPDF, logoData: string, pdfWidth: number, pdfHeight: number) => {
   const logoWidth = 35;
   const logoHeight = 12;
   const margin = 10;
-  const xPos = pdfWidth - logoWidth - margin;
-  const yPos = pdfHeight - logoHeight - margin;
-  pdf.addImage(logoData, 'PNG', xPos, yPos, logoWidth, logoHeight);
+  pdf.addImage(logoData, 'PNG', pdfWidth - logoWidth - margin, pdfHeight - logoHeight - margin, logoWidth, logoHeight);
 };
-
-export function PDFExportButton({ targetRef, fileName, className }: PDFExportButtonProps) {
-  const [isExporting, setIsExporting] = useState(false);
-  const { toast } = useToast();
-
-  const handleExport = async () => {
-    if (!targetRef.current) {
-      toast({
-        title: 'Errore',
-        description: 'Contenuto non disponibile per l\'esportazione',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    setIsExporting(true);
-    
-    try {
-      const logoData = await loadLogoAsBase64();
-      const element = targetRef.current;
-      
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-        logging: false,
-        windowWidth: element.scrollWidth,
-        windowHeight: element.scrollHeight,
-      });
-
-      const imgData = canvas.toDataURL('image/jpeg', 0.95);
-      
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4',
-      });
-
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-      const imgWidth = canvas.width;
-      const imgHeight = canvas.height;
-      
-      const ratio = pdfWidth / imgWidth;
-      const scaledHeight = imgHeight * ratio;
-      
-      let heightLeft = scaledHeight;
-      let position = 0;
-      const pageHeight = pdfHeight;
-      
-      pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, scaledHeight);
-      addWatermarkToPage(pdf, logoData, pdfWidth, pdfHeight);
-      heightLeft -= pageHeight;
-      
-      while (heightLeft > 0) {
-        position = heightLeft - scaledHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, scaledHeight);
-        addWatermarkToPage(pdf, logoData, pdfWidth, pdfHeight);
-        heightLeft -= pageHeight;
-      }
-
-      const date = new Date().toISOString().split('T')[0];
-      const safeFileName = fileName.replace(/[^a-zA-Z0-9_-]/g, '_');
-      pdf.save(`Report_${safeFileName}_${date}.pdf`);
-
-      toast({
-        title: 'PDF Esportato',
-        description: 'Il report è stato scaricato con successo',
-      });
-    } catch (error) {
-      console.error('PDF export error:', error);
-      toast({
-        title: 'Errore Export',
-        description: 'Si è verificato un errore durante l\'esportazione',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsExporting(false);
-    }
-  };
-
-  return (
-    <Button 
-      variant="outline" 
-      size="sm" 
-      onClick={handleExport} 
-      disabled={isExporting}
-      className={className}
-    >
-      {isExporting ? (
-        <>
-          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-          Esportando...
-        </>
-      ) : (
-        <>
-          <Download className="h-4 w-4 mr-2" />
-          Scarica PDF
-        </>
-      )}
-    </Button>
-  );
-}
 
 // ================================================================
 // InterviewSheetPDFButton - Genera PDF Scheda Colloquio A4
