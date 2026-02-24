@@ -15,7 +15,7 @@ import { PROFILI_TIPO_V5_EXTENDED } from '@/lib/profiloTipoV5Extended';
 import { SYNDROMES_V5_DATA } from '@/lib/syndromesV5Data';
 import { MappaInterioreResult, ATTACCAMENTO_FRONTEND, getDimensioniChartData } from '@/lib/mappaInteriore';
 import { getPersonalizedManagementTips, getPersonalizedClosingText } from '@/lib/managementTipsV5';
-import { personalizzaTesto, getFascia } from '@/lib/traitNarrativesV5';
+import { personalizzaTesto, getFascia, getTraitNarrative, getGPSpecialNarrative, TRAIT_NARRATIVES } from '@/lib/traitNarrativesV5';
 
 // ─── Colors ─────────────────────────────────────────
 const BRAND_BLUE = '#1e3a5f';
@@ -504,6 +504,113 @@ export function PremiumReportPDF(props: PremiumReportPDFProps) {
               </div>
             </>
           )}
+        </div>
+      </Section>
+
+      <PageBreak />
+
+      {/* ═══════════════ NARRATIVE: Chi è [Nome] ═══════════════ */}
+      <Section id="profilo-narrative">
+        <div style={{ padding: '15mm 18mm' }}>
+          <SectionTitle>Chi è {candidato.nome}</SectionTitle>
+          <BodyText>Analisi narrativa completa dei 15 tratti comportamentali, organizzati per macro-area.</BodyText>
+
+          {/* Chapter 1: Come Pensa */}
+          <div style={{ marginTop: 16, borderLeft: '4px solid #3b82f6', paddingLeft: 14, marginBottom: 20 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: '#1e40af', marginBottom: 2 }}>🧠 Come Pensa</div>
+            <div style={{ fontSize: 8, color: TEXT_CAPTION, marginBottom: 10 }}>Area ESSERE — Concentrazione sugli obiettivi (ORG, AUT, GP)</div>
+            {(['ORG', 'AUT', 'GP'] as TraitCode[]).map(code => {
+              const val = traits[code] || 0;
+              const narrative = getTraitNarrative(code, val, candidato.nome, candidato.sesso || null);
+              const fasciaLabel = getFascia(val, TRAIT_NARRATIVES[code]);
+              return (
+                <div key={code} style={{ marginBottom: 12 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                    <span style={{ fontSize: 10, fontWeight: 700, color: '#333' }}>{TRAIT_LABELS[code]}</span>
+                    <Badge2 text={`${val}`} color={getTraitColor(val)} bg={val >= 40 ? '#dcfce7' : val >= 20 ? '#fef3c7' : '#fee2e2'} />
+                    <span style={{ fontSize: 8, color: TEXT_CAPTION, fontStyle: 'italic' }}>{fasciaLabel}</span>
+                  </div>
+                  {narrative && <div style={{ fontSize: 9, color: TEXT_BODY, lineHeight: 1.6 }}>{narrative}</div>}
+                </div>
+              );
+            })}
+            {/* GP Special Note */}
+            {(() => {
+              const gpVal = traits.GP || 0;
+              const maxTrait = Math.max(...(Object.entries(traits) as [TraitCode, number][]).filter(([k]) => k !== 'CTRL').map(([, v]) => v));
+              const gpSpecial = getGPSpecialNarrative(gpVal, gpVal >= maxTrait, candidato.nome, candidato.sesso || null);
+              if (!gpSpecial) return null;
+              return (
+                <div style={{ padding: 10, background: '#fffbeb', borderRadius: 6, border: '1px solid #fde68a', marginTop: 6 }}>
+                  <div style={{ fontSize: 9, fontWeight: 700, color: '#92400e', marginBottom: 3 }}>⚠️ Nota Speciale GP</div>
+                  <div style={{ fontSize: 9, color: '#78350f', lineHeight: 1.6 }}>{gpSpecial}</div>
+                </div>
+              );
+            })()}
+          </div>
+
+          {/* Chapter 2: Come Agisce */}
+          <div style={{ borderLeft: '4px solid #f59e0b', paddingLeft: 14, marginBottom: 20 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: '#92400e', marginBottom: 2 }}>⚡ Come Agisce</div>
+            <div style={{ fontSize: 8, color: TEXT_CAPTION, marginBottom: 10 }}>Area FARE — Azioni concrete (ADS, DET, VEN, HRM)</div>
+            {(['ADS', 'DET', 'VEN', 'HRM'] as TraitCode[]).map(code => {
+              const val = traits[code] || 0;
+              const narrative = getTraitNarrative(code, val, candidato.nome, candidato.sesso || null);
+              const fasciaLabel = getFascia(val, TRAIT_NARRATIVES[code]);
+              return (
+                <div key={code} style={{ marginBottom: 12 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                    <span style={{ fontSize: 10, fontWeight: 700, color: '#333' }}>{TRAIT_LABELS[code]}</span>
+                    <Badge2 text={`${val}`} color={getTraitColor(val)} bg={val >= 40 ? '#dcfce7' : val >= 20 ? '#fef3c7' : '#fee2e2'} />
+                    <span style={{ fontSize: 8, color: TEXT_CAPTION, fontStyle: 'italic' }}>{fasciaLabel}</span>
+                  </div>
+                  {narrative && <div style={{ fontSize: 9, color: TEXT_BODY, lineHeight: 1.6 }}>{narrative}</div>}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Chapter 3: Come si Relaziona */}
+          <div style={{ borderLeft: '4px solid #8b5cf6', paddingLeft: 14, marginBottom: 20 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: '#6d28d9', marginBottom: 2 }}>👥 Come si Relaziona</div>
+            <div style={{ fontSize: 8, color: TEXT_CAPTION, marginBottom: 10 }}>Area AVERE — Relazioni di valore (LDR, PRO, COM, ESP)</div>
+            {(['LDR', 'PRO', 'COM', 'ESP'] as TraitCode[]).map(code => {
+              const val = traits[code] || 0;
+              const narrative = getTraitNarrative(code, val, candidato.nome, candidato.sesso || null);
+              const fasciaLabel = getFascia(val, TRAIT_NARRATIVES[code]);
+              return (
+                <div key={code} style={{ marginBottom: 12 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                    <span style={{ fontSize: 10, fontWeight: 700, color: '#333' }}>{TRAIT_LABELS[code]}</span>
+                    <Badge2 text={`${val}`} color={getTraitColor(val)} bg={val >= 40 ? '#dcfce7' : val >= 20 ? '#fef3c7' : '#fee2e2'} />
+                    <span style={{ fontSize: 8, color: TEXT_CAPTION, fontStyle: 'italic' }}>{fasciaLabel}</span>
+                  </div>
+                  {narrative && <div style={{ fontSize: 9, color: TEXT_BODY, lineHeight: 1.6 }}>{narrative}</div>}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Chapter 4: Stabilità e Principi */}
+          <div style={{ borderLeft: '4px solid #6b7280', paddingLeft: 14, marginBottom: 10 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: '#374151', marginBottom: 2 }}>🛡️ Stabilità e Principi</div>
+            <div style={{ fontSize: 8, color: TEXT_CAPTION, marginBottom: 10 }}>Indicatori — Resilienza, focus e valori (RC, FIN, SUC, PRI)</div>
+            {(['RC', 'FIN', 'SUC', 'PRI'] as TraitCode[]).map(code => {
+              const val = traits[code] || 0;
+              const narrative = getTraitNarrative(code, val, candidato.nome, candidato.sesso || null);
+              const fasciaLabel = getFascia(val, TRAIT_NARRATIVES[code]);
+              return (
+                <div key={code} style={{ marginBottom: 12 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                    <span style={{ fontSize: 10, fontWeight: 700, color: '#333' }}>{TRAIT_LABELS[code]}</span>
+                    <Badge2 text={`${val}`} color={getTraitColor(val)} bg={val >= 40 ? '#dcfce7' : val >= 20 ? '#fef3c7' : '#fee2e2'} />
+                    <span style={{ fontSize: 8, color: TEXT_CAPTION, fontStyle: 'italic' }}>{fasciaLabel}</span>
+                  </div>
+                  {narrative && <div style={{ fontSize: 9, color: TEXT_BODY, lineHeight: 1.6 }}>{narrative}</div>}
+                </div>
+              );
+            })}
+          </div>
         </div>
       </Section>
 
