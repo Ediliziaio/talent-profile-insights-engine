@@ -106,6 +106,15 @@ export interface ProfiloCandidato {
   out_points: string[];
   strength_points: string[];
   scale_punteggi: Record<string, number>;
+  // V5 fields
+  essere_pct: number | null;
+  fare_pct: number | null;
+  avere_pct: number | null;
+  traits_v5: Record<string, number> | null;
+  syndromes_detected: Array<{ code: string; severity: string; label?: string }> | null;
+  reliability_index: ReliabilityIndex | null;
+  assessment_version: AssessmentVersion | null;
+  profilo_tipo_v5: ProfiloTipoV5 | null;
   created_at: string;
   updated_at: string;
 }
