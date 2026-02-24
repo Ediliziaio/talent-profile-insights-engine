@@ -271,18 +271,32 @@ export function PremiumReportPDF(props: PremiumReportPDFProps) {
           <div style={{ marginTop: 20 }}>
             {[
               { n: '1', title: 'Executive Summary', sub: 'Sintesi del profilo e indicatori chiave' },
-              { n: '2', title: 'Profilo Comportamentale', sub: 'Analisi dei 15 tratti, narrativa, sindromi e ruoli compatibili' },
+              { n: '2', title: 'Profilo Comportamentale', sub: 'Analisi dei 15 tratti, narrativa, sindromi e ruoli compatibili', children: [
+                { n: '2.1', title: 'Grafico tratti comportamentali' },
+                { n: '2.2', title: `Chi è ${candidato.nome} — Narrative personalizzate` },
+                { n: '2.3', title: 'Segnalazioni e sindromi' },
+                { n: '2.4', title: 'Ruoli compatibili' },
+                { n: '2.5', title: 'Profilo tipo esteso' },
+              ] },
               { n: '3', title: 'Area Gestione', sub: 'Consigli di management, piano d\'azione, quadro psicologico' },
               { n: '4', title: 'Mappa Interiore', sub: 'Dimensioni profonde, pattern, narrative e colloquio' },
               { n: '5', title: 'Colloquio', sub: 'Domande personalizzate, segnali d\'allarme e positivi' },
               { n: '6', title: 'Metodologia', sub: 'Spiegazione del metodo e dati tecnici' },
             ].map(item => (
-              <div key={item.n} style={{ display: 'flex', alignItems: 'baseline', padding: '12px 0', borderBottom: `1px solid ${BORDER_LIGHT}` }}>
-                <div style={{ width: 30, fontSize: 18, fontWeight: 700, color: BRAND_ORANGE }}>{item.n}</div>
-                <div>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: BRAND_BLUE }}>{item.title}</div>
-                  <div style={{ fontSize: 9, color: TEXT_CAPTION, marginTop: 2 }}>{item.sub}</div>
+              <div key={item.n}>
+                <div style={{ display: 'flex', alignItems: 'baseline', padding: '12px 0', borderBottom: `1px solid ${BORDER_LIGHT}` }}>
+                  <div style={{ width: 30, fontSize: 18, fontWeight: 700, color: BRAND_ORANGE }}>{item.n}</div>
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: BRAND_BLUE }}>{item.title}</div>
+                    <div style={{ fontSize: 9, color: TEXT_CAPTION, marginTop: 2 }}>{item.sub}</div>
+                  </div>
                 </div>
+                {item.children && item.children.map(child => (
+                  <div key={child.n} style={{ display: 'flex', alignItems: 'baseline', padding: '6px 0', paddingLeft: 30 }}>
+                    <div style={{ width: 28, fontSize: 10, color: TEXT_CAPTION, fontWeight: 600 }}>{child.n}</div>
+                    <div style={{ fontSize: 10, color: TEXT_BODY }}>{child.title}</div>
+                  </div>
+                ))}
               </div>
             ))}
           </div>
