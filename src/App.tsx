@@ -101,14 +101,18 @@ const App = () => (
                 </ProtectedRoute>
               } />
               <Route path="/candidati/:id" element={
-                <Suspense fallback={<CandidatoDettaglioSkeleton />}>
-                  <CandidatoDettaglio />
-                </Suspense>
+                <ProtectedRoute allowedRoles={['superadmin', 'azienda']}>
+                  <Suspense fallback={<CandidatoDettaglioSkeleton />}>
+                    <CandidatoDettaglio />
+                  </Suspense>
+                </ProtectedRoute>
               } />
               <Route path="/candidati/:id/storico" element={
-                <Suspense fallback={<CandidatoDettaglioSkeleton />}>
-                  <StoricoCandidato />
-                </Suspense>
+                <ProtectedRoute allowedRoles={['superadmin', 'azienda']}>
+                  <Suspense fallback={<CandidatoDettaglioSkeleton />}>
+                    <StoricoCandidato />
+                  </Suspense>
+                </ProtectedRoute>
               } />
               <Route path="/pagamenti" element={
                 <ProtectedRoute allowedRoles={['superadmin']}>
@@ -118,9 +122,11 @@ const App = () => (
                 </ProtectedRoute>
               } />
               <Route path="/confronto" element={
-                <Suspense fallback={<CandidatiSkeleton />}>
-                  <ConfrontoCandidati />
-                </Suspense>
+                <ProtectedRoute allowedRoles={['superadmin', 'azienda']}>
+                  <Suspense fallback={<CandidatiSkeleton />}>
+                    <ConfrontoCandidati />
+                  </Suspense>
+                </ProtectedRoute>
               } />
               <Route path="/test/anagrafica" element={
                 <Suspense fallback={<FormSkeleton />}>
