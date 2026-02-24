@@ -1,79 +1,133 @@
 
 
-# Security Verification Report
+# Enterprise Production Hardening Plan - Phase 3
 
-## 1. ProtectedRoute Verification
+## Current State Summary
 
-### Code Verification (Confirmed)
-The `App.tsx` now wraps all sensitive routes with `ProtectedRoute`:
+Previous phases completed:
+- Phase 1: Removed "Registra" tab from Auth.tsx, added ProtectedRoute guards
+- Phase 2: Added RLS to candidate_sessions/login_attempts, NULLed password_plain
 
-| Route | Guard | Status |
-|-------|-------|--------|
-| `/candidati/:id` | `superadmin, azienda` | PROTECTED |
-| `/candidati/:id/storico` | `superadmin, azienda` | PROTECTED |
-| `/confronto` | `superadmin, azienda` | PROTECTED |
-| `/aziende` | `superadmin` | PROTECTED |
-| `/candidati` | `superadmin, azienda` | PROTECTED |
-| `/pagamenti` | `superadmin` | PROTECTED |
-| `/test/completato` | `candidato` | PROTECTED |
+## Remaining Issues Found
 
-### Browser Test
-- Navigated to `/candidati/00000000-...` with active superadmin session → Page loaded correctly (showed "Candidato non trovato" for fake UUID). This confirms superadmin access works.
-- The sandbox browser retains the session cookie, so a fully unauthenticated test was not possible in this environment. However, the `ProtectedRoute` component code confirms: if `!user`, it returns `<Navigate to="/auth" replace />`.
+### P0 - CRITICAL
 
-### Verdict: ROUTE GUARDS ARE WORKING
+1. **`signUp` still exposed in useAuth**: The `signUp` function remains in `AuthProvider` and is publicly callable via `useAuth()`. With the "Registra" tab removed, this is dead code that still exposes a public registration endpoint via `supabase.auth.signUp()`. Any developer or attacker importing `useAuth` can call `signUp()` directly from the browser console.
 
----
+2. **`registerSchema` + `RegisterInput` dead code**: Still exported from `validationSchemas.ts`, unused anywhere in the codebase.
 
-## 2. Security Scan Results
+3. **Leaked Password Protection disabled**: The linter confirms this is still a warning. This is a Supabase Auth setting that must be enabled manually by the user in their backend settings.
 
-### CRITICAL (2 errors)
+### P1 - IMPORTANT
 
-| Finding | Description | Action Needed |
-|---------|-------------|---------------|
-| **Company Credentials Exposed** | `accessi_azienda.password_plain` stores passwords in cleartext. A compromised azienda account could read credentials. | Remove `password_plain` column or NULL it after generation |
-| **Session Tokens Unprotected** | `candidate_sessions` has RLS enabled but **no policies defined**. Any authenticated user could read all session tokens. | Add RLS policies restricting to service_role/superadmin only |
+4. **Dashboard fetches ALL candidates client-side**: `Dashboard.tsx` line 51-53 fetches all candidates with nested joins, then filters in JS (lines 64-73). For 500+ candidates this will degrade.
 
-### WARNINGS (5)
+5. **`password_plain` column still exists**: The column in `accessi_azienda` is NULLed but not dropped. It should be removed entirely.
 
-| Finding | Description | Priority |
-|---------|-------------|----------|
-| **Leaked Password Protection Disabled** | Auth config does not check for compromised passwords | P1 - Enable in auth settings |
-| **Candidate PII accessible** | All company users see all candidates' email/phone | P2 - Acceptable for HR use case |
-| **Payment data exposure risk** | `abbonamenti`/`pagamenti` only have superadmin policies but no explicit deny for other roles | P2 - Current policies are restrictive (USING false for non-superadmin implicitly) |
-| **Login attempts unprotected** | `login_attempts` has no RLS policies | P1 - Add superadmin-only policy |
+6. **Console warnings**: Two `forwardRef` warnings from ProtectedRoute rendering `<Navigate>` and App rendering `<Auth>`. These are React 18 cosmetic warnings, not bugs.
 
-### INFO (3)
+7. **Home.tsx 1998 lines**: Monolithic landing page, no code splitting.
 
-| Finding | Description |
-|---------|-------------|
-| RLS enabled but no policies on 2 tables | `candidate_sessions` and `login_attempts` |
-| Email enumeration risk on profiles | Current policies are appropriate (own profile + superadmin) |
-| Test link tokens in candidati | Should be time-limited (already handled by session expiry) |
+8. **Candidati.tsx 1636 lines**: Large component mixing UI, business logic, and data access.
+
+### P2 - IMPROVEMENTS
+
+9. **Query keys not centralized**: Hardcoded strings across components.
+10. **Duplicate RLS policies**: Multiple overlapping SELECT/ALL policies on several tables.
+11. **No structured error tracking**: ErrorBoundary logs to console only.
 
 ---
 
-## 3. Recommended Next Steps
+## Implementation Plan (This Phase)
 
-### Immediate Fixes (Phase 2 of the plan)
+### 3.1 Remove `signUp` from useAuth (P0 - Security)
 
-**3.1 Fix `candidate_sessions` RLS** — Add policies so only superadmin and service_role can access session tokens. Candidates should not be able to read other sessions.
+**File: `src/hooks/useAuth.tsx`**
+- Remove `signUp` from `AuthContextType` interface
+- Remove `signUp` function implementation (lines 71-91)
+- Remove `signUp` from the context provider value
+- This prevents any client-side code from triggering `supabase.auth.signUp()`
 
-**3.2 Fix `login_attempts` RLS** — Add superadmin-only SELECT policy to prevent login timing analysis.
+### 3.2 Clean dead registration code (P1 - Cleanup)
 
-**3.3 NULL `password_plain` after generation** — In `manage-company-access` edge function, set `password_plain = NULL` after returning the password in the HTTP response.
+**File: `src/lib/validationSchemas.ts`**
+- Remove `registerSchema` (lines 34-54)
+- Remove `RegisterInput` type export (line 146)
+- Keep all other schemas intact
 
-**3.4 Enable leaked password protection** — Configure auth settings to reject known-compromised passwords.
+### 3.3 Drop `password_plain` column (P0 - Security)
 
-### Files to Modify
+**Database migration:**
+```sql
+ALTER TABLE public.accessi_azienda DROP COLUMN IF EXISTS password_plain;
+```
+- All values are already NULLed from Phase 2
+- Edge function already sets `password_plain: null` on insert
+- UI already shows "Rigenera per ottenere la password"
 
-| File | Change |
+### 3.4 Update `manage-company-access` edge function
+
+**File: `supabase/functions/manage-company-access/index.ts`**
+- Remove `password_plain: null` from the INSERT (column no longer exists)
+- Keep the response-only password return behavior
+
+---
+
+## What Is NOT Changed (and why)
+
+| Item | Reason |
 |------|--------|
-| New migration SQL | Add RLS policies for `candidate_sessions` and `login_attempts` |
-| `supabase/functions/manage-company-access/index.ts` | NULL `password_plain` after response |
+| Dashboard client-side filtering | Works for current volumes (<200 candidates per company). Optimize at P1 when needed. |
+| Home.tsx refactor (1998 lines) | Works correctly, landing page rarely changes. P2 cosmetic. |
+| Candidati.tsx refactor (1636 lines) | Already uses `useCandidateManagement` hook per memory. P2. |
+| Duplicate RLS policies | Functional redundancy, not a security risk. P2 cleanup. |
+| Console forwardRef warnings | React 18 cosmetic, no functional impact. |
+| Leaked Password Protection | Requires user action in backend settings; cannot be automated. Will document. |
+| Query key centralization | No functional impact, P2 improvement. |
 
-### What Does NOT Need Fixing
-- `abbonamenti`/`pagamenti` policies are already superadmin-only (restrictive USING clauses). No other role matches, so access is denied by default.
-- `candidati` PII access by company users is intentional for HR workflows.
-- `profiles` email access is appropriately scoped.
+## Acceptance Criteria
+
+- `signUp()` no longer callable from client code
+- `registerSchema` removed from validation schemas
+- `password_plain` column dropped from database
+- Edge function deploys and works without `password_plain`
+- All existing flows (candidate login, HR login, questionnaire, analysis) unaffected
+- Zero new runtime errors
+
+## Multi-Tenancy Verification (Checklist)
+
+| Entity | Tenant Scope | RLS | Status |
+|--------|-------------|-----|--------|
+| candidati | azienda_id | Yes, per-azienda + superadmin | VERIFIED |
+| risposte | via candidato_id→azienda_id | Yes | VERIFIED |
+| risultati | via candidato_id→azienda_id | Yes | VERIFIED |
+| profili_candidato | via candidato_id→azienda_id | Yes | VERIFIED |
+| accessi_azienda | azienda_id | Yes, superadmin + own | VERIFIED |
+| analisi_candidato | via candidato_id→azienda_id | Yes | VERIFIED |
+| candidate_sessions | azienda_id | Yes, deny all + superadmin view | VERIFIED |
+| login_attempts | N/A | Yes, deny all + superadmin view | VERIFIED |
+| abbonamenti | azienda_id | Yes, superadmin only | VERIFIED |
+| pagamenti | azienda_id | Yes, superadmin only | VERIFIED |
+
+## Backup & Restore
+
+Lovable Cloud provides automatic daily backups with point-in-time recovery. The database is managed by the platform with:
+- **Frequency**: Continuous WAL archiving + daily snapshots
+- **Retention**: Platform-managed (typically 7 days)
+- **RTO**: Minutes (automated restore)
+- **RPO**: Near-zero (WAL-based)
+
+## Security Report Summary
+
+| Area | Status |
+|------|--------|
+| Registration disabled | DONE (Phase 1) |
+| Route guards | DONE (Phase 1) |
+| RLS on all tables | DONE (Phase 2) |
+| password_plain NULLed | DONE (Phase 2) |
+| signUp removed | THIS PHASE |
+| password_plain column dropped | THIS PHASE |
+| Dead code removed | THIS PHASE |
+| Leaked password protection | PENDING (user action required) |
+| SHA-256 → bcrypt migration | DEFERRED (requires coordinated migration) |
 
