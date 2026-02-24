@@ -1,241 +1,221 @@
 
-# Enterprise Production Readiness Plan - TalentProfile
+# Piano Enterprise per Sezione Candidato - TalentProfile
 
-## A) REPORT AS-IS
+## A) Report AS-IS: Flusso Candidato
 
-### Architettura Attuale
-- **Frontend**: React 18 + Vite + TypeScript, Tailwind CSS, shadcn/ui, React Query, React Router
-- **Backend**: Lovable Cloud (Supabase) con 8 Edge Functions
-- **Database**: 9 tabelle con RLS policies, 3 funzioni SECURITY DEFINER
-- **Auth**: Doppio sistema (Supabase Auth per HR/Admin + candidato login custom via Edge Function)
-- **Ruoli**: superadmin, azienda, candidato (memorizzati nella tabella `profiles.ruolo`)
-
-### Flussi Utente Principali
-1. **Candidato**: Auth -> Anagrafica -> Privacy -> Questionario (242 domande) -> Completato
-2. **HR/Azienda**: Auth -> Dashboard -> Candidati (CRUD, filtri, drawer) -> Dettaglio Candidato (4 tab)
-3. **Superadmin**: Dashboard -> Aziende (CRUD) -> Candidati -> Pagamenti -> Confronto Candidati
-
-### Problemi Identificati (Prioritizzati)
-
-#### P0 - CRITICI (Sicurezza/Stabilita)
-
-1. **RUOLI NEL PROFILO (Privilege Escalation Risk)**: I ruoli sono nella tabella `profiles`, non in una tabella separata `user_roles`. Un utente con accesso UPDATE al proprio profilo potrebbe alterare il proprio ruolo. Le RLS policies consentono `Users can update own profile` senza restrizioni sui campi modificabili.
-
-2. **Edge Function `candidate-login` senza rate limiting**: Nessuna protezione brute-force. Endpoint pubblico senza JWT verification in config.toml (manca del tutto la configurazione `verify_jwt = false`).
-
-3. **Edge Function `register-candidate` senza autenticazione**: Chiunque con un `azienda_id` valido potrebbe registrare candidati fittizi. L'endpoint non verifica il session token dal candidate-login.
-
-4. **`password_plain` nel database**: La colonna `accessi_azienda.password_plain` esiste ancora nel DB. Anche se la memory dice che non viene piu usata, la colonna va rimossa.
-
-5. **SHA-256 per password hashing**: Le funzioni `candidate-login` e `manage-company-access` usano SHA-256 che non e adeguato per password hashing (manca salt, troppo veloce per brute force). Dovrebbe essere bcrypt/argon2.
-
-6. **Leaked password protection disabilitata**: Confermato dal linter Supabase.
-
-7. **Funzione `analyze-candidate` usa scale V4 legacy**: L'edge function `analyze-candidate` contiene ROLE_REQUIREMENTS basati su scale V4 (SV, MO, CF, etc.) ma il sistema e ora completamente V5. Produce risultati incoerenti.
-
-#### P1 - IMPORTANTI (Performance/Pulizia)
-
-8. **Home.tsx e 2000 righe**: Pagina landing page enorme, difficile da manutenere. Contiene dati statici hardcoded, animazioni, componenti interni.
-
-9. **Candidati.tsx e 1636 righe e Aziende.tsx e 1419 righe**: Pagine monolitiche con UI, business logic, e data layer tutti mescolati.
-
-10. **Dashboard.tsx duplica query candidati**: La query per duplicati cross-azienda scarica tutti i candidati una seconda volta.
-
-11. **Aziende.tsx `generatePassword()` client-side**: Funzione inutilizzata (la generazione avviene server-side), residuo di codice morto.
-
-12. **`as any` casting diffuso**: CandidatoDettaglio.tsx usa `(profilo as any)?.assessment_version` per campi che esistono nel tipo ma non sono mappati correttamente. Indica che il tipo `ProfiloCandidato` non e aggiornato per V5.
-
-13. **Mancanza di ProtectedRoute su Dashboard e Pagamenti**: Le pagine fanno redirect manuale controllando `user` e `profile`, ma non usano il wrapper `ProtectedRoute` in modo coerente.
-
-#### P2 - MIGLIORAMENTI (UX/Manutenibilita)
-
-14. **Nessun password reset flow**: Non esiste la pagina `/reset-password` ne la funzionalita di recupero password.
-
-15. **Nessuna pagina 404 per rotte inesistenti nel layout**: La NotionLayout non gestisce rotte non valide; la route `*` esiste ma non e dentro il layout.
-
-16. **Console potenzialmente non pulita**: Nessun ErrorBoundary sui singoli tab di CandidatoDettaglio.
-
----
-
-## B) PIANO DI CLEANUP E SEMPLIFICAZIONE
-
-### B1. Tipo `ProfiloCandidato` aggiornato per V5
-Aggiornare `src/types/database.ts` per includere i campi V5 (`traits_v5`, `essere_pct`, `fare_pct`, `avere_pct`, `syndromes_detected`, `reliability_index`, `assessment_version`, `profilo_tipo_v5`) direttamente nel tipo, eliminando tutti i `(profilo as any)` casting in CandidatoDettaglio.tsx.
-
-### B2. Rimozione codice morto
-- `Aziende.tsx`: rimuovere la funzione `generatePassword()` (riga 74-81, non usata)
-- Verificare se `src/lib/scaleTexts.ts`, `src/lib/chartMapping.ts`, `src/lib/interpretazioneProfile.ts` sono usati solo dal flusso V4 legacy nel CandidatoDrawer/PDFReport - se si, mantenerli per retrocompatibilita con candidati V4 esistenti
-
-### B3. Standardizzazione ProtectedRoute
-Avvolgere Dashboard e Pagamenti con `ProtectedRoute` per eliminare logica di redirect duplicata.
-
-### B4. Centralizzazione fetch URL per Edge Functions
-Creare un helper `invokeEdgeFunction(name, body, token?)` in un file utility per eliminare la costruzione manuale di URL ripetuta in Candidati.tsx, Aziende.tsx e Auth.tsx.
-
----
-
-## C) PERFORMANCE
-
-### C1. Dashboard: eliminare query duplicati separata
-Integrare la logica dei duplicati cross-azienda nel dataset gia scaricato dalla query principale (sono gli stessi dati).
-
-### C2. Candidati.tsx: spostare filtri client-side sul server
-I filtri `filterFitVerdict`, `filterSesso`, `filterEta` e `searchTerm` sono applicati client-side dopo aver scaricato TUTTI i candidati. Per dataset grandi, spostare almeno `sesso` e `eta` lato server con `.eq()` / `.gte()`.
-
-### C3. Home.tsx: code splitting
-Estrarre i dati statici (NAV_LINKS, STEPS, FEATURES, TESTIMONIALS, FAQ, etc.) in un file separato `src/data/homeContent.ts` per ridurre il bundle della pagina.
-
-### C4. Database indexes
-Aggiungere indici su:
-- `candidati(azienda_id, test_completato)` - usato da Dashboard e Candidati
-- `risposte(candidato_id, domanda_id)` - usato dal questionario upsert
-- `profili_candidato(candidato_id)` - usato dal dettaglio candidato
-- `pagamenti(abbonamento_id, data_pagamento)` - usato da Pagamenti
-
-### C5. Stima miglioramenti
-- Dashboard: riduzione 1 query (duplicati) = ~200ms meno
-- Candidati: filtri server-side = risparmio trasferimento dati proporzionale al dataset
-- Home: estrazione dati statici = ~50KB in meno nel chunk lazy
-
----
-
-## D) STABILITA FUNZIONALE
-
-### D1. Fix `analyze-candidate` per V5
-L'edge function usa scale V4 (SV, MO, CF, etc.) per i ROLE_REQUIREMENTS. Deve essere aggiornata per usare i tratti V5 (ORG, AUT, GP, etc.) allineandosi con `src/lib/roleMatchingV5.ts`.
-
-### D2. Fix tipo ProfiloCandidato
-Eliminare tutti i cast `as any` nei componenti di dettaglio candidato aggiornando il tipo TypeScript.
-
-### D3. Gestione errori coerente
-Verificare che tutte le mutation hanno handler `onError` con toast. Attualmente presente ovunque.
-
-### D4. Loading states
-Tutti i loading state sono gestiti correttamente con skeleton e spinner. Nessun fix necessario.
-
----
-
-## E) UX "ESPERIENZIALE"
-
-### E1. Feedback micro-interazioni
-Gia implementati: pulse animation per salvataggio risposte, animate-in per step, spinner per navigazione privacy->questionario. Nessun intervento necessario.
-
-### E2. Mobile
-Gia implementato mobile-first con responsive layout e bottom sheets. Nessun intervento critico necessario.
-
----
-
-## F) MULTI-TENANCY E DATA ISOLATION
-
-### F1. Stato attuale
-L'isolamento multi-tenant e gia implementato tramite:
-- RLS policies basate su `azienda_id` via `get_user_azienda_id(auth.uid())`
-- Ogni query filtra per `azienda_id` del profilo
-- Edge functions verificano il ruolo del caller e scope l'azienda
-
-### F2. Rischio residuo
-La tabella `profiles` permette `Users can update own profile` - un utente potrebbe teoricamente modificare il proprio `azienda_id`. Fix: creare una policy UPDATE che escluda i campi `ruolo` e `azienda_id`, oppure separare i ruoli in tabella dedicata.
-
-### F3. Fix raccomandato (P0)
-Aggiungere una policy UPDATE piu restrittiva su `profiles` che impedisca la modifica di `ruolo` e `azienda_id`:
-
+### Mappa Flusso
+```text
+Auth.tsx (tab "Candidato")
+  |-- candidate-login Edge Function (username/password -> sessionToken)
+  |-- sessionStorage.setItem('candidate_session')
+  v
+FormAnagrafico.tsx
+  |-- Legge candidate_session da sessionStorage
+  |-- register-candidate Edge Function (crea auth user + candidato record)
+  |-- supabase.auth.setSession() -> sessione Supabase attiva
+  v
+ConsensoPrivacy.tsx
+  |-- Verifica test_completato -> redirect se gia fatto
+  |-- Checkbox accettazione -> navigazione
+  v
+Questionario.tsx (242 domande, 20 per pagina)
+  |-- Carica risposte esistenti (resume)
+  |-- Upsert singola risposta per ogni click
+  |-- Submit finale: scoring V5 + sindromi + profilo -> DB
+  v
+TestCompletato.tsx (pagina finale, logout)
 ```
-CREATE POLICY "Users can update own non-sensitive fields"
-ON public.profiles
-FOR UPDATE
-USING (auth.uid() = user_id)
-WITH CHECK (
-  auth.uid() = user_id 
-  AND ruolo = (SELECT ruolo FROM public.profiles WHERE user_id = auth.uid())
-  AND azienda_id IS NOT DISTINCT FROM (SELECT azienda_id FROM public.profiles WHERE user_id = auth.uid())
-);
+
+### Entita DB coinvolte
+- `accessi_azienda` -- credenziali condivise per login candidato
+- `login_attempts` -- rate limiting
+- `candidati` -- record anagrafico
+- `risposte` -- risposte questionario (upsert per domanda)
+- `risultati` -- punteggi per tratto
+- `profili_candidato` -- profilo V5 completo
+- `profiles` -- profilo auth utente
+
+### Problemi Identificati
+
+#### P0 - CRITICI
+
+1. **`register-candidate` non valida il sessionToken**: Il candidato fa login e ottiene un `sessionToken`, ma `FormAnagrafico.tsx` non lo invia mai al backend. La Edge Function `register-candidate` non lo verifica. Chiunque con un `azienda_id` valido puo registrare candidati fittizi senza autenticarsi.
+
+2. **`register-candidate` manca validazione server-side**: La funzione verifica solo che i campi non siano vuoti (`!azienda_id || !cognome`), ma non applica validazione di formato (eta fuori range, email malformata, injection nei campi testo). La validazione Zod esiste solo lato client.
+
+3. **SHA-256 per password hashing in `candidate-login`**: Usa `crypto.subtle.digest('SHA-256')` senza salt. Vulnerabile a rainbow tables e brute force. Dovrebbe usare bcrypt o argon2.
+
+4. **FormAnagrafico non verifica scadenza sessione**: Il `sessionToken` ha un `expiresAt` ma il client non lo controlla mai. Un candidato potrebbe usare una sessione scaduta.
+
+#### P1 - IMPORTANTI
+
+5. **Questionario: risposte caricate via useEffect invece di useQuery**: Il caricamento risposte in `Questionario.tsx` (riga 51-76) usa un `useEffect` manuale con `setLoadingRisposte`. Questo bypassa React Query e non beneficia di cache, retry automatico, o gestione errori standard.
+
+6. **Questionario: `saveMutation` senza debounce/throttle**: Ogni click su una risposta scatena immediatamente un upsert DB. Con click rapidi su domande consecutive, si generano molte richieste parallele. Non c'e un meccanismo di batching o throttle.
+
+7. **Questionario: submit finale non e idempotente**: Se il submit fallisce a meta (es. dopo `risultati` insert ma prima di `profili_candidato`), un retry inserira duplicati in `risultati`. Non c'e un check di idempotenza.
+
+8. **FormAnagrafico: email e telefono sono opzionali nello schema Zod ma obbligatori nell'UI**: Lo schema `formAnagraficoSchema` ha `email` e `telefono` come `.optional()`, ma l'UI li marca con asterisco e il backend li richiede (`!email || !telefono`). Incoerenza validazione.
+
+9. **`candidate-login` rate limit: cleanup fire-and-forget**: La pulizia dei vecchi tentativi (riga 43-49) usa `.then(() => {})` senza gestione errori. Se fallisce silenziosamente, la tabella cresce indefinitamente.
+
+#### P2 - MIGLIORAMENTI
+
+10. **Questionario: nessun indicatore di salvataggio globale**: Il `savingId` mostra solo l'animazione pulse sulla singola risposta, ma non c'e un indicatore che confermi "tutte le risposte salvate" o "salvataggio in corso".
+
+11. **ConsensoPrivacy: `setTimeout` di 300ms artificiale**: `handleContinue` introduce un delay di 300ms prima della navigazione senza motivo tecnico.
+
+12. **TestCompletato: nessun guard di autenticazione**: La pagina non verifica che l'utente sia autenticato o che sia un candidato. Qualsiasi utente puo accedere a `/test/completato`.
+
+13. **Auth.tsx: tab "Registra" visibile pubblicamente**: Chiunque puo registrare un account HR/azienda. Non e chiaro se questo sia intenzionale o se la registrazione dovrebbe essere riservata al superadmin.
+
+---
+
+## B) Cleanup e Semplificazione
+
+### B1. Validazione sessionToken end-to-end
+- `FormAnagrafico.tsx`: inviare `sessionToken` nel body della richiesta a `register-candidate`
+- `register-candidate/index.ts`: validare il token verificando che esista un record attivo in `accessi_azienda` per quell'azienda e che il token non sia scaduto
+- Dato che il sessionToken non e mai persistito in DB (e solo un UUID generato al volo dal login), l'approccio piu semplice e cambiare la logica: il client invia `sessionToken` + `azienda_id`, e il backend verifica che la coppia sia coerente con una sessione recente. Alternativa: salvare il sessionToken in una tabella `candidate_sessions` con scadenza.
+
+### B2. Validazione server-side in `register-candidate`
+Aggiungere validazione Zod (o equivalente) server-side per:
+- `eta`: intero tra 16 e 99
+- `email`: formato email valido
+- `cognome`/`nome`: max 100 caratteri, trimmed
+- `sesso`: solo 'M' o 'F'
+- `ruolo_attuale` e `funzione`: da lista predefinita
+
+### B3. Questionario: migrare caricamento risposte a useQuery
+Sostituire il `useEffect` manuale con un `useQuery` che benefici di cache e retry automatico.
+
+### B4. Coerenza validazione email/telefono
+Allineare lo schema `formAnagraficoSchema` per rendere email e telefono obbligatori (come nell'UI e nel backend).
+
+### B5. Guard su TestCompletato
+Aggiungere verifica ruolo candidato e autenticazione.
+
+---
+
+## C) Performance
+
+### C1. Questionario: batch save con debounce
+Invece di un upsert immediato per ogni risposta, accumulare le risposte modificate e salvarle in batch ogni 2-3 secondi (o al cambio pagina). Riduce le chiamate DB da potenzialmente 20/pagina a 1.
+
+**Stima**: da 20 richieste per pagina a 1-2 richieste. Riduzione ~90% delle chiamate DB durante la compilazione.
+
+### C2. Questionario: scroll ottimizzato
+Il componente ri-renderizza tutte le 20 domande ad ogni risposta (perche `risposte` state cambia). Memoizzare i singoli blocchi domanda con `React.memo` basato su `domanda.id` e `risposte[domanda.id]`.
+
+**Stima**: riduzione re-render da 20 componenti a 1 per ogni click.
+
+### C3. ConsensoPrivacy: rimuovere setTimeout artificiale
+La navigazione verso il questionario ha un delay di 300ms non necessario.
+
+---
+
+## D) Stabilita Funzionale
+
+### D1. Submit questionario idempotente
+Prima del submit, verificare se esiste gia un `profili_candidato` per quel `candidato_id`. Se esiste, saltare l'insert (o fare upsert). Stessa logica per `risultati`: usare upsert su `(candidato_id, scala)`.
+
+### D2. Verifica scadenza sessione candidato
+In `FormAnagrafico.tsx`, controllare `expiresAt` dalla sessione e se scaduto reindirizzare ad `/auth` con messaggio appropriato.
+
+### D3. Gestione errore rete nel questionario
+Se il salvataggio di una risposta fallisce, mostrare un indicatore visivo persistente (non solo un toast) e ritentare automaticamente.
+
+---
+
+## E) UX
+
+### E1. Indicatore salvataggio globale
+Aggiungere un piccolo badge "Salvato" / "Salvataggio..." nella barra di navigazione sticky del questionario, accanto al contatore risposte.
+
+### E2. Conferma prima dell'invio finale
+Aggiungere un dialog di conferma prima del submit finale ("Stai per inviare le tue risposte. Questa azione non e reversibile.").
+
+---
+
+## F) Multi-Tenancy
+
+### F1. Isolamento gia implementato
+- `candidati.azienda_id` e impostato dal backend in `register-candidate`
+- RLS policies filtrano per `user_id` del candidato
+- Il candidato vede solo i propri dati
+
+### F2. Rischio: `register-candidate` senza auth
+Senza validazione del sessionToken, un attaccante potrebbe creare candidati in qualsiasi azienda conoscendone l'ID. Questo e il fix P0 principale.
+
+---
+
+## G) Sicurezza
+
+### G1. Fix sessionToken (P0)
+Creare tabella `candidate_sessions` per persistere e validare i token:
+```text
+candidate_sessions
+  id: uuid
+  session_token: text (unique)
+  azienda_id: uuid (FK)
+  expires_at: timestamptz
+  used: boolean (default false)
+  created_at: timestamptz
 ```
-(Eliminando la policy precedente `Users can update own profile`.)
+- `candidate-login`: inserisce record con token + scadenza
+- `register-candidate`: verifica token valido, non scaduto, non usato, marca come `used`
+- RLS: nessuna policy necessaria (accesso solo via service role)
+
+### G2. Validazione input server-side (P0)
+Aggiungere validazione in `register-candidate`:
+- Trimming e sanitizzazione stringhe
+- Verifica formato email
+- Range eta 16-99
+- Sesso in ['M', 'F']
+- Lunghezza massima campi
+
+### G3. Rate limit cleanup robusto (P1)
+Sostituire il fire-and-forget con un cleanup schedulato o un TTL a livello DB (pg_cron o trigger).
+
+### G4. Guard rotte candidato (P1)
+- `/test/completato`: verificare autenticazione + ruolo candidato
+- `/test/anagrafica`: gia protetto via sessionStorage (ma debole)
 
 ---
 
-## G) SICUREZZA
-
-### G1. Fix P0: Protezione campo `ruolo` nei profili
-Modificare la policy UPDATE di `profiles` per impedire modifica di `ruolo` e `azienda_id` da parte dell'utente.
-
-### G2. Fix P0: Rate limiting su `candidate-login`
-Aggiungere un meccanismo di rate limiting basato su IP/username nella edge function (contatore in-memory con TTL o tabella DB con tentativi).
-
-### G3. Fix P0: Autenticazione `register-candidate`
-La funzione deve validare il `sessionToken` dal candidate-login, attualmente lo ignora completamente.
-
-### G4. Fix P0: Rimuovere colonna `password_plain`
-Creare migrazione per droppare `password_plain` da `accessi_azienda`.
-
-### G5. Fix P0: Abilitare leaked password protection
-Configurare tramite il backend per abilitare il controllo password compromesse.
-
-### G6. Fix P1: Configurare `candidate-login` in config.toml
-Aggiungere `[functions.candidate-login] verify_jwt = false` (dato che e un endpoint pubblico di autenticazione).
-
-### G7. Segreti e chiavi
-- Nessuna chiave API esposta nel client (verificato)
-- `VITE_SUPABASE_PUBLISHABLE_KEY` e correttamente la chiave anon (pubblica)
-- I segreti sensibili (SERVICE_ROLE_KEY, LOVABLE_API_KEY) sono solo nelle edge functions via env
+## H) Backup e Restore
+Gia coperto dal piano globale. Le risposte del questionario sono persistite una per una (upsert immediato), quindi il rischio di perdita dati e minimo.
 
 ---
 
-## H) BACKUP E RESTORE
-
-### H1. Stato attuale
-Lovable Cloud (Supabase) include backup automatici:
-- **Frequenza**: Backup giornalieri automatici gestiti dall'infrastruttura
-- **Retention**: 7 giorni (piano standard)
-- **Restore**: Disponibile tramite la dashboard Cloud
-
-### H2. Raccomandazioni aggiuntive
-- Implementare export CSV periodico dei dati critici (candidati, profili, risultati) come backup applicativo
-- La funzionalita di export CSV e gia presente in Aziende.tsx - estenderla a Candidati
+## I) Osservabilita
+- `register-candidate`: aggiungere log strutturati JSON per tracciare registrazioni (azienda_id, timestamp, esito)
+- `candidate-login`: gia loggato via `login_attempts` table
 
 ---
 
-## I) OSSERVABILITA
-
-### I1. Stato attuale
-- Error logging: `console.error` nelle Edge Functions
-- ErrorBoundary: presente a livello root in App.tsx
-- Toast notifications: presenti per tutti gli errori UI
-- Nessun sistema di alerting strutturato
-
-### I2. Raccomandazioni
-- I log delle Edge Functions sono gia raccolti automaticamente dall'infrastruttura Cloud
-- Aggiungere log strutturati (JSON) nelle edge functions per filtraggio migliore
-- Considerare integrazione con servizio di error tracking in futuro (fuori scope attuale)
-
----
-
-## J) SEQUENZA DI IMPLEMENTAZIONE
-
-La sequenza tiene conto delle dipendenze e della priorita:
+## J) Sequenza di Implementazione
 
 ### Fase 1: Sicurezza critica (P0)
-1. Migrazione DB: aggiungere policy restrittiva UPDATE su `profiles`, droppare `password_plain`
-2. Fix `register-candidate`: validare sessionToken
-3. Aggiornare `config.toml` per `candidate-login`
-4. Abilitare leaked password protection
+1. Creare tabella `candidate_sessions` con migrazione DB
+2. Aggiornare `candidate-login` per inserire sessione in DB
+3. Aggiornare `FormAnagrafico.tsx` per inviare sessionToken
+4. Aggiornare `register-candidate` per validare token + input server-side
+5. Allineare validazione email/telefono obbligatori
 
-### Fase 2: Pulizia e tipi (P1)
-5. Aggiornare tipo `ProfiloCandidato` in `database.ts` per V5
-6. Rimuovere `generatePassword()` da Aziende.tsx
-7. Eliminare `as any` casting in CandidatoDettaglio.tsx
-8. Centralizzare helper per invocazione Edge Functions
+### Fase 2: Stabilita (P1)
+6. Submit questionario idempotente (upsert risultati e profilo)
+7. Verifica scadenza sessione in FormAnagrafico
+8. Guard autenticazione su TestCompletato
+9. Migrare caricamento risposte a useQuery
 
-### Fase 3: Performance (P1)
-9. Indici database
-10. Eliminare query duplicati dalla Dashboard
-11. Estrarre dati statici da Home.tsx
-12. ProtectedRoute su Dashboard e Pagamenti
-
-### Fase 4: Backend fix (P1)
-13. Aggiornare `analyze-candidate` per V5
+### Fase 3: Performance e UX (P2)
+10. Memoizzare blocchi domanda nel questionario
+11. Indicatore salvataggio globale
+12. Dialog conferma invio finale
+13. Rimuovere setTimeout ConsensoPrivacy
 
 ### Note
-- Ogni fase e indipendente e non rompe le precedenti
-- Stima totale: ~4-5 iterazioni di implementazione
-- Nessun cambiamento funzionale visibile all'utente (behavior-preserving)
+- Fase 1 e critica per la sicurezza e deve essere implementata per prima
+- Fase 2 e 3 sono behavior-preserving e non rompono funzionalita
+- Stima totale: 2-3 iterazioni di implementazione
