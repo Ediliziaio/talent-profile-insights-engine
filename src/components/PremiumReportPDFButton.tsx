@@ -159,7 +159,12 @@ export function PremiumReportPDFButton({
           totalPages += 1;
         } else {
           const pxPerPage = maxContentH / ratio;
-          totalPages += Math.ceil(canvas.height / pxPerPage);
+          let pages = Math.ceil(canvas.height / pxPerPage);
+          const lastSliceH = canvas.height - (pages - 1) * pxPerPage;
+          if (pages > 1 && lastSliceH < pxPerPage * 0.08) {
+            pages -= 1;
+          }
+          totalPages += pages;
         }
       }
 
@@ -201,7 +206,13 @@ export function PremiumReportPDFButton({
             let isFirstSlice = true;
 
             while (srcY < canvas.height) {
-              const sliceH = Math.min(pxPerPage, canvas.height - srcY);
+              const remainingH = canvas.height - srcY;
+              const sliceH = Math.min(pxPerPage, remainingH);
+
+              // Skip last slice if too small (< 8% of page = just padding/overflow)
+              if (remainingH < pxPerPage * 0.08 && srcY > 0) {
+                break;
+              }
 
               const sliceCanvas = document.createElement('canvas');
               sliceCanvas.width = canvas.width;
