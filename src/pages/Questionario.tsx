@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -6,16 +6,132 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { AnswerButton } from '@/components/AnswerButton';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { DOMANDE } from '@/data/questionario';
 import { calcolaProfiloV5, determinaProfiloTipoV5, RispostaInputV5 } from '@/lib/scoringV5';
 import { getActiveSyndromes, formatSyndromesForDB, TraitScores } from '@/lib/syndromes';
 import { QUESTIONS_PER_PAGE, ANSWER_OPTIONS, type AnswerValue } from '@/lib/constants';
-import { Brain, ChevronLeft, ChevronRight, Send, Loader2 } from 'lucide-react';
+import { Brain, ChevronLeft, ChevronRight, Send, Loader2, CheckCircle2, CloudUpload } from 'lucide-react';
 import { Candidato, RispostaValueV5 } from '@/types/database';
 import { Json } from '@/integrations/supabase/types';
 import { cn } from '@/lib/utils';
 import { QuestionarioSkeleton } from '@/components/skeletons';
+
+// ---- Memoized Question Block Components ----
+
+interface QuestionBlockDesktopProps {
+  domanda: (typeof DOMANDE)[number];
+  questionNumber: number;
+  selectedValue: AnswerValue | undefined;
+  savingId: number | null;
+  onAnswer: (domandaId: number, valore: AnswerValue) => void;
+  animationDelay: number;
+}
+
+const QuestionBlockDesktop = React.memo(function QuestionBlockDesktop({
+  domanda, questionNumber, selectedValue, savingId, onAnswer, animationDelay,
+}: QuestionBlockDesktopProps) {
+  const options = domanda.risposte_custom
+    ? ANSWER_OPTIONS.map(option => ({
+        ...option,
+        label: domanda.risposte_custom![option.value.toLowerCase() as 'a' | 'b' | 'c'],
+        shortLabel: domanda.risposte_custom![option.value.toLowerCase() as 'a' | 'b' | 'c'],
+      }))
+    : ANSWER_OPTIONS;
+
+  return (
+    <Card className={cn(
+      "hidden lg:block transition-all duration-300",
+      "animate-in fade-in-50 slide-in-from-bottom-1",
+      selectedValue ? "border-accent/50 shadow-md" : ""
+    )} style={{ animationDelay: `${animationDelay}ms` }}>
+      <CardContent className="p-3 lg:p-4">
+        <div className="lg:grid lg:grid-cols-[1fr_auto_auto_auto] gap-3 items-center">
+          <div className="flex gap-2 items-start">
+            <span className="text-muted-foreground font-medium min-w-[2.5rem] text-sm">
+              {questionNumber}.
+            </span>
+            <p className="font-medium text-sm lg:text-base leading-snug line-clamp-2">
+              {domanda.testo}
+            </p>
+          </div>
+          {options.map(option => (
+            <AnswerButton
+              key={option.value}
+              value={option.value}
+              label={option.label}
+              selected={selectedValue === option.value}
+              onClick={() => onAnswer(domanda.id, option.value)}
+              variant="desktop"
+              isSaving={savingId === domanda.id}
+            />
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+});
+
+interface QuestionBlockMobileProps {
+  domanda: (typeof DOMANDE)[number];
+  questionNumber: number;
+  selectedValue: AnswerValue | undefined;
+  savingId: number | null;
+  onAnswer: (domandaId: number, valore: AnswerValue) => void;
+  animationDelay: number;
+  showDivider: boolean;
+}
+
+const QuestionBlockMobile = React.memo(function QuestionBlockMobile({
+  domanda, questionNumber, selectedValue, savingId, onAnswer, animationDelay, showDivider,
+}: QuestionBlockMobileProps) {
+  const options = domanda.risposte_custom
+    ? ANSWER_OPTIONS.map(option => ({
+        ...option,
+        label: domanda.risposte_custom![option.value.toLowerCase() as 'a' | 'b' | 'c'],
+        shortLabel: domanda.risposte_custom![option.value.toLowerCase() as 'a' | 'b' | 'c'],
+      }))
+    : ANSWER_OPTIONS;
+
+  return (
+    <div className={cn(
+      "lg:hidden py-2.5 px-2 rounded-md transition-all duration-200",
+      "animate-in fade-in-50",
+      selectedValue
+        ? "border-l-[3px] border-l-accent bg-accent/5"
+        : "border-l-[3px] border-l-transparent"
+    )} style={{ animationDelay: `${animationDelay}ms` }}>
+      <div className="space-y-2">
+        <div className="flex gap-1.5 items-start">
+          <span className="text-muted-foreground font-medium min-w-[1.5rem] text-xs mt-0.5">
+            {questionNumber}.
+          </span>
+          <p className="font-medium text-[13px] leading-snug">{domanda.testo}</p>
+        </div>
+        <div className="grid grid-cols-3 gap-1.5 pl-5">
+          {options.map(option => (
+            <AnswerButton
+              key={option.value}
+              value={option.value}
+              label={option.label}
+              shortLabel={option.shortLabel}
+              selected={selectedValue === option.value}
+              onClick={() => onAnswer(domanda.id, option.value)}
+              isSaving={savingId === domanda.id}
+              variant="mobile"
+            />
+          ))}
+        </div>
+      </div>
+      {showDivider && (
+        <div className="h-px bg-border/50 mt-2.5 -mx-2" />
+      )}
+    </div>
+  );
+});
+
+// ---- Main Component ----
 
 export default function Questionario() {
   const { user, profile, loading: authLoading } = useAuth();
@@ -25,11 +141,15 @@ export default function Questionario() {
   const [risposte, setRisposte] = useState<Record<number, AnswerValue>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [savingId, setSavingId] = useState<number | null>(null);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   const totalPages = Math.ceil(DOMANDE.length / QUESTIONS_PER_PAGE);
   const startIndex = currentPage * QUESTIONS_PER_PAGE;
   const endIndex = Math.min(startIndex + QUESTIONS_PER_PAGE, DOMANDE.length);
-  const currentQuestions = DOMANDE.slice(startIndex, endIndex);
+  const currentQuestions = useMemo(
+    () => DOMANDE.slice(startIndex, endIndex),
+    [startIndex, endIndex]
+  );
 
   const { data: candidato, isLoading: loadingCandidato } = useQuery({
     queryKey: ['candidato', user?.id],
@@ -63,7 +183,7 @@ export default function Questionario() {
       return existing;
     },
     enabled: !!candidato,
-    staleTime: 1000 * 60 * 5, // 5 min cache
+    staleTime: 1000 * 60 * 5,
     retry: 2,
   });
 
@@ -115,6 +235,7 @@ export default function Questionario() {
   const progress = (Object.keys(risposte).length / DOMANDE.length) * 100;
   const isLastPage = currentPage === totalPages - 1;
   const allAnswered = Object.keys(risposte).length === DOMANDE.length;
+  const isSaving = saveMutation.isPending;
 
   // Auto-scroll to top when page changes
   useEffect(() => {
@@ -175,7 +296,7 @@ export default function Questionario() {
       const syndromes = getActiveSyndromes(traitScores, candidato.eta ?? undefined);
       const syndromesForDB = formatSyndromesForDB(syndromes);
 
-      // Ricalcola profilo tipo con sindromi (fix: calcolaProfiloV5 non passa sindromi)
+      // Ricalcola profilo tipo con sindromi
       const activeSyndromeCodes = syndromes
         .filter(s => s.isActive)
         .map(s => s.code);
@@ -196,7 +317,6 @@ export default function Questionario() {
         .maybeSingle();
 
       if (existingProfilo) {
-        // Already submitted — skip to completion
         toast({
           title: 'Test già completato',
           description: 'I risultati erano già stati salvati.',
@@ -222,28 +342,20 @@ export default function Questionario() {
       // Salva profilo V5 completo
       const profiloData = {
         candidato_id: candidato.id,
-        // Macro-aree V5
         essere_pct: profilo.essere_pct,
         fare_pct: profilo.fare_pct,
         avere_pct: profilo.avere_pct,
-        // Tratti V5
         traits_v5: profilo.traits_v5 as Json,
-        // Profilo tipo V5 (con sindromi)
         profilo_tipo_v5: profiloTipoCorretto,
-        // Attendibilità
         reliability_index: profilo.reliability_index,
-        // Sindromi rilevate
         syndromes_detected: syndromesForDB as Json,
-        // Punti di forza e debolezza
         out_points: profilo.valleys as Json,
         strength_points: profilo.strengths as Json,
-        // Legacy (per compatibilità)
         scale_punteggi: profilo.traits_v5 as Json,
         leadership_pct: profilo.avere_pct,
         maturita_pct: profilo.essere_pct,
         potenziale_pct: profilo.fare_pct,
         stress_zone: hasCriticalSyndromes,
-        // Versione assessment
         assessment_version: 'v5',
       };
 
@@ -345,89 +457,27 @@ export default function Questionario() {
           />
         </div>
 
-        {/* Questions - Optimized Desktop Grid */}
+        {/* Questions - Memoized blocks */}
         <div className="space-y-1.5 sm:space-y-3">
           {currentQuestions.map((domanda, idx) => (
             <React.Fragment key={domanda.id}>
-              {/* Desktop: Card layout (unchanged) */}
-              <Card className={cn(
-                "hidden lg:block transition-all duration-300",
-                "animate-in fade-in-50 slide-in-from-bottom-1",
-                risposte[domanda.id] ? "border-accent/50 shadow-md" : ""
-              )} style={{ animationDelay: `${idx * 30}ms` }}>
-                <CardContent className="p-3 lg:p-4">
-                  <div className="lg:grid lg:grid-cols-[1fr_auto_auto_auto] gap-3 items-center">
-                    <div className="flex gap-2 items-start">
-                      <span className="text-muted-foreground font-medium min-w-[2.5rem] text-sm">
-                        {startIndex + idx + 1}.
-                      </span>
-                      <p className="font-medium text-sm lg:text-base leading-snug line-clamp-2">
-                        {domanda.testo}
-                      </p>
-                    </div>
-                    {(domanda.risposte_custom
-                      ? ANSWER_OPTIONS.map(option => ({
-                          ...option,
-                          label: domanda.risposte_custom![option.value.toLowerCase() as 'a' | 'b' | 'c'],
-                          shortLabel: domanda.risposte_custom![option.value.toLowerCase() as 'a' | 'b' | 'c'],
-                        }))
-                      : ANSWER_OPTIONS
-                    ).map(option => (
-                      <AnswerButton
-                        key={option.value}
-                        value={option.value}
-                        label={option.label}
-                        selected={risposte[domanda.id] === option.value}
-                        onClick={() => handleAnswer(domanda.id, option.value)}
-                        variant="desktop"
-                        isSaving={savingId === domanda.id}
-                      />
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Mobile: Compact list layout */}
-              <div className={cn(
-                "lg:hidden py-2.5 px-2 rounded-md transition-all duration-200",
-                "animate-in fade-in-50",
-                risposte[domanda.id] 
-                  ? "border-l-[3px] border-l-accent bg-accent/5" 
-                  : "border-l-[3px] border-l-transparent"
-              )} style={{ animationDelay: `${idx * 20}ms` }}>
-                <div className="space-y-2">
-                  <div className="flex gap-1.5 items-start">
-                    <span className="text-muted-foreground font-medium min-w-[1.5rem] text-xs mt-0.5">
-                      {startIndex + idx + 1}.
-                    </span>
-                    <p className="font-medium text-[13px] leading-snug">{domanda.testo}</p>
-                  </div>
-                  <div className="grid grid-cols-3 gap-1.5 pl-5">
-                    {(domanda.risposte_custom
-                      ? ANSWER_OPTIONS.map(option => ({
-                          ...option,
-                          label: domanda.risposte_custom![option.value.toLowerCase() as 'a' | 'b' | 'c'],
-                          shortLabel: domanda.risposte_custom![option.value.toLowerCase() as 'a' | 'b' | 'c'],
-                        }))
-                      : ANSWER_OPTIONS
-                    ).map(option => (
-                      <AnswerButton
-                        key={option.value}
-                        value={option.value}
-                        label={option.label}
-                        shortLabel={option.shortLabel}
-                        selected={risposte[domanda.id] === option.value}
-                        onClick={() => handleAnswer(domanda.id, option.value)}
-                        isSaving={savingId === domanda.id}
-                        variant="mobile"
-                      />
-                    ))}
-                  </div>
-                </div>
-                {idx < currentQuestions.length - 1 && (
-                  <div className="h-px bg-border/50 mt-2.5 -mx-2" />
-                )}
-              </div>
+              <QuestionBlockDesktop
+                domanda={domanda}
+                questionNumber={startIndex + idx + 1}
+                selectedValue={risposte[domanda.id]}
+                savingId={savingId}
+                onAnswer={handleAnswer}
+                animationDelay={idx * 30}
+              />
+              <QuestionBlockMobile
+                domanda={domanda}
+                questionNumber={startIndex + idx + 1}
+                selectedValue={risposte[domanda.id]}
+                savingId={savingId}
+                onAnswer={handleAnswer}
+                animationDelay={idx * 20}
+                showDivider={idx < currentQuestions.length - 1}
+              />
             </React.Fragment>
           ))}
         </div>
@@ -446,12 +496,28 @@ export default function Questionario() {
             <span className="hidden sm:inline">Indietro</span>
           </Button>
 
-          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-            <span className="font-semibold">{Object.keys(risposte).length}/{DOMANDE.length}</span>
+          {/* Global saving indicator */}
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            {isSaving ? (
+              <span className="flex items-center gap-1 text-primary animate-pulse">
+                <CloudUpload className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Salvataggio...</span>
+              </span>
+            ) : (
+              <span className="flex items-center gap-1">
+                <CheckCircle2 className="h-3.5 w-3.5 text-accent" />
+                <span className="hidden sm:inline">Salvato</span>
+              </span>
+            )}
+            <span className="font-semibold ml-1">{Object.keys(risposte).length}/{DOMANDE.length}</span>
           </div>
 
           {isLastPage && allAnswered ? (
-            <Button onClick={handleSubmit} disabled={isSubmitting} className="h-10 sm:h-12 px-4 sm:px-6 text-sm sm:text-base bg-accent hover:bg-accent/90">
+            <Button 
+              onClick={() => setShowConfirmDialog(true)} 
+              disabled={isSubmitting} 
+              className="h-10 sm:h-12 px-4 sm:px-6 text-sm sm:text-base bg-accent hover:bg-accent/90"
+            >
               {isSubmitting ? (
                 <Loader2 className="h-4 w-4 sm:mr-2 animate-spin" />
               ) : (
@@ -472,6 +538,39 @@ export default function Questionario() {
           )}
         </div>
       </div>
+
+      {/* Confirmation Dialog */}
+      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Conferma invio test</AlertDialogTitle>
+            <AlertDialogDescription>
+              Stai per inviare le tue risposte. Questa azione non è reversibile: una volta confermato, 
+              non sarà più possibile modificare le risposte. Sei sicuro di voler procedere?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isSubmitting}>Torna al test</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+              className="bg-accent hover:bg-accent/90"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Invio in corso...
+                </>
+              ) : (
+                <>
+                  <Send className="h-4 w-4 mr-2" />
+                  Conferma e Invia
+                </>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
