@@ -152,7 +152,6 @@ Deno.serve(async (req) => {
           azienda_id: targetAziendaId,
           username,
           password_hash: passwordHash,
-          password_plain: null,
           attivo: true,
         })
         .select()

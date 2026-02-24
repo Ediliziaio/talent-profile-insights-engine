@@ -31,28 +31,6 @@ export const loginCandidateSchema = z.object({
     .min(1, 'Password obbligatoria'),
 });
 
-export const registerSchema = z.object({
-  nome: z
-    .string()
-    .trim()
-    .min(1, 'Nome obbligatorio')
-    .max(VALIDATION.NAME_MAX_LENGTH, `Nome troppo lungo (max ${VALIDATION.NAME_MAX_LENGTH} caratteri)`),
-  cognome: z
-    .string()
-    .trim()
-    .min(1, 'Cognome obbligatorio')
-    .max(VALIDATION.NAME_MAX_LENGTH, `Cognome troppo lungo (max ${VALIDATION.NAME_MAX_LENGTH} caratteri)`),
-  email: z
-    .string()
-    .trim()
-    .min(1, 'Email obbligatoria')
-    .email('Email non valida')
-    .max(VALIDATION.EMAIL_MAX_LENGTH, `Email troppo lunga`),
-  password: z
-    .string()
-    .min(VALIDATION.PASSWORD_MIN_LENGTH, `Minimo ${VALIDATION.PASSWORD_MIN_LENGTH} caratteri`),
-});
-
 // ============ CANDIDATO SCHEMAS ============
 
 export const createCandidatoSchema = z.object({
@@ -143,6 +121,5 @@ export const formAnagraficoSchema = z.object({
 
 export type LoginEmailInput = z.infer<typeof loginEmailSchema>;
 export type LoginCandidateInput = z.infer<typeof loginCandidateSchema>;
-export type RegisterInput = z.infer<typeof registerSchema>;
 export type CreateCandidatoInput = z.infer<typeof createCandidatoSchema>;
 export type FormAnagraficoInput = z.infer<typeof formAnagraficoSchema>;

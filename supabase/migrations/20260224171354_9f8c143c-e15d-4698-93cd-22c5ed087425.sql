@@ -1,0 +1,1 @@
+ALTER TABLE public.accessi_azienda DROP COLUMN IF EXISTS password_plain;
