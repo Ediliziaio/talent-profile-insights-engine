@@ -11,19 +11,11 @@ import { User, Building2, Loader2 } from 'lucide-react';
 import { 
   loginEmailSchema, 
   loginCandidateSchema, 
-  registerSchema,
-  type LoginEmailInput,
-  type LoginCandidateInput,
-  type RegisterInput 
 } from '@/lib/validationSchemas';
 
 export default function Auth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [regEmail, setRegEmail] = useState('');
-  const [regPassword, setRegPassword] = useState('');
-  const [nome, setNome] = useState('');
-  const [cognome, setCognome] = useState('');
   const [loading, setLoading] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   
@@ -33,7 +25,7 @@ export default function Auth() {
   const [candidateLoading, setCandidateLoading] = useState(false);
   const [candidateErrors, setCandidateErrors] = useState<Record<string, string>>({});
   
-  const { signIn, signUp } = useAuth();
+  const { signIn } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -72,39 +64,6 @@ export default function Auth() {
     }
   };
 
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setFieldErrors({});
-    
-    // Validate with Zod
-    const validation = registerSchema.safeParse({ nome, cognome, email: regEmail, password: regPassword });
-    if (!validation.success) {
-      const errors: Record<string, string> = {};
-      validation.error.errors.forEach(err => {
-        if (err.path[0]) {
-          errors[err.path[0].toString()] = err.message;
-        }
-      });
-      setFieldErrors(errors);
-      return;
-    }
-    
-    setLoading(true);
-    const { error } = await signUp(
-      validation.data.email, 
-      validation.data.password, 
-      validation.data.nome, 
-      validation.data.cognome
-    );
-    setLoading(false);
-    
-    if (error) {
-      toast({ title: 'Errore', description: error.message, variant: 'destructive' });
-    } else {
-      toast({ title: 'Registrazione completata', description: 'Puoi ora accedere.' });
-      navigate('/');
-    }
-  };
 
   const handleCandidateLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -191,7 +150,7 @@ export default function Auth() {
         </CardHeader>
         <CardContent className="px-4 sm:px-6">
           <Tabs defaultValue="candidate" className="space-y-4" onValueChange={() => { setFieldErrors({}); setCandidateErrors({}); }}>
-            <TabsList className="grid w-full grid-cols-3 h-11">
+            <TabsList className="grid w-full grid-cols-2 h-11">
               <TabsTrigger value="candidate" className="flex items-center justify-center gap-1.5 h-full text-xs sm:text-sm">
                 <User className="h-4 w-4 shrink-0" />
                 <span className="hidden xs:inline sm:inline">Candidato</span>
@@ -200,7 +159,6 @@ export default function Auth() {
                 <Building2 className="h-4 w-4 shrink-0" />
                 <span className="hidden xs:inline sm:inline">Azienda</span>
               </TabsTrigger>
-              <TabsTrigger value="register" className="h-full text-xs sm:text-sm">Registra</TabsTrigger>
             </TabsList>
 
             {/* Candidate Login Tab */}
@@ -292,75 +250,6 @@ export default function Auth() {
                     </>
                   ) : (
                     'Accedi'
-                  )}
-                </Button>
-              </form>
-            </TabsContent>
-            
-            {/* Registration Tab */}
-            <TabsContent value="register">
-              <form onSubmit={handleSignUp} className="space-y-4 mt-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="nome" className="text-sm">Nome</Label>
-                    <Input 
-                      id="nome" 
-                      value={nome} 
-                      onChange={e => setNome(e.target.value)} 
-                      className={`h-11 text-base ${fieldErrors.nome ? 'border-destructive' : ''}`}
-                    />
-                    {fieldErrors.nome && (
-                      <p className="text-xs text-destructive">{fieldErrors.nome}</p>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="cognome" className="text-sm">Cognome</Label>
-                    <Input 
-                      id="cognome" 
-                      value={cognome} 
-                      onChange={e => setCognome(e.target.value)} 
-                      className={`h-11 text-base ${fieldErrors.cognome ? 'border-destructive' : ''}`}
-                    />
-                    {fieldErrors.cognome && (
-                      <p className="text-xs text-destructive">{fieldErrors.cognome}</p>
-                    )}
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="reg-email" className="text-sm">Email</Label>
-                  <Input 
-                    id="reg-email" 
-                    type="email" 
-                    value={regEmail} 
-                    onChange={e => setRegEmail(e.target.value)} 
-                    className={`h-11 text-base ${fieldErrors.email ? 'border-destructive' : ''}`}
-                  />
-                  {fieldErrors.email && (
-                    <p className="text-xs text-destructive">{fieldErrors.email}</p>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="reg-password" className="text-sm">Password</Label>
-                  <Input 
-                    id="reg-password" 
-                    type="password"
-                    autoComplete="new-password"
-                    value={regPassword} 
-                    onChange={e => setRegPassword(e.target.value)} 
-                    className={`h-11 text-base ${fieldErrors.password ? 'border-destructive' : ''}`}
-                  />
-                  {fieldErrors.password && (
-                    <p className="text-xs text-destructive">{fieldErrors.password}</p>
-                  )}
-                </div>
-                <Button type="submit" className="w-full h-12 text-base" disabled={loading}>
-                  {loading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Registrazione...
-                    </>
-                  ) : (
-                    'Registrati'
                   )}
                 </Button>
               </form>
