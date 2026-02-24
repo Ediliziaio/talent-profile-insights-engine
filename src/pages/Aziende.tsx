@@ -450,12 +450,10 @@ export default function Aziende() {
         return;
       }
 
-      const email = `${data.username}@azienda.talentprofile.local`;
-
       setViewingCredentials({
         aziendaId: azienda.id,
         aziendaNome: azienda.nome,
-        email,
+        email: data.username,
         username: data.username,
         password: '••••••••••••',
       });
@@ -503,10 +501,8 @@ export default function Aziende() {
         throw new Error(result.error || 'Errore nella rigenerazione');
       }
 
-      const email = `${result.accesso.username}@azienda.talentprofile.local`;
-      
       setRegeneratedCredentials({
-        email,
+        email: result.accesso.username,
         password: result.plainPassword,
       });
 
@@ -1370,7 +1366,7 @@ export default function Aziende() {
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label>Email</Label>
+                <Label>Username</Label>
                 <div className="flex gap-2">
                   <Input value={viewingCredentials?.email || ''} readOnly className="font-mono text-sm" />
                   <Button
