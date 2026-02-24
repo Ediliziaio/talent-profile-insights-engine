@@ -1324,7 +1324,7 @@ export function PremiumReportPDF(props: PremiumReportPDFProps) {
               })()}
 
               {/* Bottom: Narrativa sx + 3 Card dx */}
-              <div style={{ display: 'flex', gap: 20, marginBottom: 16 }}>
+              <div style={{ display: 'flex', gap: 20, marginBottom: 16, pageBreakInside: 'avoid' }}>
                 {/* Chi è nel profondo */}
                 <div style={{ flex: '0 0 58%' }}>
                   <div style={{ fontSize: 12, fontWeight: 700, color: BRAND_BLUE, marginBottom: 8 }}>Chi è {candidato.nome} nel profondo</div>
@@ -1369,7 +1369,7 @@ export function PremiumReportPDF(props: PremiumReportPDFProps) {
               </div>
 
               {/* 3 colonne: Motiva / Blocca / Teme */}
-              <div style={{ display: 'flex', gap: 14, marginBottom: 20 }}>
+              <div style={{ display: 'flex', gap: 14, marginBottom: 20, pageBreakInside: 'avoid' }}>
                 <div style={{ flex: 1, padding: '14px 14px', border: `1px solid ${BORDER_LIGHT}`, borderRadius: 8, borderTop: `3px solid ${COLOR_GREEN}`, pageBreakInside: 'avoid' }}>
                   <div style={{ fontSize: 10, fontWeight: 800, color: COLOR_GREEN, marginBottom: 8, letterSpacing: 0.5, textTransform: 'uppercase' }}>💪 Cosa lo Motiva</div>
                   {mappaInteriore.cosa_motiva.map((m, i) => (
@@ -1397,7 +1397,7 @@ export function PremiumReportPDF(props: PremiumReportPDFProps) {
               </AccentBox>
 
               {/* Cosa lo guida + Cosa lo blocca narratives */}
-              <div style={{ display: 'flex', gap: 16, marginBottom: 20 }}>
+              <div style={{ display: 'flex', gap: 16, marginBottom: 20, pageBreakInside: 'avoid' }}>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 11, fontWeight: 700, color: BRAND_BLUE, marginBottom: 6 }}>Cosa lo guida</div>
                   <div style={{ fontSize: FONT_BODY, color: TEXT_BODY, lineHeight: 1.55 }}>{mappaInteriore.narrativa.cosa_lo_guida}</div>
