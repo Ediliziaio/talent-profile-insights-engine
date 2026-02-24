@@ -1,47 +1,63 @@
 
 
-# Fix: Aziende.tsx mostra username con suffisso email errato
+# Ottimizzazione velocita "Prosegui al Test" (register-candidate)
 
-## Problema
+## Analisi del problema
 
-In `src/pages/Aziende.tsx` (linea 506), quando le credenziali candidato vengono rigenerate, lo username viene mostrato nel formato:
-```
-cristiancarli-kmoi@azienda.talentprofile.local
-```
+La edge function `register-candidate` esegue **6 operazioni sequenziali** al database/auth:
 
-Questo suffisso `@azienda.talentprofile.local` è un residuo del vecchio sistema di autenticazione tramite Supabase Auth. Il sistema attuale di login candidato (edge function `candidate-login`) cerca lo username esatto nella tabella `accessi_azienda`, quindi l'utente deve inserire solo `cristiancarli-kmoi`.
+1. Validazione session token (query `candidate_sessions`)
+2. Mark session as used (update `candidate_sessions`)
+3. Verifica azienda (query `aziende`)
+4. Creazione auth user (`auth.admin.createUser`) -- **lenta** (~2-3s)
+5. Upsert profilo (upsert `profiles`)
+6. Insert candidato (insert `candidati`)
+7. **Sign in con password** (`signInWithPassword`) -- **lenta** (~2-3s, e ridondante)
 
-L'utente ha copiato le credenziali dalla pagina Aziende, ha incollato lo username completo con il suffisso nel form di login candidato, e il login ha fallito con "Credenziali non valide".
+Il collo di bottiglia principale e il punto 7: `signInWithPassword` e completamente inutile perche `createUser` restituisce gia l'utente creato. Possiamo generare una sessione senza fare un secondo round-trip di autenticazione.
 
-Ho verificato che le credenziali `cristiancarli-kmoi` / `9tPdFSFgxFjR` funzionano correttamente chiamando direttamente la edge function.
+Inoltre, i punti 2 e 3 possono essere eseguiti **in parallelo** (non dipendono l'uno dall'altro).
 
-## Soluzione
+## Modifiche proposte
 
-### File: `src/pages/Aziende.tsx`
+### File: `supabase/functions/register-candidate/index.ts`
 
-**Linea 506**: Rimuovere il suffisso `@azienda.talentprofile.local`. Mostrare solo lo username puro:
+1. **Rimuovere `signInWithPassword`** (linee 247-255): Questa chiamata e ridondante. Dopo `createUser`, possiamo generare un token direttamente con `auth.admin.generateLink` oppure semplicemente restituire le credenziali e lasciare che il frontend faccia il sign-in lato client.
 
+2. **Parallelizzare operazioni indipendenti**: Eseguire `Promise.all` per il mark-session-used e la verifica azienda (linee 152-171), dato che non hanno dipendenze reciproche.
+
+3. **Sign-in lato client**: Nel frontend (`FormAnagrafico.tsx`), dopo aver ricevuto le credenziali dal backend (`internalEmail` + `password`), eseguire `supabase.auth.signInWithPassword()` direttamente dal client. Questo elimina ~3 secondi dalla edge function.
+
+### Dettaglio tecnico
+
+**Edge function** - rimuovere il blocco sign-in server-side e restituire le credenziali interne:
 ```typescript
-// PRIMA (errato):
-const email = `${result.accesso.username}@azienda.talentprofile.local`;
-setRegeneratedCredentials({ email, password: result.plainPassword });
+// RIMUOVERE:
+const { data: sessionData, error: signInError } = await supabaseAdmin.auth.signInWithPassword({...});
 
-// DOPO (corretto):
-setRegeneratedCredentials({
-  email: result.accesso.username,
-  password: result.plainPassword,
-});
+// PARALLELIZZARE:
+const [sessionUpdateResult, aziendaResult] = await Promise.all([
+  supabaseAdmin.from('candidate_sessions').update({ used: true }).eq('id', session.id),
+  supabaseAdmin.from('aziende').select('id, nome').eq('id', azienda_id).eq('attiva', true).single()
+]);
+
+// Restituire credenziali interne invece della sessione:
+return { success: true, candidato, credentials: { internalEmail, password } };
 ```
 
-Verificare anche se ci sono altri punti nella pagina Aziende dove viene aggiunto questo suffisso e correggerli.
+**Frontend** (`FormAnagrafico.tsx`) - sign-in lato client con le credenziali ricevute:
+```typescript
+// Dopo aver ricevuto responseData:
+if (responseData.credentials) {
+  await supabase.auth.signInWithPassword({
+    email: responseData.credentials.internalEmail,
+    password: responseData.credentials.password,
+  });
+}
+```
 
-### Verifica aggiuntiva
+## Risultato atteso
 
-Controllare se il label "Email" nel dialog delle credenziali rigenerate va rinominato in "Username" per coerenza con il form di login candidato.
-
-## Comportamento atteso
-
-- Le credenziali mostrate nella pagina Aziende usano lo username puro (es. `cristiancarli-kmoi`)
-- L'utente copia le credenziali e le incolla nel form di login candidato
-- Il login funziona al primo tentativo
+- **Tempo ridotto da ~10s a ~4-5s**: Eliminazione del sign-in server-side (~3s) + parallelizzazione di 2 query (~1-2s).
+- Nessun cambiamento funzionale: il candidato viene comunque autenticato e reindirizzato a `/test/privacy`.
 
