@@ -126,16 +126,15 @@ export const formAnagraficoSchema = z.object({
   email: z
     .string()
     .trim()
+    .min(1, 'Email obbligatoria')
     .email('Email non valida')
-    .max(VALIDATION.EMAIL_MAX_LENGTH, 'Email troppo lunga')
-    .optional()
-    .or(z.literal('')),
+    .max(VALIDATION.EMAIL_MAX_LENGTH, 'Email troppo lunga'),
   telefono: z
     .string()
     .trim()
-    .optional()
+    .min(1, 'Telefono obbligatorio')
     .refine(
-      val => !val || VALIDATION.PHONE_REGEX.test(val.replace(/\s/g, '')),
+      val => VALIDATION.PHONE_REGEX.test(val.replace(/\s/g, '')),
       'Formato telefono non valido'
     ),
 });
