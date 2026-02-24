@@ -117,10 +117,13 @@ export default function FormAnagrafico() {
 
       // Sign in client-side with internal credentials
       if (responseData.credentials?.internalEmail && responseData.credentials?.password) {
-        await supabase.auth.signInWithPassword({
+        const { error: signInError } = await supabase.auth.signInWithPassword({
           email: responseData.credentials.internalEmail,
           password: responseData.credentials.password,
         });
+        if (signInError) {
+          throw new Error('Errore di autenticazione: ' + signInError.message);
+        }
       }
 
       sessionStorage.removeItem('candidate_session');

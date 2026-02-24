@@ -44,6 +44,11 @@ export default function ConsensoPrivacy() {
     );
   }
 
+  // If not authenticated, redirect to auth
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
+
   // Only candidato role can access this page
   if (profile?.ruolo !== 'candidato') {
     return <Navigate to="/" replace />;
