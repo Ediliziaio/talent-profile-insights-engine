@@ -2,3 +2,27 @@ project_id = "zpobytjptrmrvmegkqnb"
 
 [functions.batch-ricalcolo-v5]
 verify_jwt = false
+
+[functions.candidate-login]
+verify_jwt = false
+
+[functions.register-candidate]
+verify_jwt = false
+
+[functions.create-candidate]
+verify_jwt = false
+
+[functions.create-company]
+verify_jwt = false
+
+[functions.manage-company-access]
+verify_jwt = false
+
+[functions.reset-company-password]
+verify_jwt = false
+
+[functions.analyze-candidate]
+verify_jwt = false
+
+[functions.seed-demo-candidates]
+verify_jwt = false

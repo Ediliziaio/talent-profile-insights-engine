@@ -76,15 +76,15 @@ export default function CandidatoDettaglio() {
   const schematicita = profilo?.schematicita || 100;
 
   // V5 Data
-  const assessmentVersion = (profilo as any)?.assessment_version as 'v4' | 'v5' | undefined || 'v4';
+  const assessmentVersion = profilo?.assessment_version || 'v4';
   const isV5 = assessmentVersion === 'v5';
-  const traitsV5 = (profilo as any)?.traits_v5 as Record<string, number> | undefined;
-  const esserePct = (profilo as any)?.essere_pct as number | undefined;
-  const farePct = (profilo as any)?.fare_pct as number | undefined;
-  const averePct = (profilo as any)?.avere_pct as number | undefined;
-  const profiloTipoV5 = (profilo as any)?.profilo_tipo_v5 as ProfiloTipoV5 | undefined;
-  const reliabilityIndex = (profilo as any)?.reliability_index as ReliabilityIndex | undefined;
-  const syndromesFromDB = (profilo as any)?.syndromes_detected as SyndromeResult[] | undefined;
+  const traitsV5 = profilo?.traits_v5 as Record<string, number> | undefined;
+  const esserePct = profilo?.essere_pct ?? undefined;
+  const farePct = profilo?.fare_pct ?? undefined;
+  const averePct = profilo?.avere_pct ?? undefined;
+  const profiloTipoV5 = profilo?.profilo_tipo_v5 as ProfiloTipoV5 | undefined;
+  const reliabilityIndex = profilo?.reliability_index as ReliabilityIndex | undefined;
+  const syndromesFromDB = profilo?.syndromes_detected as SyndromeResult[] | undefined;
   const profiloTipo = (profilo?.profilo_tipo as ProfiloTipo) || null;
 
   // Calculate syndromes

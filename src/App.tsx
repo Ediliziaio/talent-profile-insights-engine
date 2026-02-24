@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { QUERY_CONFIG } from "@/lib/constants";
 import {
   DashboardSkeleton,
@@ -86,14 +87,18 @@ const App = () => (
               } />
               <Route path="/auth" element={<Auth />} />
               <Route path="/aziende" element={
-                <Suspense fallback={<AziendeSkeleton />}>
-                  <Aziende />
-                </Suspense>
+                <ProtectedRoute allowedRoles={['superadmin']}>
+                  <Suspense fallback={<AziendeSkeleton />}>
+                    <Aziende />
+                  </Suspense>
+                </ProtectedRoute>
               } />
               <Route path="/candidati" element={
-                <Suspense fallback={<CandidatiSkeleton />}>
-                  <Candidati />
-                </Suspense>
+                <ProtectedRoute allowedRoles={['superadmin', 'azienda']}>
+                  <Suspense fallback={<CandidatiSkeleton />}>
+                    <Candidati />
+                  </Suspense>
+                </ProtectedRoute>
               } />
               <Route path="/candidati/:id" element={
                 <Suspense fallback={<CandidatoDettaglioSkeleton />}>
@@ -106,9 +111,11 @@ const App = () => (
                 </Suspense>
               } />
               <Route path="/pagamenti" element={
-                <Suspense fallback={<DashboardSkeleton />}>
-                  <Pagamenti />
-                </Suspense>
+                <ProtectedRoute allowedRoles={['superadmin']}>
+                  <Suspense fallback={<DashboardSkeleton />}>
+                    <Pagamenti />
+                  </Suspense>
+                </ProtectedRoute>
               } />
               <Route path="/confronto" element={
                 <Suspense fallback={<CandidatiSkeleton />}>

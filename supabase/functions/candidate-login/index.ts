@@ -14,6 +14,41 @@ async function hashPassword(password: string): Promise<string> {
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
+// Rate limiting: max 5 attempts per identifier per 15 minutes
+const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+const RATE_LIMIT_MAX_ATTEMPTS = 5;
+
+async function checkRateLimit(supabaseAdmin: ReturnType<typeof createClient>, identifier: string): Promise<boolean> {
+  const windowStart = new Date(Date.now() - RATE_LIMIT_WINDOW_MS).toISOString();
+
+  const { count, error } = await supabaseAdmin
+    .from('login_attempts')
+    .select('*', { count: 'exact', head: true })
+    .eq('identifier', identifier)
+    .gte('attempted_at', windowStart);
+
+  if (error) {
+    console.error('Rate limit check error:', error);
+    return false; // fail open on error
+  }
+
+  return (count ?? 0) >= RATE_LIMIT_MAX_ATTEMPTS;
+}
+
+async function recordAttempt(supabaseAdmin: ReturnType<typeof createClient>, identifier: string): Promise<void> {
+  await supabaseAdmin
+    .from('login_attempts')
+    .insert({ identifier });
+
+  // Cleanup old entries (fire-and-forget)
+  const cutoff = new Date(Date.now() - RATE_LIMIT_WINDOW_MS * 2).toISOString();
+  supabaseAdmin
+    .from('login_attempts')
+    .delete()
+    .lt('attempted_at', cutoff)
+    .then(() => {});
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -34,11 +69,25 @@ Deno.serve(async (req) => {
       );
     }
 
+    const normalizedUsername = username.toLowerCase().trim();
+
+    // Rate limiting check
+    const isRateLimited = await checkRateLimit(supabaseAdmin, normalizedUsername);
+    if (isRateLimited) {
+      return new Response(
+        JSON.stringify({ error: 'Troppi tentativi di accesso. Riprova tra 15 minuti.' }),
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Record this attempt
+    await recordAttempt(supabaseAdmin, normalizedUsername);
+
     // Find the access record by username
     const { data: accesso, error: accessoError } = await supabaseAdmin
       .from('accessi_azienda')
       .select('*, aziende(id, nome)')
-      .eq('username', username.toLowerCase().trim())
+      .eq('username', normalizedUsername)
       .eq('attivo', true)
       .single();
 
@@ -59,7 +108,6 @@ Deno.serve(async (req) => {
     }
 
     // Generate a session token for the candidate
-    // This is a temporary token that allows access to the anagraphic form
     const sessionToken = crypto.randomUUID();
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(); // 24 hours
 
