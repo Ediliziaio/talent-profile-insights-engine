@@ -507,7 +507,7 @@ export default function Aziende() {
       
       setRegeneratedCredentials({
         email,
-        password: result.plainPassword || result.accesso.password_plain,
+        password: result.plainPassword,
       });
 
       toast({

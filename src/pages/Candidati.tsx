@@ -970,7 +970,7 @@ export default function Candidati() {
                       <div className="space-y-1">
                         <Label className="text-xs text-muted-foreground">Password</Label>
                         <div className="flex gap-1">
-                          <Input value={generatedPassword || 'Rigenera per ottenere la password'} readOnly className="font-mono text-sm h-8" />
+                          <Input value={generatedPassword || 'Genera per ottenere la password'} readOnly className="font-mono text-sm h-8" />
                           <Button
                             variant="outline"
                             size="icon"
@@ -988,7 +988,7 @@ export default function Candidati() {
                           size="sm"
                           className="w-full h-8"
                           onClick={() => {
-                            const text = `Credenziali:\nUsername: ${accessoAzienda.username}\nPassword: ${generatedPassword || '(rigenera per ottenere la password)'}\nLink: ${window.location.origin}/auth`;
+                            const text = `Credenziali:\nUsername: ${accessoAzienda.username}\nPassword: ${generatedPassword || '(genera per ottenere la password)'}\nLink: ${window.location.origin}/auth`;
                             copyToClipboard(text, 'az-all');
                           }}
                         >
