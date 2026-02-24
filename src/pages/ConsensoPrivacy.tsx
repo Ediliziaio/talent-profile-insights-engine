@@ -52,7 +52,7 @@ export default function ConsensoPrivacy() {
   const handleContinue = () => {
     if (accepted && !navigating) {
       setNavigating(true);
-      setTimeout(() => navigate('/test/questionario'), 300);
+      navigate('/test/questionario');
     }
   };
 

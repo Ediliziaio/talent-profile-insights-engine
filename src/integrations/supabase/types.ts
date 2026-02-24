@@ -200,6 +200,41 @@ export type Database = {
         }
         Relationships: []
       }
+      candidate_sessions: {
+        Row: {
+          azienda_id: string
+          created_at: string
+          expires_at: string
+          id: string
+          session_token: string
+          used: boolean
+        }
+        Insert: {
+          azienda_id: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          session_token: string
+          used?: boolean
+        }
+        Update: {
+          azienda_id?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          session_token?: string
+          used?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_sessions_azienda_id_fkey"
+            columns: ["azienda_id"]
+            isOneToOne: false
+            referencedRelation: "aziende"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       candidati: {
         Row: {
           azienda_id: string
@@ -573,6 +608,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cleanup_expired_candidate_sessions: { Args: never; Returns: undefined }
       get_user_azienda_id: { Args: { user_uuid: string }; Returns: string }
       get_user_role: { Args: { user_uuid: string }; Returns: string }
       is_superadmin: { Args: { user_uuid: string }; Returns: boolean }

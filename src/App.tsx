@@ -138,9 +138,11 @@ const App = () => (
                 </Suspense>
               } />
               <Route path="/test/completato" element={
-                <Suspense fallback={<FormSkeleton />}>
-                  <TestCompletato />
-                </Suspense>
+                <ProtectedRoute allowedRoles={['candidato']}>
+                  <Suspense fallback={<FormSkeleton />}>
+                    <TestCompletato />
+                  </Suspense>
+                </ProtectedRoute>
               } />
               <Route path="*" element={<NotFound />} />
             </Routes>

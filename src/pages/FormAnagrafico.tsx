@@ -18,6 +18,7 @@ interface CandidateSession {
     nome: string;
   };
   sessionToken: string;
+  expiresAt?: string;
 }
 
 type FieldErrors = Partial<Record<string, string>>;
@@ -54,6 +55,17 @@ export default function FormAnagrafico() {
 
     try {
       const parsed = JSON.parse(sessionData);
+      // Check session expiry client-side
+      if (parsed.expiresAt && new Date(parsed.expiresAt) < new Date()) {
+        sessionStorage.removeItem('candidate_session');
+        toast({
+          title: 'Sessione scaduta',
+          description: 'La sessione è scaduta. Effettua nuovamente l\'accesso.',
+          variant: 'destructive',
+        });
+        navigate('/auth');
+        return;
+      }
       setCandidateSession(parsed);
     } catch {
       navigate('/auth');
@@ -91,6 +103,7 @@ export default function FormAnagrafico() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             azienda_id: candidateSession.azienda.id,
+            sessionToken: candidateSession.sessionToken,
             ...formData,
           }),
         }

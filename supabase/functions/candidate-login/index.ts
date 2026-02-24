@@ -107,9 +107,31 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Generate a session token for the candidate
+    // Generate a session token and persist it in DB
     const sessionToken = crypto.randomUUID();
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(); // 24 hours
+
+    // Persist session token for validation by register-candidate
+    const { error: sessionError } = await supabaseAdmin
+      .from('candidate_sessions')
+      .insert({
+        session_token: sessionToken,
+        azienda_id: accesso.aziende.id,
+        expires_at: expiresAt,
+      });
+
+    if (sessionError) {
+      console.error('Session insert error:', sessionError);
+      return new Response(
+        JSON.stringify({ error: 'Errore nella creazione della sessione' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Cleanup expired sessions (fire-and-forget but with error logging)
+    supabaseAdmin.rpc('cleanup_expired_candidate_sessions').then(({ error }) => {
+      if (error) console.error('Session cleanup error:', error);
+    });
 
     return new Response(
       JSON.stringify({ 
