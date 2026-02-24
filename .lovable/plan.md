@@ -1,34 +1,31 @@
 
 
-# Fix: Show Generated Password One-Time in Candidati.tsx
+# Fix: Credenziali visibili subito dopo la generazione
 
-## Problem
-After dropping `password_plain` from the database (Phase 3), the credentials panel still references `accessoAzienda.password_plain`, which is now always `undefined`. The UI shows masked dots (`••••••••••••`) and the copy button is permanently disabled. Users cannot see or copy the password even after generating/regenerating credentials.
+## Problema
 
-## Root Cause
-The `credentialsMutation.onSuccess` invalidates the query, which re-fetches from the DB — but the DB no longer has `password_plain`. The generated password from the API response (`result.plainPassword`) is never captured in local state.
+Due problemi distinti:
 
-## Solution
+1. **Candidati.tsx**: Il testo placeholder dice "Rigenera per ottenere la password" anche quando le credenziali sono appena state generate per la prima volta. In realtà il codice `onSuccess` già cattura `result.plainPassword` nello state `generatedPassword`, quindi la password dovrebbe apparire correttamente dopo il click su "Genera". Il testo del placeholder va corretto per coerenza.
 
-**File: `src/pages/Candidati.tsx`**
+2. **Aziende.tsx (line 510)**: Ancora referenzia `result.accesso.password_plain` come fallback, ma quella colonna è stata droppata nel Phase 3. Va rimosso il fallback.
 
-1. Add a `generatedPassword` state variable to temporarily hold the password returned by the edge function after generate/regenerate.
+## Modifiche
 
-2. In `credentialsMutation.onSuccess`, capture `result.plainPassword` into `generatedPassword` state before invalidating the query.
+### File: `src/pages/Candidati.tsx`
 
-3. Update the password display section (lines 961-974):
-   - If `generatedPassword` exists, show it in the input field (cleartext, copyable)
-   - If not, show a placeholder message: "Rigenera per ottenere la password"
-   - Enable/disable the copy button based on whether `generatedPassword` is set
+1. **Linea 973**: Cambiare il placeholder da `'Rigenera per ottenere la password'` a `'Genera per ottenere la password'` per coerenza con il bottone che mostra "Genera" quando non ci sono credenziali.
 
-4. Update the "Copia tutto" button (line 982) to use `generatedPassword` instead of `accessoAzienda.password_plain`.
+2. **Linea 991**: Stesso fix nel testo del "Copia tutto".
 
-5. Clear `generatedPassword` when the user navigates away (changes `currentAziendaId`).
+### File: `src/pages/Aziende.tsx`
 
-### Behavior After Fix
-- **First load**: Shows "Rigenera per ottenere la password" (no password stored in DB)
-- **After clicking "Genera" or "Rigenera"**: Shows the actual password in cleartext, copyable
-- **After page refresh**: Back to "Rigenera per ottenere la password" (password not persisted)
+1. **Linea 510**: Rimuovere il fallback `|| result.accesso.password_plain` — usare solo `result.plainPassword`. La colonna `password_plain` non esiste più nel DB.
 
-This matches the security design: passwords are only visible at generation time.
+## Comportamento atteso
+
+- **Prima generazione ("Genera")**: Click → la mutation chiama l'edge function → `onSuccess` cattura `plainPassword` → la password appare in chiaro, copiabile.
+- **Rigenerazione ("Rigenera")**: Stesso flusso, nuove credenziali generate e mostrate.
+- **Refresh pagina**: Placeholder "Genera per ottenere la password" (la password non è mai persistita nel DB).
+- **Aziende.tsx**: Nessun crash da referenza a colonna inesistente.
 
