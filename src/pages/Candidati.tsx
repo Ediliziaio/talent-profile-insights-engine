@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -129,6 +129,7 @@ export default function Candidati() {
     nome: string;
     cognome: string;
   } | null>(null);
+  const [generatedPassword, setGeneratedPassword] = useState<string | null>(null);
 
   // Date filters
   const [filterDateFrom, setFilterDateFrom] = useState<Date | undefined>(undefined);
@@ -143,6 +144,11 @@ export default function Candidati() {
 
   const isSuperadmin = profile?.ruolo === 'superadmin';
   const currentAziendaId = isSuperadmin ? filterAzienda : profile?.azienda_id;
+
+  // Clear one-time password when switching company
+  useEffect(() => {
+    setGeneratedPassword(null);
+  }, [currentAziendaId]);
 
   const [formData, setFormData] = useState({
     nome: '',
@@ -355,7 +361,10 @@ export default function Candidati() {
       if (!response.ok) throw new Error(result.error || 'Errore nella generazione credenziali');
       return result;
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
+      if (result.plainPassword) {
+        setGeneratedPassword(result.plainPassword);
+      }
       queryClient.invalidateQueries({ queryKey: ['accesso-azienda'] });
       toast({
         title: 'Credenziali generate',
@@ -961,13 +970,13 @@ export default function Candidati() {
                       <div className="space-y-1">
                         <Label className="text-xs text-muted-foreground">Password</Label>
                         <div className="flex gap-1">
-                          <Input value={accessoAzienda.password_plain || '••••••••••••'} readOnly className="font-mono text-sm h-8" />
+                          <Input value={generatedPassword || 'Rigenera per ottenere la password'} readOnly className="font-mono text-sm h-8" />
                           <Button
                             variant="outline"
                             size="icon"
                             className="h-8 w-8 shrink-0"
-                            onClick={() => accessoAzienda.password_plain && copyToClipboard(accessoAzienda.password_plain, 'az-password')}
-                            disabled={!accessoAzienda.password_plain}
+                            onClick={() => generatedPassword && copyToClipboard(generatedPassword, 'az-password')}
+                            disabled={!generatedPassword}
                           >
                             {copiedId === 'az-password' ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
                           </Button>
@@ -979,7 +988,7 @@ export default function Candidati() {
                           size="sm"
                           className="w-full h-8"
                           onClick={() => {
-                            const text = `Credenziali:\nUsername: ${accessoAzienda.username}\nPassword: ${accessoAzienda.password_plain || '(rigenera per ottenere la password)'}\nLink: ${window.location.origin}/auth`;
+                            const text = `Credenziali:\nUsername: ${accessoAzienda.username}\nPassword: ${generatedPassword || '(rigenera per ottenere la password)'}\nLink: ${window.location.origin}/auth`;
                             copyToClipboard(text, 'az-all');
                           }}
                         >
