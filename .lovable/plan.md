@@ -1,49 +1,32 @@
 
 
-# Aggiunta Narrative Tratti al PDF Premium
+# Aggiornamento Indice PDF con sotto-voce "Chi è [Nome]"
 
-## Cosa manca
+## Stato attuale
 
-La sezione "2. Profilo Comportamentale" del PDF contiene attualmente:
-- Grafico barre tratti
-- Segnalazioni sindromi
-- Ruoli compatibili
-- Profilo tipo esteso
+L'indice (linee 272-287 di `PremiumReportPDF.tsx`) è una lista piatta di 6 sezioni senza sotto-voci. La sezione 2 dice solo "Profilo Comportamentale — Analisi dei 15 tratti, narrativa, sindromi e ruoli compatibili".
 
-Ma **non** contiene la narrativa "Chi è [Nome]" — i 4 capitoli con testo descrittivo per ogni tratto, che invece sono presenti nella UI (ProfiloUnificatoTab).
+## Modifica
 
-## Cosa aggiungo
+Trasformo l'indice da lista piatta a lista gerarchica. La sezione 2 avrà sotto-voci indentate:
 
-Dopo il grafico barre e prima delle sindromi, inserisco una nuova sotto-sezione "Chi è [Nome]" con i 4 capitoli:
+- **2.1** Grafico tratti comportamentali
+- **2.2** Chi è [Nome] — Narrative personalizzate
+- **2.3** Segnalazioni e sindromi
+- **2.4** Ruoli compatibili
+- **2.5** Profilo tipo esteso
 
-1. **Come Pensa** (ORG, AUT, GP) — icona cervello, sfondo blu chiaro
-2. **Come Agisce** (ADS, DET, VEN, HRM) — icona fulmine, sfondo ambra chiaro
-3. **Come si Relaziona** (LDR, PRO, COM, ESP) — icona persone, sfondo viola chiaro
-4. **Stabilità e Principi** (RC, FIN, SUC, PRI) — icona scudo, sfondo grigio chiaro
+Le altre sezioni (1, 3, 4, 5, 6) rimangono invariate.
 
-Per ogni tratto:
-- **Nome tratto + punteggio** (badge colorato)
-- **Narrativa completa** generata da `getTraitNarrative()`
-- **Nota speciale GP** se applicabile (da `getGPSpecialNarrative()`)
+## Design sotto-voci
 
-Dato che questa sezione sarà molto lunga (15 tratti × testo lungo), la inserisco come **sezione separata** (`data-section="profilo-narrative"`) con un proprio `PageBreak`, così il canvas slicing gestirà correttamente la paginazione.
+- Indentazione sinistra 30px (allineate sotto il titolo padre)
+- Numero in grigio (fontSize 10, color TEXT_CAPTION)
+- Titolo fontSize 10, color TEXT_BODY
+- Nessun bordo inferiore (solo il padre ha il bordo)
+- Padding verticale ridotto (6px vs 12px)
 
-## Modifiche
+## File modificato
 
-### `src/components/PremiumReportPDF.tsx`
-
-1. Aggiungere import di `getTraitNarrative`, `getGPSpecialNarrative` (già importati `personalizzaTesto` e `getFascia`)
-2. Dopo la sezione `profilo-tratti` (linea 508) e prima del `PageBreak` verso Gestione, inserire una nuova `<Section id="profilo-narrative">` con:
-   - Titolo "Chi è [Nome]"
-   - 4 blocchi capitolo, ognuno con sfondo colorato, titolo, sottotitolo
-   - Per ogni tratto nel capitolo: nome, badge punteggio, testo narrativo
-   - Nota speciale GP se presente
-
-### Design
-
-- Ogni capitolo è un box con bordo sinistro colorato (4px)
-- Titolo capitolo: fontSize 12, bold, colore tematico
-- Sottotitolo: fontSize 8, caption
-- Ogni tratto: header con nome + badge, poi testo narrativo (fontSize 9, interlinea 1.6)
-- Nota GP: box ambra con icona ⚠️
+**`src/components/PremiumReportPDF.tsx`** — linee 272-287: sostituire l'array piatto con una struttura che supporta `children` opzionali, e renderizzare le sotto-voci per la sezione 2.
 
