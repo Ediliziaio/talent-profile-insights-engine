@@ -5,7 +5,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { NotionLayout } from '@/components/NotionLayout';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { RisposteDettagliate } from '@/components/RisposteDettagliate';
-import { PDFExportButton, InterviewSheetPDFButton } from '@/components/PDFExportButton';
+import { InterviewSheetPDFButton } from '@/components/PDFExportButton';
+import { PremiumReportPDFButton } from '@/components/PremiumReportPDFButton';
 import { ManagementGuideV5 } from '@/components/ManagementGuideV5';
 import { ActionPlanCardV5 } from '@/components/ActionPlanCardV5';
 import { GestioneAvanzataV3 } from '@/components/GestioneAvanzataV3';
@@ -217,10 +218,29 @@ export default function CandidatoDettaglio() {
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
-                  <PDFExportButton
-                    targetRef={reportRef}
-                    fileName={`${candidato.cognome}_${candidato.nome}`}
-                  />
+                  {isV5 && traitsV5 && profiloTipoV5 && reliabilityIndex && (
+                    <PremiumReportPDFButton
+                      candidato={{
+                        nome: candidato.nome,
+                        cognome: candidato.cognome,
+                        sesso: candidato.sesso,
+                        ruolo_attuale: candidato.ruolo_attuale,
+                        data_test: candidato.data_test,
+                        funzione: candidato.funzione,
+                        eta: candidato.eta,
+                        azienda: candidato.aziende?.nome,
+                      }}
+                      traits={traitsV5 as Record<TraitCode, number>}
+                      macroAreas={{
+                        essere: esserePct || 0,
+                        fare: farePct || 0,
+                        avere: averePct || 0,
+                      }}
+                      profiloTipo={profiloTipoV5}
+                      reliabilityIndex={reliabilityIndex}
+                      syndromes={syndromes}
+                    />
+                  )}
                 </div>
 
                 {/* Mobile: single "..." menu with all actions */}
