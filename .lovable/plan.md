@@ -1,63 +1,62 @@
 
 
-# Ottimizzazione velocita "Prosegui al Test" (register-candidate)
+# Fix: Spinner infinito su /test/privacy
 
-## Analisi del problema
+## Problema identificato
 
-La edge function `register-candidate` esegue **6 operazioni sequenziali** al database/auth:
+Dopo la registrazione candidato, la pagina `/test/privacy` resta con lo spinner infinito. La causa principale e una **race condition + mancata gestione errori**:
 
-1. Validazione session token (query `candidate_sessions`)
-2. Mark session as used (update `candidate_sessions`)
-3. Verifica azienda (query `aziende`)
-4. Creazione auth user (`auth.admin.createUser`) -- **lenta** (~2-3s)
-5. Upsert profilo (upsert `profiles`)
-6. Insert candidato (insert `candidati`)
-7. **Sign in con password** (`signInWithPassword`) -- **lenta** (~2-3s, e ridondante)
+1. **`FormAnagrafico.tsx` (linea 119-123)**: `supabase.auth.signInWithPassword()` restituisce `{ data, error }` ma il codice **non controlla l'errore**. Se il sign-in fallisce (per qualsiasi motivo), il codice prosegue comunque con `navigate('/test/privacy')` senza che l'utente sia autenticato.
 
-Il collo di bottiglia principale e il punto 7: `signInWithPassword` e completamente inutile perche `createUser` restituisce gia l'utente creato. Possiamo generare una sessione senza fare un secondo round-trip di autenticazione.
+2. **`ConsensoPrivacy.tsx` (linea 19-20)**: L'useEffect che controlla lo stato del test ha la condizione `if (!user || loading) return`. Se `user` e `null` (perche il sign-in e fallito), l'effect non procede mai e `checkingTest` resta `true` per sempre → **spinner infinito**.
 
-Inoltre, i punti 2 e 3 possono essere eseguiti **in parallelo** (non dipendono l'uno dall'altro).
+## Soluzione
 
-## Modifiche proposte
+### File: `src/pages/FormAnagrafico.tsx`
 
-### File: `supabase/functions/register-candidate/index.ts`
+Aggiungere controllo errore sul sign-in e attendere conferma autenticazione:
 
-1. **Rimuovere `signInWithPassword`** (linee 247-255): Questa chiamata e ridondante. Dopo `createUser`, possiamo generare un token direttamente con `auth.admin.generateLink` oppure semplicemente restituire le credenziali e lasciare che il frontend faccia il sign-in lato client.
-
-2. **Parallelizzare operazioni indipendenti**: Eseguire `Promise.all` per il mark-session-used e la verifica azienda (linee 152-171), dato che non hanno dipendenze reciproche.
-
-3. **Sign-in lato client**: Nel frontend (`FormAnagrafico.tsx`), dopo aver ricevuto le credenziali dal backend (`internalEmail` + `password`), eseguire `supabase.auth.signInWithPassword()` direttamente dal client. Questo elimina ~3 secondi dalla edge function.
-
-### Dettaglio tecnico
-
-**Edge function** - rimuovere il blocco sign-in server-side e restituire le credenziali interne:
 ```typescript
-// RIMUOVERE:
-const { data: sessionData, error: signInError } = await supabaseAdmin.auth.signInWithPassword({...});
+// PRIMA (senza controllo errore):
+await supabase.auth.signInWithPassword({
+  email: responseData.credentials.internalEmail,
+  password: responseData.credentials.password,
+});
 
-// PARALLELIZZARE:
-const [sessionUpdateResult, aziendaResult] = await Promise.all([
-  supabaseAdmin.from('candidate_sessions').update({ used: true }).eq('id', session.id),
-  supabaseAdmin.from('aziende').select('id, nome').eq('id', azienda_id).eq('attiva', true).single()
-]);
-
-// Restituire credenziali interne invece della sessione:
-return { success: true, candidato, credentials: { internalEmail, password } };
+// DOPO (con controllo errore):
+const { error: signInError } = await supabase.auth.signInWithPassword({
+  email: responseData.credentials.internalEmail,
+  password: responseData.credentials.password,
+});
+if (signInError) {
+  throw new Error('Errore di autenticazione: ' + signInError.message);
+}
 ```
 
-**Frontend** (`FormAnagrafico.tsx`) - sign-in lato client con le credenziali ricevute:
+### File: `src/pages/ConsensoPrivacy.tsx`
+
+Gestire il caso in cui `user` e `null` dopo che `loading` diventa `false`. Se non c'e utente autenticato, redirect al login invece di spinner infinito:
+
 ```typescript
-// Dopo aver ricevuto responseData:
-if (responseData.credentials) {
-  await supabase.auth.signInWithPassword({
-    email: responseData.credentials.internalEmail,
-    password: responseData.credentials.password,
-  });
+// Dopo il check loading || checkingTest, PRIMA del check ruolo:
+if (!user) {
+  return <Navigate to="/auth" replace />;
 }
+```
+
+Inoltre, modificare l'useEffect per gestire il caso `user` null dopo il loading:
+
+```typescript
+useEffect(() => {
+  if (loading) return;
+  if (!user) return; // will be handled by the redirect above
+  // ... rest of checkTestStatus
+}, [user, loading, navigate]);
 ```
 
 ## Risultato atteso
 
-- **Tempo ridotto da ~10s a ~4-5s**: Eliminazione del sign-in server-side (~3s) + parallelizzazione di 2 query (~1-2s).
-- Nessun cambiamento funzionale: il candidato viene comunque autenticato e reindirizzato a `/test/privacy`.
+- Se il sign-in fallisce: errore mostrato all'utente nel form anagrafico (toast), non naviga
+- Se l'utente arriva su `/test/privacy` senza autenticazione: redirect a `/auth` invece di spinner infinito
+- Flusso normale: registrazione → sign-in → navigate → pagina privacy si carica correttamente
 
