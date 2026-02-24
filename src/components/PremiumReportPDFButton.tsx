@@ -172,32 +172,47 @@ export function PremiumReportPDFButton({
             height: section.scrollHeight,
           });
 
-          const imgData = canvas.toDataURL('image/jpeg', 0.92);
           const ratio = contentW / canvas.width;
           const scaledH = canvas.height * ratio;
+          const maxContentH = isCover ? pdfH : usableH;
+          const pxPerPage = maxContentH / ratio;
 
-          if (i > 0) {
-            pdf.addPage();
-            currentPage++;
-          }
+          if (scaledH <= maxContentH) {
+            // Fits on one page — add normally
+            if (i > 0) { pdf.addPage(); currentPage++; }
+            const yOffset = isCover ? 0 : headerH;
+            const imgData = canvas.toDataURL('image/jpeg', 0.92);
+            pdf.addImage(imgData, 'JPEG', margin, yOffset, contentW, scaledH);
+            addHeaderFooter(currentPage, isCover);
+          } else {
+            // Need multiple pages — slice the canvas
+            let srcY = 0;
+            let isFirstSlice = true;
 
-          const yOffset = isCover ? 0 : headerH;
-          pdf.addImage(imgData, 'JPEG', margin, yOffset, contentW, scaledH);
-          addHeaderFooter(currentPage, isCover);
+            while (srcY < canvas.height) {
+              const sliceH = Math.min(pxPerPage, canvas.height - srcY);
 
-          // Handle overflow (section taller than one page)
-          if (scaledH > usableH && !isCover) {
-            let remainingH = scaledH - usableH;
-            let pageOffset = usableH;
+              // Create sub-canvas for this slice
+              const sliceCanvas = document.createElement('canvas');
+              sliceCanvas.width = canvas.width;
+              sliceCanvas.height = sliceH;
+              const ctx = sliceCanvas.getContext('2d')!;
+              ctx.drawImage(canvas, 0, srcY, canvas.width, sliceH, 0, 0, canvas.width, sliceH);
 
-            while (remainingH > 0) {
-              pdf.addPage();
-              currentPage++;
-              // Negative Y to show the continuation
-              pdf.addImage(imgData, 'JPEG', margin, headerH - pageOffset, contentW, scaledH);
-              addHeaderFooter(currentPage, false);
-              pageOffset += usableH;
-              remainingH -= usableH;
+              const sliceImg = sliceCanvas.toDataURL('image/jpeg', 0.92);
+              const sliceScaledH = sliceH * ratio;
+
+              if (!isFirstSlice || i > 0) {
+                pdf.addPage();
+                currentPage++;
+              }
+
+              const yOffset = isCover && isFirstSlice ? 0 : headerH;
+              pdf.addImage(sliceImg, 'JPEG', margin, yOffset, contentW, sliceScaledH);
+              addHeaderFooter(currentPage, isCover && isFirstSlice);
+
+              srcY += sliceH;
+              isFirstSlice = false;
             }
           }
         } catch (err) {
