@@ -1,31 +1,47 @@
 
 
-# Fix: Credenziali visibili subito dopo la generazione
+# Fix: Aziende.tsx mostra username con suffisso email errato
 
 ## Problema
 
-Due problemi distinti:
+In `src/pages/Aziende.tsx` (linea 506), quando le credenziali candidato vengono rigenerate, lo username viene mostrato nel formato:
+```
+cristiancarli-kmoi@azienda.talentprofile.local
+```
 
-1. **Candidati.tsx**: Il testo placeholder dice "Rigenera per ottenere la password" anche quando le credenziali sono appena state generate per la prima volta. In realtà il codice `onSuccess` già cattura `result.plainPassword` nello state `generatedPassword`, quindi la password dovrebbe apparire correttamente dopo il click su "Genera". Il testo del placeholder va corretto per coerenza.
+Questo suffisso `@azienda.talentprofile.local` è un residuo del vecchio sistema di autenticazione tramite Supabase Auth. Il sistema attuale di login candidato (edge function `candidate-login`) cerca lo username esatto nella tabella `accessi_azienda`, quindi l'utente deve inserire solo `cristiancarli-kmoi`.
 
-2. **Aziende.tsx (line 510)**: Ancora referenzia `result.accesso.password_plain` come fallback, ma quella colonna è stata droppata nel Phase 3. Va rimosso il fallback.
+L'utente ha copiato le credenziali dalla pagina Aziende, ha incollato lo username completo con il suffisso nel form di login candidato, e il login ha fallito con "Credenziali non valide".
 
-## Modifiche
+Ho verificato che le credenziali `cristiancarli-kmoi` / `9tPdFSFgxFjR` funzionano correttamente chiamando direttamente la edge function.
 
-### File: `src/pages/Candidati.tsx`
-
-1. **Linea 973**: Cambiare il placeholder da `'Rigenera per ottenere la password'` a `'Genera per ottenere la password'` per coerenza con il bottone che mostra "Genera" quando non ci sono credenziali.
-
-2. **Linea 991**: Stesso fix nel testo del "Copia tutto".
+## Soluzione
 
 ### File: `src/pages/Aziende.tsx`
 
-1. **Linea 510**: Rimuovere il fallback `|| result.accesso.password_plain` — usare solo `result.plainPassword`. La colonna `password_plain` non esiste più nel DB.
+**Linea 506**: Rimuovere il suffisso `@azienda.talentprofile.local`. Mostrare solo lo username puro:
+
+```typescript
+// PRIMA (errato):
+const email = `${result.accesso.username}@azienda.talentprofile.local`;
+setRegeneratedCredentials({ email, password: result.plainPassword });
+
+// DOPO (corretto):
+setRegeneratedCredentials({
+  email: result.accesso.username,
+  password: result.plainPassword,
+});
+```
+
+Verificare anche se ci sono altri punti nella pagina Aziende dove viene aggiunto questo suffisso e correggerli.
+
+### Verifica aggiuntiva
+
+Controllare se il label "Email" nel dialog delle credenziali rigenerate va rinominato in "Username" per coerenza con il form di login candidato.
 
 ## Comportamento atteso
 
-- **Prima generazione ("Genera")**: Click → la mutation chiama l'edge function → `onSuccess` cattura `plainPassword` → la password appare in chiaro, copiabile.
-- **Rigenerazione ("Rigenera")**: Stesso flusso, nuove credenziali generate e mostrate.
-- **Refresh pagina**: Placeholder "Genera per ottenere la password" (la password non è mai persistita nel DB).
-- **Aziende.tsx**: Nessun crash da referenza a colonna inesistente.
+- Le credenziali mostrate nella pagina Aziende usano lo username puro (es. `cristiancarli-kmoi`)
+- L'utente copia le credenziali e le incolla nel form di login candidato
+- Il login funziona al primo tentativo
 
