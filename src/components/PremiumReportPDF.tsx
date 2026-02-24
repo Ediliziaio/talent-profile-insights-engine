@@ -868,14 +868,20 @@ export function PremiumReportPDF(props: PremiumReportPDFProps) {
             ))}
           </div>
 
+        </div>
+      </Section>
+
+      {/* ═══════════════ PROFILO — Sindromi + Ruoli + Profilo Tipo ═══════════════ */}
+      <Section id="profilo-extra">
+        <div style={{ padding: PAGE_PADDING_NARROW }}>
           {/* Sindromi */}
           {activeSyndromes.length > 0 && (
-            <div style={{ marginTop: 20 }}>
+            <div style={{ marginBottom: 16 }}>
               <SubTitle>Segnalazioni e Sindromi</SubTitle>
               {activeSyndromes.map(s => {
                 const data = SYNDROMES_V5_DATA[s.code];
                 return (
-                  <AccentBox key={s.code} borderColor={s.severity === 'RED' ? COLOR_RED : s.severity === 'ORANGE' ? COLOR_AMBER : '#fbbf24'}>
+                  <AccentBox key={s.code} borderColor={s.severity === 'RED' ? COLOR_RED : s.severity === 'ORANGE' ? COLOR_AMBER : '#fbbf24'} style={{ pageBreakInside: 'avoid' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                       <Badge2
                         text={s.severity}
@@ -893,7 +899,7 @@ export function PremiumReportPDF(props: PremiumReportPDFProps) {
 
           {/* Top 5 Compatible Roles */}
           {topRoles.length > 0 && (
-            <div style={{ marginTop: 20 }}>
+            <div style={{ marginBottom: 16 }}>
               <SubTitle>Ruoli Compatibili</SubTitle>
               {topRoles.map((r, i) => (
                 <div key={r.ruolo} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 0', borderBottom: i < topRoles.length - 1 ? `1px solid ${BORDER_LIGHT}` : 'none' }}>
@@ -912,7 +918,7 @@ export function PremiumReportPDF(props: PremiumReportPDFProps) {
 
           {/* Profilo Tipo Esteso */}
           {profiloExt && (
-            <div style={{ marginTop: 24 }}>
+            <div style={{ pageBreakInside: 'avoid' }}>
               <SubTitle>Profilo Tipo: {profiloExt.emoji} {profiloExt.label}</SubTitle>
               <BodyText>{profiloExt.descrizioneEstesa}</BodyText>
               <div style={{ display: 'flex', gap: 16, marginTop: 14 }}>
@@ -948,16 +954,17 @@ export function PremiumReportPDF(props: PremiumReportPDFProps) {
 
       <PageBreak />
 
-      {/* ═══════════════ NARRATIVE: Chi è [Nome] — 2-Column Layout ═══════════════ */}
-      <Section id="profilo-narrative">
-        <div style={{ padding: PAGE_PADDING }}>
+      {/* ═══════════════ NARRATIVE: Chi è [Nome] — Split per Chapter ═══════════════ */}
+      
+      {/* Chapter 1: Come Pensa */}
+      <Section id="narrative-come-pensa">
+        <div style={{ padding: PAGE_PADDING_NARROW }}>
           <SectionTitle>Chi è {candidato.nome}</SectionTitle>
           <BodyText style={{ marginBottom: 20 }}>
             Analisi narrativa approfondita dei 15 tratti comportamentali. Per ogni tratto: interpretazione personalizzata, impatto professionale e indicazioni operative per il colloquio.
           </BodyText>
 
-          {/* Chapter 1: Come Pensa */}
-          <div style={{ marginBottom: 28 }}>
+          <div style={{ marginBottom: 10 }}>
             <div style={{ fontSize: 14, fontWeight: 700, color: '#1e40af', marginBottom: 2, display: 'flex', alignItems: 'center', gap: 8 }}>
               <span>🧠</span> <span>Come Pensa</span>
             </div>
@@ -969,8 +976,7 @@ export function PremiumReportPDF(props: PremiumReportPDFProps) {
               const fasciaLabel = getFascia(val, TRAIT_NARRATIVES[code]);
               const impact = getTraitOperationalImpact(code, val);
               return (
-                <div key={code} style={{ display: 'flex', gap: 16, marginBottom: 18, paddingBottom: 18, borderBottom: `1px solid ${BORDER_LIGHT}` }}>
-                  {/* Left column: trait info */}
+                <div key={code} style={{ display: 'flex', gap: 16, marginBottom: 18, paddingBottom: 18, borderBottom: `1px solid ${BORDER_LIGHT}`, pageBreakInside: 'avoid' }}>
                   <div style={{ width: 110, flexShrink: 0, textAlign: 'center' }}>
                     <div style={{ fontSize: 10, fontWeight: 700, color: TEXT_BODY, marginBottom: 6 }}>{TRAIT_LABELS[code]}</div>
                     <div style={{
@@ -980,7 +986,6 @@ export function PremiumReportPDF(props: PremiumReportPDFProps) {
                     }}>{val}</div>
                     <div style={{ fontSize: FONT_CAPTION, color: getTraitColor(val), fontWeight: 600 }}>{fasciaLabel}</div>
                   </div>
-                  {/* Right column: narrative + impact */}
                   <div style={{ flex: 1 }}>
                     {narrative && <div style={{ fontSize: 10, color: TEXT_BODY, lineHeight: 1.65, marginBottom: 10 }}>{narrative}</div>}
                     <div style={{ padding: 10, background: BG_SUBTLE, borderLeft: `3px solid ${getTraitColor(val)}`, borderRadius: '0 6px 6px 0' }}>
@@ -993,7 +998,6 @@ export function PremiumReportPDF(props: PremiumReportPDFProps) {
                 </div>
               );
             })}
-            {/* GP Special Note */}
             {(() => {
               const gpVal = traits.GP || 0;
               const maxTrait = Math.max(...(Object.entries(traits) as [TraitCode, number][]).filter(([k]) => k !== 'CTRL').map(([, v]) => v));
@@ -1007,9 +1011,13 @@ export function PremiumReportPDF(props: PremiumReportPDFProps) {
               );
             })()}
           </div>
+        </div>
+      </Section>
 
-          {/* Chapter 2: Come Agisce */}
-          <div style={{ marginBottom: 28 }}>
+      {/* Chapter 2: Come Agisce */}
+      <Section id="narrative-come-agisce">
+        <div style={{ padding: PAGE_PADDING_NARROW }}>
+          <div style={{ marginBottom: 10 }}>
             <div style={{ fontSize: 14, fontWeight: 700, color: '#92400e', marginBottom: 2, display: 'flex', alignItems: 'center', gap: 8 }}>
               <span>⚡</span> <span>Come Agisce</span>
             </div>
@@ -1021,7 +1029,7 @@ export function PremiumReportPDF(props: PremiumReportPDFProps) {
               const fasciaLabel = getFascia(val, TRAIT_NARRATIVES[code]);
               const impact = getTraitOperationalImpact(code, val);
               return (
-                <div key={code} style={{ display: 'flex', gap: 16, marginBottom: 18, paddingBottom: 18, borderBottom: `1px solid ${BORDER_LIGHT}` }}>
+                <div key={code} style={{ display: 'flex', gap: 16, marginBottom: 18, paddingBottom: 18, borderBottom: `1px solid ${BORDER_LIGHT}`, pageBreakInside: 'avoid' }}>
                   <div style={{ width: 110, flexShrink: 0, textAlign: 'center' }}>
                     <div style={{ fontSize: 10, fontWeight: 700, color: TEXT_BODY, marginBottom: 6 }}>{TRAIT_LABELS[code]}</div>
                     <div style={{
@@ -1044,9 +1052,13 @@ export function PremiumReportPDF(props: PremiumReportPDFProps) {
               );
             })}
           </div>
+        </div>
+      </Section>
 
-          {/* Chapter 3: Come si Relaziona */}
-          <div style={{ marginBottom: 28 }}>
+      {/* Chapter 3: Come si Relaziona */}
+      <Section id="narrative-come-relaziona">
+        <div style={{ padding: PAGE_PADDING_NARROW }}>
+          <div style={{ marginBottom: 10 }}>
             <div style={{ fontSize: 14, fontWeight: 700, color: '#6d28d9', marginBottom: 2, display: 'flex', alignItems: 'center', gap: 8 }}>
               <span>👥</span> <span>Come si Relaziona</span>
             </div>
@@ -1058,7 +1070,7 @@ export function PremiumReportPDF(props: PremiumReportPDFProps) {
               const fasciaLabel = getFascia(val, TRAIT_NARRATIVES[code]);
               const impact = getTraitOperationalImpact(code, val);
               return (
-                <div key={code} style={{ display: 'flex', gap: 16, marginBottom: 18, paddingBottom: 18, borderBottom: `1px solid ${BORDER_LIGHT}` }}>
+                <div key={code} style={{ display: 'flex', gap: 16, marginBottom: 18, paddingBottom: 18, borderBottom: `1px solid ${BORDER_LIGHT}`, pageBreakInside: 'avoid' }}>
                   <div style={{ width: 110, flexShrink: 0, textAlign: 'center' }}>
                     <div style={{ fontSize: 10, fontWeight: 700, color: TEXT_BODY, marginBottom: 6 }}>{TRAIT_LABELS[code]}</div>
                     <div style={{
@@ -1081,8 +1093,12 @@ export function PremiumReportPDF(props: PremiumReportPDFProps) {
               );
             })}
           </div>
+        </div>
+      </Section>
 
-          {/* Chapter 4: Stabilità e Principi */}
+      {/* Chapter 4: Stabilità e Principi */}
+      <Section id="narrative-stabilita">
+        <div style={{ padding: PAGE_PADDING_NARROW }}>
           <div style={{ marginBottom: 10 }}>
             <div style={{ fontSize: 14, fontWeight: 700, color: '#374151', marginBottom: 2, display: 'flex', alignItems: 'center', gap: 8 }}>
               <span>🛡️</span> <span>Stabilità e Principi</span>
@@ -1095,7 +1111,7 @@ export function PremiumReportPDF(props: PremiumReportPDFProps) {
               const fasciaLabel = getFascia(val, TRAIT_NARRATIVES[code]);
               const impact = getTraitOperationalImpact(code, val);
               return (
-                <div key={code} style={{ display: 'flex', gap: 16, marginBottom: 18, paddingBottom: 18, borderBottom: `1px solid ${BORDER_LIGHT}` }}>
+                <div key={code} style={{ display: 'flex', gap: 16, marginBottom: 18, paddingBottom: 18, borderBottom: `1px solid ${BORDER_LIGHT}`, pageBreakInside: 'avoid' }}>
                   <div style={{ width: 110, flexShrink: 0, textAlign: 'center' }}>
                     <div style={{ fontSize: 10, fontWeight: 700, color: TEXT_BODY, marginBottom: 6 }}>{TRAIT_LABELS[code]}</div>
                     <div style={{
@@ -1123,9 +1139,9 @@ export function PremiumReportPDF(props: PremiumReportPDFProps) {
 
       <PageBreak />
 
-      {/* ═══════════════ GESTIONE ═══════════════ */}
-      <Section id="gestione">
-        <div style={{ padding: PAGE_PADDING }}>
+      {/* ═══════════════ GESTIONE — Tips + Action Plan ═══════════════ */}
+      <Section id="gestione-tips">
+        <div style={{ padding: PAGE_PADDING_NARROW }}>
           <SectionTitle number="03">Area Gestione</SectionTitle>
 
           {/* Management Tips — structured boxes */}
@@ -1133,7 +1149,7 @@ export function PremiumReportPDF(props: PremiumReportPDFProps) {
             <>
               <SubTitle>Consigli di Management</SubTitle>
               {managementTips.map((tip, i) => (
-                <div key={i} style={{ display: 'flex', gap: 12, marginBottom: 12, padding: 14, borderLeft: `4px solid ${tip.isPriorityOne ? COLOR_RED : BRAND_BLUE}`, background: '#fff', borderRadius: '0 8px 8px 0', border: `1px solid ${BORDER_LIGHT}`, borderLeftWidth: 4, borderLeftColor: tip.isPriorityOne ? COLOR_RED : BRAND_BLUE }}>
+                <div key={i} style={{ display: 'flex', gap: 12, marginBottom: 12, padding: 14, borderLeft: `4px solid ${tip.isPriorityOne ? COLOR_RED : BRAND_BLUE}`, background: '#fff', borderRadius: '0 8px 8px 0', border: `1px solid ${BORDER_LIGHT}`, borderLeftWidth: 4, borderLeftColor: tip.isPriorityOne ? COLOR_RED : BRAND_BLUE, pageBreakInside: 'avoid' }}>
                   <div style={{ width: 36, height: 36, borderRadius: '50%', background: tip.isPriorityOne ? '#fef2f2' : '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, flexShrink: 0 }}>
                     {tip.isPriorityOne ? '🚨' : `${i + 1}`}
                   </div>
@@ -1180,176 +1196,59 @@ export function PremiumReportPDF(props: PremiumReportPDFProps) {
               </div>
             </>
           )}
-
-          {/* Growth Plan — Quadro Psicologico */}
-          {growthPlan && (
-            <>
-              <SubTitle>Quadro Psicologico</SubTitle>
-              <div style={{ display: 'flex', gap: 16, marginBottom: 16 }}>
-                <div style={{ flex: 1 }}>
-                  <AccentBox borderColor={COLOR_RED}>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: COLOR_RED, marginBottom: 4 }}>RADICE DEL PROBLEMA</div>
-                    <BodyText>{growthPlan.rootCause}</BodyText>
-                  </AccentBox>
-                </div>
-                <div style={{ flex: 1 }}>
-                  <AccentBox borderColor={COLOR_GREEN}>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: COLOR_GREEN, marginBottom: 4 }}>RISORSA NASCOSTA</div>
-                    <BodyText>{growthPlan.hiddenResource}</BodyText>
-                  </AccentBox>
-                </div>
-              </div>
-
-              {growthPlan.viciouscircles.length > 0 && (
-                <AccentBox borderColor={COLOR_AMBER}>
-                  <div style={{ fontSize: 10, fontWeight: 700, color: COLOR_AMBER, marginBottom: 4 }}>CIRCOLI VIZIOSI</div>
-                  {growthPlan.viciouscircles.map((c, i) => (
-                    <div key={i} style={{ fontSize: 10, color: TEXT_BODY, marginBottom: 3, lineHeight: 1.5 }}>• {c}</div>
-                  ))}
-                </AccentBox>
-              )}
-
-              {/* Growth Plan — Vertical Timeline */}
-              {growthPlan.phases.length > 0 && (
-                <>
-                  <SubTitle>Piano di Crescita</SubTitle>
-                  <div style={{ position: 'relative', paddingLeft: 30, marginTop: 8 }}>
-                    {/* Vertical line */}
-                    <div style={{ position: 'absolute', left: 11, top: 6, bottom: 6, width: 2, background: `linear-gradient(to bottom, ${BRAND_ORANGE}, ${BRAND_BLUE})` }} />
-                    {growthPlan.phases.map((phase, i) => (
-                      <div key={i} style={{ position: 'relative', marginBottom: 18, paddingBottom: 2 }}>
-                        {/* Circle connector */}
-                        <div style={{
-                          position: 'absolute', left: -24, top: 2,
-                          width: 20, height: 20, borderRadius: '50%',
-                          background: i === 0 ? BRAND_ORANGE : i === growthPlan.phases.length - 1 ? BRAND_BLUE : '#fff',
-                          border: `3px solid ${i <= 1 ? BRAND_ORANGE : BRAND_BLUE}`,
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          fontSize: 9, fontWeight: 700, color: i === 0 || i === growthPlan.phases.length - 1 ? '#fff' : BRAND_BLUE,
-                        }}>{i + 1}</div>
-                        <div style={{ fontSize: 12, fontWeight: 700, color: BRAND_BLUE, marginBottom: 4 }}>{phase.name}</div>
-                        <div style={{ fontSize: 10, color: TEXT_BODY, lineHeight: 1.6 }}>{phase.description}</div>
-                      </div>
-                    ))}
-                  </div>
-                </>
-              )}
-            </>
-          )}
         </div>
       </Section>
 
-      <PageBreak />
-
-      {/* ═══════════════ MAPPA INTERIORE ═══════════════ */}
-      {mappaInteriore && (
-        <Section id="mappa-interiore">
-          <div style={{ padding: PAGE_PADDING }}>
-            <SectionTitle number="04">Mappa Interiore</SectionTitle>
-            <BodyText style={{ marginBottom: 20 }}>
-              Analisi delle dimensioni psicologiche profonde. Il grafico radar mostra l'equilibrio tra le cinque aree fondamentali della personalità.
-            </BodyText>
-
-            {/* Radar Chart SVG */}
-            {(() => {
-              const chartData = getDimensioniChartData(mappaInteriore);
-              const radarDims = chartData.map(d => ({
-                name: d.name.split(' ').slice(0, 2).join(' '),
-                value: d.value,
-                max: 10,
-                color: d.color,
-              }));
-              return <RadarChartSVG dimensions={radarDims} />;
-            })()}
-
-            {/* Pillole */}
-            <div style={{ display: 'flex', gap: 12, marginTop: 20, marginBottom: 16 }}>
-              <div style={{ flex: 1, padding: 14, border: `1px solid ${BORDER_LIGHT}`, borderRadius: 8, borderTop: `3px solid ${BRAND_BLUE}` }}>
-                <div style={{ fontSize: FONT_CAPTION, fontWeight: 700, color: BRAND_BLUE, marginBottom: 4, letterSpacing: 0.5 }}>STILE RELAZIONALE</div>
-                <div style={{ fontSize: FONT_BODY, color: TEXT_BODY, fontWeight: 600 }}>{ATTACCAMENTO_FRONTEND[mappaInteriore.dimensioni.attaccamento.dominante]}</div>
-              </div>
-              <div style={{ flex: 1, padding: 14, border: `1px solid ${BORDER_LIGHT}`, borderRadius: 8, borderTop: `3px solid ${BRAND_ORANGE}` }}>
-                <div style={{ fontSize: FONT_CAPTION, fontWeight: 700, color: BRAND_ORANGE, marginBottom: 4, letterSpacing: 0.5 }}>MECCANISMO DI DIFESA</div>
-                <div style={{ fontSize: FONT_BODY, color: TEXT_BODY, fontWeight: 600 }}>
-                  {mappaInteriore.dimensioni.difesa.dominante?.frontend || 'Equilibrate'}
-                </div>
-              </div>
-              <div style={{ flex: 1, padding: 14, border: `1px solid ${BORDER_LIGHT}`, borderRadius: 8, borderTop: `3px solid #8b5cf6` }}>
-                <div style={{ fontSize: FONT_CAPTION, fontWeight: 700, color: '#8b5cf6', marginBottom: 4, letterSpacing: 0.5 }}>BISOGNO PRIMARIO</div>
-                <div style={{ fontSize: FONT_BODY, color: TEXT_BODY, fontWeight: 600 }}>{mappaInteriore.dimensioni.bisogno.primario.frontend}</div>
-              </div>
-            </div>
-
-            {/* 4 Box: Motiva / Blocca / Teme / Potenziale */}
-            <div style={{ display: 'flex', gap: 12, marginBottom: 20 }}>
-              <div style={{ flex: 1 }}>
-                <AccentBox borderColor={COLOR_GREEN}>
-                  <div style={{ fontSize: 10, fontWeight: 700, color: COLOR_GREEN, marginBottom: 6 }}>COSA LO MOTIVA</div>
-                  {mappaInteriore.cosa_motiva.map((m, i) => (
-                    <div key={i} style={{ fontSize: 10, color: TEXT_BODY, marginBottom: 3, lineHeight: 1.5 }}>• {m}</div>
-                  ))}
-                </AccentBox>
-              </div>
+      {/* ═══════════════ GESTIONE — Quadro + Growth Plan ═══════════════ */}
+      {growthPlan && (
+        <Section id="gestione-growth">
+          <div style={{ padding: PAGE_PADDING_NARROW }}>
+            <SubTitle>Quadro Psicologico</SubTitle>
+            <div style={{ display: 'flex', gap: 16, marginBottom: 16 }}>
               <div style={{ flex: 1 }}>
                 <AccentBox borderColor={COLOR_RED}>
-                  <div style={{ fontSize: 10, fontWeight: 700, color: COLOR_RED, marginBottom: 6 }}>COSA LO BLOCCA</div>
-                  {mappaInteriore.cosa_blocca.map((m, i) => (
-                    <div key={i} style={{ fontSize: 10, color: TEXT_BODY, marginBottom: 3, lineHeight: 1.5 }}>• {m}</div>
-                  ))}
+                  <div style={{ fontSize: 10, fontWeight: 700, color: COLOR_RED, marginBottom: 4 }}>RADICE DEL PROBLEMA</div>
+                  <BodyText>{growthPlan.rootCause}</BodyText>
                 </AccentBox>
               </div>
               <div style={{ flex: 1 }}>
-                <AccentBox borderColor={COLOR_AMBER}>
-                  <div style={{ fontSize: 10, fontWeight: 700, color: COLOR_AMBER, marginBottom: 6 }}>COSA TEME</div>
-                  {mappaInteriore.cosa_teme.map((m, i) => (
-                    <div key={i} style={{ fontSize: 10, color: TEXT_BODY, marginBottom: 3, lineHeight: 1.5 }}>• {m}</div>
-                  ))}
-                </AccentBox>
-              </div>
-              <div style={{ flex: 1 }}>
-                <AccentBox borderColor={BRAND_BLUE}>
-                  <div style={{ fontSize: 10, fontWeight: 700, color: BRAND_BLUE, marginBottom: 6 }}>POTENZIALE INESPRESSO</div>
-                  <div style={{ fontSize: 10, color: TEXT_BODY, lineHeight: 1.5 }}>{mappaInteriore.narrativa.potenziale_inespresso}</div>
+                <AccentBox borderColor={COLOR_GREEN}>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: COLOR_GREEN, marginBottom: 4 }}>RISORSA NASCOSTA</div>
+                  <BodyText>{growthPlan.hiddenResource}</BodyText>
                 </AccentBox>
               </div>
             </div>
 
-            {/* Narratives */}
-            <SubTitle>Chi è {candidato.nome} nel profondo</SubTitle>
-            <BodyText>{mappaInteriore.narrativa.chi_e_nel_profondo}</BodyText>
-
-            <SubTitle>Cosa lo guida</SubTitle>
-            <BodyText>{mappaInteriore.narrativa.cosa_lo_guida}</BodyText>
-
-            <SubTitle>Cosa lo blocca</SubTitle>
-            <BodyText>{mappaInteriore.narrativa.cosa_lo_blocca}</BodyText>
-
-            {/* LA CHIAVE — elemento centrale premium */}
-            <div style={{ marginTop: 24, padding: 24, borderLeft: `6px solid ${BRAND_ORANGE}`, background: '#fff', borderRadius: '0 8px 8px 0', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
-              <div style={{ fontSize: 12, fontWeight: 800, color: BRAND_ORANGE, marginBottom: 10, letterSpacing: 2, textTransform: 'uppercase' }}>🔑 LA CHIAVE</div>
-              <div style={{ fontSize: 14, fontWeight: 600, color: BRAND_BLUE, lineHeight: 1.7 }}>{mappaInteriore.narrativa.la_chiave}</div>
-            </div>
-
-            {/* Errori da Non Fare */}
-            {mappaInteriore.errori_da_evitare.length > 0 && (
-              <AccentBox borderColor={COLOR_RED} style={{ marginTop: 20 }}>
-                <div style={{ fontSize: FONT_BODY, fontWeight: 700, color: COLOR_RED, marginBottom: 6 }}>🚫 3 Errori da Non Fare Mai</div>
-                {mappaInteriore.errori_da_evitare.map((e, i) => (
-                  <div key={i} style={{ fontSize: 10, color: TEXT_BODY, marginBottom: 4, lineHeight: 1.5 }}>{i + 1}. {e}</div>
+            {growthPlan.viciouscircles.length > 0 && (
+              <AccentBox borderColor={COLOR_AMBER}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: COLOR_AMBER, marginBottom: 4 }}>CIRCOLI VIZIOSI</div>
+                {growthPlan.viciouscircles.map((c, i) => (
+                  <div key={i} style={{ fontSize: 10, color: TEXT_BODY, marginBottom: 3, lineHeight: 1.5 }}>• {c}</div>
                 ))}
               </AccentBox>
             )}
 
-            {/* Pattern Combinatori */}
-            {mappaInteriore.pattern_combinatori.length > 0 && (
+            {/* Growth Plan — Vertical Timeline */}
+            {growthPlan.phases.length > 0 && (
               <>
-                <SubTitle>Pattern Combinatori</SubTitle>
-                {mappaInteriore.pattern_combinatori.map((p, i) => (
-                  <AccentBox key={i} borderColor={p.positivo ? COLOR_GREEN : COLOR_AMBER}>
-                    <div style={{ fontSize: FONT_BODY, fontWeight: 600, color: p.positivo ? COLOR_GREEN : COLOR_AMBER, marginBottom: 4 }}>{p.frontend}</div>
-                    <BodyText>{p.azione}</BodyText>
-                  </AccentBox>
-                ))}
+                <SubTitle>Piano di Crescita</SubTitle>
+                <div style={{ position: 'relative', paddingLeft: 30, marginTop: 8 }}>
+                  <div style={{ position: 'absolute', left: 11, top: 6, bottom: 6, width: 2, background: `linear-gradient(to bottom, ${BRAND_ORANGE}, ${BRAND_BLUE})` }} />
+                  {growthPlan.phases.map((phase, i) => (
+                    <div key={i} style={{ position: 'relative', marginBottom: 18, paddingBottom: 2, pageBreakInside: 'avoid' }}>
+                      <div style={{
+                        position: 'absolute', left: -24, top: 2,
+                        width: 20, height: 20, borderRadius: '50%',
+                        background: i === 0 ? BRAND_ORANGE : i === growthPlan.phases.length - 1 ? BRAND_BLUE : '#fff',
+                        border: `3px solid ${i <= 1 ? BRAND_ORANGE : BRAND_BLUE}`,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 9, fontWeight: 700, color: i === 0 || i === growthPlan.phases.length - 1 ? '#fff' : BRAND_BLUE,
+                      }}>{i + 1}</div>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: BRAND_BLUE, marginBottom: 4 }}>{phase.name}</div>
+                      <div style={{ fontSize: 10, color: TEXT_BODY, lineHeight: 1.6 }}>{phase.description}</div>
+                    </div>
+                  ))}
+                </div>
               </>
             )}
           </div>
@@ -1358,9 +1257,132 @@ export function PremiumReportPDF(props: PremiumReportPDFProps) {
 
       <PageBreak />
 
+      {/* ═══════════════ MAPPA INTERIORE — Radar + Pillole ═══════════════ */}
+      {mappaInteriore && (
+        <>
+          <Section id="mappa-radar">
+            <div style={{ padding: PAGE_PADDING_NARROW }}>
+              <SectionTitle number="04">Mappa Interiore</SectionTitle>
+              <BodyText style={{ marginBottom: 20 }}>
+                Analisi delle dimensioni psicologiche profonde. Il grafico radar mostra l'equilibrio tra le cinque aree fondamentali della personalità.
+              </BodyText>
+
+              {/* Radar Chart SVG */}
+              {(() => {
+                const chartData = getDimensioniChartData(mappaInteriore);
+                const radarDims = chartData.map(d => ({
+                  name: d.name.split(' ').slice(0, 2).join(' '),
+                  value: d.value,
+                  max: 10,
+                  color: d.color,
+                }));
+                return <RadarChartSVG dimensions={radarDims} />;
+              })()}
+
+              {/* Pillole */}
+              <div style={{ display: 'flex', gap: 12, marginTop: 20, marginBottom: 16 }}>
+                <div style={{ flex: 1, padding: 14, border: `1px solid ${BORDER_LIGHT}`, borderRadius: 8, borderTop: `3px solid ${BRAND_BLUE}` }}>
+                  <div style={{ fontSize: FONT_CAPTION, fontWeight: 700, color: BRAND_BLUE, marginBottom: 4, letterSpacing: 0.5 }}>STILE RELAZIONALE</div>
+                  <div style={{ fontSize: FONT_BODY, color: TEXT_BODY, fontWeight: 600 }}>{ATTACCAMENTO_FRONTEND[mappaInteriore.dimensioni.attaccamento.dominante]}</div>
+                </div>
+                <div style={{ flex: 1, padding: 14, border: `1px solid ${BORDER_LIGHT}`, borderRadius: 8, borderTop: `3px solid ${BRAND_ORANGE}` }}>
+                  <div style={{ fontSize: FONT_CAPTION, fontWeight: 700, color: BRAND_ORANGE, marginBottom: 4, letterSpacing: 0.5 }}>MECCANISMO DI DIFESA</div>
+                  <div style={{ fontSize: FONT_BODY, color: TEXT_BODY, fontWeight: 600 }}>
+                    {mappaInteriore.dimensioni.difesa.dominante?.frontend || 'Equilibrate'}
+                  </div>
+                </div>
+                <div style={{ flex: 1, padding: 14, border: `1px solid ${BORDER_LIGHT}`, borderRadius: 8, borderTop: `3px solid #8b5cf6` }}>
+                  <div style={{ fontSize: FONT_CAPTION, fontWeight: 700, color: '#8b5cf6', marginBottom: 4, letterSpacing: 0.5 }}>BISOGNO PRIMARIO</div>
+                  <div style={{ fontSize: FONT_BODY, color: TEXT_BODY, fontWeight: 600 }}>{mappaInteriore.dimensioni.bisogno.primario.frontend}</div>
+                </div>
+              </div>
+
+              {/* 4 Box: Motiva / Blocca / Teme / Potenziale */}
+              <div style={{ display: 'flex', gap: 12, marginBottom: 10 }}>
+                <div style={{ flex: 1 }}>
+                  <AccentBox borderColor={COLOR_GREEN}>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: COLOR_GREEN, marginBottom: 6 }}>COSA LO MOTIVA</div>
+                    {mappaInteriore.cosa_motiva.map((m, i) => (
+                      <div key={i} style={{ fontSize: 10, color: TEXT_BODY, marginBottom: 3, lineHeight: 1.5 }}>• {m}</div>
+                    ))}
+                  </AccentBox>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <AccentBox borderColor={COLOR_RED}>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: COLOR_RED, marginBottom: 6 }}>COSA LO BLOCCA</div>
+                    {mappaInteriore.cosa_blocca.map((m, i) => (
+                      <div key={i} style={{ fontSize: 10, color: TEXT_BODY, marginBottom: 3, lineHeight: 1.5 }}>• {m}</div>
+                    ))}
+                  </AccentBox>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <AccentBox borderColor={COLOR_AMBER}>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: COLOR_AMBER, marginBottom: 6 }}>COSA TEME</div>
+                    {mappaInteriore.cosa_teme.map((m, i) => (
+                      <div key={i} style={{ fontSize: 10, color: TEXT_BODY, marginBottom: 3, lineHeight: 1.5 }}>• {m}</div>
+                    ))}
+                  </AccentBox>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <AccentBox borderColor={BRAND_BLUE}>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: BRAND_BLUE, marginBottom: 6 }}>POTENZIALE INESPRESSO</div>
+                    <div style={{ fontSize: 10, color: TEXT_BODY, lineHeight: 1.5 }}>{mappaInteriore.narrativa.potenziale_inespresso}</div>
+                  </AccentBox>
+                </div>
+              </div>
+            </div>
+          </Section>
+
+          {/* Mappa Interiore — Narratives + La Chiave + Pattern */}
+          <Section id="mappa-narrative">
+            <div style={{ padding: PAGE_PADDING_NARROW }}>
+              <SubTitle>Chi è {candidato.nome} nel profondo</SubTitle>
+              <BodyText>{mappaInteriore.narrativa.chi_e_nel_profondo}</BodyText>
+
+              <SubTitle>Cosa lo guida</SubTitle>
+              <BodyText>{mappaInteriore.narrativa.cosa_lo_guida}</BodyText>
+
+              <SubTitle>Cosa lo blocca</SubTitle>
+              <BodyText>{mappaInteriore.narrativa.cosa_lo_blocca}</BodyText>
+
+              {/* LA CHIAVE */}
+              <div style={{ marginTop: 24, padding: 24, borderLeft: `6px solid ${BRAND_ORANGE}`, background: '#fff', borderRadius: '0 8px 8px 0', boxShadow: '0 2px 8px rgba(0,0,0,0.06)', pageBreakInside: 'avoid' }}>
+                <div style={{ fontSize: 12, fontWeight: 800, color: BRAND_ORANGE, marginBottom: 10, letterSpacing: 2, textTransform: 'uppercase' }}>🔑 LA CHIAVE</div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: BRAND_BLUE, lineHeight: 1.7 }}>{mappaInteriore.narrativa.la_chiave}</div>
+              </div>
+
+              {/* Errori da Non Fare */}
+              {mappaInteriore.errori_da_evitare.length > 0 && (
+                <AccentBox borderColor={COLOR_RED} style={{ marginTop: 20 }}>
+                  <div style={{ fontSize: FONT_BODY, fontWeight: 700, color: COLOR_RED, marginBottom: 6 }}>🚫 3 Errori da Non Fare Mai</div>
+                  {mappaInteriore.errori_da_evitare.map((e, i) => (
+                    <div key={i} style={{ fontSize: 10, color: TEXT_BODY, marginBottom: 4, lineHeight: 1.5 }}>{i + 1}. {e}</div>
+                  ))}
+                </AccentBox>
+              )}
+
+              {/* Pattern Combinatori */}
+              {mappaInteriore.pattern_combinatori.length > 0 && (
+                <>
+                  <SubTitle>Pattern Combinatori</SubTitle>
+                  {mappaInteriore.pattern_combinatori.map((p, i) => (
+                    <AccentBox key={i} borderColor={p.positivo ? COLOR_GREEN : COLOR_AMBER} style={{ pageBreakInside: 'avoid' }}>
+                      <div style={{ fontSize: FONT_BODY, fontWeight: 600, color: p.positivo ? COLOR_GREEN : COLOR_AMBER, marginBottom: 4 }}>{p.frontend}</div>
+                      <BodyText>{p.azione}</BodyText>
+                    </AccentBox>
+                  ))}
+                </>
+              )}
+            </div>
+          </Section>
+        </>
+      )}
+
+      <PageBreak />
+
       {/* ═══════════════ COLLOQUIO — GUIDA OPERATIVA HR ═══════════════ */}
-      <Section id="colloquio">
-        <div style={{ padding: PAGE_PADDING }}>
+      <Section id="colloquio-aree">
+        <div style={{ padding: PAGE_PADDING_NARROW }}>
           <SectionTitle number="05">Guida al Colloquio</SectionTitle>
           <BodyText style={{ marginBottom: 20 }}>
             Guida operativa strutturata per il colloquio con {candidato.nome}. Per ogni area critica: motivazione, domande mirate, segnali da osservare.
@@ -1371,8 +1393,7 @@ export function PremiumReportPDF(props: PremiumReportPDFProps) {
               {colloquioAreas.map(area => {
                 const signals = getColloquioSignals(area.id);
                 return (
-                  <div key={area.id} style={{ marginBottom: 20, padding: 18, border: `1px solid ${BORDER_LIGHT}`, borderRadius: 8, borderLeft: `5px solid ${area.priorita === 'ALTA' ? COLOR_RED : COLOR_AMBER}` }}>
-                    {/* Header */}
+                  <div key={area.id} style={{ marginBottom: 20, padding: 18, border: `1px solid ${BORDER_LIGHT}`, borderRadius: 8, borderLeft: `5px solid ${area.priorita === 'ALTA' ? COLOR_RED : COLOR_AMBER}`, pageBreakInside: 'avoid' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
                       <Badge2
                         text={area.priorita}
@@ -1381,13 +1402,9 @@ export function PremiumReportPDF(props: PremiumReportPDFProps) {
                       />
                       <span style={{ fontSize: 14, fontWeight: 700, color: BRAND_BLUE }}>{area.area}</span>
                     </div>
-
-                    {/* Perché è critica */}
                     <div style={{ fontSize: 10, color: TEXT_BODY, fontStyle: 'italic', marginBottom: 12, lineHeight: 1.6, padding: '6px 12px', background: BG_SUBTLE, borderRadius: 4 }}>
                       <strong>Perché è critica:</strong> {area.motivazione}
                     </div>
-
-                    {/* Domande */}
                     <div style={{ marginBottom: 12 }}>
                       <div style={{ fontSize: 10, fontWeight: 700, color: BRAND_BLUE, marginBottom: 6 }}>Domande da porre:</div>
                       {area.domande.map((d, j) => (
@@ -1396,8 +1413,6 @@ export function PremiumReportPDF(props: PremiumReportPDFProps) {
                         </div>
                       ))}
                     </div>
-
-                    {/* Signals row */}
                     <div style={{ display: 'flex', gap: 10 }}>
                       <div style={{ flex: 1, padding: 10, background: '#f0fdf4', borderRadius: 6 }}>
                         <div style={{ fontSize: 9, fontWeight: 700, color: COLOR_GREEN, marginBottom: 4 }}>✅ Segnale Positivo</div>
@@ -1419,8 +1434,12 @@ export function PremiumReportPDF(props: PremiumReportPDFProps) {
           ) : (
             <BodyText>Il profilo non evidenzia aree che richiedano domande specifiche. Procedere con colloquio standard.</BodyText>
           )}
+        </div>
+      </Section>
 
-          {/* Segnali Generali */}
+      {/* Colloquio — Segnali Generali */}
+      <Section id="colloquio-segnali">
+        <div style={{ padding: PAGE_PADDING_NARROW }}>
           <SubTitle>Segnali Generali da Monitorare</SubTitle>
           <div style={{ display: 'flex', gap: 16, marginTop: 8 }}>
             <div style={{ flex: 1 }}>

@@ -136,16 +136,22 @@ export function PremiumReportPDFButton({
       const fullName = `${candidato.cognome} ${candidato.nome}`;
       const today = new Date().toLocaleDateString('it-IT');
 
-      // First pass: count total pages
-      let totalPages = 0;
+      // Capture all canvases once (reused for counting + rendering)
+      const canvases: { canvas: HTMLCanvasElement; isCover: boolean; sectionId: string }[] = [];
       for (let i = 0; i < sections.length; i++) {
         const section = sections[i] as HTMLElement;
-        const sectionId = section.getAttribute('data-section');
-        const isCover = sectionId === 'cover';
+        const sectionId = section.getAttribute('data-section') || '';
         const canvas = await html2canvas(section, {
           scale: 2, useCORS: true, allowTaint: true, backgroundColor: '#ffffff', logging: false,
           width: section.scrollWidth, height: section.scrollHeight,
         });
+        canvases.push({ canvas, isCover: sectionId === 'cover', sectionId });
+        setProgress(25 + Math.round(((i + 1) / sections.length) * 35));
+      }
+
+      // Count total pages
+      let totalPages = 0;
+      for (const { canvas, isCover } of canvases) {
         const ratio = contentW / canvas.width;
         const scaledH = canvas.height * ratio;
         const maxContentH = isCover ? pdfH : usableH;
@@ -159,7 +165,6 @@ export function PremiumReportPDFButton({
 
       const addHeaderFooter = (pageNum: number, isCover: boolean) => {
         if (isCover) return;
-        // Header — minimal
         if (logoData) {
           pdf.addImage(logoData, 'PNG', margin, 3, 25, 8);
         }
@@ -167,7 +172,6 @@ export function PremiumReportPDFButton({
         pdf.setTextColor(136, 136, 136);
         pdf.text(`Analisi Strategica — ${fullName}`, pdfW - margin, 8, { align: 'right' });
 
-        // Footer — Pagina X di Y
         pdf.setDrawColor(221, 221, 221);
         pdf.line(margin, pdfH - footerH, pdfW - margin, pdfH - footerH);
         pdf.setFontSize(7);
@@ -176,43 +180,29 @@ export function PremiumReportPDFButton({
         pdf.text(today, pdfW - margin, pdfH - 5, { align: 'right' });
       };
 
-      for (let i = 0; i < sections.length; i++) {
-        const section = sections[i] as HTMLElement;
-        const sectionId = section.getAttribute('data-section');
-        const isCover = sectionId === 'cover';
+      // Render pages from cached canvases
+      for (let i = 0; i < canvases.length; i++) {
+        const { canvas, isCover } = canvases[i];
 
         try {
-          const canvas = await html2canvas(section, {
-            scale: 2,
-            useCORS: true,
-            allowTaint: true,
-            backgroundColor: '#ffffff',
-            logging: false,
-            width: section.scrollWidth,
-            height: section.scrollHeight,
-          });
-
           const ratio = contentW / canvas.width;
           const scaledH = canvas.height * ratio;
           const maxContentH = isCover ? pdfH : usableH;
           const pxPerPage = maxContentH / ratio;
 
           if (scaledH <= maxContentH) {
-            // Fits on one page — add normally
             if (i > 0) { pdf.addPage(); currentPage++; }
             const yOffset = isCover ? 0 : headerH;
             const imgData = canvas.toDataURL('image/jpeg', 0.92);
             pdf.addImage(imgData, 'JPEG', margin, yOffset, contentW, scaledH);
             addHeaderFooter(currentPage, isCover);
           } else {
-            // Need multiple pages — slice the canvas
             let srcY = 0;
             let isFirstSlice = true;
 
             while (srcY < canvas.height) {
               const sliceH = Math.min(pxPerPage, canvas.height - srcY);
 
-              // Create sub-canvas for this slice
               const sliceCanvas = document.createElement('canvas');
               sliceCanvas.width = canvas.width;
               sliceCanvas.height = sliceH;
@@ -236,10 +226,10 @@ export function PremiumReportPDFButton({
             }
           }
         } catch (err) {
-          console.warn(`PDF section ${sectionId} failed:`, err);
+          console.warn(`PDF section ${canvases[i].sectionId} failed:`, err);
         }
 
-        setProgress(25 + Math.round(((i + 1) / sections.length) * 70));
+        setProgress(60 + Math.round(((i + 1) / canvases.length) * 35));
       }
 
       // Cleanup
