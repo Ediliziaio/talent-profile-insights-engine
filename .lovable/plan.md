@@ -1,107 +1,49 @@
 
 
-# Fix: Contenuto PDF che sfora oltre header/footer
+# Aggiunta Narrative Tratti al PDF Premium
 
-## Problema
+## Cosa manca
 
-Quando una sezione e piu alta di una pagina A4, il codice attuale (linee 188-201 di `PremiumReportPDFButton.tsx`) ri-aggiunge l'intera immagine con un offset Y negativo per mostrare la continuazione. Ma `jsPDF.addImage()` **non fa clipping** — l'immagine viene renderizzata per intero, sforando sia nell'area header che nell'area footer. Questo e esattamente quello che si vede negli screenshot: testo che arriva fino in fondo, sovrapposto al footer, e che continua sopra l'header nella pagina successiva.
+La sezione "2. Profilo Comportamentale" del PDF contiene attualmente:
+- Grafico barre tratti
+- Segnalazioni sindromi
+- Ruoli compatibili
+- Profilo tipo esteso
 
-## Soluzione
+Ma **non** contiene la narrativa "Chi è [Nome]" — i 4 capitoli con testo descrittivo per ogni tratto, che invece sono presenti nella UI (ProfiloUnificatoTab).
 
-Sostituire l'approccio "immagine intera con offset negativo" con un sistema di **clipping rettangolare** usando le API native di jsPDF (`rect` + `clip`). Per ogni "fetta" di pagina:
+## Cosa aggiungo
 
-1. Salvare il contesto grafico (`pdf.internal.getCanvas().getContext` → no, jsPDF usa `doc.save()`)
-2. Definire un rettangolo di clipping che copre solo l'area utile (da `headerH` a `pdfH - footerH`)
-3. Aggiungere l'immagine con l'offset negativo (come prima)
-4. Il clipping impedisce al contenuto di invadere header/footer
+Dopo il grafico barre e prima delle sindromi, inserisco una nuova sotto-sezione "Chi è [Nome]" con i 4 capitoli:
 
-In pratica, il pattern jsPDF per clipping e:
+1. **Come Pensa** (ORG, AUT, GP) — icona cervello, sfondo blu chiaro
+2. **Come Agisce** (ADS, DET, VEN, HRM) — icona fulmine, sfondo ambra chiaro
+3. **Come si Relaziona** (LDR, PRO, COM, ESP) — icona persone, sfondo viola chiaro
+4. **Stabilità e Principi** (RC, FIN, SUC, PRI) — icona scudo, sfondo grigio chiaro
 
-```typescript
-// Save graphics state
-const ctx = pdf.context2d; // not available in jsPDF directly
-```
+Per ogni tratto:
+- **Nome tratto + punteggio** (badge colorato)
+- **Narrativa completa** generata da `getTraitNarrative()`
+- **Nota speciale GP** se applicabile (da `getGPSpecialNarrative()`)
 
-Dato che jsPDF non ha un API di clipping nativa semplice, l'approccio migliore e **tagliare il canvas in sotto-canvas** (uno per pagina) prima di aggiungerli al PDF. Questo garantisce che ogni immagine aggiunta sia esattamente della dimensione giusta.
+Dato che questa sezione sarà molto lunga (15 tratti × testo lungo), la inserisco come **sezione separata** (`data-section="profilo-narrative"`) con un proprio `PageBreak`, così il canvas slicing gestirà correttamente la paginazione.
 
-### Approccio: Canvas Slicing
+## Modifiche
 
-Per ogni sezione che sfora:
+### `src/components/PremiumReportPDF.tsx`
 
-```
-canvas originale (es. 3000px di altezza)
-  ↓
-Calcolo quanti pixel corrispondono a usableH in mm
-  ↓
-Taglio il canvas in fette (slice1: 0→maxPx, slice2: maxPx→2*maxPx, ecc.)
-  ↓
-Ogni fetta diventa un'immagine separata, alta esattamente quanto lo spazio disponibile
-  ↓
-Ogni fetta va su una pagina diversa, posizionata a Y=headerH
-```
+1. Aggiungere import di `getTraitNarrative`, `getGPSpecialNarrative` (già importati `personalizzaTesto` e `getFascia`)
+2. Dopo la sezione `profilo-tratti` (linea 508) e prima del `PageBreak` verso Gestione, inserire una nuova `<Section id="profilo-narrative">` con:
+   - Titolo "Chi è [Nome]"
+   - 4 blocchi capitolo, ognuno con sfondo colorato, titolo, sottotitolo
+   - Per ogni tratto nel capitolo: nome, badge punteggio, testo narrativo
+   - Nota speciale GP se presente
 
-### Modifiche in `src/components/PremiumReportPDFButton.tsx`
+### Design
 
-Riscrivere il blocco linee 159-208 (il loop delle sezioni) con questa logica:
-
-```typescript
-for (let i = 0; i < sections.length; i++) {
-  const section = sections[i] as HTMLElement;
-  const sectionId = section.getAttribute('data-section');
-  const isCover = sectionId === 'cover';
-
-  const canvas = await html2canvas(section, { scale: 2, ... });
-  
-  const ratio = contentW / canvas.width;
-  const scaledH = canvas.height * ratio;
-  const maxContentH = isCover ? pdfH : usableH;
-  
-  // How many pixels of canvas correspond to one page of usable space
-  const pxPerPage = maxContentH / ratio;
-  
-  if (scaledH <= maxContentH) {
-    // Fits on one page — add normally
-    if (i > 0) { pdf.addPage(); currentPage++; }
-    const yOffset = isCover ? 0 : headerH;
-    pdf.addImage(imgData, 'JPEG', margin, yOffset, contentW, scaledH);
-    addHeaderFooter(currentPage, isCover);
-  } else {
-    // Need multiple pages — slice the canvas
-    let srcY = 0;
-    let isFirstSlice = true;
-    
-    while (srcY < canvas.height) {
-      const sliceH = Math.min(pxPerPage, canvas.height - srcY);
-      
-      // Create sub-canvas for this slice
-      const sliceCanvas = document.createElement('canvas');
-      sliceCanvas.width = canvas.width;
-      sliceCanvas.height = sliceH;
-      const ctx = sliceCanvas.getContext('2d')!;
-      ctx.drawImage(canvas, 0, srcY, canvas.width, sliceH, 0, 0, canvas.width, sliceH);
-      
-      const sliceImg = sliceCanvas.toDataURL('image/jpeg', 0.92);
-      const sliceScaledH = sliceH * ratio;
-      
-      if (!isFirstSlice || i > 0) {
-        pdf.addPage();
-        currentPage++;
-      }
-      
-      const yOffset = isCover && isFirstSlice ? 0 : headerH;
-      pdf.addImage(sliceImg, 'JPEG', margin, yOffset, contentW, sliceScaledH);
-      addHeaderFooter(currentPage, isCover && isFirstSlice);
-      
-      srcY += sliceH;
-      isFirstSlice = false;
-    }
-  }
-}
-```
-
-Questo approccio:
-- Taglia fisicamente il canvas in fette della dimensione giusta
-- Ogni fetta e un'immagine indipendente che non puo sforare
-- Header e footer sono sempre visibili e mai coperti
-- Nessuna sovrapposizione tra contenuto e aree riservate
+- Ogni capitolo è un box con bordo sinistro colorato (4px)
+- Titolo capitolo: fontSize 12, bold, colore tematico
+- Sottotitolo: fontSize 8, caption
+- Ogni tratto: header con nome + badge, poi testo narrativo (fontSize 9, interlinea 1.6)
+- Nota GP: box ambra con icona ⚠️
 
