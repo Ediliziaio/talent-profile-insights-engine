@@ -378,7 +378,7 @@ function ReliabilityIndicator({ reliability }: { reliability?: ReliabilityIndex 
 // ─── Radar Chart SVG (Pentagon) ──────────────────────
 
 function RadarChartSVG({ dimensions }: { dimensions: { name: string; value: number; max: number; color: string }[] }) {
-  const cx = 150, cy = 150, maxR = 110;
+  const cx = 250, cy = 250, maxR = 170;
   const n = dimensions.length;
   const angles = dimensions.map((_, i) => (Math.PI * 2 * i) / n - Math.PI / 2);
 
@@ -387,8 +387,9 @@ function RadarChartSVG({ dimensions }: { dimensions: { name: string; value: numb
     y: cy + r * Math.sin(angle),
   });
 
-  // Grid rings
+  // Grid rings at 25%, 50%, 75%, 100%
   const rings = [0.25, 0.5, 0.75, 1.0];
+  const ringValues = [2.5, 5, 7.5, 10];
   const gridPaths = rings.map(pct => {
     const pts = angles.map(a => getPoint(a, maxR * pct));
     return pts.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ') + ' Z';
@@ -404,33 +405,44 @@ function RadarChartSVG({ dimensions }: { dimensions: { name: string; value: numb
   // Axis lines
   const axisLines = angles.map(a => getPoint(a, maxR));
 
-  // Labels
+  // Labels positioned outside
   const labelPoints = dimensions.map((d, i) => {
-    const p = getPoint(angles[i], maxR + 28);
+    const p = getPoint(angles[i], maxR + 42);
     return { ...p, name: d.name, value: d.value, max: d.max, color: d.color };
   });
 
   return (
-    <svg width={300} height={300} viewBox="0 0 300 300" style={{ display: 'block', margin: '0 auto' }}>
-      {/* Grid */}
+    <svg id="inner-map-radar" width={420} height={420} viewBox="0 0 500 500" style={{ display: 'block', margin: '0 auto', flexShrink: 0 }}>
+      {/* Background fill */}
+      <rect x="0" y="0" width="500" height="500" fill="#ffffff" />
+      {/* Grid rings */}
       {gridPaths.map((path, i) => (
-        <path key={i} d={path} fill="none" stroke="#e5e7eb" strokeWidth={i === rings.length - 1 ? 1.5 : 0.8} />
+        <path key={i} d={path} fill="none" stroke="#e5e7eb" strokeWidth={i === rings.length - 1 ? 1.8 : 1} />
       ))}
+      {/* Ring scale labels (on top axis) */}
+      {rings.map((pct, i) => {
+        const pt = getPoint(-Math.PI / 2, maxR * pct);
+        return (
+          <text key={`rv-${i}`} x={pt.x + 8} y={pt.y + 1} fontSize="9" fill="#9ca3af" dominantBaseline="middle" textAnchor="start">{ringValues[i]}</text>
+        );
+      })}
       {/* Axes */}
       {axisLines.map((p, i) => (
-        <line key={i} x1={cx} y1={cy} x2={p.x} y2={p.y} stroke="#d1d5db" strokeWidth={0.8} />
+        <line key={i} x1={cx} y1={cy} x2={p.x} y2={p.y} stroke="#d1d5db" strokeWidth={1} />
       ))}
-      {/* Data polygon */}
-      <path d={dataPath} fill={`${BRAND_BLUE}22`} stroke={BRAND_BLUE} strokeWidth={2.5} strokeLinejoin="round" />
+      {/* Data fill */}
+      <path d={dataPath} fill={`${BRAND_BLUE}18`} stroke="none" />
+      {/* Data outline */}
+      <path d={dataPath} fill="none" stroke={BRAND_BLUE} strokeWidth={2.5} strokeLinejoin="round" />
       {/* Data points */}
       {dataPoints.map((p, i) => (
-        <circle key={i} cx={p.x} cy={p.y} r={4} fill={dimensions[i].color} stroke="#fff" strokeWidth={2} />
+        <circle key={i} cx={p.x} cy={p.y} r={5} fill={dimensions[i].color} stroke="#fff" strokeWidth={2} />
       ))}
-      {/* Labels */}
+      {/* Labels — name + value */}
       {labelPoints.map((lp, i) => (
         <g key={i}>
-          <text x={lp.x} y={lp.y - 6} textAnchor="middle" fontSize="8" fontWeight="700" fill={BRAND_BLUE}>{lp.name}</text>
-          <text x={lp.x} y={lp.y + 6} textAnchor="middle" fontSize="9" fontWeight="800" fill={lp.color}>{lp.value}/{lp.max}</text>
+          <text x={lp.x} y={lp.y - 7} textAnchor="middle" dominantBaseline="middle" fontSize="11" fontWeight="700" fill={BRAND_BLUE} fontFamily={FONT_FAMILY}>{lp.name}</text>
+          <text x={lp.x} y={lp.y + 8} textAnchor="middle" dominantBaseline="middle" fontSize="12" fontWeight="800" fill={lp.color} fontFamily={FONT_FAMILY}>{lp.value}/{lp.max}</text>
         </g>
       ))}
     </svg>
@@ -1263,11 +1275,22 @@ export function PremiumReportPDF(props: PremiumReportPDFProps) {
           <Section id="mappa-radar">
             <div style={{ padding: PAGE_PADDING_NARROW }}>
               <SectionTitle number="04">Mappa Interiore</SectionTitle>
-              <BodyText style={{ marginBottom: 20 }}>
+              <BodyText style={{ marginBottom: 8 }}>
                 Analisi delle dimensioni psicologiche profonde. Il grafico radar mostra l'equilibrio tra le cinque aree fondamentali della personalità.
               </BodyText>
 
-              {/* Radar Chart SVG */}
+              {/* Legenda chip */}
+              <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
+                {[
+                  { label: '0–3 Basso', color: COLOR_RED },
+                  { label: '4–6 Medio', color: COLOR_AMBER },
+                  { label: '7–10 Alto', color: COLOR_GREEN },
+                ].map((c, i) => (
+                  <div key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '3px 10px', borderRadius: 4, border: `1px solid ${c.color}20`, background: `${c.color}08`, fontSize: 9, fontWeight: 600, color: c.color }}>{c.label}</div>
+                ))}
+              </div>
+
+              {/* Hero: Radar + Snapshot */}
               {(() => {
                 const chartData = getDimensioniChartData(mappaInteriore);
                 const radarDims = chartData.map(d => ({
@@ -1276,102 +1299,139 @@ export function PremiumReportPDF(props: PremiumReportPDFProps) {
                   max: 10,
                   color: d.color,
                 }));
-                return <RadarChartSVG dimensions={radarDims} />;
+                return (
+                  <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', marginBottom: 22 }}>
+                    {/* Radar */}
+                    <div style={{ flex: '0 0 auto' }}>
+                      <RadarChartSVG dimensions={radarDims} />
+                    </div>
+                    {/* Snapshot */}
+                    <div style={{ flex: 1, paddingTop: 30 }}>
+                      <div style={{ fontSize: 11, fontWeight: 800, color: BRAND_BLUE, letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 16 }}>SNAPSHOT</div>
+                      {chartData.map((d, i) => (
+                        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+                          <div style={{ width: 60, height: 6, borderRadius: 3, background: '#f3f4f6', overflow: 'hidden', flexShrink: 0 }}>
+                            <div style={{ width: `${(d.value / 10) * 100}%`, height: '100%', borderRadius: 3, background: d.color }} />
+                          </div>
+                          <div style={{ fontSize: 13, fontWeight: 800, color: d.color, minWidth: 36 }}>{d.value}/10</div>
+                          <div style={{ fontSize: 11, color: TEXT_BODY, fontWeight: 600 }}>{d.name}</div>
+                          <div style={{ fontSize: 9, color: TEXT_CAPTION, fontStyle: 'italic', marginLeft: 'auto' }}>{d.label}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
               })()}
 
-              {/* Pillole */}
-              <div style={{ display: 'flex', gap: 12, marginTop: 20, marginBottom: 16 }}>
-                <div style={{ flex: 1, padding: 14, border: `1px solid ${BORDER_LIGHT}`, borderRadius: 8, borderTop: `3px solid ${BRAND_BLUE}` }}>
-                  <div style={{ fontSize: FONT_CAPTION, fontWeight: 700, color: BRAND_BLUE, marginBottom: 4, letterSpacing: 0.5 }}>STILE RELAZIONALE</div>
-                  <div style={{ fontSize: FONT_BODY, color: TEXT_BODY, fontWeight: 600 }}>{ATTACCAMENTO_FRONTEND[mappaInteriore.dimensioni.attaccamento.dominante]}</div>
+              {/* Bottom: Narrativa sx + 3 Card dx */}
+              <div style={{ display: 'flex', gap: 20, marginBottom: 16 }}>
+                {/* Chi è nel profondo */}
+                <div style={{ flex: '0 0 58%' }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: BRAND_BLUE, marginBottom: 8 }}>Chi è {candidato.nome} nel profondo</div>
+                  <div style={{ fontSize: FONT_BODY, color: TEXT_BODY, lineHeight: 1.55 }}>{mappaInteriore.narrativa.chi_e_nel_profondo}</div>
                 </div>
-                <div style={{ flex: 1, padding: 14, border: `1px solid ${BORDER_LIGHT}`, borderRadius: 8, borderTop: `3px solid ${BRAND_ORANGE}` }}>
-                  <div style={{ fontSize: FONT_CAPTION, fontWeight: 700, color: BRAND_ORANGE, marginBottom: 4, letterSpacing: 0.5 }}>MECCANISMO DI DIFESA</div>
-                  <div style={{ fontSize: FONT_BODY, color: TEXT_BODY, fontWeight: 600 }}>
-                    {mappaInteriore.dimensioni.difesa.dominante?.frontend || 'Equilibrate'}
+                {/* 3 card */}
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <div style={{ padding: '14px 16px', border: `1px solid ${BORDER_LIGHT}`, borderRadius: 8, borderTop: `3px solid ${BRAND_BLUE}` }}>
+                    <div style={{ fontSize: FONT_CAPTION, fontWeight: 700, color: BRAND_BLUE, marginBottom: 3, letterSpacing: 0.5, textTransform: 'uppercase' }}>Stile Relazionale</div>
+                    <div style={{ fontSize: FONT_BODY, color: TEXT_BODY, fontWeight: 600 }}>{ATTACCAMENTO_FRONTEND[mappaInteriore.dimensioni.attaccamento.dominante]}</div>
                   </div>
-                </div>
-                <div style={{ flex: 1, padding: 14, border: `1px solid ${BORDER_LIGHT}`, borderRadius: 8, borderTop: `3px solid #8b5cf6` }}>
-                  <div style={{ fontSize: FONT_CAPTION, fontWeight: 700, color: '#8b5cf6', marginBottom: 4, letterSpacing: 0.5 }}>BISOGNO PRIMARIO</div>
-                  <div style={{ fontSize: FONT_BODY, color: TEXT_BODY, fontWeight: 600 }}>{mappaInteriore.dimensioni.bisogno.primario.frontend}</div>
+                  <div style={{ padding: '14px 16px', border: `1px solid ${BORDER_LIGHT}`, borderRadius: 8, borderTop: `3px solid ${BRAND_ORANGE}` }}>
+                    <div style={{ fontSize: FONT_CAPTION, fontWeight: 700, color: BRAND_ORANGE, marginBottom: 3, letterSpacing: 0.5, textTransform: 'uppercase' }}>Meccanismo di Difesa</div>
+                    <div style={{ fontSize: FONT_BODY, color: TEXT_BODY, fontWeight: 600 }}>{mappaInteriore.dimensioni.difesa.dominante?.frontend || 'Equilibrate'}</div>
+                  </div>
+                  <div style={{ padding: '14px 16px', border: `1px solid ${BORDER_LIGHT}`, borderRadius: 8, borderTop: `3px solid #8b5cf6` }}>
+                    <div style={{ fontSize: FONT_CAPTION, fontWeight: 700, color: '#8b5cf6', marginBottom: 3, letterSpacing: 0.5, textTransform: 'uppercase' }}>Bisogno Primario</div>
+                    <div style={{ fontSize: FONT_BODY, color: TEXT_BODY, fontWeight: 600 }}>{mappaInteriore.dimensioni.bisogno.primario.frontend}</div>
+                  </div>
                 </div>
               </div>
 
-              {/* 4 Box: Motiva / Blocca / Teme / Potenziale */}
-              <div style={{ display: 'flex', gap: 12, marginBottom: 10 }}>
-                <div style={{ flex: 1 }}>
-                  <AccentBox borderColor={COLOR_GREEN}>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: COLOR_GREEN, marginBottom: 6 }}>COSA LO MOTIVA</div>
-                    {mappaInteriore.cosa_motiva.map((m, i) => (
-                      <div key={i} style={{ fontSize: 10, color: TEXT_BODY, marginBottom: 3, lineHeight: 1.5 }}>• {m}</div>
-                    ))}
-                  </AccentBox>
-                </div>
-                <div style={{ flex: 1 }}>
-                  <AccentBox borderColor={COLOR_RED}>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: COLOR_RED, marginBottom: 6 }}>COSA LO BLOCCA</div>
-                    {mappaInteriore.cosa_blocca.map((m, i) => (
-                      <div key={i} style={{ fontSize: 10, color: TEXT_BODY, marginBottom: 3, lineHeight: 1.5 }}>• {m}</div>
-                    ))}
-                  </AccentBox>
-                </div>
-                <div style={{ flex: 1 }}>
-                  <AccentBox borderColor={COLOR_AMBER}>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: COLOR_AMBER, marginBottom: 6 }}>COSA TEME</div>
-                    {mappaInteriore.cosa_teme.map((m, i) => (
-                      <div key={i} style={{ fontSize: 10, color: TEXT_BODY, marginBottom: 3, lineHeight: 1.5 }}>• {m}</div>
-                    ))}
-                  </AccentBox>
-                </div>
-                <div style={{ flex: 1 }}>
-                  <AccentBox borderColor={BRAND_BLUE}>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: BRAND_BLUE, marginBottom: 6 }}>POTENZIALE INESPRESSO</div>
-                    <div style={{ fontSize: 10, color: TEXT_BODY, lineHeight: 1.5 }}>{mappaInteriore.narrativa.potenziale_inespresso}</div>
-                  </AccentBox>
+              {/* Footer note */}
+              <div style={{ borderTop: `1px solid ${BORDER_LIGHT}`, paddingTop: 10, marginTop: 6 }}>
+                <div style={{ fontSize: 9, color: TEXT_CAPTION, fontStyle: 'italic', lineHeight: 1.5 }}>
+                  Questa sezione è il cuore del profilo: utilizza queste informazioni per guidare l'inserimento e la gestione quotidiana della risorsa.
                 </div>
               </div>
             </div>
           </Section>
 
-          {/* Mappa Interiore — Narratives + La Chiave + Pattern */}
+          {/* Mappa Interiore — PAGINA B: Leva Strategica */}
           <Section id="mappa-narrative">
             <div style={{ padding: PAGE_PADDING_NARROW }}>
-              <SubTitle>Chi è {candidato.nome} nel profondo</SubTitle>
-              <BodyText>{mappaInteriore.narrativa.chi_e_nel_profondo}</BodyText>
 
-              <SubTitle>Cosa lo guida</SubTitle>
-              <BodyText>{mappaInteriore.narrativa.cosa_lo_guida}</BodyText>
-
-              <SubTitle>Cosa lo blocca</SubTitle>
-              <BodyText>{mappaInteriore.narrativa.cosa_lo_blocca}</BodyText>
-
-              {/* LA CHIAVE */}
-              <div style={{ marginTop: 24, padding: 24, borderLeft: `6px solid ${BRAND_ORANGE}`, background: '#fff', borderRadius: '0 8px 8px 0', boxShadow: '0 2px 8px rgba(0,0,0,0.06)', pageBreakInside: 'avoid' }}>
-                <div style={{ fontSize: 12, fontWeight: 800, color: BRAND_ORANGE, marginBottom: 10, letterSpacing: 2, textTransform: 'uppercase' }}>🔑 LA CHIAVE</div>
-                <div style={{ fontSize: 14, fontWeight: 600, color: BRAND_BLUE, lineHeight: 1.7 }}>{mappaInteriore.narrativa.la_chiave}</div>
+              {/* LA CHIAVE — Hero box full-width */}
+              <div style={{ marginBottom: 22, padding: '24px 28px', borderLeft: `6px solid ${BRAND_ORANGE}`, background: '#fef9f3', borderRadius: '0 10px 10px 0', pageBreakInside: 'avoid' }}>
+                <div style={{ fontSize: 11, fontWeight: 800, color: BRAND_ORANGE, marginBottom: 10, letterSpacing: 2, textTransform: 'uppercase' }}>🔑 LA CHIAVE</div>
+                <div style={{ fontSize: 16, fontWeight: 600, color: BRAND_BLUE, lineHeight: 1.6, textAlign: 'center' }}>
+                  "{mappaInteriore.narrativa.la_chiave}"
+                </div>
               </div>
 
-              {/* Errori da Non Fare */}
-              {mappaInteriore.errori_da_evitare.length > 0 && (
-                <AccentBox borderColor={COLOR_RED} style={{ marginTop: 20 }}>
-                  <div style={{ fontSize: FONT_BODY, fontWeight: 700, color: COLOR_RED, marginBottom: 6 }}>🚫 3 Errori da Non Fare Mai</div>
-                  {mappaInteriore.errori_da_evitare.map((e, i) => (
-                    <div key={i} style={{ fontSize: 10, color: TEXT_BODY, marginBottom: 4, lineHeight: 1.5 }}>{i + 1}. {e}</div>
+              {/* 3 colonne: Motiva / Blocca / Teme */}
+              <div style={{ display: 'flex', gap: 14, marginBottom: 20 }}>
+                <div style={{ flex: 1, padding: '14px 14px', border: `1px solid ${BORDER_LIGHT}`, borderRadius: 8, borderTop: `3px solid ${COLOR_GREEN}`, pageBreakInside: 'avoid' }}>
+                  <div style={{ fontSize: 10, fontWeight: 800, color: COLOR_GREEN, marginBottom: 8, letterSpacing: 0.5, textTransform: 'uppercase' }}>💪 Cosa lo Motiva</div>
+                  {mappaInteriore.cosa_motiva.map((m, i) => (
+                    <div key={i} style={{ fontSize: 10, color: TEXT_BODY, marginBottom: 4, lineHeight: 1.5 }}>• {m}</div>
                   ))}
-                </AccentBox>
+                </div>
+                <div style={{ flex: 1, padding: '14px 14px', border: `1px solid ${BORDER_LIGHT}`, borderRadius: 8, borderTop: `3px solid ${COLOR_RED}`, pageBreakInside: 'avoid' }}>
+                  <div style={{ fontSize: 10, fontWeight: 800, color: COLOR_RED, marginBottom: 8, letterSpacing: 0.5, textTransform: 'uppercase' }}>🔒 Cosa lo Blocca</div>
+                  {mappaInteriore.cosa_blocca.map((m, i) => (
+                    <div key={i} style={{ fontSize: 10, color: TEXT_BODY, marginBottom: 4, lineHeight: 1.5 }}>• {m}</div>
+                  ))}
+                </div>
+                <div style={{ flex: 1, padding: '14px 14px', border: `1px solid ${BORDER_LIGHT}`, borderRadius: 8, borderTop: `3px solid ${COLOR_AMBER}`, pageBreakInside: 'avoid' }}>
+                  <div style={{ fontSize: 10, fontWeight: 800, color: COLOR_AMBER, marginBottom: 8, letterSpacing: 0.5, textTransform: 'uppercase' }}>⚠️ Cosa Teme</div>
+                  {mappaInteriore.cosa_teme.map((m, i) => (
+                    <div key={i} style={{ fontSize: 10, color: TEXT_BODY, marginBottom: 4, lineHeight: 1.5 }}>• {m}</div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Potenziale Inespresso — full-width */}
+              <AccentBox borderColor={BRAND_BLUE} style={{ marginBottom: 20 }}>
+                <div style={{ fontSize: 11, fontWeight: 800, color: BRAND_BLUE, marginBottom: 8, letterSpacing: 0.5, textTransform: 'uppercase' }}>✨ Potenziale Inespresso</div>
+                <div style={{ fontSize: FONT_BODY, color: TEXT_BODY, lineHeight: 1.6 }}>{mappaInteriore.narrativa.potenziale_inespresso}</div>
+              </AccentBox>
+
+              {/* Cosa lo guida + Cosa lo blocca narratives */}
+              <div style={{ display: 'flex', gap: 16, marginBottom: 20 }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: BRAND_BLUE, marginBottom: 6 }}>Cosa lo guida</div>
+                  <div style={{ fontSize: FONT_BODY, color: TEXT_BODY, lineHeight: 1.55 }}>{mappaInteriore.narrativa.cosa_lo_guida}</div>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: BRAND_BLUE, marginBottom: 6 }}>Cosa lo blocca</div>
+                  <div style={{ fontSize: FONT_BODY, color: TEXT_BODY, lineHeight: 1.55 }}>{mappaInteriore.narrativa.cosa_lo_blocca}</div>
+                </div>
+              </div>
+
+              {/* 🚫 3 Errori da Non Fare Mai */}
+              {mappaInteriore.errori_da_evitare.length > 0 && (
+                <div style={{ marginBottom: 20, padding: '16px 18px', border: `1px solid ${COLOR_RED}30`, borderRadius: 8, background: `${COLOR_RED}06`, pageBreakInside: 'avoid' }}>
+                  <div style={{ fontSize: 11, fontWeight: 800, color: COLOR_RED, marginBottom: 10, letterSpacing: 0.5 }}>🚫 3 ERRORI DA NON FARE MAI</div>
+                  {mappaInteriore.errori_da_evitare.map((e, i) => (
+                    <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 6, lineHeight: 1.5 }}>
+                      <div style={{ fontSize: 12, fontWeight: 800, color: COLOR_RED, minWidth: 18 }}>{i + 1}.</div>
+                      <div style={{ fontSize: FONT_BODY, color: TEXT_BODY }}>{e}</div>
+                    </div>
+                  ))}
+                </div>
               )}
 
               {/* Pattern Combinatori */}
               {mappaInteriore.pattern_combinatori.length > 0 && (
-                <>
-                  <SubTitle>Pattern Combinatori</SubTitle>
+                <div style={{ pageBreakInside: 'avoid' }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: BRAND_BLUE, marginBottom: 10 }}>Pattern Combinatori</div>
                   {mappaInteriore.pattern_combinatori.map((p, i) => (
-                    <AccentBox key={i} borderColor={p.positivo ? COLOR_GREEN : COLOR_AMBER} style={{ pageBreakInside: 'avoid' }}>
+                    <AccentBox key={i} borderColor={p.positivo ? COLOR_GREEN : COLOR_AMBER} style={{ pageBreakInside: 'avoid', marginBottom: 8 }}>
                       <div style={{ fontSize: FONT_BODY, fontWeight: 600, color: p.positivo ? COLOR_GREEN : COLOR_AMBER, marginBottom: 4 }}>{p.frontend}</div>
                       <BodyText>{p.azione}</BodyText>
                     </AccentBox>
                   ))}
-                </>
+                </div>
               )}
             </div>
           </Section>
