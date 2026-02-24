@@ -1,10 +1,29 @@
 import { useAuth } from '@/hooks/useAuth';
+import { Navigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Brain, CheckCircle2, PartyPopper } from 'lucide-react';
+import { Brain, CheckCircle2, PartyPopper, Loader2 } from 'lucide-react';
 
 export default function TestCompletato() {
-  const { profile, signOut } = useAuth();
+  const { user, profile, loading, signOut } = useAuth();
+
+  // Guard: must be authenticated
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!user || !profile) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  // Guard: only candidato role
+  if (profile.ruolo !== 'candidato') {
+    return <Navigate to="/" replace />;
+  }
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">

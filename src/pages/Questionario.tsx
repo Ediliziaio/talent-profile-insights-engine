@@ -24,7 +24,6 @@ export default function Questionario() {
   const [currentPage, setCurrentPage] = useState(0);
   const [risposte, setRisposte] = useState<Record<number, AnswerValue>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [loadingRisposte, setLoadingRisposte] = useState(true);
   const [savingId, setSavingId] = useState<number | null>(null);
 
   const totalPages = Math.ceil(DOMANDE.length / QUESTIONS_PER_PAGE);
@@ -47,34 +46,35 @@ export default function Questionario() {
     enabled: !!user,
   });
 
-  // Load existing answers with proper loading state
-  useEffect(() => {
-    if (candidato) {
-      setLoadingRisposte(true);
-      supabase
+  // Load existing answers via useQuery for cache, retry, and proper error handling
+  const { data: risposteCaricate, isLoading: loadingRisposteQuery } = useQuery({
+    queryKey: ['risposte', candidato?.id],
+    queryFn: async () => {
+      if (!candidato) return {};
+      const { data, error } = await supabase
         .from('risposte')
         .select('domanda_id, valore')
-        .eq('candidato_id', candidato.id)
-        .then(({ data, error }) => {
-          if (error) {
-            toast({
-              title: 'Errore caricamento',
-              description: 'Impossibile caricare le risposte salvate',
-              variant: 'destructive',
-            });
-          } else if (data) {
-            const existing: Record<number, AnswerValue> = {};
-            data.forEach((r) => {
-              existing[r.domanda_id] = r.valore as AnswerValue;
-            });
-            setRisposte(existing);
-          }
-          setLoadingRisposte(false);
-        });
-    } else {
-      setLoadingRisposte(false);
+        .eq('candidato_id', candidato.id);
+      if (error) throw error;
+      const existing: Record<number, AnswerValue> = {};
+      (data ?? []).forEach((r) => {
+        existing[r.domanda_id] = r.valore as AnswerValue;
+      });
+      return existing;
+    },
+    enabled: !!candidato,
+    staleTime: 1000 * 60 * 5, // 5 min cache
+    retry: 2,
+  });
+
+  // Sync loaded answers into local state (once)
+  useEffect(() => {
+    if (risposteCaricate && Object.keys(risposteCaricate).length > 0 && Object.keys(risposte).length === 0) {
+      setRisposte(risposteCaricate);
     }
-  }, [candidato, toast]);
+  }, [risposteCaricate]);
+
+  const loadingRisposte = loadingRisposteQuery;
 
   const saveMutation = useMutation({
     mutationFn: async ({ domandaId, valore }: { domandaId: number; valore: AnswerValue }) => {
@@ -188,7 +188,24 @@ export default function Questionario() {
         activeSyndromeCodes
       );
 
-      // Salva risultati per ogni tratto V5
+      // Idempotent: check if profile already exists (retry-safe)
+      const { data: existingProfilo } = await supabase
+        .from('profili_candidato')
+        .select('id')
+        .eq('candidato_id', candidato.id)
+        .maybeSingle();
+
+      if (existingProfilo) {
+        // Already submitted — skip to completion
+        toast({
+          title: 'Test già completato',
+          description: 'I risultati erano già stati salvati.',
+        });
+        navigate('/test/completato');
+        return;
+      }
+
+      // Salva risultati per ogni tratto V5 — upsert per idempotenza
       const risultatiData = Object.entries(profilo.traits_v5).map(([scala, punteggio]) => ({
         candidato_id: candidato.id,
         scala,
@@ -198,7 +215,7 @@ export default function Questionario() {
 
       const { error: risultatiError } = await supabase
         .from('risultati')
-        .insert(risultatiData);
+        .upsert(risultatiData, { onConflict: 'candidato_id,scala' });
 
       if (risultatiError) throw risultatiError;
 
@@ -232,7 +249,7 @@ export default function Questionario() {
 
       const { error: profiloError } = await supabase
         .from('profili_candidato')
-        .insert([profiloData]);
+        .upsert([profiloData], { onConflict: 'candidato_id' });
 
       if (profiloError) throw profiloError;
 
