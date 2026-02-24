@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { NotionLayout } from '@/components/NotionLayout';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { RisposteDettagliate } from '@/components/RisposteDettagliate';
-import { PDFExportButton, PDFReportButton, PDFSyndromeReportButton, InterviewSheetPDFButton } from '@/components/PDFExportButton';
+import { PDFExportButton, InterviewSheetPDFButton } from '@/components/PDFExportButton';
 import { ManagementGuideV5 } from '@/components/ManagementGuideV5';
 import { ActionPlanCardV5 } from '@/components/ActionPlanCardV5';
 import { GestioneAvanzataV3 } from '@/components/GestioneAvanzataV3';
@@ -30,7 +30,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Candidato, ProfiloCandidato, ProfiloTipo, ProfiloTipoV5, ReliabilityIndex, TraitCode } from '@/types/database';
+import { Candidato, ProfiloCandidato, ProfiloTipoV5, ReliabilityIndex, TraitCode } from '@/types/database';
 import { getProfiloTipoV5Label } from '@/lib/scoringV5';
 import { calculateRoleMatchingV5Cached } from '@/lib/roleMatchingV5Cache';
 import { mapFunzioneToRuoloV5 } from '@/lib/roleMatchingV5';
@@ -85,8 +85,6 @@ export default function CandidatoDettaglio() {
   const profiloTipoV5 = profilo?.profilo_tipo_v5 as ProfiloTipoV5 | undefined;
   const reliabilityIndex = profilo?.reliability_index as ReliabilityIndex | undefined;
   const syndromesFromDB = profilo?.syndromes_detected as SyndromeResult[] | undefined;
-  const profiloTipo = (profilo?.profilo_tipo as ProfiloTipo) || null;
-
   // Calculate syndromes
   const syndromes = useMemo(() => {
     if (!isV5 || !traitsV5) return [];
@@ -180,30 +178,6 @@ export default function CandidatoDettaglio() {
               <>
                 {/* Desktop buttons */}
                 <div className="hidden sm:flex items-center gap-2 flex-wrap">
-                  <PDFReportButton
-                    candidatoNome={candidato.nome}
-                    candidatoCognome={candidato.cognome}
-                    eta={candidato.eta}
-                    email={candidato.email}
-                    telefono={candidato.telefono}
-                    azienda={candidato.aziende?.nome}
-                    ruoloRichiesto={ruoloRichiesto}
-                    profiloTipo={profiloTipo}
-                    scalePunteggi={scalePunteggi}
-                    stressZone={stressZone}
-                    dataTest={candidato.data_test}
-                    schematicita={profilo?.schematicita ?? 100}
-                  />
-                  {isV5 && syndromes.length > 0 && (
-                    <PDFSyndromeReportButton
-                      candidatoNome={candidato.nome}
-                      candidatoCognome={candidato.cognome}
-                      azienda={candidato.aziende?.nome}
-                      ruoloRichiesto={candidato.funzione || undefined}
-                      dataTest={candidato.data_test}
-                      syndromes={syndromes}
-                    />
-                  )}
                   {isV5 && traitsV5 && profiloTipoV5 && reliabilityIndex && (
                     <InterviewSheetPDFButton
                       candidato={{
