@@ -115,10 +115,11 @@ export default function FormAnagrafico() {
         throw new Error(responseData.error || 'Errore nella registrazione');
       }
 
-      if (responseData.session) {
-        await supabase.auth.setSession({
-          access_token: responseData.session.access_token,
-          refresh_token: responseData.session.refresh_token,
+      // Sign in client-side with internal credentials
+      if (responseData.credentials?.internalEmail && responseData.credentials?.password) {
+        await supabase.auth.signInWithPassword({
+          email: responseData.credentials.internalEmail,
+          password: responseData.credentials.password,
         });
       }
 

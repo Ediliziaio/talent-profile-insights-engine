@@ -149,19 +149,21 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Mark session as used (one-time use)
-    await supabaseAdmin
-      .from('candidate_sessions')
-      .update({ used: true })
-      .eq('id', session.id);
+    // Mark session as used + verify azienda in parallel
+    const [, aziendaResult] = await Promise.all([
+      supabaseAdmin
+        .from('candidate_sessions')
+        .update({ used: true })
+        .eq('id', session.id),
+      supabaseAdmin
+        .from('aziende')
+        .select('id, nome')
+        .eq('id', azienda_id)
+        .eq('attiva', true)
+        .single(),
+    ]);
 
-    // ---- Verify azienda exists ----
-    const { data: azienda, error: aziendaError } = await supabaseAdmin
-      .from('aziende')
-      .select('id, nome')
-      .eq('id', azienda_id)
-      .eq('attiva', true)
-      .single();
+    const { data: azienda, error: aziendaError } = aziendaResult;
 
     if (aziendaError || !azienda) {
       return new Response(
@@ -243,17 +245,6 @@ Deno.serve(async (req) => {
         throw new Error('Errore nella creazione del candidato');
       }
 
-      // Sign in the user immediately
-      const { data: sessionData, error: signInError } = await supabaseAdmin.auth.signInWithPassword({
-        email: internalEmail,
-        password,
-      });
-
-      if (signInError) {
-        console.error('Sign in error:', signInError);
-        // Not fatal - user can still log in manually
-      }
-
       console.log(JSON.stringify({
         event: 'candidate_registered',
         azienda_id,
@@ -265,10 +256,10 @@ Deno.serve(async (req) => {
         JSON.stringify({ 
           success: true,
           candidato,
-          session: sessionData?.session || null,
           credentials: {
             username,
-            password, // Only shown once during registration
+            password,
+            internalEmail,
           }
         }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
