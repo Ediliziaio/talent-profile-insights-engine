@@ -661,7 +661,7 @@ export default function Home() {
                 transition={{ duration: 0.6, ease: 'easeOut' }}
                 className="text-base md:text-lg text-white/70 leading-relaxed max-w-xl mb-8"
               >
-                In 15 minuti ottieni il profilo psicologico completo del candidato: 15 tratti misurati, 24 sindromi comportamentali, compatibilità ruolo e guida al colloquio personalizzata.
+                Basta perdere soldi in persone demotivate che non producono o se ne vanno dopo 3 mesi. Con TalentProfile capisci chi hai davvero di fronte, prima di assumerlo.
               </motion.p>
 
               <motion.div variants={fadeUp} transition={{ duration: 0.5 }} className="flex flex-col sm:flex-row gap-3 mb-8">
