@@ -351,13 +351,7 @@ const TARGET_NO = [
   'Non hai intenzione di migliorare il processo',
 ];
 
-const TRUST_BADGES = [
-  { icon: Shield, label: 'GDPR Compliant', desc: 'Piena conformità normativa' },
-  { icon: Globe, label: 'Server EU', desc: 'Dati in Europa' },
-  { icon: Lock, label: 'Dati crittografati', desc: 'Crittografia end-to-end' },
-  { icon: Server, label: 'ISO 27001', desc: 'Standard di sicurezza' },
-  { icon: Zap, label: 'Nessuna installazione', desc: '100% cloud-based' },
-];
+
 
 const FEAR_SCENARIOS = [
   {
@@ -1823,42 +1817,7 @@ export default function Home() {
         </div>
       </motion.section>
 
-      {/* ═══ 14. TRUST / SICUREZZA ═══ */}
-      <motion.section
-        className="py-16 md:py-20 bg-gradient-to-b from-white to-[#faf8f5]"
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.15 }}
-        variants={fadeUp}
-        transition={sectionTransition}
-      >
-        <div className="max-w-5xl mx-auto px-4 md:px-8">
-          <div className="text-center mb-12">
-            <span className="section-badge mb-3 inline-block">Sicurezza</span>
-            <h2 className="text-2xl md:text-3xl font-bold accent-underline mx-auto w-fit">
-              I tuoi dati sono al sicuro
-            </h2>
-          </div>
-          <motion.div
-            className="flex flex-wrap justify-center gap-6 md:gap-4"
-            variants={staggerContainer}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.15 }}
-          >
-            {TRUST_BADGES.map((badge, i) => (
-              <motion.div key={i} className="flex flex-col items-center text-center w-[160px] bg-white rounded-xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.05)] border border-[#e5e0db]/50 hover:scale-105 transition-transform duration-300" variants={scaleIn} transition={cardTransition}>
-                <div className="w-16 h-16 rounded-full bg-[#f7f4f0] border-2 border-[#f09133]/30 flex items-center justify-center mb-3">
-                  <badge.icon className="h-7 w-7 text-[#1e3a5f]" />
-                </div>
-                <span className="text-sm font-semibold text-[#1a1a2e]">{badge.label}</span>
-                <span className="text-xs text-[#6b7280] mt-1">{badge.desc}</span>
-              </motion.div>
-            ))}
-          </motion.div>
-          <p className="text-center text-xs text-[#6b7280] mt-6">Conformi a tutte le normative europee sulla protezione dei dati personali</p>
-        </div>
-      </motion.section>
+
 
       {/* ═══ FIX #6: PRICING SECTION ═══ */}
       <motion.section
