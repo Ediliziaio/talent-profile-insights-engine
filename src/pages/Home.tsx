@@ -1356,70 +1356,119 @@ export default function Home() {
           <p className="text-center text-[#6b7280] text-base mb-14 max-w-2xl mx-auto">
             Ecco perché i dati battono l'istinto.
           </p>
-          <div className="landing-card overflow-hidden rounded-xl shadow-[0_8px_40px_rgba(0,0,0,0.08)]">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b-2 border-[#e5e0db]">
-                    <th className="text-left p-5 font-bold text-[#1a1a2e] text-base">Criterio</th>
-                    <th className="text-center p-5 font-bold text-red-700 text-base bg-red-100/80">Metodo Tradizionale</th>
-                    <th className="text-center p-5 font-bold text-green-800 text-base bg-green-100/80 relative">
-                      TalentProfile
-                      <span className="absolute top-2 right-2 text-xs bg-green-500 text-white px-2 py-1 rounded-full font-bold shadow-sm">✓ Vincitore</span>
-                    </th>
-                  </tr>
-                </thead>
-                <motion.tbody
-                  variants={staggerContainerFast}
-                  initial="hidden"
-                  whileInView="visible"
-                  viewport={{ once: true, amount: 0.15 }}
-                >
-                  {COMPARISON_ROWS.map((row, i) => (
-                    <motion.tr key={i} className={`border-b border-[#e5e0db] last:border-0 ${i % 2 === 0 ? 'bg-white' : 'bg-[#faf8f5]/50'}`} variants={fadeUp} transition={cardTransition}>
-                      <td className="p-4 font-medium">{row.label}</td>
-                      <td className="p-4 text-center bg-red-50/30">
-                        <motion.div
-                          className="flex items-center justify-center gap-2"
-                          initial={{ opacity: 0, x: -20 }}
-                          whileInView={{ opacity: 1, x: 0 }}
-                          viewport={{ once: true }}
-                          transition={{ delay: i * 0.05, duration: 0.4 }}
-                        >
-                          <div className="w-7 h-7 rounded-full bg-red-100 flex items-center justify-center shrink-0">
-                            <X className="h-4 w-4 text-red-500" />
-                          </div>
-                          <span className="text-[#6b7280]">{row.trad}</span>
-                        </motion.div>
-                      </td>
-                      <td className="p-4 text-center bg-green-50/30">
-                        <motion.div
-                          className="flex items-center justify-center gap-2"
-                          initial={{ opacity: 0, x: 20 }}
-                          whileInView={{ opacity: 1, x: 0 }}
-                          viewport={{ once: true }}
-                          transition={{ delay: i * 0.05, duration: 0.4 }}
-                        >
-                          <div className="w-7 h-7 rounded-full bg-green-100 flex items-center justify-center shrink-0">
-                            <Check className="h-4 w-4 text-green-600" />
-                          </div>
-                          <span className="text-[#1a1a2e] font-medium">{row.tp}</span>
-                        </motion.div>
-                      </td>
-                    </motion.tr>
-                  ))}
-                  {/* Score row */}
-                  <tr className="border-t-2 border-[#e5e0db] bg-[#faf8f5]">
-                    <td className="p-4 font-bold text-[#1a1a2e]">Punteggio totale</td>
-                    <td className="p-4 text-center bg-red-50/50">
-                      <span className="text-2xl font-bold text-red-500">2/7</span>
+          {/* Desktop table */}
+          <div className="hidden md:block landing-card overflow-hidden rounded-xl shadow-[0_8px_40px_rgba(0,0,0,0.08)]">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b-2 border-[#e5e0db]">
+                  <th className="text-left p-5 font-bold text-[#1a1a2e] text-base">Criterio</th>
+                  <th className="text-center p-5 font-bold text-red-700 text-base bg-red-100/80">Metodo Tradizionale</th>
+                  <th className="text-center p-5 font-bold text-green-800 text-base bg-green-100/80 relative">
+                    TalentProfile
+                    <span className="absolute top-2 right-2 text-xs bg-green-500 text-white px-2 py-1 rounded-full font-bold shadow-sm">✓ Vincitore</span>
+                  </th>
+                </tr>
+              </thead>
+              <motion.tbody
+                variants={staggerContainerFast}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.15 }}
+              >
+                {COMPARISON_ROWS.map((row, i) => (
+                  <motion.tr key={i} className={`border-b border-[#e5e0db] last:border-0 ${i % 2 === 0 ? 'bg-white' : 'bg-[#faf8f5]/50'}`} variants={fadeUp} transition={cardTransition}>
+                    <td className="p-4 font-medium">{row.label}</td>
+                    <td className="p-4 text-center bg-red-50/30">
+                      <motion.div
+                        className="flex items-center justify-center gap-2"
+                        initial={{ opacity: 0, x: -20 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: i * 0.05, duration: 0.4 }}
+                      >
+                        <div className="w-7 h-7 rounded-full bg-red-100 flex items-center justify-center shrink-0">
+                          <X className="h-4 w-4 text-red-500" />
+                        </div>
+                        <span className="text-[#6b7280]">{row.trad}</span>
+                      </motion.div>
                     </td>
-                    <td className="p-4 text-center bg-green-50/50">
-                      <span className="text-2xl font-bold text-green-600">7/7</span>
+                    <td className="p-4 text-center bg-green-50/30">
+                      <motion.div
+                        className="flex items-center justify-center gap-2"
+                        initial={{ opacity: 0, x: 20 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: i * 0.05, duration: 0.4 }}
+                      >
+                        <div className="w-7 h-7 rounded-full bg-green-100 flex items-center justify-center shrink-0">
+                          <Check className="h-4 w-4 text-green-600" />
+                        </div>
+                        <span className="text-[#1a1a2e] font-medium">{row.tp}</span>
+                      </motion.div>
                     </td>
-                  </tr>
-                </motion.tbody>
-              </table>
+                  </motion.tr>
+                ))}
+                <tr className="border-t-2 border-[#e5e0db] bg-[#faf8f5]">
+                  <td className="p-4 font-bold text-[#1a1a2e]">Punteggio totale</td>
+                  <td className="p-4 text-center bg-red-50/50">
+                    <span className="text-2xl font-bold text-red-500">2/7</span>
+                  </td>
+                  <td className="p-4 text-center bg-green-50/50">
+                    <span className="text-2xl font-bold text-green-600">7/7</span>
+                  </td>
+                </tr>
+              </motion.tbody>
+            </table>
+          </div>
+
+          {/* Mobile card stack */}
+          <div className="md:hidden space-y-3">
+            {COMPARISON_ROWS.map((row, i) => (
+              <motion.div
+                key={i}
+                className="landing-card p-4 rounded-xl"
+                variants={fadeUp}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.06, duration: 0.4 }}
+              >
+                <p className="font-bold text-[#1a1a2e] text-sm mb-3">{row.label}</p>
+                <div className="space-y-2">
+                  <div className="flex items-start gap-2 bg-red-50 rounded-lg px-3 py-2.5">
+                    <div className="w-6 h-6 rounded-full bg-red-100 flex items-center justify-center shrink-0 mt-0.5">
+                      <X className="h-3.5 w-3.5 text-red-500" />
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-semibold text-red-600 uppercase tracking-wide">Tradizionale</span>
+                      <p className="text-[#6b7280] text-sm leading-snug">{row.trad}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2 bg-green-50 rounded-lg px-3 py-2.5">
+                    <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center shrink-0 mt-0.5">
+                      <Check className="h-3.5 w-3.5 text-green-600" />
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-semibold text-green-700 uppercase tracking-wide">TalentProfile</span>
+                      <p className="text-[#1a1a2e] text-sm font-medium leading-snug">{row.tp}</p>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+            {/* Score card */}
+            <div className="landing-card p-5 rounded-xl">
+              <p className="font-bold text-[#1a1a2e] text-sm mb-3 text-center">Punteggio totale</p>
+              <div className="flex gap-3">
+                <div className="flex-1 bg-red-50 rounded-lg py-3 text-center">
+                  <span className="text-[10px] font-semibold text-red-600 uppercase tracking-wide block mb-1">Tradizionale</span>
+                  <span className="text-2xl font-bold text-red-500">2/7</span>
+                </div>
+                <div className="flex-1 bg-green-50 rounded-lg py-3 text-center">
+                  <span className="text-[10px] font-semibold text-green-700 uppercase tracking-wide block mb-1">TalentProfile</span>
+                  <span className="text-2xl font-bold text-green-600">7/7</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
