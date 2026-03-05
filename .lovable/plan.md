@@ -1,23 +1,27 @@
 
 
-# Miglioramento Tabella Comparativa per Mobile
+# Modifica Header Hero — Copy più diretto e persuasivo
 
-## Problema
-La tabella a 3 colonne su mobile (< 768px) richiede scroll orizzontale (`overflow-x-auto`), con testo che si comprime e diventa illeggibile. Le colonne "Metodo Tradizionale" e "TalentProfile" con icone + testo si sovrappongono.
+## Cosa cambiare
 
-## Soluzione
-Su mobile, trasformare la tabella in un layout a **card stack**: per ogni riga/criterio, mostrare una card con il label in alto e le due opzioni (tradizionale vs TalentProfile) impilate verticalmente, con icone e colori chiari. La tabella classica resta visibile solo su `md:` e superiori.
+**File**: `src/pages/Home.tsx`, righe 651-664
 
-### Implementazione in `src/pages/Home.tsx` (righe 1359-1424)
+### Titolo H1 (riga 656-658)
+Attuale: `Assumi le persone giuste. Con i dati.`
 
-1. **Desktop (md+)**: mantenere la tabella attuale invariata, wrappata in `hidden md:block`
-2. **Mobile (< md)**: aggiungere un blocco `md:hidden` con layout card:
-   - Per ogni `COMPARISON_ROWS` item, una card con:
-     - **Label** del criterio come titolo della card
-     - Due righe: una rossa (❌ Tradizionale: valore) e una verde (✓ TalentProfile: valore)
-   - Riga finale "Punteggio totale" con i due score affiancati (2/7 vs 7/7)
-   - Stile coerente con `landing-card`, padding adeguato, font minimo 12px
+Nuovo:
+```
+Assumi le persone giuste. Con i dati.
+```
+(resta uguale — già in linea con la richiesta)
 
-### Risultato
-Su mobile ogni confronto occupa tutta la larghezza dello schermo, è leggibile senza scroll orizzontale e mantiene l'impatto visivo rosso/verde.
+### Sottotitolo (riga 664)
+Attuale: _"In 15 minuti ottieni il profilo psicologico completo del candidato: 15 tratti misurati, 24 sindromi comportamentali, compatibilità ruolo e guida al colloquio personalizzata."_
+
+Nuovo: _"Basta perdere soldi in persone demotivate che non producono o se ne vanno dopo 3 mesi. Con TalentProfile capisci chi hai davvero di fronte, prima di assumerlo."_
+
+### Perché
+Il sottotitolo attuale è tecnico ("15 tratti", "24 sindromi") e non parla al dolore dell'imprenditore. Il nuovo copy colpisce il problema reale (soldi persi, turnover, demotivazione) e posiziona TalentProfile come soluzione immediata.
+
+Nessuna modifica strutturale — solo il testo del paragrafo sotto l'H1.
 
