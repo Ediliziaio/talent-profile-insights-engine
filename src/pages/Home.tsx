@@ -208,38 +208,38 @@ const STEPS = [
 const FEATURES = [
   {
     icon: Brain,
-    title: 'Profilo Psicologico 360°',
-    desc: '15 tratti, 3 macro-aree, 24 sindromi. Report esecutivo leggibile in 5 minuti.',
+    title: 'Radiografia del Candidato',
+    desc: 'Scopri chi hai davvero di fronte: motivazioni, punti di forza, rischi nascosti. Tutto in un report che leggi in 5 minuti.',
     borderColor: 'border-l-[#f09133]',
   },
   {
     icon: Target,
-    title: 'Mappa Interiore',
-    desc: '7 profili profondi: identità, emozioni, stile di attaccamento, meccanismi difensivi.',
+    title: 'Cosa lo Muove Davvero',
+    desc: 'Vai oltre il curriculum: capisci cosa lo motiva, cosa lo blocca e come reagisce sotto pressione.',
     borderColor: 'border-l-[#1e3a5f]',
   },
   {
     icon: Users,
-    title: 'Role Matching Automatico',
-    desc: 'Compatibilità istantanea con 30+ ruoli aziendali. Scopri dove il candidato performa meglio.',
+    title: 'Il Ruolo Giusto, Subito',
+    desc: 'Ti dice in quale posizione il candidato renderà di più. Compatibilità immediata con 30+ ruoli aziendali.',
     borderColor: 'border-l-green-500',
   },
   {
     icon: Lightbulb,
-    title: 'Guida al Colloquio',
-    desc: 'Domande personalizzate generate dall\'assessment. Sai esattamente cosa chiedere.',
+    title: 'Domande Pronte per il Colloquio',
+    desc: 'Ricevi le domande giuste da fare, generate su misura per ogni candidato. Niente più colloqui improvvisati.',
     borderColor: 'border-l-[#f09133]',
   },
   {
     icon: BarChart3,
-    title: 'Confronto Candidati',
-    desc: 'Confronta fino a 4 candidati fianco a fianco su tutte le dimensioni psicologiche.',
+    title: 'Confronta e Scegli',
+    desc: 'Metti fino a 4 candidati fianco a fianco. Vedi subito chi è più adatto al ruolo.',
     borderColor: 'border-l-[#1e3a5f]',
   },
   {
     icon: FileText,
-    title: 'Report PDF Esecutivo',
-    desc: 'Scaricabile, condivisibile, con piano d\'azione per i primi 90 giorni.',
+    title: 'Report Pronto da Condividere',
+    desc: 'PDF professionale da girare al team in un clic, con piano d\'azione per i primi 90 giorni.',
     borderColor: 'border-l-green-500',
   },
 ];
@@ -1092,7 +1092,7 @@ export default function Home() {
             Tutto quello che ti serve per assumere meglio
           </h2>
           <p className="text-center text-[#6b7280] text-base mb-14 max-w-2xl mx-auto">
-            Un sistema completo di intelligence HR per decisioni basate sui dati.
+            Strumenti concreti per smettere di assumere a sensazione.
           </p>
           <motion.div
             className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"
