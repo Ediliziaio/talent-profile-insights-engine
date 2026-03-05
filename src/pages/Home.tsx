@@ -185,23 +185,23 @@ const NAV_LINKS = [
 const STEPS = [
   {
     icon: Send,
-    title: 'Invita il Candidato',
-    desc: 'Invii un link personalizzato. Il candidato compila in autonomia, da qualsiasi dispositivo. Zero logistica.',
+    title: 'Manda il Link',
+    desc: 'Copi un link e lo invii al candidato. Lui compila dal telefono o dal PC, quando vuole. Tu non devi fare niente.',
   },
   {
     icon: ClipboardCheck,
-    title: 'Assessment Scientifico',
-    desc: '242 domande validate scientificamente. 15 minuti di compilazione. Niente da preparare, niente da fingere.',
+    title: 'Il Candidato Risponde',
+    desc: '242 domande semplici, 15 minuti. Non si può barare e non serve prepararsi. Funziona da solo.',
   },
   {
     icon: BarChart3,
-    title: 'Report Istantaneo',
-    desc: 'Profilo psicologico completo: 15 tratti, 3 macro-aree, 24 sindromi comportamentali. In tempo reale.',
+    title: 'Ricevi il Report',
+    desc: 'Appena finisce, hai il profilo completo: chi è davvero, dove è forte, dove rischia. Tutto in una pagina.',
   },
   {
     icon: Lightbulb,
-    title: 'Decisione Informata',
-    desc: 'Compatibilità ruolo automatica. Guida al colloquio personalizzata. Confronto candidati. Assumi con i dati.',
+    title: 'Scegli con i Dati',
+    desc: 'Vedi subito se è adatto al ruolo. Hai le domande pronte per il colloquio e puoi confrontare più candidati.',
   },
 ];
 
@@ -1223,7 +1223,7 @@ export default function Home() {
             Il Metodo TalentProfile in 4 Step
           </h2>
           <p className="text-center text-[#6b7280] text-base mb-16 max-w-2xl mx-auto">
-            Dal link al report completo. 15 minuti. Zero logistica.
+            Mandi un link, il candidato risponde, tu ricevi il report. Tutto qui.
           </p>
           <motion.div
             className="max-w-3xl mx-auto relative"
