@@ -1,26 +1,26 @@
 
 
-# Riscrittura Sezione Features — Linguaggio Persuasivo per PMI
+# Generare immagine AI per la sezione "La scienza dietro le decisioni"
 
-## Problema
-I titoli e le descrizioni delle 6 feature card usano gergo tecnico ("Profilo Psicologico 360°", "macro-aree", "24 sindromi", "stile di attaccamento", "meccanismi difensivi", "dimensioni psicologiche") che non parla al target (imprenditori e HR manager di PMI italiane). Il target vuole sapere **cosa ottiene**, non come funziona tecnicamente.
+## Cosa fare
 
-## Modifiche
+Sostituire il placeholder attuale (icona Brain con sfondo gradient blu) con un'immagine generata dall'AI che rappresenti il concetto "la scienza dietro le decisioni di assunzione".
 
-### File: `src/pages/Home.tsx` — Array `FEATURES` (righe 208-245)
+### Passaggi
 
-Riscrittura completa dei 6 oggetti con titoli orientati al beneficio e descrizioni in linguaggio business:
+1. **Generare l'immagine** tramite l'edge function AI (modello `google/gemini-3-pro-image-preview` per qualità superiore). Prompt: un'illustrazione professionale e moderna che rappresenti l'analisi scientifica delle persone in ambito HR — ad esempio un profilo umano stilizzato con connessioni neurali/dati, toni blu scuro e arancione in linea con il brand.
 
-| # | Titolo attuale | Nuovo titolo | Nuova descrizione |
-|---|---|---|---|
-| 1 | Profilo Psicologico 360° | Radiografia del Candidato | Scopri chi hai davvero di fronte: motivazioni, punti di forza, rischi nascosti. Tutto in un report che leggi in 5 minuti. |
-| 2 | Mappa Interiore | Cosa lo Muove Davvero | Vai oltre il curriculum: capisce cosa lo motiva, cosa lo blocca e come reagisce sotto pressione. |
-| 3 | Role Matching Automatico | Il Ruolo Giusto, Subito | Ti dice in quale posizione il candidato renderà di più. Compatibilità immediata con 30+ ruoli aziendali. |
-| 4 | Guida al Colloquio | Domande Pronte per il Colloquio | Ricevi le domande giuste da fare, generate su misura per ogni candidato. Niente più colloqui improvvisati. |
-| 5 | Confronto Candidati | Confronta e Scegli | Metti fino a 4 candidati fianco a fianco. Vedi subito chi è più adatto al ruolo. |
-| 6 | Report PDF Esecutivo | Report Pronto da Condividere | PDF professionale da girare al team in un clic, con piano d'azione per i primi 90 giorni. |
+2. **Salvare l'immagine** nello storage (bucket pubblico) o direttamente in `public/images/` come file statico.
 
-Aggiorno anche il sottotitolo della sezione da "Un sistema completo di intelligence HR per decisioni basate sui dati." a "Strumenti concreti per smettere di assumere a sensazione."
+3. **Aggiornare `src/pages/Home.tsx`** (righe 1146-1163): sostituire il div con gradient+Brain icon con un tag `<img>` che mostra l'immagine generata, mantenendo lo stesso aspect ratio (4/3), rounded corners e shadow.
 
-Nessuna modifica strutturale — solo testi.
+### Dettaglio tecnico
+
+- Creare un'edge function `generate-landing-image` che chiama il modello AI, riceve il base64, lo carica su storage e restituisce l'URL pubblico
+- In alternativa (più semplice): generare l'immagine una volta sola, salvarla in `public/images/manifesto-hero.png` e referenziarla staticamente — evita chiamate API ad ogni page load
+- Approccio consigliato: **statico** (generare una volta, salvare nel progetto)
+
+### Risultato
+
+Il placeholder blu con icona Brain viene sostituito da un'immagine AI professionale che rende la sezione più visivamente impattante e credibile.
 
