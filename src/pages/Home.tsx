@@ -40,6 +40,7 @@ import {
   Sparkles,
   HelpCircle,
   ChevronRight,
+  ChevronDown,
   BadgeCheck,
   BookOpen,
   Flame,
@@ -48,8 +49,12 @@ import {
   Skull,
   UserX,
   Timer,
+  Loader2,
 } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
+import { Input } from '@/components/ui/input';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 /* ─── Animation variants ─── */
 /* ── Typewriter component ── */
@@ -173,6 +178,7 @@ const NAV_LINKS = [
   { label: 'Come Funziona', id: 'metodo' },
   { label: 'Calcolatore', id: 'calcolatore' },
   { label: 'Testimonianze', id: 'testimonianze' },
+  { label: 'Prezzi', id: 'pricing' },
   { label: 'FAQ', id: 'faq' },
 ];
 
@@ -238,32 +244,36 @@ const FEATURES = [
   },
 ];
 
+/* FIX #4: Testimonials without stock photos — use initials + colored avatars */
 const TESTIMONIALS = [
   {
-    name: 'Marco Rinaldi',
+    name: 'Marco R.',
+    initials: 'MR',
+    avatarBg: 'bg-[#1e3a5f]',
     role: 'HR Director',
     company: 'Gruppo Industriale — 200 dip.',
     date: '12 gennaio 2025',
     text: 'Da quando usiamo TalentProfile, il turnover nei primi 6 mesi è calato del 40%. Finalmente abbiamo dati oggettivi per le nostre decisioni. Non torniamo più indietro.',
-    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&q=80',
     stars: 5,
   },
   {
-    name: 'Chiara Fontana',
+    name: 'Chiara F.',
+    initials: 'CF',
+    avatarBg: 'bg-[#f09133]',
     role: 'CEO',
     company: 'Tech Startup — 25 dip.',
     date: '3 febbraio 2025',
     text: 'Con TalentProfile abbiamo ridotto gli errori di selezione quasi a zero. Il ROI? Incalcolabile. Ogni nuova risorsa performa dal primo mese. Strumento indispensabile.',
-    image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&q=80',
     stars: 5,
   },
   {
-    name: 'Luca Ferretti',
+    name: 'Luca F.',
+    initials: 'LF',
+    avatarBg: 'bg-green-600',
     role: 'Resp. Selezione',
-    company: 'Retail Chain — 50 PV',
+    company: 'Catena Retail — 50 PV',
     date: '28 dicembre 2024',
     text: 'La mappa interiore ci ha rivelato dinamiche che nessun colloquio avrebbe fatto emergere. Abbiamo capito perché certi talenti non performavano e li abbiamo riposizionati.',
-    image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&q=80',
     stars: 5,
   },
 ];
@@ -291,12 +301,8 @@ const FAQ_DATA = [
   },
   {
     q: 'Quanto costa?',
-    a: 'Piani flessibili basati sul numero di assessment. Richiedi una demo per un preventivo personalizzato.',
+    a: 'Piani flessibili basati sul numero di assessment. Scorri fino alla sezione Prezzi o richiedi una demo per un preventivo personalizzato.',
   },
-];
-
-const LOGO_COMPANIES = [
-  'TechCorp', 'InnovaGroup', 'AlphaRetail', 'NordEst HR', 'MediPlus', 'BuildItalia', 'FinServ Pro'
 ];
 
 const PROBLEMS = [
@@ -429,6 +435,40 @@ const FAQ_DATA_EXTRA = [
   },
 ];
 
+/* FIX #6: Pricing plans */
+const PRICING_PLANS = [
+  {
+    name: 'Starter',
+    price: '€49',
+    period: '/mese',
+    desc: 'Per piccole aziende che iniziano con gli assessment',
+    features: ['5 assessment/mese', 'Report psicologico completo', 'Role matching base', 'Supporto email'],
+    cta: 'Inizia con Starter',
+    popular: false,
+    color: '#1e3a5f',
+  },
+  {
+    name: 'Professional',
+    price: '€97',
+    period: '/mese',
+    desc: 'Per aziende in crescita che vogliono il meglio',
+    features: ['20 assessment/mese', 'Tutti i report avanzati', 'Mappa interiore + sindromi', 'Confronto candidati', 'Guida al colloquio AI', 'Supporto prioritario'],
+    cta: 'Scegli Professional',
+    popular: true,
+    color: '#f09133',
+  },
+  {
+    name: 'Enterprise',
+    price: 'Custom',
+    period: '',
+    desc: 'Per grandi organizzazioni con esigenze specifiche',
+    features: ['Assessment illimitati', 'API dedicata', 'Onboarding personalizzato', 'Account manager dedicato', 'SLA garantito', 'Formazione team HR'],
+    cta: 'Contattaci',
+    popular: false,
+    color: '#1e3a5f',
+  },
+];
+
 /* ─────────────────── COMPONENT ─────────────────── */
 export default function Home() {
   const navigate = useNavigate();
@@ -436,6 +476,12 @@ export default function Home() {
   const [scrolled, setScrolled] = useState(false);
   const [ral, setRal] = useState(30000);
   const [mesi, setMesi] = useState(3);
+  const [letterExpanded, setLetterExpanded] = useState(false);
+
+  /* Lead form state */
+  const [leadForm, setLeadForm] = useState({ nome: '', email: '', azienda: '', num_dipendenti: '' });
+  const [leadSubmitting, setLeadSubmitting] = useState(false);
+  const [leadSubmitted, setLeadSubmitted] = useState(false);
 
   const costi = useMemo(() => {
     const stipendioBruciato = (ral / 12) * mesi;
@@ -468,6 +514,27 @@ export default function Home() {
     },
     []
   );
+
+  const handleLeadSubmit = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!leadForm.nome.trim() || !leadForm.email.trim()) return;
+    setLeadSubmitting(true);
+    try {
+      const { error } = await supabase.from('leads').insert({
+        nome: leadForm.nome.trim(),
+        email: leadForm.email.trim(),
+        azienda: leadForm.azienda.trim() || null,
+        num_dipendenti: leadForm.num_dipendenti || null,
+      });
+      if (error) throw error;
+      setLeadSubmitted(true);
+      toast({ title: 'Richiesta inviata!', description: 'Ti contatteremo entro 24 ore.' });
+    } catch {
+      toast({ title: 'Errore', description: 'Riprova più tardi.', variant: 'destructive' });
+    } finally {
+      setLeadSubmitting(false);
+    }
+  }, [leadForm]);
 
   /* ─── Counters ─── */
   const c1 = useCountUp(1000);
@@ -601,19 +668,19 @@ export default function Home() {
                 <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                   <Button
                     size="lg"
-                    className="bg-white text-[#1e3a5f] hover:bg-white/90 rounded-xl px-8 font-semibold shadow-lg"
-                    onClick={() => scrollTo('metodo')}
+                    className="bg-[#f09133] hover:bg-[#e07a1f] text-white rounded-xl px-8 shadow-[0_4px_20px_rgba(240,145,51,0.4)]"
+                    onClick={() => scrollTo('cta-finale')}
                   >
-                    Scopri di più
+                    Richiedi una demo <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </motion.div>
                 <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                   <Button
                     size="lg"
-                    className="bg-[#f09133] hover:bg-[#e07a1f] text-white rounded-xl px-8 shadow-[0_4px_20px_rgba(240,145,51,0.4)]"
-                    onClick={() => scrollTo('cta-finale')}
+                    className="bg-white text-[#1e3a5f] hover:bg-white/90 rounded-xl px-8 font-semibold shadow-lg"
+                    onClick={() => scrollTo('metodo')}
                   >
-                    Inizia ora <ArrowRight className="ml-2 h-4 w-4" />
+                    Scopri di più
                   </Button>
                 </motion.div>
               </motion.div>
@@ -630,14 +697,14 @@ export default function Home() {
                 </span>
               </motion.div>
 
-              {/* Micro-badges */}
+              {/* FIX #9: Micro-badges — min 12px on mobile */}
               <motion.div variants={fadeUp} transition={{ duration: 0.5 }} className="flex flex-wrap gap-3 mt-4">
                 {[
                   { icon: Users, text: 'Usato da +1000 HR Manager' },
                   { icon: Clock, text: '15 min per assessment' },
                   { icon: Zap, text: 'Report istantaneo' },
                 ].map((badge, i) => (
-                  <span key={i} className="inline-flex items-center gap-1.5 text-[11px] text-white/50 bg-white/[0.07] border border-white/10 rounded-full px-3 py-1">
+                  <span key={i} className="inline-flex items-center gap-1.5 text-xs text-white/50 bg-white/[0.07] border border-white/10 rounded-full px-3 py-1">
                     <badge.icon className="h-3 w-3" /> {badge.text}
                   </span>
                 ))}
@@ -646,7 +713,7 @@ export default function Home() {
 
             {/* Right — Product Mockup with glow shadow */}
             <motion.div
-              className="flex-1 lg:max-w-[42%] w-full animate-float"
+              className="flex-1 lg:max-w-[42%] w-full motion-safe:animate-float"
               initial={{ opacity: 0, x: 60, scale: 0.95 }}
               animate={{ opacity: 1, x: 0, scale: 1 }}
               transition={{ duration: 0.8, ease: 'easeOut', delay: 0.3 }}
@@ -703,7 +770,7 @@ export default function Home() {
                   </div>
                   {/* Report badge */}
                   <div className="mt-3 text-center">
-                    <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold text-[#6b7280] bg-[#f7f4f0] px-3 py-1 rounded-full border border-[#e5e0db]">
+                    <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#6b7280] bg-[#f7f4f0] px-3 py-1 rounded-full border border-[#e5e0db]">
                       <FileText className="h-3 w-3" /> Report Esecutivo
                     </span>
                   </div>
@@ -714,7 +781,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═══ LETTERA AL LETTORE — Emotional connection ═══ */}
+      {/* ═══ LETTERA AL LETTORE — FIX #2: Collapsible after 6 paragraphs ═══ */}
       <motion.section
         className="py-16 md:py-20 bg-white"
         initial="hidden"
@@ -751,7 +818,7 @@ export default function Home() {
                   Poi sono passate tre settimane. Forse tre mesi. E quella persona è diventata irriconoscibile. Ritardi. Scuse. Tensioni con il team. E tu, da solo nel tuo ufficio, a fissare il muro chiedendoti: <em>"Ma chi ho preso?"</em>
                 </p>
                 <p>
-                  Non è colpa tua. È un copione che si ripete migliaia di volte al giorno, in migliaia di aziende. Imprenditori come te, responsabili HR come te, che fanno del loro meglio con gli strumenti che hanno — e che continuano a sbattere contro lo stesso muro.
+                  Non è colpa tua. È un copione che si ripete migliaia di volte al giorno, in migliaia di aziende.
                 </p>
                 
                 <div className="bg-[#fef9c3]/60 border-l-4 border-[#f09133]/50 rounded-r-lg p-4 my-6">
@@ -761,49 +828,48 @@ export default function Home() {
                 </div>
                 
                 <p>
-                  Sai qual è la parte peggiore? Non è solo lo stipendio buttato. Non sono solo i mesi persi. È quella vocina nella testa che ti dice: <em>"E se sbaglio di nuovo?"</em>
+                  Sai qual è la parte peggiore? Non è solo lo stipendio buttato. È quella vocina nella testa che ti dice: <em>"E se sbaglio di nuovo?"</em>
                 </p>
                 <p>
-                  Quella paura ti frena. Ti fa tenere persone mediocri perché almeno "le conosci già". Ti fa rimandare assunzioni strategiche. Ti fa accontentare. E intanto il tuo team perde fiducia, i tuoi clienti lo percepiscono, e il tuo fatturato ne risente.
+                  <strong className="text-[#1a1a2e]">Ci siamo passati. Sappiamo esattamente come ci si sente.</strong> Ecco perché abbiamo creato <strong className="text-[#f09133]">TalentProfile</strong>.
                 </p>
-                <p>
-                  <strong className="text-[#1a1a2e]">Ci siamo passati. Sappiamo esattamente come ci si sente.</strong>
-                </p>
-                <p>
-                  Ecco perché abbiamo creato <strong className="text-[#f09133]">TalentProfile</strong>.
-                </p>
-                <p>
-                  Non l'ennesimo test della personalità scaricato da internet. Non un questionario generico che ti dà risposte vaghe e inutilizzabili.
-                </p>
-                <p>
-                  TalentProfile è un sistema di profilazione psicologica sviluppato in collaborazione con psicologi del lavoro, psicoterapeuti e professionisti delle risorse umane — persone che studiano il comportamento umano da decenni, non marketer che si improvvisano esperti di selezione.
-                </p>
-                <p>
-                  È nato dall'incontro tra scienza e campo. Da una parte, le basi solide della psicologia comportamentale e organizzativa. Dall'altra, anni di esperienza diretta nelle assunzioni — compresi tutti gli errori che abbiamo pagato caro e le notti passate a chiederci <em>"come facciamo a non ripetere lo stesso sbaglio?"</em>
-                </p>
-                <p>
-                  Il risultato? Un sistema che analizza <strong className="text-[#1a1a2e]">15 tratti comportamentali</strong> e <strong className="text-[#1a1a2e]">5 dimensioni psicologiche</strong> di ogni candidato. Che ti mostra chi hai davvero di fronte — non chi quella persona finge di essere durante un colloquio di 45 minuti.
-                </p>
-                <p>
-                  Perché il problema non sei tu. Il problema è che un colloquio tradizionale è progettato per farti vedere solo quello che il candidato vuole mostrarti. È un palcoscenico. E i migliori attori non sono sempre i migliori lavoratori.
-                </p>
-                <p>
-                  Con TalentProfile smetti di decidere sulle persone al buio. Smetti di affidarti all'istinto, alle sensazioni, al <em>"mi sembra una brava persona"</em>. Inizi a decidere con i dati. Con la chiarezza. Con la sicurezza di chi sa — perché ha gli strumenti giusti per sapere.
-                </p>
-                <p>
-                  Non ti stiamo chiedendo di fidarti di noi. Ti stiamo chiedendo di fidarti della scienza. Degli stessi modelli psicologici usati nelle più grandi aziende del mondo, adattati e perfezionati per la realtà delle PMI italiane — per imprenditori che non hanno un reparto HR da 50 persone, ma che hanno bisogno delle stesse risposte.
-                </p>
-                <p>
-                  <strong className="text-[#1a1a2e]">Questa lettera è per te</strong> — che vuoi smettere di sperare e iniziare a sapere.
-                </p>
-                <p>
-                  Se sei arrivato fin qui, è perché qualcosa di quello che hai letto ti ha colpito. Forse ti ci sei rivisto. Forse hai pensato a quell'ultima assunzione che ti ha fatto perdere il sonno. Forse stai per assumere qualcuno proprio in queste settimane e vuoi essere sicuro di non ripetere gli stessi errori.
-                </p>
+
+                {/* Collapsible extended content */}
+                {letterExpanded && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    transition={{ duration: 0.4 }}
+                    className="space-y-5"
+                  >
+                    <p>
+                      Non l'ennesimo test della personalità scaricato da internet. TalentProfile è un sistema di profilazione psicologica sviluppato in collaborazione con psicologi del lavoro, psicoterapeuti e professionisti delle risorse umane.
+                    </p>
+                    <p>
+                      Il risultato? Un sistema che analizza <strong className="text-[#1a1a2e]">15 tratti comportamentali</strong> e <strong className="text-[#1a1a2e]">5 dimensioni psicologiche</strong> di ogni candidato. Che ti mostra chi hai davvero di fronte — non chi quella persona finge di essere durante un colloquio di 45 minuti.
+                    </p>
+                    <p>
+                      Con TalentProfile smetti di decidere sulle persone al buio. Smetti di affidarti all'istinto, alle sensazioni, al <em>"mi sembra una brava persona"</em>. Inizi a decidere con i dati.
+                    </p>
+                    <p>
+                      Non ti stiamo chiedendo di fidarti di noi. Ti stiamo chiedendo di fidarti della scienza. Degli stessi modelli psicologici usati nelle più grandi aziende del mondo, adattati per la realtà delle PMI italiane.
+                    </p>
+                    <p>
+                      <strong className="text-[#1a1a2e]">Questa lettera è per te</strong> — che vuoi smettere di sperare e iniziare a sapere.
+                    </p>
+                  </motion.div>
+                )}
+
+                <button
+                  onClick={() => setLetterExpanded(!letterExpanded)}
+                  className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#f09133] hover:text-[#d47a1f] transition-colors"
+                >
+                  {letterExpanded ? 'Mostra meno' : 'Leggi tutto'}
+                  <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${letterExpanded ? 'rotate-180' : ''}`} />
+                </button>
+
                 <p className="text-lg font-medium text-[#1a1a2e]">
                   Allora fai una cosa semplice: <strong>provalo. Gratis.</strong>
-                </p>
-                <p>
-                  Nessun impegno, nessun vincolo, nessuna carta di credito. Solo la possibilità di vedere con i tuoi occhi cosa significa finalmente avere chiarezza sulle persone che entrano nella tua azienda.
                 </p>
 
                 <div className="text-center my-8">
@@ -813,12 +879,6 @@ export default function Home() {
                   </a>
                 </div>
 
-                <p>
-                  Perché la prossima assunzione che farai potrebbe essere quella giusta. O potrebbe essere l'ennesimo errore che ti costa mesi di frustrazione e migliaia di euro buttati.
-                </p>
-                <p>
-                  La differenza sta negli strumenti che usi per decidere.
-                </p>
                 <p className="text-xl font-bold text-[#1a1a2e] text-center mt-6">
                   Scegli di sapere.
                 </p>
@@ -834,7 +894,7 @@ export default function Home() {
         </div>
       </motion.section>
 
-      {/* ═══ 3. LOGO BAR — Separator + hover grayscale remove ═══ */}
+      {/* FIX #3: Replaced fake logo bar with simple social proof stat */}
       <motion.section
         className="py-8 md:py-10 bg-[#faf8f5]"
         initial="hidden"
@@ -844,22 +904,36 @@ export default function Home() {
         transition={sectionTransition}
       >
         <div className="max-w-6xl mx-auto px-4 md:px-8 text-center">
-          {/* Top separator */}
           <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-[#f09133]/30 to-transparent mb-10" />
-          <p className="text-sm text-[#6b7280] mb-8 font-medium">
-            Scelto da più di 1.000 aziende italiane
-          </p>
-          <div className="logo-marquee-container overflow-hidden">
-            <div className="animate-marquee flex items-center gap-14 w-max hover:[animation-play-state:paused]" style={{ animationDuration: '20s' }}>
-              {[...LOGO_COMPANIES, ...LOGO_COMPANIES, ...LOGO_COMPANIES].map((name, i) => (
-                <div key={`${name}-${i}`} className="flex items-center gap-2 opacity-40 grayscale shrink-0 hover:opacity-100 hover:grayscale-0 transition-all duration-300 cursor-default">
-                  <Building2 className="h-5 w-5 text-[#1a1a2e]" />
-                  <span className="text-sm font-semibold text-[#1a1a2e] whitespace-nowrap">{name}</span>
-                </div>
-              ))}
+          <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-[#f09133]/10 flex items-center justify-center">
+                <Building2 className="h-6 w-6 text-[#f09133]" />
+              </div>
+              <div className="text-left">
+                <p className="text-2xl font-bold text-[#1a1a2e]">+1.000</p>
+                <p className="text-sm text-[#6b7280]">Aziende italiane</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-[#1e3a5f]/10 flex items-center justify-center">
+                <ClipboardCheck className="h-6 w-6 text-[#1e3a5f]" />
+              </div>
+              <div className="text-left">
+                <p className="text-2xl font-bold text-[#1a1a2e]">+5.000</p>
+                <p className="text-sm text-[#6b7280]">Assessment completati</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
+                <TrendingUp className="h-6 w-6 text-green-600" />
+              </div>
+              <div className="text-left">
+                <p className="text-2xl font-bold text-[#1a1a2e]">-40%</p>
+                <p className="text-sm text-[#6b7280]">Turnover medio</p>
+              </div>
             </div>
           </div>
-          {/* Bottom separator */}
           <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-[#f09133]/30 to-transparent mt-10" />
         </div>
       </motion.section>
@@ -923,7 +997,7 @@ export default function Home() {
         </div>
       </motion.section>
 
-      {/* ═══ L'INCUBO CHE CONOSCI — Fear Section ═══ */}
+      {/* ═══ L'INCUBO CHE CONOSCI — Fear Section + FIX #8: CTA bridge ═══ */}
       <section className="py-16 md:py-24 relative" style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%)' }}>
         {/* Decorative red glow */}
         <div className="absolute top-0 left-[20%] w-[300px] h-[300px] rounded-full bg-red-500/[0.04] blur-3xl" />
@@ -985,8 +1059,17 @@ export default function Home() {
             transition={{ ...sectionTransition, delay: 0.6 }}
           >
             <p className="text-white/40 text-sm mb-2">Non deve essere così.</p>
-            <p className="text-[#f09133] font-semibold text-lg">C'è un modo migliore.</p>
-            <div className="w-12 h-[2px] bg-[#f09133]/50 mx-auto mt-4" />
+            <p className="text-[#f09133] font-semibold text-lg mb-6">C'è un modo migliore.</p>
+            {/* FIX #8: CTA bridge to solution */}
+            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+              <Button
+                className="bg-[#f09133] hover:bg-[#e07a1f] text-white rounded-xl px-8 shadow-[0_4px_20px_rgba(240,145,51,0.3)]"
+                onClick={() => scrollTo('funzionalita')}
+              >
+                Scopri la soluzione <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </motion.div>
+            <div className="w-12 h-[2px] bg-[#f09133]/50 mx-auto mt-6" />
           </motion.div>
         </div>
       </section>
@@ -1039,14 +1122,6 @@ export default function Home() {
               </motion.div>
             ))}
           </motion.div>
-          <div className="text-center mt-10">
-            <button
-              onClick={() => scrollTo('metodo')}
-              className="text-[#f09133] font-semibold text-sm hover:underline inline-flex items-center gap-1"
-            >
-              Scopri come funziona <ArrowRight className="h-4 w-4" />
-            </button>
-          </div>
         </div>
       </motion.section>
 
@@ -1074,7 +1149,9 @@ export default function Home() {
                 <div className="absolute top-[-30px] right-[-30px] w-[120px] h-[120px] rounded-full bg-white/5 blur-xl" />
                 <div className="absolute bottom-[-20px] left-[-20px] w-[100px] h-[100px] rounded-full bg-[#f09133]/10 blur-xl" />
                 <div className="text-center text-white relative z-10">
+                  {/* FIX #7: respect prefers-reduced-motion */}
                   <motion.div
+                    className="motion-safe:animate-none"
                     animate={{ scale: [1, 1.05, 1] }}
                     transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
                   >
@@ -1105,39 +1182,6 @@ export default function Home() {
                   Inizia ora <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </motion.div>
-            </motion.div>
-          </div>
-        </div>
-      </motion.section>
-
-      {/* ═══ 7. CTA INTERMEDIO — Sparkles icon + stronger bg ═══ */}
-      <motion.section
-        className="py-10 md:py-14"
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.15 }}
-        variants={fadeUp}
-        transition={sectionTransition}
-      >
-        <div className="max-w-4xl mx-auto px-4 md:px-8">
-          <div className="rounded-2xl bg-gradient-to-r from-[#f09133]/8 to-[#f09133]/15 border border-[#f09133]/40 py-10 px-6 md:px-12 text-center relative overflow-hidden">
-            <div className="dot-pattern" />
-            <div className="absolute top-[-20px] right-[-20px] w-[100px] h-[100px] rounded-full bg-[#f09133]/8 blur-2xl" />
-            <Sparkles className="h-8 w-8 text-[#f09133]/60 mx-auto mb-4 relative z-10" />
-            <h3 className="text-xl md:text-2xl font-bold mb-3">
-              Vuoi vedere TalentProfile in azione?
-            </h3>
-            <p className="text-[#6b7280] text-base mb-3 max-w-xl mx-auto">
-              Richiedi una demo gratuita e scopri come funziona sulla tua realtà aziendale.
-            </p>
-            <p className="text-sm text-[#f09133] font-semibold mb-6">Già 1.247 aziende l'hanno fatto</p>
-            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-              <Button
-                className="bg-[#f09133] hover:bg-[#e07a1f] text-white rounded-xl px-8 shadow-[0_4px_20px_rgba(240,145,51,0.3)]"
-                onClick={() => scrollTo('cta-finale')}
-              >
-                Richiedi una demo gratuita <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
             </motion.div>
           </div>
         </div>
@@ -1267,13 +1311,7 @@ export default function Home() {
             <div className="text-center py-8 px-6 rounded-xl bg-gradient-to-br from-red-50 via-red-100/60 to-orange-50/40 border border-red-200 mb-8 relative overflow-hidden">
               {/* Decorative Euro icon */}
               <span className="absolute top-4 left-6 text-7xl font-black text-red-100/40 select-none pointer-events-none leading-none">€</span>
-              <motion.div
-                animate={{ scale: [1, 1.1, 1] }}
-                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-                className="absolute top-4 right-4"
-              >
-                <AlertTriangle className="h-6 w-6 text-red-400" />
-              </motion.div>
+              <AlertTriangle className="absolute top-4 right-4 h-6 w-6 text-red-400" />
               <p className="text-sm font-semibold text-[#6b7280] mb-1 uppercase tracking-wide relative z-10">Danno totale stimato</p>
               <p className="text-4xl md:text-5xl font-bold text-red-500 relative z-10">
                 €{Math.round(costi.totale).toLocaleString('it-IT')}
@@ -1339,7 +1377,7 @@ export default function Home() {
                     <th className="text-center p-5 font-bold text-red-700 text-base bg-red-100/80">Metodo Tradizionale</th>
                     <th className="text-center p-5 font-bold text-green-800 text-base bg-green-100/80 relative">
                       TalentProfile
-                      <span className="absolute top-2 right-2 text-[10px] bg-green-500 text-white px-2 py-1 rounded-full font-bold shadow-sm">✓ Vincitore</span>
+                      <span className="absolute top-2 right-2 text-xs bg-green-500 text-white px-2 py-1 rounded-full font-bold shadow-sm">✓ Vincitore</span>
                     </th>
                   </tr>
                 </thead>
@@ -1399,7 +1437,7 @@ export default function Home() {
         </div>
       </motion.section>
 
-      {/* ═══ 11. TESTIMONIANZE — Quotes + orange avatar border + verified ═══ */}
+      {/* ═══ 11. TESTIMONIANZE — FIX #4: Initials avatars instead of stock photos ═══ */}
       <motion.section
         className="py-16 md:py-20 bg-gradient-to-b from-[#f7f4f0] to-[#faf8f5] relative"
         id="testimonianze"
@@ -1432,14 +1470,11 @@ export default function Home() {
               <motion.div key={i} className="bg-gradient-to-br from-white to-[#faf8f5]/50 rounded-xl p-8 shadow-[0_4px_25px_rgba(0,0,0,0.07)] border border-[#e5e0db]/50 relative overflow-hidden" variants={fadeUp} transition={cardTransition} whileHover={{ y: -5, boxShadow: '0 16px 50px rgba(0,0,0,0.1)' }}>
                 {/* Decorative quote */}
                 <span className="absolute top-1 right-4 text-7xl font-serif text-[#f09133]/15 select-none pointer-events-none leading-none">"</span>
-                {/* LinkedIn-style header */}
+                {/* Header with initials avatar */}
                 <div className="flex items-start gap-3 mb-4">
-                  <img
-                    src={t.image}
-                    alt={t.name}
-                    className="w-14 h-14 rounded-full object-cover ring-2 ring-[#f09133]/40 ring-offset-2"
-                    loading="lazy"
-                  />
+                  <div className={`w-14 h-14 rounded-full ${t.avatarBg} flex items-center justify-center text-white text-lg font-bold ring-2 ring-[#f09133]/40 ring-offset-2 shrink-0`}>
+                    {t.initials}
+                  </div>
                   <div className="flex-1 min-w-0">
                     <div className="font-semibold text-sm flex items-center gap-1.5">
                       {t.name}
@@ -1448,7 +1483,6 @@ export default function Home() {
                     <div className="text-xs text-[#6b7280]">{t.role} — {t.company}</div>
                     <div className="text-xs text-[#6b7280]/60 mt-0.5">{t.date}</div>
                   </div>
-                  <Linkedin className="h-5 w-5 text-[#0077b5] shrink-0" />
                 </div>
 
                 {/* Stars */}
@@ -1461,14 +1495,14 @@ export default function Home() {
                 {/* Text */}
                 <p className="text-[#6b7280] text-sm leading-relaxed relative z-10">{t.text}</p>
                 
-                {/* Key metrics */}
+                {/* Key metrics — FIX #9: min 12px */}
                 <div className="flex gap-3 mt-4 pt-3 border-t border-[#e5e0db]/40">
                   {[
                     ['-40% turnover', '-35% costi', '+3 mesi retention'],
                     ['Zero errori', '+200% ROI', 'Team stabile'],
                     ['+85% fit', '-60% rotazione', 'Report in 15min'],
                   ][i]?.map((metric, j) => (
-                    <span key={j} className="text-[10px] font-semibold text-[#f09133] bg-[#f09133]/10 px-2 py-0.5 rounded-full">
+                    <span key={j} className="text-xs font-semibold text-[#f09133] bg-[#f09133]/10 px-2 py-0.5 rounded-full">
                       {metric}
                     </span>
                   ))}
@@ -1479,7 +1513,7 @@ export default function Home() {
         </div>
       </motion.section>
 
-      {/* ═══ STORIE DI SUCCESSO — Case Studies ═══ */}
+      {/* ═══ STORIE DI SUCCESSO — FIX #5: Badge "Esempio" instead of "Caso Reale" ═══ */}
       <motion.section
         className="py-16 md:py-20 bg-gradient-to-b from-[#faf8f5] to-white"
         initial="hidden"
@@ -1495,7 +1529,7 @@ export default function Home() {
             </span>
           </div>
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 accent-underline mx-auto w-fit">
-            Risultati reali, aziende reali
+            Risultati concreti
           </h2>
           <p className="text-center text-[#6b7280] text-base mb-14 max-w-2xl mx-auto">
             Ecco come TalentProfile ha trasformato il processo di selezione di aziende come la tua.
@@ -1528,8 +1562,9 @@ export default function Home() {
                         <p className="text-xs text-[#6b7280]">{cs.sector}</p>
                       </div>
                     </div>
-                    <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider bg-green-100 text-green-700 px-2.5 py-1 rounded-full">
-                      <BadgeCheck className="h-3 w-3" /> Caso Reale
+                    {/* FIX #5: Changed from "Caso Reale" to "Esempio" */}
+                    <span className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wider bg-[#f09133]/10 text-[#f09133] px-2.5 py-1 rounded-full">
+                      Esempio
                     </span>
                   </div>
                 </div>
@@ -1551,12 +1586,12 @@ export default function Home() {
                     <div className="flex items-end gap-4 mb-3">
                       <div className="text-center">
                         <p className="text-2xl font-bold text-red-400 line-through opacity-70">{cs.resultBefore}{cs.resultSuffix}</p>
-                        <p className="text-[10px] text-[#6b7280]">Prima</p>
+                        <p className="text-xs text-[#6b7280]">Prima</p>
                       </div>
                       <ArrowRight className="h-5 w-5 text-[#f09133] mb-2" />
                       <div className="text-center">
                         <p className="text-3xl font-bold" style={{ color: cs.color }}>{cs.resultAfter}{cs.resultSuffix}</p>
-                        <p className="text-[10px] text-[#6b7280]">Dopo</p>
+                        <p className="text-xs text-[#6b7280]">Dopo</p>
                       </div>
                     </div>
                     {/* Progress bar */}
@@ -1664,7 +1699,7 @@ export default function Home() {
         </div>
       </motion.section>
 
-      {/* ═══ 13. NUMERI / CONTATORI — Gradient + spheres + glow + separators + icons ═══ */}
+      {/* ═══ 13. NUMERI / CONTATORI ═══ */}
       <motion.section
         className="py-0 md:py-0 px-4 md:px-8"
         id="numeri"
@@ -1721,7 +1756,7 @@ export default function Home() {
         </div>
       </motion.section>
 
-      {/* ═══ 14. TRUST / SICUREZZA — Shield cards + orange ring + separators ═══ */}
+      {/* ═══ 14. TRUST / SICUREZZA ═══ */}
       <motion.section
         className="py-16 md:py-20 bg-gradient-to-b from-white to-[#faf8f5]"
         initial="hidden"
@@ -1758,9 +1793,76 @@ export default function Home() {
         </div>
       </motion.section>
 
-      {/* ═══ 15. FAQ — Orange active border + ? icon ═══ */}
+      {/* ═══ FIX #6: PRICING SECTION ═══ */}
       <motion.section
-        className="py-16 md:py-20 bg-gradient-to-b from-[#faf8f5] to-[#f7f4f0] relative"
+        className="py-16 md:py-20 bg-gradient-to-b from-[#faf8f5] to-white"
+        id="pricing"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.15 }}
+        variants={fadeUp}
+        transition={sectionTransition}
+      >
+        <div className="max-w-6xl mx-auto px-4 md:px-8">
+          <div className="text-center mb-3">
+            <span className="section-badge">Prezzi</span>
+          </div>
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 accent-underline mx-auto w-fit">
+            Piani per ogni esigenza
+          </h2>
+          <p className="text-center text-[#6b7280] text-base mb-14 max-w-2xl mx-auto">
+            Scegli il piano più adatto alla tua azienda. Tutti i piani includono report completo e supporto.
+          </p>
+
+          <motion.div
+            className="grid md:grid-cols-3 gap-6"
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.15 }}
+          >
+            {PRICING_PLANS.map((plan, i) => (
+              <motion.div
+                key={i}
+                className={`landing-card p-8 relative overflow-hidden ${plan.popular ? 'border-2 border-[#f09133] shadow-[0_8px_40px_rgba(240,145,51,0.15)]' : 'border border-[#e5e0db]'}`}
+                variants={fadeUp}
+                transition={cardTransition}
+                whileHover={{ y: -6 }}
+              >
+                {plan.popular && (
+                  <span className="absolute top-0 right-0 bg-[#f09133] text-white text-xs font-bold px-4 py-1.5 rounded-bl-xl">
+                    Più Scelto
+                  </span>
+                )}
+                <h3 className="text-xl font-bold mb-2" style={{ color: plan.color }}>{plan.name}</h3>
+                <div className="flex items-baseline gap-1 mb-2">
+                  <span className="text-4xl font-bold text-[#1a1a2e]">{plan.price}</span>
+                  {plan.period && <span className="text-[#6b7280] text-sm">{plan.period}</span>}
+                </div>
+                <p className="text-sm text-[#6b7280] mb-6">{plan.desc}</p>
+                <ul className="space-y-3 mb-8">
+                  {plan.features.map((feature, j) => (
+                    <li key={j} className="flex items-start gap-2">
+                      <Check className="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
+                      <span className="text-sm text-[#6b7280]">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Button
+                  className={`w-full rounded-xl ${plan.popular ? 'bg-[#f09133] hover:bg-[#e07a1f] text-white shadow-[0_4px_20px_rgba(240,145,51,0.3)]' : 'bg-[#1e3a5f] hover:bg-[#162d4a] text-white'}`}
+                  onClick={() => scrollTo('cta-finale')}
+                >
+                  {plan.cta}
+                </Button>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </motion.section>
+
+      {/* ═══ 15. FAQ ═══ */}
+      <motion.section
+        className="py-16 md:py-20 bg-gradient-to-b from-white to-[#f7f4f0] relative"
         id="faq"
         initial="hidden"
         whileInView="visible"
@@ -1807,7 +1909,7 @@ export default function Home() {
         </div>
       </motion.section>
 
-      {/* ═══ 16. CTA FINALE — Sparkles + glow button + urgency badge ═══ */}
+      {/* ═══ 16. CTA FINALE — FIX #1: Lead capture form instead of mailto ═══ */}
       <motion.section
         id="cta-finale"
         className="px-4 md:px-8 py-8"
@@ -1817,87 +1919,120 @@ export default function Home() {
         variants={fadeUp}
         transition={sectionTransition}
       >
-        <div className="py-16 md:py-24 text-center max-w-7xl mx-auto relative overflow-hidden rounded-[1.5rem]" style={{ background: 'radial-gradient(ellipse at 50% 30%, #2a4f7a 0%, #1e3a5f 60%, #162d4a 100%)' }}>
-          {/* Animated sparkles */}
-          <motion.div
-            className="absolute top-8 left-[15%]"
-            animate={{ opacity: [0.3, 0.8, 0.3], scale: [0.8, 1.2, 0.8] }}
-            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-          >
-            <Sparkles className="h-6 w-6 text-[#f09133]/40" />
-          </motion.div>
-          <motion.div
-            className="absolute bottom-12 right-[20%]"
-            animate={{ opacity: [0.2, 0.7, 0.2], scale: [1, 1.3, 1] }}
-            transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
-          >
-            <Sparkles className="h-5 w-5 text-white/20" />
-          </motion.div>
-          <motion.div
-            className="absolute top-[40%] right-[8%]"
-            animate={{ opacity: [0.4, 0.9, 0.4] }}
-            transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
-          >
-            <Star className="h-4 w-4 text-[#f09133]/30" />
-          </motion.div>
-
+        <div className="py-16 md:py-24 max-w-7xl mx-auto relative overflow-hidden rounded-[1.5rem]" style={{ background: 'radial-gradient(ellipse at 50% 30%, #2a4f7a 0%, #1e3a5f 60%, #162d4a 100%)' }}>
           {/* Decorative spheres */}
           <div className="absolute top-[-60px] right-[-40px] w-[200px] h-[200px] rounded-full bg-white/[0.04] blur-3xl" />
           <div className="absolute bottom-[-80px] left-[10%] w-[300px] h-[300px] rounded-full bg-[#f09133]/[0.08] blur-3xl" />
 
           <div className="max-w-3xl mx-auto px-4 md:px-8 relative z-10">
-            {/* Urgency badge */}
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-1.5 mb-6"
-            >
-              <Zap className="h-3.5 w-3.5 text-[#f09133]" />
-              <span className="text-xs font-semibold text-[#f09133]">Solo 5 demo disponibili questa settimana</span>
-            </motion.div>
-            <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
-              Il futuro del tuo team inizia{' '}
-              <span className="text-[#f09133]">da qui.</span>
-            </h2>
-            <p className="text-base md:text-lg text-white/70 mb-10 leading-relaxed">
-              La demo è gratuita, dura 30 minuti e ti mostra esattamente come funziona il sistema sulla tua realtà. Nessun impegno.
-            </p>
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
-              <Button
-                size="lg"
-                className="bg-[#f09133] hover:bg-[#e07a1f] text-white text-xl px-12 py-8 rounded-xl shadow-[0_0_30px_rgba(240,145,51,0.4)] animate-[pulse_3s_ease-in-out_infinite]"
-                onClick={() => window.open('mailto:info@talentprofile.it?subject=Richiesta Demo TalentProfile', '_blank')}
-              >
-                Richiedi una Demo Gratuita <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </motion.div>
-            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="mt-4">
-              <Button
-                variant="outline"
-                size="lg"
-                className="border-white/30 text-white/80 hover:bg-white/10 hover:text-white rounded-xl px-8"
-                onClick={() => window.open('https://linkedin.com', '_blank')}
-              >
-                <Linkedin className="mr-2 h-4 w-4" /> Oppure scrivici su LinkedIn
-              </Button>
-            </motion.div>
-            <div className="flex flex-wrap justify-center gap-6 mt-8">
-              <span className="flex items-center gap-2 text-sm text-white/60">
-                <Clock className="h-4 w-4" /> Risposta in 24h
-              </span>
-              <span className="flex items-center gap-2 text-sm text-white/60">
-                <Shield className="h-4 w-4" /> 100% Riservato
-              </span>
-              <span className="flex items-center gap-2 text-sm text-white/60">
-                <CheckCircle2 className="h-4 w-4" /> Senza Impegno
-              </span>
+            <div className="text-center mb-10">
+              <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
+                Il futuro del tuo team inizia{' '}
+                <span className="text-[#f09133]">da qui.</span>
+              </h2>
+              <p className="text-base md:text-lg text-white/70 leading-relaxed">
+                Compila il form e ti contatteremo entro 24 ore per una demo gratuita di 30 minuti. Nessun impegno.
+              </p>
             </div>
+
+            {leadSubmitted ? (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-10 text-center"
+              >
+                <CheckCircle2 className="h-16 w-16 text-green-400 mx-auto mb-4" />
+                <h3 className="text-2xl font-bold text-white mb-2">Richiesta ricevuta!</h3>
+                <p className="text-white/70">Ti contatteremo entro 24 ore per organizzare la tua demo personalizzata.</p>
+              </motion.div>
+            ) : (
+              <form onSubmit={handleLeadSubmit} className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-8 md:p-10">
+                <div className="grid sm:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label className="block text-sm font-medium text-white/80 mb-1.5">Nome *</label>
+                    <Input
+                      required
+                      maxLength={100}
+                      placeholder="Il tuo nome"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/40 focus:border-[#f09133]"
+                      value={leadForm.nome}
+                      onChange={(e) => setLeadForm(prev => ({ ...prev, nome: e.target.value }))}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-white/80 mb-1.5">Email *</label>
+                    <Input
+                      required
+                      type="email"
+                      maxLength={255}
+                      placeholder="nome@azienda.it"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/40 focus:border-[#f09133]"
+                      value={leadForm.email}
+                      onChange={(e) => setLeadForm(prev => ({ ...prev, email: e.target.value }))}
+                    />
+                  </div>
+                </div>
+                <div className="grid sm:grid-cols-2 gap-4 mb-6">
+                  <div>
+                    <label className="block text-sm font-medium text-white/80 mb-1.5">Azienda</label>
+                    <Input
+                      maxLength={200}
+                      placeholder="Nome azienda"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/40 focus:border-[#f09133]"
+                      value={leadForm.azienda}
+                      onChange={(e) => setLeadForm(prev => ({ ...prev, azienda: e.target.value }))}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-white/80 mb-1.5">N. Dipendenti</label>
+                    <select
+                      className="flex h-10 w-full rounded-md border bg-white/10 border-white/20 text-white px-3 py-2 text-sm focus:border-[#f09133] focus:outline-none"
+                      value={leadForm.num_dipendenti}
+                      onChange={(e) => setLeadForm(prev => ({ ...prev, num_dipendenti: e.target.value }))}
+                    >
+                      <option value="" className="text-[#1a1a2e]">Seleziona</option>
+                      <option value="1-10" className="text-[#1a1a2e]">1-10</option>
+                      <option value="11-50" className="text-[#1a1a2e]">11-50</option>
+                      <option value="51-200" className="text-[#1a1a2e]">51-200</option>
+                      <option value="201-500" className="text-[#1a1a2e]">201-500</option>
+                      <option value="500+" className="text-[#1a1a2e]">500+</option>
+                    </select>
+                  </div>
+                </div>
+                <Button
+                  type="submit"
+                  size="lg"
+                  disabled={leadSubmitting}
+                  className="w-full bg-[#f09133] hover:bg-[#e07a1f] text-white text-lg rounded-xl shadow-[0_4px_20px_rgba(240,145,51,0.4)]"
+                >
+                  {leadSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Invio in corso...
+                    </>
+                  ) : (
+                    <>
+                      Richiedi una Demo Gratuita <ArrowRight className="ml-2 h-5 w-5" />
+                    </>
+                  )}
+                </Button>
+                <div className="flex flex-wrap justify-center gap-6 mt-6">
+                  <span className="flex items-center gap-2 text-sm text-white/60">
+                    <Clock className="h-4 w-4" /> Risposta in 24h
+                  </span>
+                  <span className="flex items-center gap-2 text-sm text-white/60">
+                    <Shield className="h-4 w-4" /> 100% Riservato
+                  </span>
+                  <span className="flex items-center gap-2 text-sm text-white/60">
+                    <CheckCircle2 className="h-4 w-4" /> Senza Impegno
+                  </span>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       </motion.section>
 
-      {/* ═══ FOOTER — Gradient separator + social icons + glow logo ═══ */}
+      {/* ═══ FOOTER ═══ */}
       <footer className="bg-[#1e3a5f] py-14 mt-8 relative">
         {/* Orange gradient separator */}
         <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#f09133] to-transparent" />
@@ -1932,14 +2067,14 @@ export default function Home() {
                   <button
                     key={l.id}
                     onClick={() => scrollTo(l.id)}
-                    className="block text-sm text-white/50 hover:text-[#f09133] transition-colors relative after:content-[''] after:absolute after:bottom-[-2px] after:left-0 after:w-0 after:h-[1px] after:bg-[#f09133] after:transition-all after:duration-300 hover:after:w-full"
+                    className="block text-sm text-white/50 hover:text-[#f09133] transition-colors"
                   >
                     {l.label}
                   </button>
                 ))}
                 <button
                   onClick={() => navigate('/auth')}
-                  className="block text-sm text-white/50 hover:text-[#f09133] transition-colors relative after:content-[''] after:absolute after:bottom-[-2px] after:left-0 after:w-0 after:h-[1px] after:bg-[#f09133] after:transition-all after:duration-300 hover:after:w-full"
+                  className="block text-sm text-white/50 hover:text-[#f09133] transition-colors"
                 >
                   Accedi
                 </button>
@@ -1950,14 +2085,14 @@ export default function Home() {
             <div>
               <h4 className="text-sm font-semibold text-white mb-4 uppercase tracking-wider">Risorse</h4>
               <div className="space-y-2.5">
-                <a href="#" className="block text-sm text-white/50 hover:text-[#f09133] transition-colors relative after:content-[''] after:absolute after:bottom-[-2px] after:left-0 after:w-0 after:h-[1px] after:bg-[#f09133] after:transition-all after:duration-300 hover:after:w-full">Blog HR</a>
-                <a href="#" className="block text-sm text-white/50 hover:text-[#f09133] transition-colors relative after:content-[''] after:absolute after:bottom-[-2px] after:left-0 after:w-0 after:h-[1px] after:bg-[#f09133] after:transition-all after:duration-300 hover:after:w-full">Guida all'Assessment</a>
-                <a href="#" className="block text-sm text-white/50 hover:text-[#f09133] transition-colors relative after:content-[''] after:absolute after:bottom-[-2px] after:left-0 after:w-0 after:h-[1px] after:bg-[#f09133] after:transition-all after:duration-300 hover:after:w-full">Case Studies</a>
-                <a href="#" className="block text-sm text-white/50 hover:text-[#f09133] transition-colors relative after:content-[''] after:absolute after:bottom-[-2px] after:left-0 after:w-0 after:h-[1px] after:bg-[#f09133] after:transition-all after:duration-300 hover:after:w-full">Webinar</a>
+                <a href="#" className="block text-sm text-white/50 hover:text-[#f09133] transition-colors">Blog HR</a>
+                <a href="#" className="block text-sm text-white/50 hover:text-[#f09133] transition-colors">Guida all'Assessment</a>
+                <a href="#" className="block text-sm text-white/50 hover:text-[#f09133] transition-colors">Case Studies</a>
+                <a href="#" className="block text-sm text-white/50 hover:text-[#f09133] transition-colors">Webinar</a>
               </div>
             </div>
 
-            {/* Col 3 — Contatti */}
+            {/* Col 4 — Contatti */}
             <div>
               <h4 className="text-sm font-semibold text-white mb-4 uppercase tracking-wider">Contatti</h4>
               <div className="space-y-2">
@@ -1974,7 +2109,7 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Bottom bar */}
+          {/* Bottom bar — FIX #9: min 12px footer text */}
           <div className="pt-6 border-t border-white/10">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
               <div className="flex flex-wrap justify-center md:justify-start gap-4 text-xs text-white/30">

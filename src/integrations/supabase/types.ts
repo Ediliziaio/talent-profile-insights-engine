@@ -330,6 +330,33 @@ export type Database = {
         }
         Relationships: []
       }
+      leads: {
+        Row: {
+          azienda: string | null
+          created_at: string
+          email: string
+          id: string
+          nome: string
+          num_dipendenti: string | null
+        }
+        Insert: {
+          azienda?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          nome: string
+          num_dipendenti?: string | null
+        }
+        Update: {
+          azienda?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          nome?: string
+          num_dipendenti?: string | null
+        }
+        Relationships: []
+      }
       login_attempts: {
         Row: {
           attempted_at: string
