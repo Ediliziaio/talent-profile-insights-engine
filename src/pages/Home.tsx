@@ -1143,24 +1143,12 @@ export default function Home() {
               variants={fadeLeft}
               transition={{ duration: 0.7, ease: 'easeOut' }}
             >
-              <div className="aspect-[4/3] rounded-2xl bg-gradient-to-br from-[#1e3a5f] to-[#2a4f7a] flex items-center justify-center p-8 relative overflow-hidden shadow-[0_20px_60px_rgba(30,58,95,0.4)] border border-white/10">
-                {/* Geometric pattern */}
-                <div className="absolute inset-0 opacity-[0.06]" style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
-                <div className="absolute top-[-30px] right-[-30px] w-[120px] h-[120px] rounded-full bg-white/5 blur-xl" />
-                <div className="absolute bottom-[-20px] left-[-20px] w-[100px] h-[100px] rounded-full bg-[#f09133]/10 blur-xl" />
-                <div className="text-center text-white relative z-10">
-                  {/* FIX #7: respect prefers-reduced-motion */}
-                  <motion.div
-                    className="motion-safe:animate-none"
-                    animate={{ scale: [1, 1.05, 1] }}
-                    transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-                  >
-                    <Brain className="h-20 w-20 mx-auto mb-4 opacity-70" />
-                  </motion.div>
-                  <p className="text-lg font-semibold opacity-80">La scienza dietro le decisioni</p>
-                  <p className="text-base italic text-white/50 mt-3 font-medium">"La persona giusta al posto giusto cambia tutto."</p>
-                </div>
-              </div>
+              <img
+                src="/images/manifesto-hero.png"
+                alt="La scienza dietro le decisioni di assunzione — analisi scientifica del profilo umano"
+                className="aspect-[4/3] w-full rounded-2xl object-cover shadow-[0_20px_60px_rgba(30,58,95,0.4)]"
+                loading="lazy"
+              />
             </motion.div>
             {/* Right — Text */}
             <motion.div className="flex-1" variants={fadeRight} transition={{ duration: 0.7, ease: 'easeOut' }}>
