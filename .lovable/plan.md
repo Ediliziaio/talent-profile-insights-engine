@@ -1,26 +1,23 @@
 
 
-# Generare immagine AI per la sezione "La scienza dietro le decisioni"
+# Miglioramento Tabella Comparativa per Mobile
 
-## Cosa fare
+## Problema
+La tabella a 3 colonne su mobile (< 768px) richiede scroll orizzontale (`overflow-x-auto`), con testo che si comprime e diventa illeggibile. Le colonne "Metodo Tradizionale" e "TalentProfile" con icone + testo si sovrappongono.
 
-Sostituire il placeholder attuale (icona Brain con sfondo gradient blu) con un'immagine generata dall'AI che rappresenti il concetto "la scienza dietro le decisioni di assunzione".
+## Soluzione
+Su mobile, trasformare la tabella in un layout a **card stack**: per ogni riga/criterio, mostrare una card con il label in alto e le due opzioni (tradizionale vs TalentProfile) impilate verticalmente, con icone e colori chiari. La tabella classica resta visibile solo su `md:` e superiori.
 
-### Passaggi
+### Implementazione in `src/pages/Home.tsx` (righe 1359-1424)
 
-1. **Generare l'immagine** tramite l'edge function AI (modello `google/gemini-3-pro-image-preview` per qualità superiore). Prompt: un'illustrazione professionale e moderna che rappresenti l'analisi scientifica delle persone in ambito HR — ad esempio un profilo umano stilizzato con connessioni neurali/dati, toni blu scuro e arancione in linea con il brand.
-
-2. **Salvare l'immagine** nello storage (bucket pubblico) o direttamente in `public/images/` come file statico.
-
-3. **Aggiornare `src/pages/Home.tsx`** (righe 1146-1163): sostituire il div con gradient+Brain icon con un tag `<img>` che mostra l'immagine generata, mantenendo lo stesso aspect ratio (4/3), rounded corners e shadow.
-
-### Dettaglio tecnico
-
-- Creare un'edge function `generate-landing-image` che chiama il modello AI, riceve il base64, lo carica su storage e restituisce l'URL pubblico
-- In alternativa (più semplice): generare l'immagine una volta sola, salvarla in `public/images/manifesto-hero.png` e referenziarla staticamente — evita chiamate API ad ogni page load
-- Approccio consigliato: **statico** (generare una volta, salvare nel progetto)
+1. **Desktop (md+)**: mantenere la tabella attuale invariata, wrappata in `hidden md:block`
+2. **Mobile (< md)**: aggiungere un blocco `md:hidden` con layout card:
+   - Per ogni `COMPARISON_ROWS` item, una card con:
+     - **Label** del criterio come titolo della card
+     - Due righe: una rossa (❌ Tradizionale: valore) e una verde (✓ TalentProfile: valore)
+   - Riga finale "Punteggio totale" con i due score affiancati (2/7 vs 7/7)
+   - Stile coerente con `landing-card`, padding adeguato, font minimo 12px
 
 ### Risultato
-
-Il placeholder blu con icona Brain viene sostituito da un'immagine AI professionale che rende la sezione più visivamente impattante e credibile.
+Su mobile ogni confronto occupa tutta la larghezza dello schermo, è leggibile senza scroll orizzontale e mantiene l'impatto visivo rosso/verde.
 
