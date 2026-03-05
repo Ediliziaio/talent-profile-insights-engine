@@ -658,10 +658,40 @@ export default function Home() {
               </motion.h1>
               <motion.p
                 variants={fadeUp}
-                transition={{ duration: 0.6, ease: 'easeOut' }}
-                className="text-base md:text-lg text-white/70 leading-relaxed max-w-xl mb-8"
+                transition={{ duration: 0.5, ease: 'easeOut' }}
+                className="text-base md:text-lg text-white/90 font-semibold leading-relaxed max-w-xl mb-4"
               >
-                Basta perdere soldi in persone demotivate che non producono o se ne vanno dopo 3 mesi. Con TalentProfile capisci chi hai davvero di fronte, prima di assumerlo.
+                Basta perdere soldi in assunzioni sbagliate.
+              </motion.p>
+              <motion.ul
+                variants={fadeUp}
+                transition={{ duration: 0.6, ease: 'easeOut' }}
+                className="space-y-2 max-w-xl mb-4"
+              >
+                {[
+                  { bold: 'colloqui a sensazione', rest: ' che non predicono nulla' },
+                  { bold: 'persone demotivate', rest: ' dopo 3 mesi' },
+                  { bold: 'turnover', rest: ' che ti costa 2x lo stipendio' },
+                  { bold: 'candidati sbagliati', rest: ' nel ruolo sbagliato' },
+                ].map((item, i) => (
+                  <motion.li
+                    key={i}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.4 + i * 0.1, duration: 0.4 }}
+                    className="flex items-center gap-2 text-white/70 text-sm md:text-base"
+                  >
+                    <span className="text-red-400 font-bold text-lg">✕</span>
+                    <span>Addio a <strong className="text-white/90">{item.bold}</strong>{item.rest}</span>
+                  </motion.li>
+                ))}
+              </motion.ul>
+              <motion.p
+                variants={fadeUp}
+                transition={{ duration: 0.6, ease: 'easeOut', delay: 0.8 }}
+                className="text-sm md:text-base text-white/80 leading-relaxed max-w-xl mb-8 italic"
+              >
+                Con TalentProfile sai chi hai davvero di fronte, prima di assumerlo.
               </motion.p>
 
               <motion.div variants={fadeUp} transition={{ duration: 0.5 }} className="flex flex-col sm:flex-row gap-3 mb-8">
