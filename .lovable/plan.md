@@ -1,37 +1,27 @@
 
 
-# Hero Sub-headline con Bullet Points "Addio a..."
+# Semplificare la sezione "4 Step" — Linguaggio più comprensibile
 
 ## Cosa cambiare
 
-**File**: `src/pages/Home.tsx`, righe 659-665
+**File**: `src/pages/Home.tsx`
 
-Sostituire il paragrafo attuale con una struttura più potente: una frase d'apertura emotiva + bullet points "Addio a..." che colpiscono i dolori specifici dell'imprenditore.
+### 1. Sottotitolo sezione (riga 1226)
+Attuale: _"Dal link al report completo. 15 minuti. Zero logistica."_
+Nuovo: _"Mandi un link, il candidato risponde, tu ricevi il report. Tutto qui."_
 
-### Nuovo copy
+### 2. Dati STEPS (righe 185-206) — riscrittura copy
 
-**Frase d'apertura**: _"Basta perdere soldi in assunzioni sbagliate."_
+| Step | Titolo attuale → Nuovo | Descrizione nuova |
+|------|----------------------|-------------------|
+| 01 | Invita il Candidato → **Manda il Link** | _"Copi un link e lo invii al candidato. Lui compila dal telefono o dal PC, quando vuole. Tu non devi fare niente."_ |
+| 02 | Assessment Scientifico → **Il Candidato Risponde** | _"242 domande semplici, 15 minuti. Non si può barare e non serve prepararsi. Funziona da solo."_ |
+| 03 | Report Istantaneo → **Ricevi il Report** | _"Appena finisce, hai il profilo completo: chi è davvero, dove è forte, dove rischia. Tutto in una pagina."_ |
+| 04 | Decisione Informata → **Scegli con i Dati** | _"Vedi subito se è adatto al ruolo. Hai le domande pronte per il colloquio e puoi confrontare più candidati."_ |
 
-**Bullet points** (con icona ✕ o simile, stile lista):
-- Addio a **colloqui a sensazione** che non predicono nulla
-- Addio a **persone demotivate** dopo 3 mesi
-- Addio a **turnover** che ti costa 2x lo stipendio
-- Addio a **candidati sbagliati** nel ruolo sbagliato
-
-**Chiusura**: _"Con TalentProfile sai chi hai davvero di fronte, prima di assumerlo."_
-
-### Implementazione
-
-Sostituire il `<motion.p>` (righe 659-665) con:
-1. Una `<motion.p>` breve con la frase d'apertura
-2. Una `<motion.ul>` con 4 bullet points stilizzati (icona X rossa + testo bianco/70, font-medium)
-3. Una `<motion.p>` di chiusura con "Con TalentProfile..." in bianco più luminoso
-
-Stile bullet: `flex items-center gap-2`, icona `X` in `text-red-400`, testo in `text-white/70`, spacing `space-y-2`.
-
-### Leve psicologiche utilizzate
-- **Loss aversion**: "perdere soldi", "ti costa 2x"
-- **Pain points specifici**: colloqui inefficaci, demotivazione, turnover
-- **Pattern interrupt**: la struttura "Addio a..." è scannerizzabile e d'impatto
-- **Soluzione immediata**: la chiusura posiziona TalentProfile come risposta
+### Perché
+- Rimosso gergo tecnico ("validate scientificamente", "sindromi comportamentali", "macro-aree", "compatibilità ruolo automatica")
+- Linguaggio parlato, diretto, come se lo spiegassi a un imprenditore al bar
+- Frasi corte, soggetto-verbo-oggetto
+- Benefici concreti al posto di feature astratte
 
