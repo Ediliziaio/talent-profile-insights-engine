@@ -327,13 +327,13 @@ const PROBLEMS = [
 ];
 
 const COMPARISON_ROWS = [
-  { label: 'Metodo di valutazione', trad: 'CV + colloquio', tp: 'Assessment scientifico' },
-  { label: 'Base decisionale', trad: 'Soggettivo / istinto', tp: '15 tratti misurati oggettivamente' },
-  { label: 'Tempo di valutazione', trad: 'Settimane', tp: '15 minuti' },
-  { label: 'Profondità analisi', trad: 'Superficiale', tp: '24 sindromi + mappa interiore' },
-  { label: 'Compatibilità ruolo', trad: 'Opinione personale', tp: 'Role matching automatico' },
-  { label: 'Confronto candidati', trad: 'Fogli Excel manuali', tp: 'Dashboard comparativa' },
-  { label: 'Guida al colloquio', trad: 'Domande generiche', tp: 'Domande personalizzate AI' },
+  { label: 'Come valuti', trad: 'Leggi un CV e vai a sensazione', tp: 'Test scientifico, 15 minuti' },
+  { label: 'Su cosa decidi', trad: 'Istinto e impressioni', tp: '15 tratti misurati con i numeri' },
+  { label: 'Quanto ci metti', trad: 'Settimane di colloqui', tp: '15 minuti, tutto online' },
+  { label: 'Cosa scopri', trad: 'Solo quello che il candidato vuole mostrarti', tp: 'Chi è davvero, rischi inclusi' },
+  { label: 'È giusto per il ruolo?', trad: 'Speri di sì', tp: 'Lo sai prima di assumerlo' },
+  { label: 'Confronti', trad: 'Fogli Excel o memoria', tp: 'Confronto visivo immediato' },
+  { label: 'Colloquio', trad: 'Domande uguali per tutti', tp: 'Domande su misura per ogni candidato' },
 ];
 
 const TARGET_YES = [
@@ -1375,10 +1375,10 @@ export default function Home() {
             <span className="section-badge">Confronto</span>
           </div>
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 accent-underline mx-auto w-fit">
-            Metodo Tradizionale vs TalentProfile
+            Come assumi oggi vs come potresti assumere
           </h2>
           <p className="text-center text-[#6b7280] text-base mb-14 max-w-2xl mx-auto">
-            Ecco perché i dati battono l'istinto.
+            La differenza tra sperare di aver scelto bene e saperlo.
           </p>
           {/* Desktop table */}
           <div className="hidden md:block landing-card overflow-hidden rounded-xl shadow-[0_8px_40px_rgba(0,0,0,0.08)]">
