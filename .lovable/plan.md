@@ -1,34 +1,37 @@
 
 
-# Semplificare il testo della sezione "Metodo Tradizionale vs TalentProfile"
+# Fix testo invisibile + passare al "Noi"
 
-## Cosa cambiare
+## Problemi identificati
 
-**File**: `src/pages/Home.tsx`
+1. **Testo invisibile nella CTA finale**: la classe `landing-card` forza `background: #ffffff` che sovrascrive il `bg-[#1e3a5f]`. Il testo bianco diventa invisibile su sfondo bianco.
+2. **"Parola mia" → singolare**: va cambiato in "Noi" su tutta la pagina.
 
-### 1. Titolo (riga 1378)
-Attuale: _"Metodo Tradizionale vs TalentProfile"_
-Nuovo: _"Come assumi oggi vs come potresti assumere"_
+## Modifiche — `src/pages/Garanzia.tsx`
 
-### 2. Sottotitolo (riga 1381)
-Attuale: _"Ecco perché i dati battono l'istinto."_
-Nuovo: _"La differenza tra sperare di aver scelto bene e saperlo."_
+### 1. Fix CTA card — rimuovere `landing-card` dalla sezione finale
+Riga 239: sostituire `landing-card p-10 md:p-16 bg-[#1e3a5f]` con solo `rounded-2xl p-10 md:p-16 bg-[#1e3a5f]` (senza `landing-card` che forza lo sfondo bianco).
 
-### 3. Dati COMPARISON_ROWS (righe 329-337) — riscrittura in linguaggio semplice
+### 2. Cambiare tutto il copy da singolare a plurale ("Noi")
 
-| Criterio attuale → Nuovo | Tradizionale → Nuovo | TalentProfile → Nuovo |
-|---|---|---|
-| Metodo di valutazione → **Come valuti** | CV + colloquio → _"Leggi un CV e vai a sensazione"_ | Assessment scientifico → _"Test scientifico, 15 minuti"_ |
-| Base decisionale → **Su cosa decidi** | Soggettivo / istinto → _"Istinto e impressioni"_ | 15 tratti misurati → _"15 tratti misurati con i numeri"_ |
-| Tempo di valutazione → **Quanto ci metti** | Settimane → _"Settimane di colloqui"_ | 15 minuti → _"15 minuti, tutto online"_ |
-| Profondità analisi → **Cosa scopri** | Superficiale → _"Solo quello che il candidato vuole mostrarti"_ | 24 sindromi → _"Chi è davvero, rischi inclusi"_ |
-| Compatibilità ruolo → **È giusto per il ruolo?** | Opinione personale → _"Speri di sì"_ | Role matching → _"Lo sai prima di assumerlo"_ |
-| Confronto candidati → **Confronti** | Fogli Excel manuali → _"Fogli Excel o memoria"_ | Dashboard → _"Confronto visivo immediato"_ |
-| Guida al colloquio → **Colloquio** | Domande generiche → _"Domande uguali per tutti"_ | Domande AI → _"Domande su misura per ogni candidato"_ |
+| Attuale | Nuovo |
+|---|---|
+| "Parola mia." | "Parola nostra." |
+| "ti ridò ogni centesimo" | "ti ridiamo ogni centesimo" |
+| "Senza farti una sola domanda" | "Senza farti una sola domanda" (ok) |
+| "Perché ti faccio questa garanzia?" | "Perché ti facciamo questa garanzia?" |
+| "Potrei semplicemente dirti" | "Potremmo semplicemente dirti" |
+| "Ma voglio fare di più" | "Ma vogliamo fare di più" |
+| "Voglio toglierti OGNI scusa" | "Vogliamo toglierti OGNI scusa" |
+| "Perché so una cosa" | "Perché sappiamo una cosa" |
+| "Se il mio strumento funziona, ci guadagno un cliente a vita" | "Se il nostro strumento funziona, ci guadagniamo un cliente a vita" |
+| "Se non funziona, non merito i tuoi soldi" | "Se non funziona, non meritiamo i tuoi soldi" |
+| "il rischio è tutto dalla mia parte" | "il rischio è tutto dalla nostra parte" |
+| "UN'EMAIL e ti ridò tutto" (nei GUARANTEES) | "UN'EMAIL e ti ridiamo tutto" |
+| "Provalo. Se non funziona, ti ridò tutto." | "Provalo. Se non funziona, ti ridiamo tutto." |
+| FAQ "E se volessi fregarti?" risposta: mantiene "non succede quasi mai" | invariato |
 
-### Perché
-- Linguaggio parlato, zero gergo tecnico
-- Le colonne "Tradizionale" ora descrivono il dolore in modo riconoscibile
-- Le colonne "TalentProfile" esprimono benefici concreti
-- I criteri sono formulati come domande implicite che l'imprenditore si fa
+### 3. Dati statici da aggiornare
+- `GUARANTEES[3]`: "ti ridò" → "ti ridiamo"
+- Hero h1, hero subtitle, reason-why section, CTA section
 
