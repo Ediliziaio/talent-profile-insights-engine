@@ -236,7 +236,7 @@ export default function Garanzia() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="landing-card p-10 md:p-16 bg-[#1e3a5f] border-none text-white"
+            className="rounded-2xl p-10 md:p-16 bg-[#1e3a5f] text-white"
           >
             <h2 className="text-3xl md:text-4xl font-extrabold mb-4">
               L'unico rischio è <span className="text-[#f09133]">NON</span> provarlo.
