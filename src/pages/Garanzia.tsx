@@ -8,7 +8,7 @@ const GUARANTEES = [
   'Accesso COMPLETO a tutti gli strumenti — nessuna versione limitata',
   'Report illimitati su tutti i candidati che vuoi',
   'Confronto visivo tra candidati, domande colloquio generate dall\'AI',
-  'Se non vedi risultati, UN\'EMAIL e ti ridò tutto',
+  'Se non vedi risultati, UN\'EMAIL e ti ridiamo tutto',
   'Nessun modulo, nessuna telefonata, nessuna rottura di scatole',
 ];
 
