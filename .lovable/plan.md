@@ -1,34 +1,53 @@
 
 
-# Semplificare il testo della sezione "Metodo Tradizionale vs TalentProfile"
+# Riscrittura pagina Garanzia — stile Dan Kennedy / Belfort / Jay Abraham
 
-## Cosa cambiare
+## Problemi attuali
+- Testo troppo leggero e poco visibile (colori con opacità `/60`, `/70`)
+- Copy generico, istituzionale — zero urgenza, zero emozione
+- Manca la struttura persuasiva da sales letter
 
-**File**: `src/pages/Home.tsx`
+## Approccio
+Riscrittura completa in stile **direct response marketing**: headline potente, inversione del rischio aggressiva, linguaggio in prima persona, urgenza, social proof implicito, pattern interrupt.
 
-### 1. Titolo (riga 1378)
-Attuale: _"Metodo Tradizionale vs TalentProfile"_
-Nuovo: _"Come assumi oggi vs come potresti assumere"_
+## Struttura nuova
 
-### 2. Sottotitolo (riga 1381)
-Attuale: _"Ecco perché i dati battono l'istinto."_
-Nuovo: _"La differenza tra sperare di aver scelto bene e saperlo."_
+**File**: `src/pages/Garanzia.tsx` — riscrittura completa
 
-### 3. Dati COMPARISON_ROWS (righe 329-337) — riscrittura in linguaggio semplice
+### 1. HERO — Pattern interrupt + headline killer
+- Headline: **"Rischio ZERO. Parola mia."**
+- Sottotitolo lungo, stile lettera: "Se TalentProfile non ti fa risparmiare almeno una assunzione sbagliata nei prossimi 30 giorni... ti ridò ogni centesimo. Senza farti una sola domanda."
+- Testo bianco su sfondo scuro `bg-[#1e3a5f]` per massima leggibilità
 
-| Criterio attuale → Nuovo | Tradizionale → Nuovo | TalentProfile → Nuovo |
-|---|---|---|
-| Metodo di valutazione → **Come valuti** | CV + colloquio → _"Leggi un CV e vai a sensazione"_ | Assessment scientifico → _"Test scientifico, 15 minuti"_ |
-| Base decisionale → **Su cosa decidi** | Soggettivo / istinto → _"Istinto e impressioni"_ | 15 tratti misurati → _"15 tratti misurati con i numeri"_ |
-| Tempo di valutazione → **Quanto ci metti** | Settimane → _"Settimane di colloqui"_ | 15 minuti → _"15 minuti, tutto online"_ |
-| Profondità analisi → **Cosa scopri** | Superficiale → _"Solo quello che il candidato vuole mostrarti"_ | 24 sindromi → _"Chi è davvero, rischi inclusi"_ |
-| Compatibilità ruolo → **È giusto per il ruolo?** | Opinione personale → _"Speri di sì"_ | Role matching → _"Lo sai prima di assumerlo"_ |
-| Confronto candidati → **Confronti** | Fogli Excel manuali → _"Fogli Excel o memoria"_ | Dashboard → _"Confronto visivo immediato"_ |
-| Guida al colloquio → **Colloquio** | Domande generiche → _"Domande uguali per tutti"_ | Domande AI → _"Domande su misura per ogni candidato"_ |
+### 2. SEZIONE "PERCHÉ LO FACCIO" — Lettera personale
+- Stile Dan Kennedy "reason why"
+- Copy diretto: "Potrei semplicemente dirti 'provalo'. Ma voglio fare di più. Voglio toglierti OGNI scusa per non iniziare..."
+- Spiegazione della logica: "Se il mio strumento funziona, ci guadagno un cliente a vita. Se non funziona, non merito i tuoi soldi."
+- Font serif (Georgia) per effetto lettera, testo grande e leggibile
 
-### Perché
-- Linguaggio parlato, zero gergo tecnico
-- Le colonne "Tradizionale" ora descrivono il dolore in modo riconoscibile
-- Le colonne "TalentProfile" esprimono benefici concreti
-- I criteri sono formulati come domande implicite che l'imprenditore si fa
+### 3. SEZIONE "ECCO COSA TI GARANTISCO" — Lista aggressiva con checkmark
+- Bullet points grandi, bold, alta leggibilità
+- "Accesso COMPLETO a tutti gli strumenti — nessuna versione limitata"
+- "Report illimitati su tutti i candidati che vuoi"
+- "Se non vedi risultati, UN'EMAIL e ti ridò tutto"
+- "Nessun modulo, nessuna telefonata, nessuna rottura"
+
+### 4. SEZIONE "3 PASSI" — Riscritta con urgenza
+- Step 1: "Attiva oggi — ci vogliono 2 minuti"
+- Step 2: "Usa tutto per 30 giorni — mettimi alla prova"
+- Step 3: "Non ti convince? Una mail. Fine."
+
+### 5. FAQ — Riscritta con tono diretto
+- Domande più aggressive: "E se volessi fregarti?" → "Puoi farlo. Ma non succede mai, perché il prodotto funziona."
+- Testo con colori pieni, no opacità basse
+
+### 6. CTA FINALE — Urgenza + inversione rischio
+- "L'unico rischio è NON provarlo"
+- Bottone grande con copy diretto: "ATTIVA ORA — RISCHIO ZERO"
+- Sotto il bottone: "30 giorni. Rimborso garantito. Zero domande."
+
+## Fix visivi
+- Tutti i testi con colori pieni (`text-[#1a1a2e]`, `text-white`) — eliminare le opacità `/60` `/70` che rendono il testo invisibile
+- Font size più grandi per il body copy (`text-lg`, `text-xl`)
+- Più contrasto ovunque
 
