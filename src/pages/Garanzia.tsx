@@ -94,8 +94,8 @@ export default function Garanzia() {
             transition={{ delay: 0.3, duration: 0.5 }}
             className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto leading-relaxed font-medium"
           >
-            Se TalentProfile non ti fa risparmiare almeno <strong className="text-[#f09133]">una assunzione sbagliata</strong> nei prossimi 30 giorni...
-            ti ridò ogni centesimo. <span className="underline decoration-[#f09133] decoration-2 underline-offset-4">Senza farti una sola domanda.</span>
+             Se TalentProfile non ti fa risparmiare almeno <strong className="text-[#f09133]">una assunzione sbagliata</strong> nei prossimi 30 giorni...
+            ti ridiamo ogni centesimo. <span className="underline decoration-[#f09133] decoration-2 underline-offset-4">Senza farti una sola domanda.</span>
           </motion.p>
         </div>
       </section>
