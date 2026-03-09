@@ -110,7 +110,7 @@ export default function Garanzia() {
             className="landing-card p-8 md:p-12 border-l-4 border-[#f09133]"
           >
             <h2 className="text-2xl md:text-3xl font-bold text-[#1a1a2e] mb-6">
-              Perché ti faccio questa garanzia?
+              Perché ti facciamo questa garanzia?
             </h2>
             <div className="space-y-5 text-lg md:text-xl text-[#1a1a2e] leading-relaxed" style={{ fontFamily: 'Georgia, serif' }}>
               <p>
