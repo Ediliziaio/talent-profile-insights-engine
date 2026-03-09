@@ -114,23 +114,23 @@ export default function Garanzia() {
             </h2>
             <div className="space-y-5 text-lg md:text-xl text-[#1a1a2e] leading-relaxed" style={{ fontFamily: 'Georgia, serif' }}>
               <p>
-                Potrei semplicemente dirti <em>"provalo"</em>. Ma voglio fare di più.
+                Potremmo semplicemente dirti <em>"provalo"</em>. Ma vogliamo fare di più.
               </p>
               <p>
-                Voglio toglierti <strong>OGNI scusa</strong> per non iniziare.
+                Vogliamo toglierti <strong>OGNI scusa</strong> per non iniziare.
               </p>
               <p>
-                Perché so una cosa: ogni mese che passi a selezionare candidati "a sensazione", stai <strong>bruciando soldi</strong>. Un'assunzione sbagliata costa tra i 30.000€ e i 150.000€. Lo sai anche tu.
+                Perché sappiamo una cosa: ogni mese che passi a selezionare candidati "a sensazione", stai <strong>bruciando soldi</strong>. Un'assunzione sbagliata costa tra i 30.000€ e i 150.000€. Lo sai anche tu.
               </p>
               <p>
                 Ecco la logica, nuda e cruda:
               </p>
               <p className="text-[#1e3a5f] font-bold text-xl md:text-2xl pl-4 border-l-4 border-[#1e3a5f]">
-                Se il mio strumento funziona, ci guadagno un cliente a vita.<br />
-                Se non funziona, non merito i tuoi soldi.
+                Se il nostro strumento funziona, ci guadagniamo un cliente a vita.<br />
+                Se non funziona, non meritiamo i tuoi soldi.
               </p>
               <p>
-                In entrambi i casi, <strong>il rischio è tutto dalla mia parte</strong>. Tu non rischi nulla.
+                In entrambi i casi, <strong>il rischio è tutto dalla nostra parte</strong>. Tu non rischi nulla.
               </p>
             </div>
           </motion.div>
