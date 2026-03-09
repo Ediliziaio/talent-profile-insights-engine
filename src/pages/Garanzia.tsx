@@ -33,7 +33,7 @@ const FAQ = [
   },
   {
     q: '"Perché dovrei fidarmi?"',
-    a: 'Non devi fidarti. Devi solo provare. Il rischio è tutto dalla mia parte. Se non funziona, perdo un cliente E ti ridò i soldi. Credi che lo farei se il prodotto non funzionasse?',
+    a: 'Non devi fidarti. Devi solo provare. Il rischio è tutto dalla nostra parte. Se non funziona, perdiamo un cliente E ti ridiamo i soldi. Credi che lo faremmo se il prodotto non funzionasse?',
   },
 ];
 
