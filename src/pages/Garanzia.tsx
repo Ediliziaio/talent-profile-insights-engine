@@ -85,7 +85,7 @@ export default function Garanzia() {
             className="text-4xl md:text-6xl font-extrabold text-white leading-tight mb-6"
           >
             Rischio <span className="text-[#f09133]">ZERO</span>.<br />
-            Parola mia.
+            Parola nostra.
           </motion.h1>
 
           <motion.p
