@@ -35,6 +35,7 @@ const TestCompletato = lazy(() => import('./pages/TestCompletato'));
 const FormAnagrafico = lazy(() => import('./pages/FormAnagrafico'));
 const Home = lazy(() => import('./pages/Home'));
 const Pagamenti = lazy(() => import('./pages/Pagamenti'));
+const Garanzia = lazy(() => import('./pages/Garanzia'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
