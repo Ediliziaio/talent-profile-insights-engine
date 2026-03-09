@@ -2114,7 +2114,7 @@ export default function Home() {
                 <a href="#" className="block text-sm text-white/50 hover:text-[#f09133] transition-colors">Blog HR</a>
                 <a href="#" className="block text-sm text-white/50 hover:text-[#f09133] transition-colors">Guida all'Assessment</a>
                 <a href="#" className="block text-sm text-white/50 hover:text-[#f09133] transition-colors">Case Studies</a>
-                <a href="#" className="block text-sm text-white/50 hover:text-[#f09133] transition-colors">Webinar</a>
+                <button onClick={() => navigate('/garanzia')} className="block text-sm text-white/50 hover:text-[#f09133] transition-colors text-left">Garanzia</button>
               </div>
             </div>
 

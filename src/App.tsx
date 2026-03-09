@@ -129,6 +129,11 @@ const App = () => (
                   </Suspense>
                 </ProtectedRoute>
               } />
+              <Route path="/garanzia" element={
+                <Suspense fallback={<DashboardSkeleton />}>
+                  <Garanzia />
+                </Suspense>
+              } />
               <Route path="/test/anagrafica" element={
                 <Suspense fallback={<FormSkeleton />}>
                   <FormAnagrafico />
