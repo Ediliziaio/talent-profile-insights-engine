@@ -242,7 +242,7 @@ export default function Garanzia() {
               L'unico rischio è <span className="text-[#f09133]">NON</span> provarlo.
             </h2>
             <p className="text-lg md:text-xl text-white/90 mb-10 max-w-lg mx-auto leading-relaxed">
-              Ogni giorno senza dati è un giorno in cui rischi un'assunzione sbagliata. Provalo. Se non funziona, ti ridò tutto.
+              Ogni giorno senza dati è un giorno in cui rischi un'assunzione sbagliata. Provalo. Se non funziona, ti ridiamo tutto.
             </p>
             <Button
               size="lg"
