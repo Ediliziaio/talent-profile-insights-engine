@@ -8,7 +8,7 @@ const GUARANTEES = [
   'Accesso COMPLETO a tutti gli strumenti — nessuna versione limitata',
   'Report illimitati su tutti i candidati che vuoi',
   'Confronto visivo tra candidati, domande colloquio generate dall\'AI',
-  'Se non vedi risultati, UN\'EMAIL e ti ridò tutto',
+  'Se non vedi risultati, UN\'EMAIL e ti ridiamo tutto',
   'Nessun modulo, nessuna telefonata, nessuna rottura di scatole',
 ];
 
@@ -33,7 +33,7 @@ const FAQ = [
   },
   {
     q: '"Perché dovrei fidarmi?"',
-    a: 'Non devi fidarti. Devi solo provare. Il rischio è tutto dalla mia parte. Se non funziona, perdo un cliente E ti ridò i soldi. Credi che lo farei se il prodotto non funzionasse?',
+    a: 'Non devi fidarti. Devi solo provare. Il rischio è tutto dalla nostra parte. Se non funziona, perdiamo un cliente E ti ridiamo i soldi. Credi che lo faremmo se il prodotto non funzionasse?',
   },
 ];
 
@@ -85,7 +85,7 @@ export default function Garanzia() {
             className="text-4xl md:text-6xl font-extrabold text-white leading-tight mb-6"
           >
             Rischio <span className="text-[#f09133]">ZERO</span>.<br />
-            Parola mia.
+            Parola nostra.
           </motion.h1>
 
           <motion.p
@@ -94,8 +94,8 @@ export default function Garanzia() {
             transition={{ delay: 0.3, duration: 0.5 }}
             className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto leading-relaxed font-medium"
           >
-            Se TalentProfile non ti fa risparmiare almeno <strong className="text-[#f09133]">una assunzione sbagliata</strong> nei prossimi 30 giorni...
-            ti ridò ogni centesimo. <span className="underline decoration-[#f09133] decoration-2 underline-offset-4">Senza farti una sola domanda.</span>
+             Se TalentProfile non ti fa risparmiare almeno <strong className="text-[#f09133]">una assunzione sbagliata</strong> nei prossimi 30 giorni...
+            ti ridiamo ogni centesimo. <span className="underline decoration-[#f09133] decoration-2 underline-offset-4">Senza farti una sola domanda.</span>
           </motion.p>
         </div>
       </section>
@@ -110,27 +110,27 @@ export default function Garanzia() {
             className="landing-card p-8 md:p-12 border-l-4 border-[#f09133]"
           >
             <h2 className="text-2xl md:text-3xl font-bold text-[#1a1a2e] mb-6">
-              Perché ti faccio questa garanzia?
+              Perché ti facciamo questa garanzia?
             </h2>
             <div className="space-y-5 text-lg md:text-xl text-[#1a1a2e] leading-relaxed" style={{ fontFamily: 'Georgia, serif' }}>
               <p>
-                Potrei semplicemente dirti <em>"provalo"</em>. Ma voglio fare di più.
+                Potremmo semplicemente dirti <em>"provalo"</em>. Ma vogliamo fare di più.
               </p>
               <p>
-                Voglio toglierti <strong>OGNI scusa</strong> per non iniziare.
+                Vogliamo toglierti <strong>OGNI scusa</strong> per non iniziare.
               </p>
               <p>
-                Perché so una cosa: ogni mese che passi a selezionare candidati "a sensazione", stai <strong>bruciando soldi</strong>. Un'assunzione sbagliata costa tra i 30.000€ e i 150.000€. Lo sai anche tu.
+                Perché sappiamo una cosa: ogni mese che passi a selezionare candidati "a sensazione", stai <strong>bruciando soldi</strong>. Un'assunzione sbagliata costa tra i 30.000€ e i 150.000€. Lo sai anche tu.
               </p>
               <p>
                 Ecco la logica, nuda e cruda:
               </p>
               <p className="text-[#1e3a5f] font-bold text-xl md:text-2xl pl-4 border-l-4 border-[#1e3a5f]">
-                Se il mio strumento funziona, ci guadagno un cliente a vita.<br />
-                Se non funziona, non merito i tuoi soldi.
+                Se il nostro strumento funziona, ci guadagniamo un cliente a vita.<br />
+                Se non funziona, non meritiamo i tuoi soldi.
               </p>
               <p>
-                In entrambi i casi, <strong>il rischio è tutto dalla mia parte</strong>. Tu non rischi nulla.
+                In entrambi i casi, <strong>il rischio è tutto dalla nostra parte</strong>. Tu non rischi nulla.
               </p>
             </div>
           </motion.div>
@@ -236,13 +236,13 @@ export default function Garanzia() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="landing-card p-10 md:p-16 bg-[#1e3a5f] border-none text-white"
+            className="rounded-2xl p-10 md:p-16 bg-[#1e3a5f] text-white"
           >
             <h2 className="text-3xl md:text-4xl font-extrabold mb-4">
               L'unico rischio è <span className="text-[#f09133]">NON</span> provarlo.
             </h2>
             <p className="text-lg md:text-xl text-white/90 mb-10 max-w-lg mx-auto leading-relaxed">
-              Ogni giorno senza dati è un giorno in cui rischi un'assunzione sbagliata. Provalo. Se non funziona, ti ridò tutto.
+              Ogni giorno senza dati è un giorno in cui rischi un'assunzione sbagliata. Provalo. Se non funziona, ti ridiamo tutto.
             </p>
             <Button
               size="lg"
