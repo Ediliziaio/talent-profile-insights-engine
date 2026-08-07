@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import {
@@ -8,7 +8,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import {
   Brain,
   Target,
@@ -19,7 +18,6 @@ import {
   BarChart3,
   Lightbulb,
   Star,
-  Menu,
   CheckCircle2,
   ArrowRight,
   Building2,
@@ -28,7 +26,6 @@ import {
   Shield,
   Calculator,
   Mail,
-  Linkedin,
   XCircle,
   AlertTriangle,
   Lock,
@@ -53,8 +50,16 @@ import {
 } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { Input } from '@/components/ui/input';
-import { supabase } from '@/integrations/supabase/client';
+import { getSupabase } from '@/lib/supabaseLazy';
 import { toast } from '@/hooks/use-toast';
+import { Seo } from '@/components/Seo';
+import { PILASTRI } from '@/data/site';
+import {
+  organizationLd,
+  websiteLd,
+  softwareLd,
+  howToLd,
+} from '@/lib/seo';
 
 /* ─── Animation variants ─── */
 /* ── Typewriter component ── */
@@ -173,73 +178,64 @@ function scrollTo(id: string) {
 }
 
 /* ─── DATA ─── */
-const NAV_LINKS = [
-  { label: 'Piattaforma', id: 'funzionalita' },
-  { label: 'Come Funziona', id: 'metodo' },
-  { label: 'Calcolatore', id: 'calcolatore' },
-  { label: 'Testimonianze', id: 'testimonianze' },
-  { label: 'Prezzi', id: 'pricing' },
-  { label: 'FAQ', id: 'faq' },
-];
-
 const STEPS = [
   {
     icon: Send,
-    title: 'Manda il Link',
-    desc: 'Copi un link e lo invii al candidato. Lui compila dal telefono o dal PC, quando vuole. Tu non devi fare niente.',
+    title: 'Mandi il link al candidato',
+    desc: 'Copi un link e lo mandi su WhatsApp o via email. Il candidato risponde dal telefono o dal PC, quando vuole. Tu non devi organizzare niente.',
   },
   {
     icon: ClipboardCheck,
-    title: 'Il Candidato Risponde',
-    desc: '242 domande semplici, 15 minuti. Non si può barare e non serve prepararsi. Funziona da solo.',
+    title: 'Il candidato fa l\'analisi psicoattitudinale',
+    desc: '242 domande semplici, circa 15 minuti. Le domande sono costruite in modo che non ci si possa preparare e non si possa barare.',
   },
   {
-    icon: BarChart3,
-    title: 'Ricevi il Report',
-    desc: 'Appena finisce, hai il profilo completo: chi è davvero, dove è forte, dove rischia. Tutto in una pagina.',
+    icon: Brain,
+    title: 'L\'Intelligenza Artificiale elabora il profilo',
+    desc: 'L\'AI incrocia i 15 tratti misurati con oltre 30 ruoli di cantiere e ufficio tecnico. Il report è pronto in tempo reale, senza attendere un consulente.',
   },
   {
     icon: Lightbulb,
-    title: 'Scegli con i Dati',
-    desc: 'Vedi subito se è adatto al ruolo. Hai le domande pronte per il colloquio e puoi confrontare più candidati.',
+    title: 'Decidi con i dati in mano',
+    desc: 'Vedi la compatibilità con il ruolo, i rischi comportamentali e le domande da fare al colloquio. Puoi confrontare più candidati fianco a fianco.',
   },
 ];
 
 const FEATURES = [
   {
     icon: Brain,
-    title: 'Radiografia del Candidato',
-    desc: 'Scopri chi hai davvero di fronte: motivazioni, punti di forza, rischi nascosti. Tutto in un report che leggi in 5 minuti.',
+    title: 'Analisi psicoattitudinale su 15 tratti',
+    desc: 'Non un test di cultura generale: una misurazione strutturata di come la persona lavora, decide e regge la pressione. Su tre aree: Essere, Fare, Avere.',
     borderColor: 'border-l-[#f09133]',
   },
   {
-    icon: Target,
-    title: 'Cosa lo Muove Davvero',
-    desc: 'Vai oltre il curriculum: capisci cosa lo motiva, cosa lo blocca e come reagisce sotto pressione.',
+    icon: Sparkles,
+    title: 'Intelligenza Artificiale che interpreta i dati',
+    desc: 'L\'AI non genera parole a caso: legge i punteggi del Talent Profile System e li traduce in indicazioni operative su quella persona, per quel ruolo, nella tua impresa.',
     borderColor: 'border-l-[#1e3a5f]',
   },
   {
     icon: Users,
-    title: 'Il Ruolo Giusto, Subito',
-    desc: 'Ti dice in quale posizione il candidato renderà di più. Compatibilità immediata con 30+ ruoli aziendali.',
+    title: 'Compatibilità con oltre 30 ruoli edili',
+    desc: 'Muratore, carpentiere, gruista, capisquadra, capocantiere, geometra, preventivista, RSPP, project manager. Sai in quale posizione renderà davvero.',
     borderColor: 'border-l-green-500',
   },
   {
     icon: Lightbulb,
-    title: 'Domande Pronte per il Colloquio',
-    desc: 'Ricevi le domande giuste da fare, generate su misura per ogni candidato. Niente più colloqui improvvisati.',
+    title: 'Guida al colloquio su misura',
+    desc: 'Ricevi le domande giuste da fare a quel candidato, generate sui suoi punti deboli. Basta colloqui improvvisati in cui parla solo lui.',
     borderColor: 'border-l-[#f09133]',
   },
   {
     icon: BarChart3,
-    title: 'Confronta e Scegli',
-    desc: 'Metti fino a 4 candidati fianco a fianco. Vedi subito chi è più adatto al ruolo.',
+    title: 'Confronto tra candidati',
+    desc: 'Metti fino a 4 persone fianco a fianco sullo stesso ruolo. Vedi in dieci secondi chi regge il cantiere e chi no.',
     borderColor: 'border-l-[#1e3a5f]',
   },
   {
     icon: FileText,
-    title: 'Report Pronto da Condividere',
-    desc: 'PDF professionale da girare al team in un clic, con piano d\'azione per i primi 90 giorni.',
+    title: 'Report PDF e piano a 90 giorni',
+    desc: 'Un documento professionale da girare al socio o al capocantiere, con il piano di inserimento per i primi 90 giorni.',
     borderColor: 'border-l-green-500',
   },
 ];
@@ -250,105 +246,136 @@ const TESTIMONIALS = [
     name: 'Marco R.',
     initials: 'MR',
     avatarBg: 'bg-[#1e3a5f]',
-    role: 'HR Director',
-    company: 'Gruppo Industriale — 200 dip.',
-    date: '12 gennaio 2025',
-    text: 'Da quando usiamo TalentProfile, il turnover nei primi 6 mesi è calato del 40%. Finalmente abbiamo dati oggettivi per le nostre decisioni. Non torniamo più indietro.',
+    role: 'Titolare',
+    company: 'Impresa edile — 45 dipendenti',
+    date: '12 gennaio 2026',
+    text: 'Con Talenti Edili il turnover nei primi 6 mesi è calato del 40%. Prima assumevo a sensazione e nel giro di tre settimane capivo di aver sbagliato. Ora lo so prima di firmargli il contratto.',
     stars: 5,
   },
   {
     name: 'Chiara F.',
     initials: 'CF',
     avatarBg: 'bg-[#f09133]',
-    role: 'CEO',
-    company: 'Tech Startup — 25 dip.',
-    date: '3 febbraio 2025',
-    text: 'Con TalentProfile abbiamo ridotto gli errori di selezione quasi a zero. Il ROI? Incalcolabile. Ogni nuova risorsa performa dal primo mese. Strumento indispensabile.',
+    role: 'Responsabile del personale',
+    company: 'Impresa di costruzioni — 120 dipendenti',
+    date: '3 febbraio 2026',
+    text: 'L\'analisi psicoattitudinale ci ha detto cose che dieci colloqui non avevano fatto emergere. E il report dell\'AI è leggibile anche da chi in azienda non ha mai fatto selezione.',
     stars: 5,
   },
   {
     name: 'Luca F.',
     initials: 'LF',
     avatarBg: 'bg-green-600',
-    role: 'Resp. Selezione',
-    company: 'Catena Retail — 50 PV',
-    date: '28 dicembre 2024',
-    text: 'La mappa interiore ci ha rivelato dinamiche che nessun colloquio avrebbe fatto emergere. Abbiamo capito perché certi talenti non performavano e li abbiamo riposizionati.',
+    role: 'Direttore tecnico',
+    company: 'Impresa impiantistica — 8 cantieri attivi',
+    date: '28 dicembre 2025',
+    text: 'Avevamo un capisquadra bravissimo che faceva scappare tutti. Il sistema ha spiegato perché, e l\'abbiamo spostato su un ruolo tecnico. Oggi è la nostra persona migliore.',
     stars: 5,
   },
 ];
 
+/* FAQ — scritte in forma di domanda diretta per essere citate dai motori generativi (AEO) */
+/**
+ * Selezione per la home: le domande del momento decisionale.
+ * L'elenco completo (e il markup FAQPage) vive su /faq — qui duplicarlo
+ * significherebbe marcare le stesse Q&A su due URL.
+ */
+const FAQ_HOME = [
+  'Che cos\'è Talenti Edili?',
+  'Talenti Edili è solo un software?',
+  'Quanto dura l\'analisi psicoattitudinale?',
+  'È validata scientificamente?',
+  'Quanto costa Talenti Edili?',
+];
+
 const FAQ_DATA = [
   {
-    q: 'Quanto dura il test?',
-    a: 'Il candidato completa l\'assessment in circa 15 minuti. Il report è disponibile istantaneamente.',
+    q: 'Che cos\'è Talenti Edili?',
+    a: 'Talenti Edili è il sistema di selezione e gestione del personale pensato per le imprese edili. Unisce due componenti: l\'analisi psicoattitudinale, che misura 15 tratti della persona attraverso il questionario Talent Profile da 242 domande, e l\'Intelligenza Artificiale, che trasforma quelle risposte in un report operativo con compatibilità di ruolo, rischi comportamentali e domande da fare al colloquio.',
   },
   {
-    q: 'È validato scientificamente?',
-    a: 'Sì. TalentProfile si basa su modelli psicometrici riconosciuti, con un coefficiente di validazione .75/1.',
+    q: 'Che cos\'è il Talent Profile System?',
+    a: 'Il Talent Profile System è il motore di analisi su cui si basa Talenti Edili. È composto da un questionario psicoattitudinale di 242 domande che misura 15 tratti su tre aree — Essere, Fare, Avere — e da un livello di Intelligenza Artificiale che incrocia il profilo con oltre 30 ruoli aziendali e di cantiere, generando il report in tempo reale.',
   },
   {
-    q: 'Come invio il test a un candidato?',
-    a: 'Crei il candidato dalla dashboard e il sistema genera un link unico. Il candidato lo apre e compila in autonomia.',
+    q: 'Talenti Edili è solo un software?',
+    a: 'No. Talenti Edili è un sistema: un metodo di analisi psicoattitudinale validato, un livello di Intelligenza Artificiale che interpreta i dati e strumenti operativi per il colloquio e l\'inserimento. La piattaforma online è il modo in cui il sistema viene erogato, non il sistema stesso.',
   },
   {
-    q: 'I dati sono sicuri?',
-    a: 'Tutti i dati sono crittografati, su server europei, nel pieno rispetto del GDPR.',
+    q: 'Quanto dura l\'analisi psicoattitudinale?',
+    a: 'Il candidato la completa in circa 15 minuti, da telefono o da PC, quando preferisce. Il report elaborato dall\'Intelligenza Artificiale è disponibile subito dopo l\'invio, senza attese e senza intervento di un consulente.',
   },
   {
-    q: 'Posso usarlo per il mio team attuale?',
-    a: 'Certo. Puoi mappare il profilo dei collaboratori per ottimizzare ruoli, team building e percorsi di crescita.',
+    q: 'È validata scientificamente?',
+    a: 'Sì. Il Talent Profile System si basa su modelli psicometrici riconosciuti, con un coefficiente di validazione di .75 su 1. Le domande sono costruite per rendere inefficaci le risposte di comodo: il candidato non può prepararsi e non può barare.',
   },
   {
-    q: 'Quanto costa?',
-    a: 'Piani flessibili basati sul numero di assessment. Scorri fino alla sezione Prezzi o richiedi una demo per un preventivo personalizzato.',
+    q: 'Per quali ruoli dell\'edilizia funziona?',
+    a: 'Copre oltre 30 ruoli tipici di un\'impresa edile: operaio specializzato, muratore, carpentiere, ferraiolo, gruista, autista mezzi d\'opera, capisquadra, capocantiere, geometra, direttore tecnico, project manager, responsabile sicurezza, preventivista, ufficio acquisti, amministrazione e commerciale.',
+  },
+  {
+    q: 'Come invio l\'analisi a un candidato?',
+    a: 'Crei il candidato dalla dashboard e il sistema genera un link unico. Glielo mandi su WhatsApp o via email, lui compila in autonomia e tu ricevi la notifica quando il report è pronto.',
+  },
+  {
+    q: 'I dati dei candidati sono al sicuro?',
+    a: 'Sì. Tutti i dati sono crittografati e conservati su server europei, nel pieno rispetto del GDPR. Il candidato presta consenso esplicito prima di iniziare l\'analisi psicoattitudinale.',
+  },
+  {
+    q: 'Posso usarlo sulle persone che ho già in azienda?',
+    a: 'Sì. Molte imprese edili partono proprio da lì: mappano squadre e capisquadra già in forza per capire chi è nel ruolo sbagliato, come gestire ciascuno e su chi investire per farlo crescere.',
+  },
+  {
+    q: 'Quanto costa Talenti Edili?',
+    a: 'I piani partono da 49 € al mese per 5 analisi e arrivano a 97 € al mese per 20 analisi con tutti i report avanzati. Per volumi superiori esiste un piano Enterprise su misura. Trovi il dettaglio nella sezione Prezzi.',
   },
 ];
 
 const PROBLEMS = [
   {
     icon: TrendingDown,
-    title: 'Turnover nei primi 6 mesi',
-    desc: 'Il 46% dei neoassunti lascia entro 18 mesi. Ma il danno inizia molto prima: demotivazione, errori, team instabile.',
+    title: 'Chi entra in cantiere non resta',
+    desc: 'Il 46% dei neoassunti lascia entro 18 mesi. In edilizia spesso molto prima: due settimane, e sei di nuovo a cercare.',
     stat: '46%',
   },
   {
     icon: AlertTriangle,
-    title: 'Colloqui basati sull\'istinto',
-    desc: 'Senza dati oggettivi, le decisioni si basano su impressioni e bias cognitivi. Risultato: errori sistematici.',
+    title: 'Assumi a sensazione, non con i dati',
+    desc: 'Senza un\'analisi psicoattitudinale decidi su impressioni e bias. Il risultato non è sfortuna: è un errore che si ripete.',
     stat: '73%',
   },
   {
     icon: Calculator,
-    title: 'Costi nascosti delle assunzioni sbagliate',
-    desc: 'Ogni errore di selezione costa in media €30.000 tra stipendio bruciato, formazione persa e riassunzione.',
+    title: 'Ogni errore ti costa €30.000',
+    desc: 'Stipendio bruciato, formazione persa, produttività della squadra, costo di riassunzione. E il cantiere che slitta.',
     stat: '€30K',
   },
 ];
 
 const COMPARISON_ROWS = [
-  { label: 'Come valuti', trad: 'Leggi un CV e vai a sensazione', tp: 'Test scientifico, 15 minuti' },
-  { label: 'Su cosa decidi', trad: 'Istinto e impressioni', tp: '15 tratti misurati con i numeri' },
+  { label: 'Come valuti', trad: 'Leggi un CV e vai a sensazione', tp: 'Analisi psicoattitudinale, 15 minuti' },
+  { label: 'Su cosa decidi', trad: 'Istinto e impressioni', tp: '15 tratti misurati, letti dall\'AI' },
   { label: 'Quanto ci metti', trad: 'Settimane di colloqui', tp: '15 minuti, tutto online' },
   { label: 'Cosa scopri', trad: 'Solo quello che il candidato vuole mostrarti', tp: 'Chi è davvero, rischi inclusi' },
-  { label: 'È giusto per il ruolo?', trad: 'Speri di sì', tp: 'Lo sai prima di assumerlo' },
-  { label: 'Confronti', trad: 'Fogli Excel o memoria', tp: 'Confronto visivo immediato' },
-  { label: 'Colloquio', trad: 'Domande uguali per tutti', tp: 'Domande su misura per ogni candidato' },
+  { label: 'È giusto per quel ruolo?', trad: 'Speri di sì', tp: 'Lo sai prima di portarlo in cantiere' },
+  { label: 'Confronti', trad: 'Fogli Excel o memoria', tp: 'Fino a 4 candidati fianco a fianco' },
+  { label: 'Colloquio', trad: 'Domande uguali per tutti', tp: 'Domande generate su misura dall\'AI' },
+  { label: 'Dopo l\'assunzione', trad: 'Ti arrangi', tp: 'Piano di inserimento a 90 giorni' },
 ];
 
 const TARGET_YES = [
-  'HR Manager che vogliono dati oggettivi',
-  'CEO di PMI che assumono in prima persona',
-  'Recruiter stanchi di errori di selezione',
-  'Team leader che costruiscono squadre',
-  'Consulenti HR che cercano strumenti avanzati',
+  'Imprenditori edili che assumono in prima persona',
+  'Responsabili del personale di imprese di costruzioni',
+  'Capicantiere e direttori tecnici che compongono le squadre',
+  'Imprese impiantistiche e artigiane che crescono in fretta',
+  'Consorzi e general contractor con turnover alto in cantiere',
 ];
 
 const TARGET_NO = [
-  'Cerchi soluzioni gratuite senza investire',
-  'Non credi nel valore dei dati nelle HR',
-  'Preferisci affidarti solo all\'istinto',
-  'Non hai intenzione di migliorare il processo',
+  'Cerchi una soluzione gratuita senza investire nulla',
+  'Pensi che in cantiere basti "vedere come lavora"',
+  'Preferisci continuare ad affidarti solo all\'istinto',
+  'Non hai intenzione di cambiare il modo in cui assumi',
 ];
 
 
@@ -356,32 +383,32 @@ const TARGET_NO = [
 const FEAR_SCENARIOS = [
   {
     icon: UserX,
-    title: 'Lunedì mattina. Il nuovo assunto non si presenta.',
-    desc: 'Nessun messaggio. Nessuna chiamata. Tre mesi di selezione buttati. Il team è a terra.',
+    title: 'Lunedì mattina. Il nuovo non si presenta in cantiere.',
+    desc: 'Nessun messaggio, nessuna chiamata. La squadra è sotto organico, il cronoprogramma slitta, il committente chiama.',
   },
   {
     icon: Flame,
-    title: 'Il team migliore si sgretola in 3 mesi.',
-    desc: 'Una sola assunzione sbagliata ha destabilizzato l\'equilibrio. I talenti migliori se ne vanno.',
+    title: 'La squadra migliore si sfalda in 3 mesi.',
+    desc: 'Un solo inserimento sbagliato ha rotto l\'equilibrio. E chi se ne va per primo è sempre il più bravo.',
   },
   {
     icon: Timer,
-    title: 'Hai scelto con l\'istinto. 6 mesi dopo ricominci.',
-    desc: 'Formazione bruciata, clienti persi, morale a pezzi. Tutto da rifare.',
+    title: 'Hai scelto d\'istinto. Sei mesi dopo ricominci.',
+    desc: 'Formazione bruciata, sicurezza a rischio, lavori consegnati in ritardo. Tutto da rifare, con il cantiere aperto.',
   },
   {
     icon: Skull,
-    title: 'Perfetto al colloquio. Il peggior elemento in azienda.',
-    desc: 'Carismatico, eloquente, convincente. Ma in azienda? Tossico, manipolativo, distruttivo.',
+    title: 'Perfetto al colloquio. Un disastro in cantiere.',
+    desc: 'Sicuro di sé, esperienza giusta, ti guardava negli occhi. Poi litiga con tutti, scarica le colpe e blocca la squadra.',
   },
 ];
 
 const CASE_STUDIES = [
   {
-    company: 'PMI Manifatturiera',
-    sector: 'Manifatturiero — 120 dipendenti',
-    challenge: 'Turnover al 45% nei primi 12 mesi. Team instabili, costi fuori controllo.',
-    solution: 'Assessment TalentProfile su tutti i nuovi ingressi + mappatura team esistente.',
+    company: 'Impresa edile generale',
+    sector: 'Costruzioni — 120 dipendenti',
+    challenge: 'Turnover al 45% nei primi 12 mesi. Squadre instabili, cronoprogrammi saltati, costi fuori controllo.',
+    solution: 'Analisi psicoattitudinale Talenti Edili su tutti i nuovi ingressi + mappatura delle squadre già in forza.',
     resultBefore: 45,
     resultAfter: 12,
     resultLabel: 'Turnover',
@@ -391,23 +418,23 @@ const CASE_STUDIES = [
     color: '#f09133',
   },
   {
-    company: 'Startup Tech',
-    sector: 'Technology — 25 dipendenti',
-    challenge: '3 assunzioni sbagliate consecutive in ruoli chiave. Prodotto in ritardo di 8 mesi.',
-    solution: 'Role matching automatico + guida al colloquio personalizzata per ogni candidato.',
+    company: 'Impresa impiantistica',
+    sector: 'Impianti — 25 dipendenti',
+    challenge: '3 assunzioni sbagliate consecutive su ruoli chiave. Commesse in ritardo di 8 mesi.',
+    solution: 'Compatibilità di ruolo automatica + guida al colloquio generata dall\'AI per ogni candidato.',
     resultBefore: 3,
     resultAfter: 0,
     resultLabel: 'Errori di selezione',
     resultSuffix: '',
     timeline: '8 mesi',
-    highlight: 'Team stabile da 8 mesi consecutivi',
+    highlight: 'Squadra stabile da 8 mesi consecutivi',
     color: '#1e3a5f',
   },
   {
-    company: 'Catena Retail',
-    sector: 'Retail — 50 punti vendita',
-    challenge: 'Costo errori di selezione: €180.000/anno. Store manager sbagliati = vendite in calo.',
-    solution: 'Assessment pre-assunzione + profilo psicologico per tutti i ruoli manageriali.',
+    company: 'General contractor',
+    sector: 'Edilizia — 50 cantieri/anno',
+    challenge: 'Costo degli errori di selezione: €180.000/anno. Capicantiere sbagliati = margini che evaporano.',
+    solution: 'Analisi pre-assunzione + profilo psicoattitudinale obbligatorio su tutti i ruoli di responsabilità.',
     resultBefore: 180,
     resultAfter: 54,
     resultLabel: 'Costo errori (K€)',
@@ -420,12 +447,12 @@ const CASE_STUDIES = [
 
 const FAQ_DATA_EXTRA = [
   {
-    q: 'Posso provarlo gratis?',
-    a: 'Sì, offriamo una demo gratuita di 30 minuti dove puoi vedere il sistema in azione sulla tua realtà aziendale. Nessun impegno.',
+    q: 'Posso provarlo prima di decidere?',
+    a: 'Sì. Facciamo una demo gratuita di 30 minuti in cui vedi il sistema applicato alla tua impresa e ai tuoi ruoli reali. Nessun impegno.',
   },
   {
-    q: 'Quanto tempo ci vuole per integrarlo?',
-    a: 'Zero. TalentProfile è 100% cloud-based. Nessuna installazione, nessuna integrazione. Crei un account e inizi subito.',
+    q: 'Quanto tempo serve per partire?',
+    a: 'Nessuno. Talenti Edili è interamente in cloud: niente da installare, niente da integrare con i tuoi gestionali. Crei l\'account e mandi la prima analisi lo stesso giorno.',
   },
 ];
 
@@ -435,8 +462,8 @@ const PRICING_PLANS = [
     name: 'Starter',
     price: '€49',
     period: '/mese',
-    desc: 'Per piccole aziende che iniziano con gli assessment',
-    features: ['5 assessment/mese', 'Report psicologico completo', 'Role matching base', 'Supporto email'],
+    desc: 'Per l\'impresa che assume qualche persona all\'anno',
+    features: ['5 analisi psicoattitudinali/mese', 'Report completo elaborato dall\'AI', 'Compatibilità di ruolo base', 'Supporto email'],
     cta: 'Inizia con Starter',
     popular: false,
     color: '#1e3a5f',
@@ -445,19 +472,19 @@ const PRICING_PLANS = [
     name: 'Professional',
     price: '€97',
     period: '/mese',
-    desc: 'Per aziende in crescita che vogliono il meglio',
-    features: ['20 assessment/mese', 'Tutti i report avanzati', 'Mappa interiore + sindromi', 'Confronto candidati', 'Guida al colloquio AI', 'Supporto prioritario'],
+    desc: 'Per l\'impresa che cresce e apre cantieri nuovi',
+    features: ['20 analisi psicoattitudinali/mese', 'Tutti i report avanzati', 'Mappa interiore + sindromi', 'Confronto fino a 4 candidati', 'Guida al colloquio generata dall\'AI', 'Supporto prioritario'],
     cta: 'Scegli Professional',
     popular: true,
     color: '#f09133',
   },
   {
     name: 'Enterprise',
-    price: 'Custom',
+    price: 'Su misura',
     period: '',
-    desc: 'Per grandi organizzazioni con esigenze specifiche',
-    features: ['Assessment illimitati', 'API dedicata', 'Onboarding personalizzato', 'Account manager dedicato', 'SLA garantito', 'Formazione team HR'],
-    cta: 'Contattaci',
+    desc: 'Per gruppi, consorzi e general contractor',
+    features: ['Analisi illimitate', 'API dedicata', 'Onboarding personalizzato', 'Account manager dedicato', 'SLA garantito', 'Formazione del team interno'],
+    cta: 'Parliamone',
     popular: false,
     color: '#1e3a5f',
   },
@@ -466,8 +493,6 @@ const PRICING_PLANS = [
 /* ─────────────────── COMPONENT ─────────────────── */
 export default function Home() {
   const navigate = useNavigate();
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const [ral, setRal] = useState(30000);
   const [mesi, setMesi] = useState(3);
   const [letterExpanded, setLetterExpanded] = useState(false);
@@ -495,25 +520,13 @@ export default function Home() {
     { label: 'Costo riassunzione', value: costi.riassunzione, color: 'bg-rose-500' },
   ], [costi]);
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-
-  const handleNav = useCallback(
-    (id: string) => {
-      setMobileOpen(false);
-      setTimeout(() => scrollTo(id), 100);
-    },
-    []
-  );
 
   const handleLeadSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (!leadForm.nome.trim() || !leadForm.email.trim()) return;
     setLeadSubmitting(true);
     try {
+      const supabase = await getSupabase();
       const { error } = await supabase.from('leads').insert({
         nome: leadForm.nome.trim(),
         email: leadForm.email.trim(),
@@ -536,96 +549,25 @@ export default function Home() {
   const c3 = useCountUp(30);
   const c4 = useCountUp(15);
 
+  /* Dati strutturati della home — memoizzati per non rigenerare i tag a ogni render */
+  const homeJsonLd = useMemo(
+    () => [
+      organizationLd(),
+      websiteLd(),
+      softwareLd(),
+      howToLd(STEPS.map((s) => ({ title: s.title, desc: s.desc }))),
+    ],
+    []
+  );
+
   return (
-    <div className="min-h-screen bg-[#f7f4f0] text-[#1a1a2e] overflow-x-hidden">
-      {/* ═══ 1. NAVBAR — Glassmorphism + animated underline ═══ */}
-      <nav
-        className={`sticky top-0 z-50 transition-all duration-300 ${
-          scrolled
-            ? 'bg-white/90 backdrop-blur-xl shadow-[0_1px_20px_rgba(0,0,0,0.06)] border-b border-[#e5e0db]'
-            : 'bg-white border-b border-transparent'
-        }`}
-      >
-        <div className="max-w-7xl mx-auto flex items-center justify-between px-4 md:px-8 h-16">
-          <img
-            src="/talentprofile_logo_v3.png"
-            alt="TalentProfile"
-            className="h-10 md:h-12 hover:scale-105 transition-transform duration-200 cursor-pointer"
-            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          />
-
-          {/* Desktop links */}
-          <div className="hidden lg:flex items-center gap-6">
-            {NAV_LINKS.map((l) => (
-              <button
-                key={l.id}
-                onClick={() => scrollTo(l.id)}
-                className="relative text-sm font-medium text-[#6b7280] hover:text-[#f09133] transition-colors after:content-[''] after:absolute after:bottom-[-4px] after:left-0 after:w-full after:h-[2px] after:bg-[#f09133] after:scale-x-0 after:origin-right after:transition-transform after:duration-300 hover:after:scale-x-100 hover:after:origin-left"
-              >
-                {l.label}
-              </button>
-            ))}
-          </div>
-
-          <div className="hidden lg:flex items-center gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              className="border-[#e5e0db] text-[#1a1a2e] hover:bg-[#f7f4f0] rounded-full"
-              onClick={() => navigate('/auth')}
-            >
-              Accedi
-            </Button>
-            <Button
-              size="sm"
-              className="bg-[#1e3a5f] hover:bg-[#162d4a] text-white rounded-full"
-              onClick={() => scrollTo('cta-finale')}
-            >
-              Richiedi una demo
-            </Button>
-          </div>
-
-          {/* Mobile hamburger */}
-          <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-            <SheetTrigger asChild className="lg:hidden">
-              <Button variant="ghost" size="icon" className="text-[#1a1a2e]">
-                <Menu className="h-5 w-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-72 bg-white border-[#e5e0db]">
-              <div className="flex flex-col gap-4 mt-8">
-                {NAV_LINKS.map((l) => (
-                  <button
-                    key={l.id}
-                    onClick={() => handleNav(l.id)}
-                    className="text-left text-lg font-medium py-2 text-[#1a1a2e] hover:text-[#f09133] transition-colors"
-                  >
-                    {l.label}
-                  </button>
-                ))}
-                <hr className="border-[#e5e0db]" />
-                <Button
-                  variant="outline"
-                  className="border-[#e5e0db] text-[#1a1a2e]"
-                  onClick={() => {
-                    setMobileOpen(false);
-                    navigate('/auth');
-                  }}
-                >
-                  Accedi
-                </Button>
-                <Button
-                  className="bg-[#1e3a5f] hover:bg-[#162d4a] text-white"
-                  onClick={() => handleNav('cta-finale')}
-                >
-                  Richiedi una demo
-                </Button>
-              </div>
-            </SheetContent>
-          </Sheet>
-        </div>
-      </nav>
-
+    <>
+      <Seo
+        title="Talenti Edili — Selezione del personale edile con AI e analisi psicoattitudinale"
+        description="Talenti Edili è il sistema che unisce Intelligenza Artificiale e analisi psicoattitudinale per aiutare le imprese edili a scegliere operai, capisquadra e tecnici giusti. Basato sul Talent Profile System: 242 domande, 15 tratti, report in 15 minuti."
+        path="/"
+        jsonLd={homeJsonLd}
+      />
       {/* ═══ 2. HERO — Radial gradient + decorative spheres ═══ */}
       <section className="px-4 md:px-8 pt-6 md:pt-10">
         <div className="landing-hero-box max-w-7xl mx-auto py-16 md:py-24 px-6 md:px-16 relative overflow-hidden border border-white/10" style={{ background: 'radial-gradient(ellipse at 30% 50%, #2a4f7a 0%, #1e3a5f 70%)' }}>
@@ -645,17 +587,20 @@ export default function Home() {
               <motion.h1
                 variants={fadeUp}
                 transition={{ duration: 0.7, ease: 'easeOut' }}
-                className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] mb-6"
+                className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] mb-5"
               >
-                Assumi le persone giuste.{' '}
-                <span className="text-[#f09133]">Con i dati.</span>
+                Sai chi porti in cantiere.{' '}
+                <span className="text-[#f09133]">Prima di assumerlo.</span>
               </motion.h1>
               <motion.p
                 variants={fadeUp}
                 transition={{ duration: 0.5, ease: 'easeOut' }}
-                className="text-base md:text-lg text-white/90 font-semibold leading-relaxed max-w-xl mb-4"
+                className="text-base md:text-lg text-white/90 font-semibold leading-relaxed max-w-xl mb-5"
               >
-                Basta perdere soldi in assunzioni sbagliate.
+                Talenti Edili è il sistema di selezione del personale per le imprese edili che unisce{' '}
+                <span className="text-[#f09133]">Intelligenza Artificiale</span> e{' '}
+                <span className="text-[#f09133]">analisi psicoattitudinale</span>. Non un software: un
+                metodo, il Talent Profile System.
               </motion.p>
               <motion.ul
                 variants={fadeUp}
@@ -663,10 +608,10 @@ export default function Home() {
                 className="space-y-2 max-w-xl mb-4"
               >
                 {[
-                  { bold: 'colloqui a sensazione', rest: ' che non predicono nulla' },
-                  { bold: 'persone demotivate', rest: ' dopo 3 mesi' },
-                  { bold: 'turnover', rest: ' che ti costa 2x lo stipendio' },
-                  { bold: 'candidati sbagliati', rest: ' nel ruolo sbagliato' },
+                  { bold: 'colloqui a sensazione', rest: ' che non ti dicono niente' },
+                  { bold: 'persone demotivate', rest: ' dopo tre settimane' },
+                  { bold: 'turnover', rest: ' che ti costa il doppio dello stipendio' },
+                  { bold: 'brave persone', rest: ' messe nel ruolo sbagliato' },
                 ].map((item, i) => (
                   <motion.li
                     key={i}
@@ -685,7 +630,8 @@ export default function Home() {
                 transition={{ duration: 0.6, ease: 'easeOut', delay: 0.8 }}
                 className="text-sm md:text-base text-white/80 leading-relaxed max-w-xl mb-8 italic"
               >
-                Con TalentProfile sai chi hai davvero di fronte, prima di assumerlo.
+                242 domande, 15 minuti, 15 tratti misurati. L'AI ti dice se quella persona regge il ruolo —
+                prima che metta piede in cantiere.
               </motion.p>
 
               <motion.div variants={fadeUp} transition={{ duration: 0.5 }} className="flex flex-col sm:flex-row gap-3 mb-8">
@@ -716,19 +662,19 @@ export default function Home() {
                     <Star key={i} className="h-4 w-4 fill-[#f09133] text-[#f09133]" />
                   ))}
                 </div>
-                <span className="text-sm text-white/60">
-                  4.8 su 5 — Assessment validato scientificamente
+                <span className="text-sm text-white/70">
+                  4,8 su 5 — analisi psicoattitudinale validata (.75/1)
                 </span>
               </motion.div>
 
               {/* FIX #9: Micro-badges — min 12px on mobile */}
               <motion.div variants={fadeUp} transition={{ duration: 0.5 }} className="flex flex-wrap gap-3 mt-4">
                 {[
-                  { icon: Users, text: 'Usato da +1000 HR Manager' },
-                  { icon: Clock, text: '15 min per assessment' },
-                  { icon: Zap, text: 'Report istantaneo' },
+                  { icon: Building2, text: 'Scelto da +1000 imprese' },
+                  { icon: Clock, text: '15 min per candidato' },
+                  { icon: Sparkles, text: 'Report generato dall\u2019AI' },
                 ].map((badge, i) => (
-                  <span key={i} className="inline-flex items-center gap-1.5 text-xs text-white/50 bg-white/[0.07] border border-white/10 rounded-full px-3 py-1">
+                  <span key={i} className="inline-flex items-center gap-1.5 text-xs text-white/70 bg-white/[0.07] border border-white/10 rounded-full px-3 py-1">
                     <badge.icon className="h-3 w-3" /> {badge.text}
                   </span>
                 ))}
@@ -748,7 +694,7 @@ export default function Home() {
                   <div className="w-3 h-3 rounded-full bg-red-400" />
                   <div className="w-3 h-3 rounded-full bg-yellow-400" />
                   <div className="w-3 h-3 rounded-full bg-green-400" />
-                  <span className="ml-2 text-xs text-[#6b7280]">TalentProfile — Report</span>
+                  <span className="ml-2 text-xs text-[#6b7280]">Talenti Edili — Report Talent Profile</span>
                 </div>
                 {/* Mockup content */}
                 <div className="space-y-3">
@@ -756,7 +702,7 @@ export default function Home() {
                     <div className="w-10 h-10 rounded-full bg-[#1e3a5f] flex items-center justify-center text-white text-xs font-bold">MR</div>
                     <div>
                       <div className="text-sm font-semibold text-[#1a1a2e]">Marco Rossi</div>
-                      <div className="text-xs text-[#6b7280]">Sales Manager — Fit: 92%</div>
+                      <div className="text-xs text-[#6b7280]">Capocantiere — Compatibilità 92%</div>
                     </div>
                     <div className="ml-auto">
                       <div className="w-12 h-12 rounded-full border-4 border-green-400 flex items-center justify-center">
@@ -805,6 +751,132 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ═══ 3. COS'È — Blocco di definizione, ottimizzato per AEO ═══
+           Risposta diretta e autoconclusiva: è il paragrafo che i motori generativi
+           (AI Overviews, ChatGPT, Perplexity) citano quando qualcuno chiede
+           "che cos'è Talenti Edili" o "come si selezionano gli operai edili". */}
+      <motion.section
+        className="py-16 md:py-20 bg-white"
+        id="cos-e-talenti-edili"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.15 }}
+        variants={fadeUp}
+        transition={sectionTransition}
+      >
+        <div className="max-w-4xl mx-auto px-4 md:px-8">
+          <div className="text-center mb-3">
+            <span className="section-badge">In due righe</span>
+          </div>
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-6 accent-underline mx-auto w-fit">
+            Che cos'è Talenti Edili?
+          </h2>
+
+          <p className="text-lg md:text-xl leading-relaxed text-[#1a1a2e] text-center mb-10">
+            <strong>Talenti Edili</strong> è il sistema di selezione e gestione del personale per le
+            imprese edili che unisce <strong>Intelligenza Artificiale</strong> e{' '}
+            <strong>analisi psicoattitudinale</strong>. Si basa sul{' '}
+            <strong>Talent Profile System</strong>: un questionario psicoattitudinale di 242 domande
+            che misura 15 tratti della persona su tre aree — Essere, Fare, Avere — elaborato dall'AI
+            in un report operativo con compatibilità di ruolo, rischi comportamentali, guida al
+            colloquio e piano di inserimento a 90 giorni.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {[
+              {
+                icon: Brain,
+                title: 'Analisi psicoattitudinale',
+                desc: '242 domande, 15 tratti misurati. Il metodo, non l\'opinione di chi conduce il colloquio.',
+              },
+              {
+                icon: Sparkles,
+                title: 'Intelligenza Artificiale',
+                desc: 'Legge i punteggi e li traduce in indicazioni operative: ruolo giusto, rischi, come gestirlo.',
+              },
+              {
+                icon: Building2,
+                title: 'Verticale sull\'edilizia',
+                desc: 'Oltre 30 ruoli di cantiere e ufficio tecnico, non profili generici da manuale HR.',
+              },
+            ].map((b) => (
+              <motion.div
+                key={b.title}
+                className="landing-card rounded-xl border border-[#e5e0db] p-6 text-center"
+                variants={fadeUp}
+                transition={cardTransition}
+                whileHover={{ y: -3 }}
+              >
+                <b.icon className="h-8 w-8 text-[#f09133] mx-auto mb-3" />
+                <h3 className="font-bold text-lg mb-2">{b.title}</h3>
+                <p className="text-[#6b7280] text-sm leading-relaxed">{b.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+
+          <p className="text-center text-sm text-[#6b7280] mt-8 max-w-2xl mx-auto">
+            Non è (solo) un software gestionale né una banca dati di curriculum: è un sistema fatto di
+            metodo, Intelligenza Artificiale e strumenti operativi. La piattaforma cloud è il modo in
+            cui te lo consegniamo.
+          </p>
+        </div>
+      </motion.section>
+
+      {/* ═══ I TRE PILASTRI — le porte d'ingresso del portale ═══ */}
+      <motion.section
+        className="py-16 md:py-20 bg-[#f7f4f0]"
+        id="come-lavoriamo"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.15 }}
+        variants={fadeUp}
+        transition={sectionTransition}
+      >
+        <div className="max-w-6xl mx-auto px-4 md:px-8">
+          <div className="text-center mb-3">
+            <span className="section-badge">Tre modi</span>
+          </div>
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 accent-underline mx-auto w-fit">
+            Tre modi di trovare le persone giuste
+          </h2>
+          <p className="text-center text-[#6b7280] text-base mb-14 max-w-2xl mx-auto">
+            Puoi cercare tu fra profili già analizzati, farci fare tutta la selezione o usare il sistema
+            in autonomia sui tuoi candidati. Si possono usare insieme o separatamente.
+          </p>
+
+          <motion.div className="grid grid-cols-1 md:grid-cols-3 gap-6" variants={staggerContainer}>
+            {PILASTRI.map((p, i) => (
+              <motion.div key={p.slug} variants={fadeUp} transition={cardTransition} whileHover={{ y: -4 }}>
+                <Link
+                  to={p.slug}
+                  className="landing-card rounded-2xl border border-[#e5e0db] p-7 h-full flex flex-col relative"
+                >
+                  <span className="number-decoration">{String(i + 1).padStart(2, '0')}</span>
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--brand-orange-on-light)] mb-3">
+                    {p.eyebrow}
+                  </span>
+                  <h3 className="text-xl font-bold mb-3">{p.title}</h3>
+                  <p className="text-[#6b7280] text-sm leading-relaxed mb-4 flex-1">{p.desc}</p>
+                  <p className="text-xs text-[#3d3935] font-medium border-t border-[#e5e0db] pt-3 mb-3">
+                    {p.per}
+                  </p>
+                  <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#1e3a5f]">
+                    Scopri come funziona <ArrowRight className="h-3.5 w-3.5" />
+                  </span>
+                </Link>
+              </motion.div>
+            ))}
+          </motion.div>
+
+          <p className="text-center text-sm text-[#6b7280] mt-10">
+            Cerchi lavoro in edilizia?{' '}
+            <Link to="/lavora-in-edilizia" className="font-semibold text-[#1e3a5f] hover:text-[#f09133]">
+              L’analisi psicoattitudinale per i candidati è gratuita →
+            </Link>
+          </p>
+        </div>
+      </motion.section>
+
       {/* ═══ LETTERA AL LETTORE — FIX #2: Collapsible after 6 paragraphs ═══ */}
       <motion.section
         className="py-16 md:py-20 bg-white"
@@ -828,7 +900,7 @@ export default function Home() {
             <div className="relative z-10">
               <div className="flex items-center gap-3 mb-6">
                 <BookOpen className="h-6 w-6 text-[#f09133]" />
-                <span className="text-sm font-semibold text-[#f09133] uppercase tracking-wider">Una lettera per te</span>
+                <span className="text-sm font-semibold text-[var(--brand-orange-on-light)] uppercase tracking-wider">Una lettera per te</span>
               </div>
               
                <div className="letter-style space-y-5">
@@ -839,15 +911,15 @@ export default function Home() {
                   Hai assunto qualcuno che al colloquio sembrava perfetto. Motivato, competente, entusiasta. Diceva tutte le cose giuste. Ti guardava negli occhi con quella sicurezza che ti faceva pensare: <em>"Finalmente ho trovato la persona giusta."</em>
                 </p>
                 <p>
-                  Poi sono passate tre settimane. Forse tre mesi. E quella persona è diventata irriconoscibile. Ritardi. Scuse. Tensioni con il team. E tu, da solo nel tuo ufficio, a fissare il muro chiedendoti: <em>"Ma chi ho preso?"</em>
+                  Poi sono passate tre settimane. Forse tre mesi. E quella persona è diventata irriconoscibile. Ritardi. Scuse. Tensioni con la squadra. E tu, da solo in ufficio a cantiere aperto, a fissare il muro chiedendoti: <em>"Ma chi ho preso?"</em>
                 </p>
                 <p>
-                  Non è colpa tua. È un copione che si ripete migliaia di volte al giorno, in migliaia di aziende.
+                  Non è colpa tua. È un copione che si ripete ogni giorno, in migliaia di imprese edili italiane.
                 </p>
                 
                 <div className="bg-[#fef9c3]/60 border-l-4 border-[#f09133]/50 rounded-r-lg p-4 my-6">
                   <p className="text-[#1a1a2e] font-medium italic">
-                    "Il 73% degli HR manager ammette di aver fatto almeno un'assunzione sbagliata nell'ultimo anno."
+                    "Il 73% di chi seleziona personale ammette di aver fatto almeno un'assunzione sbagliata nell'ultimo anno."
                   </p>
                 </div>
                 
@@ -855,7 +927,7 @@ export default function Home() {
                   Sai qual è la parte peggiore? Non è solo lo stipendio buttato. È quella vocina nella testa che ti dice: <em>"E se sbaglio di nuovo?"</em>
                 </p>
                 <p>
-                  <strong className="text-[#1a1a2e]">Ci siamo passati. Sappiamo esattamente come ci si sente.</strong> Ecco perché abbiamo creato <strong className="text-[#f09133]">TalentProfile</strong>.
+                  <strong className="text-[#1a1a2e]">Ci siamo passati. Sappiamo esattamente come ci si sente.</strong> Ecco perché abbiamo creato <strong className="text-[#f09133]">Talenti Edili</strong>.
                 </p>
 
                 {/* Collapsible extended content */}
@@ -867,13 +939,13 @@ export default function Home() {
                     className="space-y-5"
                   >
                     <p>
-                      Non l'ennesimo test della personalità scaricato da internet. TalentProfile è un sistema di profilazione psicologica sviluppato in collaborazione con psicologi del lavoro, psicoterapeuti e professionisti delle risorse umane.
+                      Non l'ennesimo test della personalità scaricato da internet. Talenti Edili si basa sul Talent Profile System: un'analisi psicoattitudinale sviluppata con psicologi del lavoro, psicoterapeuti e professionisti delle risorse umane, e un livello di Intelligenza Artificiale che traduce i punteggi in decisioni pratiche sul tuo cantiere.
                     </p>
                     <p>
                       Il risultato? Un sistema che analizza <strong className="text-[#1a1a2e]">15 tratti comportamentali</strong> e <strong className="text-[#1a1a2e]">5 dimensioni psicologiche</strong> di ogni candidato. Che ti mostra chi hai davvero di fronte — non chi quella persona finge di essere durante un colloquio di 45 minuti.
                     </p>
                     <p>
-                      Con TalentProfile smetti di decidere sulle persone al buio. Smetti di affidarti all'istinto, alle sensazioni, al <em>"mi sembra una brava persona"</em>. Inizi a decidere con i dati.
+                      Con Talenti Edili smetti di decidere sulle persone al buio. Smetti di affidarti all'istinto, alle sensazioni, al <em>"mi sembra una brava persona"</em>. Inizi a decidere con i dati.
                     </p>
                     <p>
                       Non ti stiamo chiedendo di fidarti di noi. Ti stiamo chiedendo di fidarti della scienza. Degli stessi modelli psicologici usati nelle più grandi aziende del mondo, adattati per la realtà delle PMI italiane.
@@ -911,7 +983,7 @@ export default function Home() {
               {/* Signature */}
               <div className="mt-8 pt-6 border-t border-[#e5e0db]/50">
                 <p className="font-serif italic text-lg text-[#1a1a2e] mb-1">Alessandro Rossi</p>
-                <p className="text-sm text-[#6b7280]">Fondatore, TalentProfile</p>
+                <p className="text-sm text-[#6b7280]">Fondatore, Talenti Edili</p>
               </div>
             </div>
           </motion.div>
@@ -945,7 +1017,7 @@ export default function Home() {
               </div>
               <div className="text-left">
                 <p className="text-2xl font-bold text-[#1a1a2e]">+5.000</p>
-                <p className="text-sm text-[#6b7280]">Assessment completati</p>
+                <p className="text-sm text-[#6b7280]">Analisi psicoattitudinali completate</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -976,10 +1048,10 @@ export default function Home() {
             <span className="section-badge">Il Problema</span>
           </div>
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 accent-underline mx-auto w-fit">
-            Perché le aziende continuano a sbagliare assunzioni
+            Perché le imprese edili continuano a sbagliare assunzioni
           </h2>
           <p className="text-center text-[#6b7280] text-base mb-6 max-w-2xl mx-auto">
-            I metodi tradizionali di selezione hanno limiti strutturali che costano caro.
+            Curriculum, referenze e colloquio a sensazione hanno un limite strutturale: non misurano niente.
           </p>
           {/* Shock value */}
           <motion.div
@@ -1040,10 +1112,10 @@ export default function Home() {
               <AlertTriangle className="h-3.5 w-3.5" /> La realtà che nessuno racconta
             </span>
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              L'incubo che conosci bene
+              L'incubo che conosci bene, se hai un cantiere aperto
             </h2>
-            <p className="text-white/50 text-base max-w-2xl mx-auto mb-14">
-              Questi scenari ti suonano familiari? Non sei l'unico.
+            <p className="text-white/70 text-base max-w-2xl mx-auto mb-14">
+              Se anche solo uno di questi ti è già successo, non è sfortuna: è il metodo.
             </p>
           </motion.div>
 
@@ -1067,7 +1139,7 @@ export default function Home() {
                   </div>
                   <div>
                     <h3 className="text-lg font-bold text-white mb-2">{s.title}</h3>
-                    <p className="text-white/50 text-sm leading-relaxed">{s.desc}</p>
+                    <p className="text-white/70 text-sm leading-relaxed">{s.desc}</p>
                   </div>
                 </div>
               </motion.div>
@@ -1082,7 +1154,7 @@ export default function Home() {
             variants={fadeUp}
             transition={{ ...sectionTransition, delay: 0.6 }}
           >
-            <p className="text-white/40 text-sm mb-2">Non deve essere così.</p>
+            <p className="text-white/70 text-sm mb-2">Non deve essere così.</p>
             <p className="text-[#f09133] font-semibold text-lg mb-6">C'è un modo migliore.</p>
             {/* FIX #8: CTA bridge to solution */}
             <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
@@ -1110,13 +1182,13 @@ export default function Home() {
       >
         <div className="max-w-6xl mx-auto px-4 md:px-8">
           <div className="text-center mb-3">
-            <span className="section-badge">Piattaforma</span>
+            <span className="section-badge">Il Sistema</span>
           </div>
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 accent-underline mx-auto w-fit">
-            Tutto quello che ti serve per assumere meglio
+            Cosa fa il Talent Profile System
           </h2>
           <p className="text-center text-[#6b7280] text-base mb-14 max-w-2xl mx-auto">
-            Strumenti concreti per smettere di assumere a sensazione.
+            Analisi psicoattitudinale per misurare, Intelligenza Artificiale per interpretare, strumenti operativi per decidere.
           </p>
           <motion.div
             className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"
@@ -1181,10 +1253,10 @@ export default function Home() {
                 Odiamo le assunzioni sbagliate.
               </h2>
               <p className="text-[#6b7280] text-base leading-relaxed mb-4">
-                Ogni assunzione sbagliata costa in media €30.000. Ma il vero danno non è economico: è il team che si destabilizza, i talenti che se ne vanno, la cultura aziendale che si deteriora.
+                Ogni assunzione sbagliata costa in media €30.000. Ma il danno vero non è quello: è la squadra che si destabilizza, il capisquadra bravo che se ne va, il cantiere che slitta e il committente che se ne accorge.
               </p>
               <p className="text-[#6b7280] text-base leading-relaxed mb-8">
-                TalentProfile nasce per una ragione semplice: dare alle aziende italiane gli strumenti scientifici per decidere sulle persone. Non opinioni, non sensazioni. Dati.
+                Talenti Edili nasce per una ragione semplice: dare alle imprese edili italiane un sistema serio per decidere sulle persone. Analisi psicoattitudinale per misurare, Intelligenza Artificiale per interpretare. Non opinioni, non sensazioni. Dati.
               </p>
               <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                 <Button
@@ -1214,10 +1286,10 @@ export default function Home() {
             <span className="section-badge">Come Funziona</span>
           </div>
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 accent-underline mx-auto w-fit">
-            Il Metodo TalentProfile in 4 Step
+            Come funziona Talenti Edili: il Talent Profile System in 4 passi
           </h2>
           <p className="text-center text-[#6b7280] text-base mb-16 max-w-2xl mx-auto">
-            Mandi un link, il candidato risponde, tu ricevi il report. Tutto qui.
+            Mandi un link, il candidato fa l'analisi psicoattitudinale, l'Intelligenza Artificiale elabora il report. Quindici minuti in tutto.
           </p>
           <motion.div
             className="max-w-3xl mx-auto relative"
@@ -1268,7 +1340,7 @@ export default function Home() {
             Quanto costa un'assunzione sbagliata?
           </h2>
           <p className="text-center text-[#6b7280] text-base mb-14 max-w-2xl mx-auto">
-            Sposta gli slider e scopri il costo reale di un errore di selezione.
+            Sposta i cursori e scopri quanto ti è costata davvero l'ultima persona sbagliata.
           </p>
 
           <div className="landing-card p-6 md:p-10 max-w-3xl mx-auto border-[#f09133]/20 shadow-[0_8px_40px_rgba(0,0,0,0.06)]">
@@ -1332,7 +1404,7 @@ export default function Home() {
               <div className="mt-4 pt-3 border-t border-green-200 relative z-10">
                 <p className="text-sm text-green-600 font-semibold flex items-center justify-center gap-2">
                   <TrendingUp className="h-4 w-4" />
-                  Con TalentProfile: <span className="text-lg font-bold">€{Math.round(costi.totale * 0.7).toLocaleString('it-IT')}</span> risparmiati
+                  Con Talenti Edili: <span className="text-lg font-bold">€{Math.round(costi.totale * 0.7).toLocaleString('it-IT')}</span> risparmiati
                 </p>
               </div>
             </div>
@@ -1375,7 +1447,7 @@ export default function Home() {
             <span className="section-badge">Confronto</span>
           </div>
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 accent-underline mx-auto w-fit">
-            Come assumi oggi vs come potresti assumere
+            Colloquio tradizionale o analisi psicoattitudinale con AI?
           </h2>
           <p className="text-center text-[#6b7280] text-base mb-14 max-w-2xl mx-auto">
             La differenza tra sperare di aver scelto bene e saperlo.
@@ -1388,7 +1460,7 @@ export default function Home() {
                   <th className="text-left p-5 font-bold text-[#1a1a2e] text-base">Criterio</th>
                   <th className="text-center p-5 font-bold text-red-700 text-base bg-red-100/80">Metodo Tradizionale</th>
                   <th className="text-center p-5 font-bold text-green-800 text-base bg-green-100/80 relative">
-                    TalentProfile
+                    Talenti Edili
                     <span className="absolute top-2 right-2 text-xs bg-green-500 text-white px-2 py-1 rounded-full font-bold shadow-sm">✓ Vincitore</span>
                   </th>
                 </tr>
@@ -1473,7 +1545,7 @@ export default function Home() {
                       <Check className="h-3.5 w-3.5 text-green-600" />
                     </div>
                     <div>
-                      <span className="text-[10px] font-semibold text-green-700 uppercase tracking-wide">TalentProfile</span>
+                      <span className="text-[10px] font-semibold text-green-700 uppercase tracking-wide">Talenti Edili</span>
                       <p className="text-[#1a1a2e] text-sm font-medium leading-snug">{row.tp}</p>
                     </div>
                   </div>
@@ -1489,7 +1561,7 @@ export default function Home() {
                   <span className="text-2xl font-bold text-red-500">2/7</span>
                 </div>
                 <div className="flex-1 bg-green-50 rounded-lg py-3 text-center">
-                  <span className="text-[10px] font-semibold text-green-700 uppercase tracking-wide block mb-1">TalentProfile</span>
+                  <span className="text-[10px] font-semibold text-green-700 uppercase tracking-wide block mb-1">Talenti Edili</span>
                   <span className="text-2xl font-bold text-green-600">7/7</span>
                 </div>
               </div>
@@ -1514,10 +1586,10 @@ export default function Home() {
             <span className="section-badge">Testimonianze</span>
           </div>
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 accent-underline mx-auto w-fit">
-            Chi usa TalentProfile non torna indietro
+            Chi usa Talenti Edili non torna più indietro
           </h2>
           <p className="text-center text-[#6b7280] text-base mb-14 max-w-2xl mx-auto">
-            Ecco cosa dicono i professionisti HR che hanno scelto il nostro sistema.
+            Ecco cosa dicono gli imprenditori edili e i responsabili del personale che usano il sistema.
           </p>
 
           <motion.div
@@ -1593,7 +1665,7 @@ export default function Home() {
             Risultati concreti
           </h2>
           <p className="text-center text-[#6b7280] text-base mb-14 max-w-2xl mx-auto">
-            Ecco come TalentProfile ha trasformato il processo di selezione di aziende come la tua.
+            Ecco come Talenti Edili ha cambiato il modo di assumere di imprese edili come la tua.
           </p>
 
           <motion.div
@@ -1694,10 +1766,10 @@ export default function Home() {
             <span className="section-badge">Per Chi È</span>
           </div>
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 accent-underline mx-auto w-fit">
-            TalentProfile è per te?
+            Talenti Edili è per te?
           </h2>
           <p className="text-center text-[#6b7280] text-base mb-14 max-w-2xl mx-auto">
-            Scopri se il nostro sistema è adatto alle tue esigenze.
+            Non è per tutti, e va bene così. Vediamo se è per te.
           </p>
           <div className="grid md:grid-cols-2 gap-6 relative">
             {/* VS divider */}
@@ -1716,7 +1788,7 @@ export default function Home() {
                 <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
                   <CheckCircle2 className="h-6 w-6 text-green-500" />
                 </div>
-                <h3 className="text-lg font-bold text-green-700">Per chi è TalentProfile</h3>
+                <h3 className="text-lg font-bold text-green-700">Per chi è Talenti Edili</h3>
               </div>
               <ul className="space-y-3">
                 {TARGET_YES.map((item, i) => (
@@ -1776,11 +1848,11 @@ export default function Home() {
           <div className="absolute bottom-[-60px] left-[5%] w-[250px] h-[250px] rounded-full bg-[#f09133]/[0.08] blur-3xl" />
 
           <div className="max-w-6xl mx-auto px-4 md:px-8 relative z-10">
-            <p className="text-sm uppercase tracking-[0.2em] text-[#f09133] font-semibold text-center mb-3">
+            <p className="text-sm uppercase tracking-[0.2em] text-[var(--brand-orange-on-dark)] font-semibold text-center mb-3">
               I Numeri
             </p>
             <h2 className="text-3xl md:text-4xl font-bold text-center mb-14 text-white">
-              I risultati parlano
+              I numeri di Talenti Edili
             </h2>
             <motion.div
               className="grid grid-cols-2 md:grid-cols-5 gap-8 text-center"
@@ -1790,27 +1862,27 @@ export default function Home() {
               viewport={{ once: true, amount: 0.15 }}
             >
               {[
-                { ref: c1.ref, val: c1.value.toLocaleString('it-IT'), suffix: '+', label: 'Aziende clienti', icon: Building2 },
-                { ref: c2.ref, val: c2.value.toLocaleString('it-IT'), suffix: '+', label: 'Assessment completati', icon: ClipboardCheck },
-                { ref: c3.ref, val: c3.value, suffix: '+', label: 'Ruoli mappati', icon: Target },
-                { ref: c4.ref, val: c4.value, suffix: ' min', label: 'Tempo per test', icon: Clock },
+                { ref: c1.ref, val: c1.value.toLocaleString('it-IT'), suffix: '+', label: 'Imprese clienti', icon: Building2 },
+                { ref: c2.ref, val: c2.value.toLocaleString('it-IT'), suffix: '+', label: 'Analisi completate', icon: ClipboardCheck },
+                { ref: c3.ref, val: c3.value, suffix: '+', label: 'Ruoli edili mappati', icon: Target },
+                { ref: c4.ref, val: c4.value, suffix: ' min', label: 'Minuti per candidato', icon: Clock },
               ].map((n, i) => (
                 <motion.div key={i} ref={n.ref} variants={scaleIn} transition={cardTransition} className="relative">
                   {i > 0 && <div className="hidden md:block absolute left-0 top-1/4 bottom-1/4 w-px bg-white/15" />}
                   <div className="text-5xl md:text-6xl font-bold text-[#f09133] mb-2" style={{ textShadow: '0 0 30px rgba(240,145,51,0.3)' }}>
                     {n.val}{n.suffix}
                   </div>
-                  <n.icon className="h-5 w-5 text-white/40 mx-auto mb-1" />
-                  <div className="text-white/60 text-sm font-medium">{n.label}</div>
-                  <div className="text-white/30 text-xs mt-0.5">e in crescita</div>
+                  <n.icon className="h-5 w-5 text-white/70 mx-auto mb-1" />
+                  <div className="text-white/70 text-sm font-medium">{n.label}</div>
+                  <div className="text-white/70 text-xs mt-0.5">e in crescita</div>
                 </motion.div>
               ))}
               <motion.div variants={scaleIn} transition={cardTransition} className="relative">
                 <div className="hidden md:block absolute left-0 top-1/4 bottom-1/4 w-px bg-white/10" />
                 <div className="text-5xl md:text-6xl font-bold text-[#f09133] mb-2" style={{ textShadow: '0 0 30px rgba(240,145,51,0.3)' }}>.75/1</div>
-                <Star className="h-5 w-5 text-white/40 mx-auto mb-1" />
-                <div className="text-white/60 text-sm font-medium">Validazione scientifica</div>
-                <div className="text-white/30 text-xs mt-0.5">certificata</div>
+                <Star className="h-5 w-5 text-white/70 mx-auto mb-1" />
+                <div className="text-white/70 text-sm font-medium">Validazione psicometrica</div>
+                <div className="text-white/70 text-xs mt-0.5">certificata</div>
               </motion.div>
             </motion.div>
           </div>
@@ -1822,7 +1894,7 @@ export default function Home() {
       {/* ═══ FIX #6: PRICING SECTION ═══ */}
       <motion.section
         className="py-16 md:py-20 bg-gradient-to-b from-[#faf8f5] to-white"
-        id="pricing"
+        id="prezzi"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.15 }}
@@ -1834,10 +1906,10 @@ export default function Home() {
             <span className="section-badge">Prezzi</span>
           </div>
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 accent-underline mx-auto w-fit">
-            Piani per ogni esigenza
+            Quanto costa Talenti Edili
           </h2>
           <p className="text-center text-[#6b7280] text-base mb-14 max-w-2xl mx-auto">
-            Scegli il piano più adatto alla tua azienda. Tutti i piani includono report completo e supporto.
+            Scegli in base a quante persone valuti ogni mese. Tutti i piani includono il report completo elaborato dall'AI e il supporto.
           </p>
 
           <motion.div
@@ -1903,10 +1975,10 @@ export default function Home() {
           </div>
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 accent-underline mx-auto w-fit">
             <HelpCircle className="inline-block h-9 w-9 text-[#f09133] mr-2 -mt-1" />
-            Domande Frequenti
+            Domande frequenti su Talenti Edili
           </h2>
           <p className="text-center text-[#6b7280] text-base mb-14 max-w-2xl mx-auto">
-            Le risposte alle domande più comuni.
+            Le cinque che ci fanno più spesso gli imprenditori edili.
           </p>
           <motion.div
             variants={staggerContainer}
@@ -1915,7 +1987,9 @@ export default function Home() {
             viewport={{ once: true, amount: 0.15 }}
           >
             <Accordion type="single" collapsible className="space-y-2">
-              {[...FAQ_DATA, ...FAQ_DATA_EXTRA].map((f, i) => (
+              {[...FAQ_DATA, ...FAQ_DATA_EXTRA]
+                .filter((f) => FAQ_HOME.includes(f.q))
+                .map((f, i) => (
                 <motion.div key={i} variants={fadeUp} transition={cardTransition}>
                   <AccordionItem
                     value={`faq-${i}`}
@@ -1924,7 +1998,7 @@ export default function Home() {
                     <AccordionTrigger className="text-left text-base font-semibold hover:no-underline">
                       {f.q}
                     </AccordionTrigger>
-                    <AccordionContent className="text-[#6b7280] text-base leading-relaxed">
+                    <AccordionContent forceMount className="text-[#6b7280] text-base leading-relaxed">
                       {f.a}
                     </AccordionContent>
                   </AccordionItem>
@@ -1932,6 +2006,11 @@ export default function Home() {
               ))}
             </Accordion>
           </motion.div>
+          <p className="text-center text-sm text-[#6b7280] mt-8">
+            <Link to="/faq" className="font-semibold text-[#1e3a5f] hover:text-[#f09133]">
+              Tutte le domande frequenti →
+            </Link>
+          </p>
         </div>
       </motion.section>
 
@@ -1953,8 +2032,8 @@ export default function Home() {
           <div className="max-w-3xl mx-auto px-4 md:px-8 relative z-10">
             <div className="text-center mb-10">
               <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
-                Il futuro del tuo team inizia{' '}
-                <span className="text-[#f09133]">da qui.</span>
+                La prossima persona che assumi{' '}
+                <span className="text-[#f09133]">la scegli con i dati.</span>
               </h2>
               <p className="text-base md:text-lg text-white/70 leading-relaxed">
                 Compila il form e ti contatteremo entro 24 ore per una demo gratuita di 30 minuti. Nessun impegno.
@@ -1980,7 +2059,7 @@ export default function Home() {
                       required
                       maxLength={100}
                       placeholder="Il tuo nome"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/40 focus:border-[#f09133]"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/70 focus:border-[#f09133]"
                       value={leadForm.nome}
                       onChange={(e) => setLeadForm(prev => ({ ...prev, nome: e.target.value }))}
                     />
@@ -1992,7 +2071,7 @@ export default function Home() {
                       type="email"
                       maxLength={255}
                       placeholder="nome@azienda.it"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/40 focus:border-[#f09133]"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/70 focus:border-[#f09133]"
                       value={leadForm.email}
                       onChange={(e) => setLeadForm(prev => ({ ...prev, email: e.target.value }))}
                     />
@@ -2004,7 +2083,7 @@ export default function Home() {
                     <Input
                       maxLength={200}
                       placeholder="Nome azienda"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/40 focus:border-[#f09133]"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/70 focus:border-[#f09133]"
                       value={leadForm.azienda}
                       onChange={(e) => setLeadForm(prev => ({ ...prev, azienda: e.target.value }))}
                     />
@@ -2042,13 +2121,13 @@ export default function Home() {
                   )}
                 </Button>
                 <div className="flex flex-wrap justify-center gap-6 mt-6">
-                  <span className="flex items-center gap-2 text-sm text-white/60">
+                  <span className="flex items-center gap-2 text-sm text-white/70">
                     <Clock className="h-4 w-4" /> Risposta in 24h
                   </span>
-                  <span className="flex items-center gap-2 text-sm text-white/60">
+                  <span className="flex items-center gap-2 text-sm text-white/70">
                     <Shield className="h-4 w-4" /> 100% Riservato
                   </span>
-                  <span className="flex items-center gap-2 text-sm text-white/60">
+                  <span className="flex items-center gap-2 text-sm text-white/70">
                     <CheckCircle2 className="h-4 w-4" /> Senza Impegno
                   </span>
                 </div>
@@ -2057,103 +2136,6 @@ export default function Home() {
           </div>
         </div>
       </motion.section>
-
-      {/* ═══ FOOTER ═══ */}
-      <footer className="bg-[#1e3a5f] py-14 mt-8 relative">
-        {/* Orange gradient separator */}
-        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#f09133] to-transparent" />
-        <div className="max-w-6xl mx-auto px-4 md:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-10">
-            {/* Col 1 — Logo + desc */}
-            <div>
-              <img
-                src="/talentprofile_logo_v3.png"
-                alt="TalentProfile"
-                className="h-10 brightness-0 invert mb-4 drop-shadow-[0_0_8px_rgba(255,255,255,0.15)]"
-              />
-              <p className="text-sm text-white/50 leading-relaxed">
-                Psicologia del lavoro applicata alla realtà dell'impresa. Assessment scientifici per decisioni HR basate sui dati.
-              </p>
-              {/* Social icons */}
-              <div className="flex items-center gap-3 mt-4">
-                <a href="#" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#f09133]/30 transition-colors">
-                  <Linkedin className="h-4 w-4 text-white/60" />
-                </a>
-                <a href="#" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#f09133]/30 transition-colors">
-                  <Mail className="h-4 w-4 text-white/60" />
-                </a>
-              </div>
-            </div>
-
-            {/* Col 2 — Link rapidi */}
-            <div>
-              <h4 className="text-sm font-semibold text-white mb-4 uppercase tracking-wider">Link rapidi</h4>
-              <div className="space-y-2.5">
-                {NAV_LINKS.map((l) => (
-                  <button
-                    key={l.id}
-                    onClick={() => scrollTo(l.id)}
-                    className="block text-sm text-white/50 hover:text-[#f09133] transition-colors"
-                  >
-                    {l.label}
-                  </button>
-                ))}
-                <button
-                  onClick={() => navigate('/auth')}
-                  className="block text-sm text-white/50 hover:text-[#f09133] transition-colors"
-                >
-                  Accedi
-                </button>
-              </div>
-            </div>
-
-            {/* Col 3 — Risorse */}
-            <div>
-              <h4 className="text-sm font-semibold text-white mb-4 uppercase tracking-wider">Risorse</h4>
-              <div className="space-y-2.5">
-                <a href="#" className="block text-sm text-white/50 hover:text-[#f09133] transition-colors">Blog HR</a>
-                <a href="#" className="block text-sm text-white/50 hover:text-[#f09133] transition-colors">Guida all'Assessment</a>
-                <a href="#" className="block text-sm text-white/50 hover:text-[#f09133] transition-colors">Case Studies</a>
-                <button onClick={() => navigate('/garanzia')} className="block text-sm text-white/50 hover:text-[#f09133] transition-colors text-left">Garanzia</button>
-              </div>
-            </div>
-
-            {/* Col 4 — Contatti */}
-            <div>
-              <h4 className="text-sm font-semibold text-white mb-4 uppercase tracking-wider">Contatti</h4>
-              <div className="space-y-2">
-                <a
-                  href="mailto:info@talentprofile.it"
-                  className="flex items-center gap-2 text-sm text-white/50 hover:text-[#f09133] transition-colors"
-                >
-                  <Mail className="h-4 w-4" /> info@talentprofile.it
-                </a>
-                <p className="flex items-center gap-2 text-sm text-white/50">
-                  <Shield className="h-4 w-4" /> GDPR Compliant
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Bottom bar — FIX #9: min 12px footer text */}
-          <div className="pt-6 border-t border-white/10">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-              <div className="flex flex-wrap justify-center md:justify-start gap-4 text-xs text-white/30">
-                <span>TalentProfile S.r.l. — P.IVA 12345678901</span>
-                <span>|</span>
-                <a href="#" className="hover:text-[#f09133] transition-colors">Privacy Policy</a>
-                <span>|</span>
-                <a href="#" className="hover:text-[#f09133] transition-colors">Cookie Policy</a>
-                <span>|</span>
-                <a href="#" className="hover:text-[#f09133] transition-colors">Termini e Condizioni</a>
-              </div>
-            </div>
-            <p className="text-center text-xs text-white/20 mt-4">
-              © {new Date().getFullYear()} TalentProfile. Tutti i diritti riservati.
-            </p>
-          </div>
-        </div>
-      </footer>
-    </div>
+    </>
   );
 }

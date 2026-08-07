@@ -280,7 +280,7 @@ export function ActionPlanCardV5({
     {
       priority: 'P5',
       area: 'Ricompilazione Test',
-      action: `Ricompilazione del test TalentProfile a 24 mesi per monitorare evoluzione del profilo di ${candidatoNome}.`,
+      action: `Ricompilazione dell’analisi Talent Profile a 24 mesi per monitorare evoluzione del profilo di ${candidatoNome}.`,
       timeline: '12-24 mesi',
       responsible: 'HR'
     }

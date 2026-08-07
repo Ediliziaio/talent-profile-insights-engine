@@ -23,7 +23,7 @@ export function NotionLayout({ children }: NotionLayoutProps) {
   const isAzienda = profile?.ruolo === 'azienda';
 
   const navItems = [
-    { href: '/', label: 'Dashboard', icon: Home, show: true },
+    { href: '/dashboard', label: 'Dashboard', icon: Home, show: true },
     { href: '/candidati', label: 'Candidati', icon: Users, show: isSuperadmin || isAzienda },
     { href: '/aziende', label: 'Aziende', icon: BarChart3, show: isSuperadmin },
     { href: '/pagamenti', label: 'Pagamenti', icon: CreditCard, show: isSuperadmin },
@@ -43,10 +43,10 @@ export function NotionLayout({ children }: NotionLayoutProps) {
         "flex items-center",
         collapsed && !isMobileSheet ? "justify-center p-2" : "justify-start py-3 px-3"
       )}>
-        <Link to="/" className="flex items-center">
+        <Link to="/dashboard" className="flex items-center">
           <img 
-            src="/talentprofile_logo_v3.png?v=20260119" 
-            alt="Talent Profile"
+            src="/talenti-edili-logo.svg" 
+            alt="Talenti Edili"
             className={cn(
               "transition-all duration-300 object-contain",
               collapsed && !isMobileSheet ? "h-8 w-8" : "h-10 w-auto max-w-[120px]"
@@ -137,10 +137,10 @@ export function NotionLayout({ children }: NotionLayoutProps) {
             <SheetContent side="left" className="w-64 p-0 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 border-r border-slate-200 dark:border-slate-700">
               <div className="flex flex-col h-full">
                 <div className="flex items-center p-3">
-                  <Link to="/" onClick={() => setMobileOpen(false)}>
+                  <Link to="/dashboard" onClick={() => setMobileOpen(false)}>
                     <img 
-                      src="/talentprofile_logo_v3.png?v=20260119" 
-                      alt="Talent Profile"
+                      src="/talenti-edili-logo.svg" 
+                      alt="Talenti Edili"
                       className="h-10 w-auto max-w-[120px] object-contain"
                     />
                   </Link>
@@ -186,10 +186,10 @@ export function NotionLayout({ children }: NotionLayoutProps) {
             </SheetContent>
           </Sheet>
           
-          <Link to="/">
+          <Link to="/dashboard">
             <img 
-              src="/talentprofile_logo_v3.png?v=20260119" 
-              alt="Talent Profile"
+              src="/talenti-edili-logo.svg" 
+              alt="Talenti Edili"
               className="h-8 w-auto max-w-[100px] object-contain"
             />
           </Link>

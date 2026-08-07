@@ -1,0 +1,3 @@
+# SPA fallback: le rotte client-side (/garanzia, ecc.) devono servire index.html
+# invece di restituire 404 ai crawler. Usato da Netlify e Cloudflare Pages.
+/*    /index.html   200

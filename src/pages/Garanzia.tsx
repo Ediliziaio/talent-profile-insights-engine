@@ -1,21 +1,24 @@
+import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Shield, CheckCircle, ArrowRight, Mail, Linkedin } from 'lucide-react';
+import { Shield, CheckCircle, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Seo } from '@/components/Seo';
+import { breadcrumbLd, faqLd, organizationLd } from '@/lib/seo';
 
 const GUARANTEES = [
   'Accesso COMPLETO a tutti gli strumenti — nessuna versione limitata',
   'Report illimitati su tutti i candidati che vuoi',
-  'Confronto visivo tra candidati, domande colloquio generate dall\'AI',
+  'Confronto visivo tra candidati e domande di colloquio generate dall\'Intelligenza Artificiale',
   'Se non vedi risultati, UN\'EMAIL e ti ridiamo tutto',
   'Nessun modulo, nessuna telefonata, nessuna rottura di scatole',
 ];
 
 const STEPS = [
   { num: '01', title: 'Attiva oggi', desc: 'Ci vogliono 2 minuti. Nessun contratto vincolante.' },
-  { num: '02', title: 'Mettimi alla prova per 30 giorni', desc: 'Usa tutto. Assessment, report, confronto candidati. Senza limiti.' },
-  { num: '03', title: 'Non ti convince? Una mail. Fine.', desc: 'Scrivi a info@talentprofile.it. Ti ridò ogni centesimo. Nessuna domanda.' },
+  { num: '02', title: 'Mettimi alla prova per 30 giorni', desc: 'Usa tutto: analisi psicoattitudinali, report elaborati dall\'AI, confronto candidati. Senza limiti.' },
+  { num: '03', title: 'Non ti convince? Una mail. Fine.', desc: 'Scrivi a info@talentiedili.it. Ti ridò ogni centesimo. Nessuna domanda.' },
 ];
 
 const FAQ = [
@@ -25,11 +28,11 @@ const FAQ = [
   },
   {
     q: '"30 giorni bastano per capire se funziona?"',
-    a: 'Bastano 3 assessment. Dopo il primo report dettagliato capirai già il valore. 30 giorni sono più che sufficienti per vedere risultati concreti nelle tue selezioni.',
+    a: 'Bastano 3 analisi psicoattitudinali. Dopo il primo report elaborato dall\'AI capirai già il valore. 30 giorni sono più che sufficienti per vedere risultati concreti sulle tue selezioni.',
   },
   {
     q: '"Come faccio a chiedere il rimborso?"',
-    a: 'Una mail. Una. Scrivi a info@talentprofile.it, dici "voglio il rimborso" e basta. Entro 5 giorni lavorativi rivedi i tuoi soldi. Zero burocrazia.',
+    a: 'Una mail. Una. Scrivi a info@talentiedili.it, dici "voglio il rimborso" e basta. Entro 5 giorni lavorativi rivedi i tuoi soldi. Zero burocrazia.',
   },
   {
     q: '"Perché dovrei fidarmi?"',
@@ -48,22 +51,26 @@ const fadeUp = {
 export default function Garanzia() {
   const navigate = useNavigate();
 
+  const jsonLd = useMemo(
+    () => [
+      organizationLd(),
+      breadcrumbLd([
+        { name: 'Home', path: '/' },
+        { name: 'Garanzia', path: '/garanzia' },
+      ]),
+      faqLd(FAQ.map((f) => ({ q: f.q.replace(/"/g, ''), a: f.a }))),
+    ],
+    []
+  );
+
   return (
-    <div className="min-h-screen bg-[#f7f4f0]">
-      {/* NAVBAR */}
-      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-[#e5e0db]">
-        <div className="max-w-6xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
-          <button onClick={() => navigate('/home')} className="flex items-center gap-2">
-            <img src="/talentprofile_logo_v3.png" alt="TalentProfile" className="h-9" />
-          </button>
-          <Button
-            onClick={() => navigate('/auth')}
-            className="bg-[#f09133] hover:bg-[#d97e2a] text-white font-semibold rounded-lg"
-          >
-            Accedi
-          </Button>
-        </div>
-      </nav>
+    <>
+      <Seo
+        title="Garanzia 30 giorni — Talenti Edili"
+        description="Se Talenti Edili non ti fa risparmiare almeno un'assunzione sbagliata nei primi 30 giorni, ti rimborsiamo l'intero importo. Una mail, nessuna domanda, rimborso entro 5 giorni lavorativi."
+        path="/garanzia"
+        jsonLd={jsonLd}
+      />
 
       {/* ═══ HERO — Pattern Interrupt ═══ */}
       <section className="bg-[#1e3a5f] py-20 md:py-28 relative overflow-hidden">
@@ -94,7 +101,7 @@ export default function Garanzia() {
             transition={{ delay: 0.3, duration: 0.5 }}
             className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto leading-relaxed font-medium"
           >
-             Se TalentProfile non ti fa risparmiare almeno <strong className="text-[#f09133]">una assunzione sbagliata</strong> nei prossimi 30 giorni...
+             Se Talenti Edili non ti fa risparmiare almeno <strong className="text-[#f09133]">una assunzione sbagliata</strong> nei prossimi 30 giorni...
             ti ridiamo ogni centesimo. <span className="underline decoration-[#f09133] decoration-2 underline-offset-4">Senza farti una sola domanda.</span>
           </motion.p>
         </div>
@@ -120,13 +127,13 @@ export default function Garanzia() {
                 Vogliamo toglierti <strong>OGNI scusa</strong> per non iniziare.
               </p>
               <p>
-                Perché sappiamo una cosa: ogni mese che passi a selezionare candidati "a sensazione", stai <strong>bruciando soldi</strong>. Un'assunzione sbagliata costa tra i 30.000€ e i 150.000€. Lo sai anche tu.
+                Perché sappiamo una cosa: ogni mese che passi a scegliere chi portare in cantiere "a sensazione", stai <strong>bruciando soldi</strong>. Un'assunzione sbagliata costa tra i 30.000€ e i 150.000€. Lo sai anche tu.
               </p>
               <p>
                 Ecco la logica, nuda e cruda:
               </p>
               <p className="text-[#1e3a5f] font-bold text-xl md:text-2xl pl-4 border-l-4 border-[#1e3a5f]">
-                Se il nostro strumento funziona, ci guadagniamo un cliente a vita.<br />
+                Se il sistema funziona, ci guadagniamo un cliente a vita.<br />
                 Se non funziona, non meritiamo i tuoi soldi.
               </p>
               <p>
@@ -220,7 +227,7 @@ export default function Garanzia() {
                 <AccordionTrigger className="text-left text-[#1a1a2e] font-bold text-base md:text-lg hover:no-underline">
                   {faq.q}
                 </AccordionTrigger>
-                <AccordionContent className="text-[#3d3935] text-base leading-relaxed">
+                <AccordionContent forceMount className="text-[#3d3935] text-base leading-relaxed">
                   {faq.a}
                 </AccordionContent>
               </AccordionItem>
@@ -258,30 +265,6 @@ export default function Garanzia() {
         </div>
       </section>
 
-      {/* ═══ FOOTER ═══ */}
-      <footer className="bg-[#1e3a5f] py-14 relative">
-        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#f09133] to-transparent" />
-        <div className="max-w-6xl mx-auto px-4 md:px-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <button onClick={() => navigate('/home')} className="flex items-center gap-2">
-              <img
-                src="/talentprofile_logo_v3.png"
-                alt="TalentProfile"
-                className="h-10 brightness-0 invert drop-shadow-[0_0_8px_rgba(255,255,255,0.15)]"
-              />
-            </button>
-            <div className="flex flex-wrap justify-center gap-4 text-xs text-white/50">
-              <span>© {new Date().getFullYear()} TalentProfile</span>
-              <span>|</span>
-              <button onClick={() => navigate('/home')} className="hover:text-[#f09133] transition-colors">Home</button>
-              <span>|</span>
-              <a href="mailto:info@talentprofile.it" className="hover:text-[#f09133] transition-colors flex items-center gap-1">
-                <Mail className="h-3 w-3" /> Contatti
-              </a>
-            </div>
-          </div>
-        </div>
-      </footer>
-    </div>
+    </>
   );
 }

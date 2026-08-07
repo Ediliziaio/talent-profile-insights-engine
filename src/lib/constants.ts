@@ -1,5 +1,5 @@
 /**
- * Costanti centralizzate per l'applicazione TalentProfile
+ * Costanti centralizzate per l'applicazione Talenti Edili
  * Evita valori hardcoded sparsi nel codice
  */
 

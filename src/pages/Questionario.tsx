@@ -251,7 +251,7 @@ export default function Questionario() {
 
   // Only candidato role can access this page
   if (!authLoading && profile?.ruolo !== 'candidato') {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   const handleSubmit = async () => {
@@ -430,7 +430,7 @@ export default function Questionario() {
               <Brain className="h-4 w-4 sm:h-6 sm:w-6" />
             </div>
             <div className="flex-1 min-w-0">
-              <h1 className="font-bold text-sm sm:text-lg">Talent Profile</h1>
+              <h1 className="font-bold text-sm sm:text-lg">Talenti Edili</h1>
               <p className="text-[11px] sm:text-sm opacity-90 truncate">
                 <span className="sm:hidden">Pag. {currentPage + 1}/{totalPages}</span>
                 <span className="hidden sm:inline">Pag. {currentPage + 1}/{totalPages} • Dom. {startIndex + 1}-{endIndex} di {DOMANDE.length}</span>

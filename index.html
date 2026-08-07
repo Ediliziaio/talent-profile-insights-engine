@@ -1,31 +1,175 @@
 <!doctype html>
-<html lang="en">
+<html lang="it">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- TODO: Set the document title to the name of your application -->
-    <title>Talent Profile - Sistema di valutazione e selezione del personale</title>
-    <meta name="description" content="Piattaforma progettata per aiutare imprenditori a individuare, valutare e assumere i candidati giusti riducendo drasticamente errori di selezione, turnover e costi nascosti.">
-    <meta name="author" content="Lovable" />
+    <meta name="theme-color" content="#1e3a5f" />
 
-    <!-- TODO: Update og:title to match your application name -->
-    
-    
+    <title>Talenti Edili — Selezione del personale edile con AI e analisi psicoattitudinale</title>
+    <meta
+      name="description"
+      content="Talenti Edili è il sistema che unisce Intelligenza Artificiale e analisi psicoattitudinale per aiutare le imprese edili a scegliere operai, capisquadra e tecnici giusti. Basato sul Talent Profile System: 242 domande, 15 tratti, report in 15 minuti."
+    />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="author" content="Talenti Edili" />
+    <meta name="language" content="Italian" />
+    <meta name="geo.region" content="IT" />
+    <link rel="canonical" href="https://talentiedili.it/" />
+
+    <link rel="icon" type="image/svg+xml" href="/talenti-edili-logo.svg" />
+    <link rel="alternate icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/talentprofile_logo_v3.png" />
+    <link rel="preconnect" href="https://zpobytjptrmrvmegkqnb.supabase.co" crossorigin />
+
+    <!-- Open Graph -->
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://storage.googleapis.com/gpt-engineer-file-uploads/OORkMJuzeYcyfAjO2NGEVH8cRxF2/social-images/social-1768897690260-talent Profile Logo.png">
+    <meta property="og:site_name" content="Talenti Edili" />
+    <meta property="og:locale" content="it_IT" />
+    <meta property="og:url" content="https://talentiedili.it/" />
+    <meta property="og:title" content="Talenti Edili — Selezione del personale edile con AI e analisi psicoattitudinale" />
+    <meta
+      property="og:description"
+      content="Il sistema Talent Profile unisce Intelligenza Artificiale e analisi psicoattitudinale: sai chi hai davvero davanti prima di portarlo in cantiere."
+    />
+    <meta property="og:image" content="https://talentiedili.it/talentprofile_logo_v3.png" />
 
+    <!-- Twitter / X -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@Lovable" />
-    <meta name="twitter:image" content="https://storage.googleapis.com/gpt-engineer-file-uploads/OORkMJuzeYcyfAjO2NGEVH8cRxF2/social-images/social-1768897690260-talent Profile Logo.png">
-    <meta property="og:title" content="Talent Profile - Sistema di valutazione e selezione del personale">
-  <meta name="twitter:title" content="Talent Profile - Sistema di valutazione e selezione del personale">
-  <meta property="og:description" content="Piattaforma progettata per aiutare imprenditori a individuare, valutare e assumere i candidati giusti riducendo drasticamente errori di selezione, turnover e costi nascosti.">
-  <meta name="twitter:description" content="Piattaforma progettata per aiutare imprenditori a individuare, valutare e assumere i candidati giusti riducendo drasticamente errori di selezione, turnover e costi nascosti.">
-  <link rel="icon" type="image/png" href="https://storage.googleapis.com/gpt-engineer-file-uploads/OORkMJuzeYcyfAjO2NGEVH8cRxF2/uploads/1768897705057-Imprenditore Edile (2).png">
-</head>
+    <meta name="twitter:title" content="Talenti Edili — Selezione del personale edile con AI e analisi psicoattitudinale" />
+    <meta
+      name="twitter:description"
+      content="Il sistema Talent Profile unisce Intelligenza Artificiale e analisi psicoattitudinale: sai chi hai davvero davanti prima di portarlo in cantiere."
+    />
+    <meta name="twitter:image" content="https://talentiedili.it/talentprofile_logo_v3.png" />
+
+    <!-- Dati strutturati: serviti staticamente per i crawler che non eseguono JavaScript (AI Overviews, ChatGPT, Perplexity) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://talentiedili.it/#organization",
+          "name": "Talenti Edili",
+          "url": "https://talentiedili.it/",
+          "logo": "https://talentiedili.it/talentprofile_logo_v3.png",
+          "email": "info@talentiedili.it",
+          "areaServed": {
+            "@type": "Country",
+            "name": "Italia"
+          },
+          "description": "Talenti Edili è il sistema di selezione e gestione del personale per le imprese edili che unisce Intelligenza Artificiale e analisi psicoattitudinale, basato sul Talent Profile System.",
+          "knowsAbout": [
+            "selezione del personale in edilizia",
+            "analisi psicoattitudinale",
+            "test attitudinali per operai e capisquadra",
+            "Intelligenza Artificiale applicata alle risorse umane",
+            "riduzione del turnover in cantiere"
+          ]
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://talentiedili.it/#website",
+          "url": "https://talentiedili.it/",
+          "name": "Talenti Edili",
+          "inLanguage": "it-IT",
+          "publisher": {
+            "@id": "https://talentiedili.it/#organization"
+          }
+        },
+        {
+          "@type": "SoftwareApplication",
+          "@id": "https://talentiedili.it/#software",
+          "name": "Talenti Edili — Talent Profile System",
+          "applicationCategory": "BusinessApplication",
+          "applicationSubCategory": "Human Resources",
+          "operatingSystem": "Web (cloud)",
+          "inLanguage": "it-IT",
+          "url": "https://talentiedili.it/",
+          "description": "Sistema di analisi psicoattitudinale potenziato dall'Intelligenza Artificiale per la selezione e la gestione del personale nelle imprese edili.",
+          "provider": {
+            "@id": "https://talentiedili.it/#organization"
+          },
+          "offers": [
+            {
+              "@type": "Offer",
+              "name": "Starter",
+              "price": "49",
+              "priceCurrency": "EUR"
+            },
+            {
+              "@type": "Offer",
+              "name": "Professional",
+              "price": "97",
+              "priceCurrency": "EUR"
+            },
+            {
+              "@type": "Offer",
+              "name": "Enterprise",
+              "priceCurrency": "EUR"
+            }
+          ]
+        },
+        {
+          "@type": "ItemList",
+          "@id": "https://talentiedili.it/#servizi",
+          "name": "I servizi di Talenti Edili",
+          "numberOfItems": 3,
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Marketplace Talenti",
+              "url": "https://talentiedili.it/marketplace-talenti-edili",
+              "description": "Bacino di profili edili che hanno già completato l'analisi psicoattitudinale, ricercabili per ruolo, zona e compatibilità."
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Ricerca e selezione del personale edile",
+              "url": "https://talentiedili.it/ricerca-e-selezione-personale-edile",
+              "description": "Servizio chiavi in mano: ricerca attiva, screening e analisi psicoattitudinale, con consegna di una rosa di tre finalisti entro 21 giorni."
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Talent Profile System",
+              "url": "https://talentiedili.it/talent-profile-system",
+              "description": "Il sistema di analisi psicoattitudinale con Intelligenza Artificiale, utilizzabile in autonomia dall'impresa."
+            }
+          ]
+        }
+      ]
+    }
+    </script>
+  </head>
 
   <body>
     <div id="root"></div>
+    <noscript>
+      <h1>Talenti Edili — selezione del personale edile con Intelligenza Artificiale e analisi psicoattitudinale</h1>
+      <p>
+        Talenti Edili è il portale che aiuta le imprese edili italiane a scegliere le persone giuste per il cantiere.
+        Si basa sul Talent Profile System: un'analisi psicoattitudinale di 242 domande che misura 15 tratti della
+        persona, elaborata dall'Intelligenza Artificiale in un report con compatibilità di ruolo, rischi
+        comportamentali, guida al colloquio e piano di inserimento a 90 giorni.
+      </p>
+      <h2>I tre modi di usarlo</h2>
+      <ul>
+        <li><a href="/marketplace-talenti-edili">Marketplace Talenti</a> — cerca fra profili edili già analizzati, ordinati per compatibilità con il ruolo.</li>
+        <li><a href="/ricerca-e-selezione-personale-edile">Ricerca e selezione</a> — la selezione la facciamo noi: rosa di 3 finalisti con report completo in 21 giorni.</li>
+        <li><a href="/talent-profile-system">Talent Profile System</a> — usa il sistema di analisi in autonomia sui tuoi candidati.</li>
+      </ul>
+      <h2>Altre pagine</h2>
+      <ul>
+        <li><a href="/ruoli">Ruoli edili</a>: <a href="/ruoli/capocantiere">capocantiere</a>, <a href="/ruoli/capisquadra">capisquadra</a>, <a href="/ruoli/muratore">muratore</a>, <a href="/ruoli/carpentiere">carpentiere</a>, <a href="/ruoli/geometra-di-cantiere">geometra di cantiere</a>, <a href="/ruoli/project-manager-edile">project manager edile</a>, <a href="/ruoli/responsabile-sicurezza">responsabile sicurezza</a>, <a href="/ruoli/preventivista">preventivista</a></li>
+        <li><a href="/lavora-in-edilizia">Cerchi lavoro in edilizia?</a> — analisi psicoattitudinale gratuita per i candidati</li>
+        <li><a href="/prezzi">Prezzi</a> — piani da 49 €/mese</li>
+        <li><a href="/faq">Domande frequenti</a></li>
+        <li><a href="/chi-siamo">Chi siamo</a> · <a href="/contatti">Contatti</a> · <a href="/garanzia">Garanzia 30 giorni</a></li>
+      </ul>
+      <p>Per navigare il sito è necessario abilitare JavaScript. Scrivici a info@talentiedili.it.</p>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

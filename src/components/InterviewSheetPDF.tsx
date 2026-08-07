@@ -256,7 +256,7 @@ export const InterviewSheetPDF = forwardRef<HTMLDivElement, InterviewSheetPDFPro
 
         {/* Footer */}
         <div className="mt-4 pt-2 border-t text-xs text-gray-500 flex justify-between">
-          <span>TalentProfile 360° v2.0</span>
+          <span>Talenti Edili — Talent Profile 360° v2.0</span>
           <span>Scheda Colloquio - {nomeCompleto}</span>
           <span>{format(new Date(), 'dd/MM/yyyy')}</span>
         </div>

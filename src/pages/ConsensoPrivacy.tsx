@@ -51,7 +51,7 @@ export default function ConsensoPrivacy() {
 
   // Only candidato role can access this page
   if (profile?.ruolo !== 'candidato') {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   const handleContinue = () => {
@@ -68,7 +68,7 @@ export default function ConsensoPrivacy() {
           <div className="mx-auto p-2.5 sm:p-3 bg-primary/10 rounded-full w-fit mb-3 sm:mb-4">
             <Brain className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
           </div>
-          <CardTitle className="text-xl sm:text-2xl">Talent Profile Assessment</CardTitle>
+          <CardTitle className="text-xl sm:text-2xl">Talenti Edili — Analisi Talent Profile</CardTitle>
           <CardDescription className="text-xs sm:text-sm">
             Benvenuto/a, {profile?.nome || 'Candidato'}! Prima di iniziare, leggi attentamente le linee guida e l'informativa sulla privacy.
           </CardDescription>

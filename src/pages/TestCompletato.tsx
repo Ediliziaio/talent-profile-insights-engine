@@ -22,7 +22,7 @@ export default function TestCompletato() {
 
   // Guard: only candidato role
   if (profile.ruolo !== 'candidato') {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   return (
@@ -37,7 +37,7 @@ export default function TestCompletato() {
           </div>
           <CardTitle className="text-2xl">Complimenti, {profile?.nome}!</CardTitle>
           <CardDescription className="text-base">
-            Hai completato con successo il questionario Talent Profile.
+            Hai completato con successo l’analisi psicoattitudinale Talent Profile.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">

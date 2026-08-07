@@ -586,7 +586,7 @@ export function PremiumReportPDF(props: PremiumReportPDFProps) {
           
           {/* Logo */}
           <div style={{ position: 'absolute', top: 25, left: 25 }}>
-            <img src="/talentprofile_logo_v3.png" alt="TalentProfile" style={{ height: 36 }} crossOrigin="anonymous" />
+            <img src="/talentprofile_logo_v3.png" alt="Talenti Edili" style={{ height: 36 }} crossOrigin="anonymous" />
           </div>
 
           <div style={{ textAlign: 'center', marginTop: 50 }}>
@@ -627,7 +627,7 @@ export function PremiumReportPDF(props: PremiumReportPDFProps) {
               {candidato.data_test && <> — Test eseguito il {new Date(candidato.data_test).toLocaleDateString('it-IT')}</>}
             </div>
             <div style={{ fontSize: 10, color: TEXT_CAPTION, marginTop: 6 }}>
-              Assessment TalentProfile 360° — v5.0
+              Analisi Talent Profile 360° — v5.0
             </div>
           </div>
 
@@ -1535,9 +1535,9 @@ export function PremiumReportPDF(props: PremiumReportPDFProps) {
         <div style={{ padding: PAGE_PADDING }}>
           <SectionTitle number="06">Metodologia e Dati Tecnici</SectionTitle>
 
-          <SubTitle>Il Metodo TalentProfile 360°</SubTitle>
+          <SubTitle>Il Metodo Talent Profile 360°</SubTitle>
           <BodyText>
-            TalentProfile 360° è un sistema di assessment psicometrico proprietario che analizza 15 tratti comportamentali
+            Talent Profile 360° è un sistema di analisi psicoattitudinale proprietario che analizza 15 tratti comportamentali
             fondamentali + 1 indicatore di controllo (CTRL) attraverso un questionario strutturato di 260 domande a risposta multipla.
           </BodyText>
           <BodyText>
@@ -1614,7 +1614,7 @@ export function PremiumReportPDF(props: PremiumReportPDFProps) {
           {/* Disclaimer */}
           <div style={{ marginTop: 24, padding: 16, border: `1px solid ${BORDER_LIGHT}`, borderRadius: 8 }}>
             <div style={{ fontSize: FONT_CAPTION, color: TEXT_CAPTION, lineHeight: 1.6 }}>
-              <strong>Disclaimer:</strong> Questo report è generato automaticamente dal sistema TalentProfile 360° ed è destinato
+              <strong>Disclaimer:</strong> Questo report è generato automaticamente dal sistema Talent Profile 360° ed è destinato
               esclusivamente ad uso interno dell'azienda richiedente. I risultati del test rappresentano una fotografia comportamentale
               del candidato al momento della compilazione e non costituiscono un giudizio definitivo sulla persona. Si raccomanda
               di utilizzare questo report come uno degli strumenti di valutazione, integrandolo con colloqui e verifiche dirette.
@@ -1624,9 +1624,9 @@ export function PremiumReportPDF(props: PremiumReportPDFProps) {
 
           {/* Logo watermark */}
           <div style={{ textAlign: 'center', marginTop: 30 }}>
-            <img src="/talentprofile_logo_v3.png" alt="TalentProfile" style={{ height: 30, opacity: 0.5 }} crossOrigin="anonymous" />
+            <img src="/talentprofile_logo_v3.png" alt="Talenti Edili" style={{ height: 30, opacity: 0.5 }} crossOrigin="anonymous" />
             <div style={{ fontSize: FONT_CAPTION, color: TEXT_CAPTION, marginTop: 4 }}>
-              © {new Date().getFullYear()} TalentProfile — Tutti i diritti riservati
+              © {new Date().getFullYear()} Talenti Edili — Tutti i diritti riservati
             </div>
           </div>
         </div>

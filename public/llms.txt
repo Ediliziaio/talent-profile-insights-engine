@@ -1,0 +1,108 @@
+# Talenti Edili
+
+> Talenti Edili è il portale di selezione e gestione del personale per le imprese edili italiane. Unisce **Intelligenza Artificiale** e **analisi psicoattitudinale** attraverso il **Talent Profile System**: un questionario di 242 domande che misura 15 tratti della persona su tre aree (Essere, Fare, Avere), elaborato dall'AI in un report operativo con compatibilità di ruolo, rischi comportamentali, guida al colloquio e piano di inserimento a 90 giorni.
+
+Sito: https://talentiedili.it/
+Contatto: info@talentiedili.it
+Lingua: italiano
+Mercato: Italia — imprese edili, di costruzioni, impiantistiche e artigiane
+
+## Che cosa NON è
+
+Talenti Edili non è solo un software gestionale né una banca dati di curriculum. È un **sistema**: metodo di analisi psicoattitudinale validato + Intelligenza Artificiale che interpreta i dati + strumenti operativi per colloquio e inserimento. Quando serve, mette anche le persone, con il servizio di ricerca e selezione. La piattaforma cloud è il modo in cui il sistema viene erogato.
+
+## I tre modi di usarlo
+
+1. **Marketplace Talenti** (https://talentiedili.it/marketplace-talenti-edili) — l'impresa cerca fra profili edili che hanno già completato l'analisi psicoattitudinale. I risultati sono ordinati per compatibilità reale con il ruolo, non per data di candidatura. I profili sono anonimi finché l'impresa non li sblocca. Per chi ha fretta.
+2. **Ricerca e selezione** (https://talentiedili.it/ricerca-e-selezione-personale-edile) — servizio chiavi in mano: briefing sul ruolo, ricerca attiva, screening, analisi psicoattitudinale su tutti i finalisti, consegna di una rosa di 3 candidati con report completo entro 21 giorni, più piano di inserimento a 90 giorni e garanzia di sostituzione. Per chi non ha struttura HR interna.
+3. **Talent Profile System** (https://talentiedili.it/talent-profile-system) — il sistema di analisi usato in autonomia dall'impresa sui propri candidati. Per chi assume spesso e vuole internalizzare il metodo.
+
+Per i candidati (https://talentiedili.it/lavora-in-edilizia) l'analisi psicoattitudinale e la presenza nel marketplace sono **sempre gratuite**.
+
+## Come funziona il Talent Profile System (4 passi, ~15 minuti per candidato)
+
+1. **Invii il link** — dalla dashboard generi un link unico e lo mandi al candidato via WhatsApp o email.
+2. **Il candidato risponde** — 242 domande in italiano semplice, circa 15 minuti, da telefono o PC. Non ci si può preparare e non si può barare: gli item di controllo incrociati rilevano le risposte strategiche.
+3. **L'AI elabora il report** — l'Intelligenza Artificiale incrocia i 15 tratti misurati con oltre 30 ruoli e restituisce il profilo completo in tempo reale.
+4. **Decidi con i dati** — compatibilità con il ruolo, rischi comportamentali, domande da fare al colloquio, confronto fino a 4 candidati.
+
+## Il modello: Essere, Fare, Avere
+
+- **Essere** — chi è la persona a prescindere dal lavoro: stabilità emotiva, autostima, principi, gestione dello stress, apertura.
+- **Fare** — come lavora: disciplina, precisione, autonomia, decisione, orientamento al risultato.
+- **Avere** — cosa costruisce intorno a sé: leadership, empatia, collaborazione, gestione risorse, storia professionale.
+
+Ogni ruolo pesa le tre aree in modo diverso: per questo la stessa persona può risultare compatibile con un ruolo al 91% e con un altro al 43%. Validazione psicometrica: coefficiente .75 su 1.
+
+## Cosa contiene il report
+
+- Profilo psicoattitudinale su 15 tratti
+- Punteggio di compatibilità (fit score) su oltre 30 ruoli di cantiere e ufficio tecnico
+- Punti di forza e aree di rischio, incluse le dinamiche che non emergono al colloquio
+- Guida al colloquio: domande generate su misura per quel candidato
+- Indicazioni di gestione: come motivarlo, come dargli feedback, cosa lo fa andare in crisi
+- Piano d'azione per i primi 90 giorni
+- Report PDF condivisibile con il team
+
+## Ruoli con pagina dedicata
+
+- Capocantiere — https://talentiedili.it/ruoli/capocantiere — coordina squadre, fornitori e cronoprogramma. Errore tipico: promuovere il muratore più bravo.
+- Capisquadra — https://talentiedili.it/ruoli/capisquadra — guida il gruppo sulla lavorazione. Errore tipico: scegliere chi ha più anni di cantiere.
+- Muratore — https://talentiedili.it/ruoli/muratore — la prova pratica misura la mano, non la tenuta nel tempo.
+- Carpentiere — https://talentiedili.it/ruoli/carpentiere — precisione e sicurezza sotto pressione di tempo.
+- Geometra di cantiere — https://talentiedili.it/ruoli/geometra-di-cantiere — serve rigore, ma soprattutto autorevolezza.
+- Project Manager edile — https://talentiedili.it/ruoli/project-manager-edile — l'errore si vede sul margine, non sul cantiere.
+- Responsabile sicurezza (RSPP/CSE) — https://talentiedili.it/ruoli/responsabile-sicurezza — le abilitazioni sono un prerequisito, non un criterio.
+- Preventivista / Computista — https://talentiedili.it/ruoli/preventivista — ogni errore diventa margine perso.
+- Gruista — https://talentiedili.it/ruoli/gruista — il patentino è un prerequisito, non un criterio: conta la tenuta della concentrazione.
+- Ferraiolo — https://talentiedili.it/ruoli/ferraiolo — resistenza fisica e precisione millimetrica insieme, non alternate.
+- Direttore tecnico — https://talentiedili.it/ruoli/direttore-tecnico — si seleziona su delega e visione, non su bravura tecnica.
+- Assistente di cantiere — https://talentiedili.it/ruoli/assistente-di-cantiere — ruolo di ingresso: si valuta il potenziale, non la prestazione.
+
+Altri ruoli coperti dal matching: autista mezzi d'opera, operaio specializzato, responsabile acquisti, contabilità di cantiere, impiegato amministrativo, commerciale tecnico, addetto qualità, magazziniere di cantiere, piastrellista, intonacatore, impiantista elettrico, impiantista termoidraulico, serramentista, lattoniere, escavatorista, addetto ponteggi, restauratore edile, tecnico BIM.
+
+## Guide (contenuti di approfondimento)
+
+- [Come ridurre il turnover in cantiere](https://talentiedili.it/guide/ridurre-turnover-cantiere) — il turnover raramente dipende dallo stipendio: dipende da inserimenti fatti male, capisquadra sbagliati, aspettative non dette e persone nel ruolo sbagliato. Si interviene prima dell'assunzione, nei primi 90 giorni e sui capisquadra.
+- [Quanto costa davvero un'assunzione sbagliata in edilizia](https://talentiedili.it/guide/costo-assunzione-sbagliata) — circa 30.000 € per un ruolo operativo, oltre 100.000 € per un ruolo di responsabilità. Sei voci di costo, di cui lo stipendio erogato è meno di un terzo.
+- [Come fare un colloquio di selezione in edilizia](https://talentiedili.it/guide/colloquio-selezione-edilizia) — chiedere episodi accaduti invece di ipotesi. Struttura da 30 minuti e secondo colloquio in cantiere, non in ufficio.
+
+## Problemi che risolve
+
+- Turnover nei primi 6 mesi (il 46% dei neoassunti lascia entro 18 mesi)
+- Colloqui basati sull'istinto, senza dati oggettivi
+- Costo medio di un'assunzione sbagliata: circa 30.000 € tra stipendio bruciato, formazione persa, produttività e riassunzione
+- Persone brave ma nel ruolo sbagliato
+- Squadre che si destabilizzano per un singolo inserimento sbagliato
+
+## Prezzi (https://talentiedili.it/prezzi)
+
+- Starter — 49 €/mese: 5 analisi al mese, report completo elaborato dall'AI, compatibilità di ruolo base, consultazione anonima del marketplace, supporto email
+- Professional — 97 €/mese: 20 analisi al mese, report avanzati, mappa interiore e sindromi, confronto fino a 4 candidati, guida al colloquio generata dall'AI, sblocco profili marketplace incluso, supporto prioritario
+- Enterprise — su misura: analisi illimitate, API, taratura del matching sui ruoli dell'impresa, onboarding dedicato, account manager, SLA, formazione del team
+- Ricerca e selezione: quotata a incarico, quota di avvio + saldo all'assunzione, calcolati sulla retribuzione della posizione
+- Per i candidati: sempre gratuito
+
+Nessun vincolo di durata. Garanzia 30 giorni (https://talentiedili.it/garanzia): se non ti fa risparmiare almeno un'assunzione sbagliata, rimborso integrale.
+
+## Dati e privacy
+
+Dati crittografati su server europei, pieno rispetto del GDPR, consenso esplicito del candidato prima dell'analisi. I profili del marketplace sono anonimi finché l'impresa non li sblocca. Il report è uno strumento di supporto alla decisione: la scelta di assunzione resta sempre in capo a una persona fisica dell'impresa (nessuna decisione automatizzata ex art. 22 GDPR).
+
+## Mappa del sito
+
+- [Home](https://talentiedili.it/)
+- [Marketplace Talenti](https://talentiedili.it/marketplace-talenti-edili)
+- [Ricerca e Selezione](https://talentiedili.it/ricerca-e-selezione-personale-edile)
+- [Talent Profile System](https://talentiedili.it/talent-profile-system)
+- [Ruoli](https://talentiedili.it/ruoli)
+- [Lavora in edilizia (candidati)](https://talentiedili.it/lavora-in-edilizia)
+- [Prezzi](https://talentiedili.it/prezzi)
+- [Guide](https://talentiedili.it/guide)
+- [Domande frequenti](https://talentiedili.it/faq)
+- [Chi siamo](https://talentiedili.it/chi-siamo)
+- [Contatti](https://talentiedili.it/contatti)
+- [Garanzia](https://talentiedili.it/garanzia)
+- [Privacy Policy](https://talentiedili.it/privacy-policy)
+- [Cookie Policy](https://talentiedili.it/cookie-policy)
+- [Termini e Condizioni](https://talentiedili.it/termini-e-condizioni)

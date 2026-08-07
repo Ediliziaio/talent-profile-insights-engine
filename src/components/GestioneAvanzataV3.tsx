@@ -158,7 +158,7 @@ function buildGrowthPlan(traits: Record<TraitCode, number>, nome: string, sesso:
       bgColor: 'bg-green-50 dark:bg-green-950/30',
       objective: personalizzaTesto(`Ricompilare il test per misurare oggettivamente i cambiamenti. Definire il prossimo step di crescita per [Nome].`, nome, sesso),
       actions: [
-        personalizzaTesto(`Ripetizione del test TalentProfile per [Nome] — confronto prima/dopo`, nome, sesso),
+        personalizzaTesto(`Ripetizione dell’analisi Talent Profile per [Nome] — confronto prima/dopo`, nome, sesso),
         `Colloquio di bilancio: cosa è cambiato, cosa resta da fare`,
         `Definizione nuovo piano basato sui risultati aggiornati`,
       ],

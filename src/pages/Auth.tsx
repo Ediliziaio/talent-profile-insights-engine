@@ -12,6 +12,7 @@ import {
   loginEmailSchema, 
   loginCandidateSchema, 
 } from '@/lib/validationSchemas';
+import { Seo } from '@/components/Seo';
 
 export default function Auth() {
   const [email, setEmail] = useState('');
@@ -60,7 +61,7 @@ export default function Auth() {
     if (error) {
       toast({ title: 'Errore', description: error.message, variant: 'destructive' });
     } else {
-      navigate('/');
+      navigate('/dashboard');
     }
   };
 
@@ -136,17 +137,23 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4 safe-area-bottom">
+      <Seo
+        title="Accedi — Talenti Edili"
+        description="Area riservata di Talenti Edili."
+        path="/auth"
+        noindex
+      />
       <Card className="w-full max-w-md">
         <CardHeader className="text-center px-4 sm:px-6">
           <div className="flex justify-center mb-3 sm:mb-4">
             <img 
-              src="/talentprofile_logo_v3.png?v=20260119" 
-              alt="Talent Profile" 
+              src="/talenti-edili-logo.svg" 
+              alt="Talenti Edili" 
               className="h-16 sm:h-20 w-auto object-contain"
             />
           </div>
-          <CardTitle className="text-xl sm:text-2xl font-bold">Talent Profile</CardTitle>
-          <CardDescription className="text-sm">Sistema di Assessment HR</CardDescription>
+          <CardTitle className="text-xl sm:text-2xl font-bold">Talenti Edili</CardTitle>
+          <CardDescription className="text-sm">Sistema Talent Profile — AI e analisi psicoattitudinale</CardDescription>
         </CardHeader>
         <CardContent className="px-4 sm:px-6">
           <Tabs defaultValue="candidate" className="space-y-4" onValueChange={() => { setFieldErrors({}); setCandidateErrors({}); }}>

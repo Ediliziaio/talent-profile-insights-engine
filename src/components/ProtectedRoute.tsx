@@ -32,7 +32,7 @@ export function ProtectedRoute({
     if (profile.ruolo === 'candidato') {
       return <Navigate to="/test/privacy" replace />;
     }
-    return <Navigate to="/" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   return <>{children}</>;

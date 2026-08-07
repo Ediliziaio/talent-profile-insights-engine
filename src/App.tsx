@@ -1,13 +1,14 @@
-// TalentProfile App - Optimized with Code Splitting and Skeleton Loading
+// Talenti Edili — app con code splitting e skeleton loading
 import { lazy, Suspense } from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { SiteLayout } from "@/components/site/SiteLayout";
 import { QUERY_CONFIG } from "@/lib/constants";
 import {
   DashboardSkeleton,
@@ -19,10 +20,10 @@ import {
 } from "@/components/skeletons";
 
 // Lightweight pages loaded immediately
-import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
-// Heavy pages loaded lazily
+// Area riservata — caricata on demand
+const Auth = lazy(() => import('./pages/Auth'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Aziende = lazy(() => import('./pages/Aziende'));
 const Candidati = lazy(() => import('./pages/Candidati'));
@@ -33,9 +34,24 @@ const ConsensoPrivacy = lazy(() => import('./pages/ConsensoPrivacy'));
 const Questionario = lazy(() => import('./pages/Questionario'));
 const TestCompletato = lazy(() => import('./pages/TestCompletato'));
 const FormAnagrafico = lazy(() => import('./pages/FormAnagrafico'));
-const Home = lazy(() => import('./pages/Home'));
 const Pagamenti = lazy(() => import('./pages/Pagamenti'));
+
+// Sito pubblico
+const Home = lazy(() => import('./pages/Home'));
 const Garanzia = lazy(() => import('./pages/Garanzia'));
+const Marketplace = lazy(() => import('./pages/site/Marketplace'));
+const RicercaSelezione = lazy(() => import('./pages/site/RicercaSelezione'));
+const TalentProfileSystem = lazy(() => import('./pages/site/TalentProfileSystem'));
+const Ruoli = lazy(() => import('./pages/site/Ruoli'));
+const RuoloDettaglio = lazy(() => import('./pages/site/RuoloDettaglio'));
+const LavoraInEdilizia = lazy(() => import('./pages/site/LavoraInEdilizia'));
+const Prezzi = lazy(() => import('./pages/site/Prezzi'));
+const ChiSiamo = lazy(() => import('./pages/site/ChiSiamo'));
+const Contatti = lazy(() => import('./pages/site/Contatti'));
+const Faq = lazy(() => import('./pages/site/Faq'));
+const Guide = lazy(() => import('./pages/site/Guide'));
+const GuidaDettaglio = lazy(() => import('./pages/site/GuidaDettaglio'));
+const Legal = lazy(() => import('./pages/site/Legal'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -45,30 +61,44 @@ const queryClient = new QueryClient({
       refetchOnWindowFocus: false,
       retry: QUERY_CONFIG.RETRY_COUNT,
       retryDelay: attemptIndex => Math.min(
-        QUERY_CONFIG.RETRY_DELAY_BASE * 2 ** attemptIndex, 
+        QUERY_CONFIG.RETRY_DELAY_BASE * 2 ** attemptIndex,
         QUERY_CONFIG.RETRY_DELAY_MAX
       ),
     },
   },
 });
 
-// Redirect candidati to test flow
-function CandidatoRedirect() {
-  const { profile, loading } = useAuth();
-  
-  if (loading) {
-    return <DashboardSkeleton />;
-  }
-  
-  if (profile?.ruolo === 'candidato') {
-    return <Navigate to="/test/privacy" replace />;
-  }
-  
+/** Placeholder mentre si carica il chunk di una pagina pubblica. */
+function SiteSkeleton() {
+  return <div className="min-h-[70vh] bg-[#f7f4f0]" aria-busy="true" />;
+}
+
+/** Navbar + footer condivisi da tutte le pagine del sito pubblico. */
+function PublicSite() {
   return (
-    <Suspense fallback={<DashboardSkeleton />}>
-      <Dashboard />
-    </Suspense>
+    <SiteLayout>
+      <Suspense fallback={<SiteSkeleton />}>
+        <Outlet />
+      </Suspense>
+    </SiteLayout>
   );
+}
+
+/**
+ * Rotta radice — la home pubblica vive su "/" senza slug, tutte le altre pagine
+ * hanno il proprio slug. Chi è già autenticato viene mandato all'area riservata.
+ */
+function RootRoute() {
+  const { user, profile, loading } = useAuth();
+
+  // Durante il controllo della sessione mostriamo comunque la home: è la pagina
+  // che il prerender ha già scritto nell'HTML, così non si vede sfarfallare
+  // uno skeleton al primo caricamento. Chi è loggato viene poi reindirizzato.
+  if (!loading && user) {
+    return <Navigate to={profile?.ruolo === 'candidato' ? '/test/privacy' : '/dashboard'} replace />;
+  }
+
+  return <Home />;
 }
 
 const App = () => (
@@ -80,13 +110,43 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<CandidatoRedirect />} />
-              <Route path="/home" element={
-                <Suspense fallback={<DashboardSkeleton />}>
-                  <Home />
+              {/* ─── Sito pubblico ─── */}
+              <Route element={<PublicSite />}>
+                <Route path="/" element={<RootRoute />} />
+                <Route path="/marketplace-talenti-edili" element={<Marketplace />} />
+                <Route path="/ricerca-e-selezione-personale-edile" element={<RicercaSelezione />} />
+                <Route path="/talent-profile-system" element={<TalentProfileSystem />} />
+                <Route path="/ruoli" element={<Ruoli />} />
+                <Route path="/ruoli/:slug" element={<RuoloDettaglio />} />
+                <Route path="/lavora-in-edilizia" element={<LavoraInEdilizia />} />
+                <Route path="/prezzi" element={<Prezzi />} />
+                <Route path="/chi-siamo" element={<ChiSiamo />} />
+                <Route path="/contatti" element={<Contatti />} />
+                <Route path="/faq" element={<Faq />} />
+                <Route path="/guide" element={<Guide />} />
+                <Route path="/guide/:slug" element={<GuidaDettaglio />} />
+                <Route path="/garanzia" element={<Garanzia />} />
+                <Route path="/privacy-policy" element={<Legal />} />
+                <Route path="/cookie-policy" element={<Legal />} />
+                <Route path="/termini-e-condizioni" element={<Legal />} />
+              </Route>
+
+              {/* Slug legacy: la home canonica è "/" */}
+              <Route path="/home" element={<Navigate to="/" replace />} />
+
+              {/* ─── Area riservata ─── */}
+              <Route path="/auth" element={
+                <Suspense fallback={<FormSkeleton />}>
+                  <Auth />
                 </Suspense>
               } />
-              <Route path="/auth" element={<Auth />} />
+              <Route path="/dashboard" element={
+                <ProtectedRoute allowedRoles={['superadmin', 'azienda']}>
+                  <Suspense fallback={<DashboardSkeleton />}>
+                    <Dashboard />
+                  </Suspense>
+                </ProtectedRoute>
+              } />
               <Route path="/aziende" element={
                 <ProtectedRoute allowedRoles={['superadmin']}>
                   <Suspense fallback={<AziendeSkeleton />}>
@@ -129,11 +189,8 @@ const App = () => (
                   </Suspense>
                 </ProtectedRoute>
               } />
-              <Route path="/garanzia" element={
-                <Suspense fallback={<DashboardSkeleton />}>
-                  <Garanzia />
-                </Suspense>
-              } />
+
+              {/* ─── Flusso test candidato ─── */}
               <Route path="/test/anagrafica" element={
                 <Suspense fallback={<FormSkeleton />}>
                   <FormAnagrafico />
@@ -156,6 +213,7 @@ const App = () => (
                   </Suspense>
                 </ProtectedRoute>
               } />
+
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

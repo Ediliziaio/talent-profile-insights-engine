@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Talent Profile Design System - Professional HR Assessment */
+/* Talenti Edili Design System — sistema Talent Profile (AI + analisi psicoattitudinale) */
 /* Brand Colors: Orange (Accent) + Blue (Primary) */
 
 @layer base {
@@ -201,6 +201,15 @@
   .progress-gradient {
     background: linear-gradient(90deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
   }
+}
+
+/* ─── Arancio brand accessibile ───
+   #f09133 come testo piccolo non arriva a 4.5:1 (2.39:1 su bianco, 3.52:1 sul
+   blu dell'hero). Stessa tinta e saturazione, luminosità corretta per fondo
+   chiaro e fondo scuro. #f09133 resta per icone, decorazioni e testo grande. */
+:root {
+  --brand-orange-on-light: #ab5b0d; /* 4.96:1 su bianco */
+  --brand-orange-on-dark: #f5b270;  /* 4.60:1 su #2a4f7a */
 }
 
 /* ─── Landing Page Light Theme (JetHR-inspired) ─── */
