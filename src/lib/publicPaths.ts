@@ -1,6 +1,7 @@
 import { RUOLI } from '@/data/ruoli';
 import { LEGAL_DOCS } from '@/data/legal';
 import { GUIDE } from '@/data/guide';
+import { SELEZIONI } from '@/data/selezioni';
 
 /**
  * Elenco delle rotte pubbliche da generare staticamente al build.
@@ -10,6 +11,8 @@ export const PUBLIC_PATHS: string[] = [
   '/',
   '/marketplace-talenti-edili',
   '/ricerca-e-selezione-personale-edile',
+  '/troviamo',
+  ...SELEZIONI.map((s) => `/troviamo/${s.slug}`),
   '/talent-profile-system',
   '/ruoli',
   ...RUOLI.map((r) => `/ruoli/${r.slug}`),

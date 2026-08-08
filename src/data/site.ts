@@ -35,6 +35,11 @@ export const NAV: NavItem[] = [
         desc: 'La selezione la facciamo noi: ti consegniamo la rosa finale',
       },
       {
+        label: 'Chi ti troviamo',
+        to: '/troviamo',
+        desc: 'Venditori, amministrativi, capicantiere, operai e tecnici',
+      },
+      {
         label: 'Talent Profile System',
         to: '/talent-profile-system',
         desc: 'Il sistema di analisi psicoattitudinale con AI, in autonomia',
@@ -62,6 +67,7 @@ export const FOOTER_COLUMNS: { title: string; links: NavChild[] }[] = [
     links: [
       { label: 'Marketplace Talenti', to: '/marketplace-talenti-edili' },
       { label: 'Ricerca e Selezione', to: '/ricerca-e-selezione-personale-edile' },
+      { label: 'Chi ti troviamo', to: '/troviamo' },
       { label: 'Talent Profile System', to: '/talent-profile-system' },
       { label: 'Prezzi', to: '/prezzi' },
     ],

@@ -15,6 +15,9 @@ import {
   cardTransition,
 } from '@/components/site/sections';
 import { breadcrumbLd, faqLd, serviceLd, webPageLd } from '@/lib/seo';
+import { SELEZIONI } from '@/data/selezioni';
+import { Link } from 'react-router-dom';
+import { ArrowRight } from 'lucide-react';
 
 const PATH = '/ricerca-e-selezione-personale-edile';
 
@@ -240,6 +243,31 @@ export default function RicercaSelezione() {
                 </li>
               ))}
             </ul>
+          </div>
+        </div>
+      </Section>
+
+      <Section className="py-16 md:py-20 bg-white">
+        <div className="max-w-5xl mx-auto px-4 md:px-8">
+          <SectionHeading
+            badge="Per categoria"
+            title="Chi ti troviamo"
+            sub="Ogni figura si cerca in un modo diverso: le pagine dedicate spiegano metodo e criteri, categoria per categoria."
+          />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {SELEZIONI.map((cat) => (
+              <Link
+                key={cat.slug}
+                to={`/troviamo/${cat.slug}`}
+                className="landing-card rounded-xl border border-[#e5e0db] p-5 block"
+              >
+                <h3 className="font-bold text-base mb-2">{cat.h1}</h3>
+                <p className="text-[#6b7280] text-xs leading-relaxed mb-3 line-clamp-2">{cat.intro}</p>
+                <span className="inline-flex items-center gap-1 text-xs font-semibold text-[#1e3a5f]">
+                  Come li troviamo <ArrowRight className="h-3 w-3" />
+                </span>
+              </Link>
+            ))}
           </div>
         </div>
       </Section>

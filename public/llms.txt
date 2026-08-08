@@ -44,6 +44,19 @@ Ogni ruolo pesa le tre aree in modo diverso: per questo la stessa persona può r
 - Piano d'azione per i primi 90 giorni
 - Report PDF condivisibile con il team
 
+## Ricerca e selezione per categoria ("chi ti troviamo")
+
+Hub: https://talentiedili.it/troviamo — il servizio chiavi in mano organizzato per categoria, con metodo e criteri dedicati:
+
+- [Troviamo venditori](https://talentiedili.it/troviamo/venditori) — commerciali tecnici, venditori serramenti/impianti, account B2B. Criteri chiave: tenuta al rifiuto, attitudine alla vendita misurata (tratto VEN), onestà sui numeri dichiarati.
+- [Troviamo amministrativi](https://talentiedili.it/troviamo/amministrativi) — impiegati, contabilità di cantiere, fatturazione e SAL. Criteri chiave: precisione sotto scadenza, competenze edili verificate (reverse charge, ritenute, DURC), affidabilità.
+- [Troviamo capicantiere e capisquadra](https://talentiedili.it/troviamo/capicantiere-e-capisquadra) — ricerca diretta fra chi non risponde agli annunci. Criteri chiave: decisione sotto pressione, autorevolezza senza conflitto, propensione alla sicurezza.
+- [Troviamo operai specializzati](https://talentiedili.it/troviamo/operai-specializzati) — muratori, carpentieri, ferraioli, gruisti. Criteri chiave: affidabilità, tenuta nel tempo, Indice di Propensione alla Sicurezza. Anche squadre complete.
+- [Troviamo geometri e tecnici](https://talentiedili.it/troviamo/geometri-e-tecnici) — geometri di cantiere, project manager, direttori tecnici. Criteri chiave: rigore + autorevolezza, disciplina sui numeri, onestà nel riportare i problemi.
+- [Troviamo preventivisti](https://talentiedili.it/troviamo/preventivisti) — preventivisti e computisti. Criteri chiave: prova su computo reale, onestà nel dichiarare le incertezze, tenuta sulle scadenze di gara.
+
+Ogni categoria consegna: rosa di 3 finalisti in 21 giorni, report psicoattitudinale completo, verifica referenze, guida al colloquio, piano 90 giorni, garanzia di sostituzione.
+
 ## Ruoli con pagina dedicata
 
 - Capocantiere — https://talentiedili.it/ruoli/capocantiere — coordina squadre, fornitori e cronoprogramma. Errore tipico: promuovere il muratore più bravo.
@@ -94,6 +107,7 @@ Dati crittografati su server europei, pieno rispetto del GDPR, consenso esplicit
 - [Home](https://talentiedili.it/)
 - [Marketplace Talenti](https://talentiedili.it/marketplace-talenti-edili)
 - [Ricerca e Selezione](https://talentiedili.it/ricerca-e-selezione-personale-edile)
+- [Chi ti troviamo (per categoria)](https://talentiedili.it/troviamo)
 - [Talent Profile System](https://talentiedili.it/talent-profile-system)
 - [Ruoli](https://talentiedili.it/ruoli)
 - [Lavora in edilizia (candidati)](https://talentiedili.it/lavora-in-edilizia)

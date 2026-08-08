@@ -53,6 +53,8 @@ const Guide = lazy(() => import('./pages/site/Guide'));
 const GuidaDettaglio = lazy(() => import('./pages/site/GuidaDettaglio'));
 const Legal = lazy(() => import('./pages/site/Legal'));
 const RegistrazioneCandidato = lazy(() => import('./pages/site/RegistrazioneCandidato'));
+const Troviamo = lazy(() => import('./pages/site/Troviamo'));
+const TroviamoDettaglio = lazy(() => import('./pages/site/TroviamoDettaglio'));
 const AreaCandidato = lazy(() => import('./pages/AreaCandidato'));
 const MarketplaceInterno = lazy(() => import('./pages/MarketplaceInterno'));
 
@@ -118,6 +120,8 @@ const App = () => (
                 <Route path="/" element={<RootRoute />} />
                 <Route path="/marketplace-talenti-edili" element={<Marketplace />} />
                 <Route path="/ricerca-e-selezione-personale-edile" element={<RicercaSelezione />} />
+                <Route path="/troviamo" element={<Troviamo />} />
+                <Route path="/troviamo/:slug" element={<TroviamoDettaglio />} />
                 <Route path="/talent-profile-system" element={<TalentProfileSystem />} />
                 <Route path="/ruoli" element={<Ruoli />} />
                 <Route path="/ruoli/:slug" element={<RuoloDettaglio />} />

@@ -19,6 +19,8 @@ import Home from '@/pages/Home';
 import Garanzia from '@/pages/Garanzia';
 import Marketplace from '@/pages/site/Marketplace';
 import RicercaSelezione from '@/pages/site/RicercaSelezione';
+import Troviamo from '@/pages/site/Troviamo';
+import TroviamoDettaglio from '@/pages/site/TroviamoDettaglio';
 import TalentProfileSystem from '@/pages/site/TalentProfileSystem';
 import Ruoli from '@/pages/site/Ruoli';
 import RuoloDettaglio from '@/pages/site/RuoloDettaglio';
@@ -51,6 +53,8 @@ export function render(url: string): RenderResult {
               <Route path="/" element={<Home />} />
               <Route path="/marketplace-talenti-edili" element={<Marketplace />} />
               <Route path="/ricerca-e-selezione-personale-edile" element={<RicercaSelezione />} />
+              <Route path="/troviamo" element={<Troviamo />} />
+              <Route path="/troviamo/:slug" element={<TroviamoDettaglio />} />
               <Route path="/talent-profile-system" element={<TalentProfileSystem />} />
               <Route path="/ruoli" element={<Ruoli />} />
               <Route path="/ruoli/:slug" element={<RuoloDettaglio />} />
