@@ -84,7 +84,7 @@ const DIFFERENZE = [
 const FAQ = [
   {
     q: 'Che cos’è la piattaforma?',
-    a: 'È un archivio di candidati del settore edile che hanno già completato l’analisi psicoattitudinale Talent Profile. A differenza di un portale di annunci, non cerchi fra curriculum autodichiarati: cerchi fra candidati già testati su 15 tratti, ordinati per compatibilità con il ruolo che devi coprire.',
+    a: 'È un archivio di candidati del settore edile che hanno già completato l’analisi psicoattitudinale Talent Profile. A differenza di un portale di annunci, non cerchi fra curriculum autodichiarati: trovi il candidato giusto per il ruolo che devi coprire, perché di ognuno vedi già com’è fatto davvero — 15 tratti, punti di forza e rischi.',
   },
   {
     q: 'In cosa è diverso da un portale di annunci di lavoro?',
@@ -112,7 +112,7 @@ export default function Marketplace() {
   const jsonLd = useMemo(
     () => [
       webPageLd({
-        name: 'piattaforma Talenti Edili — profili edili già analizzati',
+        name: 'La piattaforma Talenti Edili — trova il candidato giusto',
         description:
           'Cerca fra profili del settore edile che hanno già completato l’analisi psicoattitudinale. Compatibilità di ruolo, rischi e guida al colloquio prima ancora di chiamare.',
         path: PATH,
@@ -137,7 +137,7 @@ export default function Marketplace() {
     <>
       <Seo
         title="La piattaforma per assumere in edilizia | Talenti Edili"
-        description="Più di un software di selezione: trovi candidati già analizzati, valuti i tuoi, confronti e gestisci l’inserimento. Tutto in una piattaforma, tutto per l’edilizia."
+        description="Più di un software di selezione: trovi il candidato giusto, valuti i tuoi, confronti e gestisci l’inserimento. Tutto in una piattaforma, tutto per l’edilizia."
         path={PATH}
         jsonLd={jsonLd}
       />
@@ -187,7 +187,7 @@ export default function Marketplace() {
             <strong>Talent Profile</strong>, gli strumenti per analizzare i propri candidati, il
             confronto fianco a fianco, la guida al colloquio e il piano di inserimento a 90 giorni. A
             differenza di un portale di annunci non cerchi fra curriculum scritti dal candidato:
-            cerchi fra candidati testati su 15 tratti, con compatibilità calcolata dall’Intelligenza
+            trovi la persona giusta per il ruolo, con compatibilità calcolata dall’Intelligenza
             Artificiale sul ruolo che devi coprire e le aree di rischio in chiaro.
           </p>
         }
@@ -203,7 +203,7 @@ export default function Marketplace() {
           />
           <motion.div className="grid grid-cols-1 md:grid-cols-3 gap-5" variants={stagger}>
             {[
-              { icon: Search, title: 'Trovi candidati già analizzati', desc: 'Filtri per ruolo e zona fra profili con analisi completata: vedi compatibilità e rischi prima di chiamare.' },
+              { icon: Search, title: 'Trovi il candidato giusto', desc: 'Filtri per ruolo e zona: di ogni candidato vedi già compatibilità e rischi, prima di chiamare.' },
               { icon: Gauge, title: 'Analizzi i tuoi candidati', desc: 'Mandi un link, il candidato risponde in 15 minuti, l’AI ti consegna il report completo.' },
               { icon: UserCheck, title: 'Confronti fianco a fianco', desc: 'Fino a 4 candidati sullo stesso ruolo: in dieci secondi vedi chi regge il cantiere.' },
               { icon: ShieldCheck, title: 'Controlli la sicurezza', desc: 'Ogni profilo ha l’Indice di Propensione alla Sicurezza: chi taglia le procedure si vede prima.' },

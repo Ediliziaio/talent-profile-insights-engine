@@ -162,7 +162,7 @@ export default function RicercaSelezione() {
         title={
           <>
             La selezione la facciamo noi.{' '}
-            <span className="text-[#f09133]">Tu scegli fra tre candidati già testati.</span>
+            <span className="text-[#f09133]">Ti troviamo il candidato giusto.</span>
           </>
         }
         intro={
@@ -271,7 +271,7 @@ export default function RicercaSelezione() {
               },
               {
                 q: '“Non ho tempo per queste cose.”',
-                a: 'È esattamente il motivo per cui esiste il servizio: il tempo lo mettiamo noi. Tu fai la prima chiamata (mezz’ora) e i colloqui finali con tre candidati già testati. Tutto il resto — ricerca, scrematura, verifica, analisi — non passa dalla tua scrivania.',
+                a: 'È esattamente il motivo per cui esiste il servizio: il tempo lo mettiamo noi. Tu fai la prima chiamata (mezz’ora) e i colloqui finali con i tre candidati che ti presentiamo. Tutto il resto — ricerca, scrematura, verifica, analisi — non passa dalla tua scrivania.',
               },
             ].map((o) => (
               <div key={o.q} className="landing-card rounded-xl border border-[#e5e0db] p-6">

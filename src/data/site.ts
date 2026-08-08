@@ -3,7 +3,7 @@
  *
  * Il portale ha tre porte d'ingresso, che vanno tenute distinte in tutta la
  * navigazione e nei dati strutturati:
- *  1. La Piattaforma — l'impresa cerca fra candidati già analizzati
+ *  1. La Piattaforma — l'impresa trova il candidato giusto
  *  2. Ricerca e selezione — la ricerca la facciamo noi, chiavi in mano
  *  3. Talent Profile System — l'impresa usa il sistema in autonomia
  */
@@ -27,7 +27,7 @@ export const NAV: NavItem[] = [
       {
         label: 'La Piattaforma',
         to: '/piattaforma',
-        desc: 'Cerca fra profili edili già analizzati e pronti a partire',
+        desc: 'Trova il candidato giusto, pronto a partire',
       },
       {
         label: 'Ricerca e Selezione',
@@ -112,10 +112,10 @@ export const PILASTRI = [
   {
     slug: '/piattaforma',
     eyebrow: 'La Piattaforma',
-    title: 'Trova talenti già analizzati',
+    title: 'Trova il candidato giusto',
     desc:
-      'Un archivio di candidati edili che hanno già completato l’analisi psicoattitudinale. Filtri per ruolo, zona e compatibilità, e vedi il profilo completo prima ancora di chiamarli.',
-    per: 'Per chi ha fretta e vuole scegliere fra candidati già testati.',
+      'Cerchi per ruolo e zona e trovi la persona giusta: di ognuna vedi già com’è fatta davvero, prima ancora di chiamarla.',
+    per: 'Per chi ha fretta e vuole trovare subito la persona giusta.',
   },
   {
     slug: '/ricerca-e-selezione-personale-edile',

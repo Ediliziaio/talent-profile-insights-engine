@@ -141,7 +141,7 @@ export default function ChiSiamo() {
         answer={
           <p>
             Talenti Edili aiuta le imprese edili italiane a scegliere e gestire le persone con i dati.
-            Lo fa in tre modi: un <strong>piattaforma</strong> di profili già analizzati, un servizio di{' '}
+            Lo fa in tre modi: una <strong>piattaforma</strong> dove trovi il candidato giusto, un servizio di{' '}
             <strong>ricerca e selezione</strong> chiavi in mano, e il{' '}
             <strong>Talent Profile System</strong> — analisi psicoattitudinale con Intelligenza
             Artificiale — utilizzabile in autonomia. Il denominatore comune è sempre lo stesso: nessuna

@@ -340,7 +340,7 @@ const PROBLEMS = [
     desc: 'Pubblichi annunci e arrivano curriculum che non c\'entrano niente. I bravi non stanno sui portali: sono già al lavoro.',
     stat: '1/20',
     soluzione: 'La Piattaforma',
-    soluzioneDesc: 'Candidati edili già analizzati, filtrabili per ruolo e zona',
+    soluzioneDesc: 'Trovi subito il candidato giusto, per ruolo e zona',
     to: '/piattaforma',
   },
   {
@@ -349,7 +349,7 @@ const PROBLEMS = [
     desc: 'Fra un cantiere e l\'altro, i colloqui li fai di sera. E la selezione fatta di fretta è quella che si paga più cara.',
     stat: '21gg',
     soluzione: 'Ricerca e Selezione',
-    soluzioneDesc: 'La facciamo noi: i 3 candidati migliori già testati in 21 giorni',
+    soluzioneDesc: 'La facciamo noi: ti troviamo il candidato giusto in 21 giorni',
     to: '/troviamo',
   },
   {
@@ -866,7 +866,7 @@ export default function Home() {
             Tre modi di trovare le persone giuste
           </h2>
           <p className="text-center text-[#6b7280] text-base mb-14 max-w-2xl mx-auto">
-            Puoi cercare tu fra profili già analizzati, farci fare tutta la selezione o usare il sistema
+            Puoi trovare da solo il candidato giusto sulla piattaforma, farci fare tutta la selezione o usare il sistema
             in autonomia sui tuoi candidati. Si possono usare insieme o separatamente.
           </p>
 

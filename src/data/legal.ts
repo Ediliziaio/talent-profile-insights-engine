@@ -170,7 +170,7 @@ export const LEGAL_DOCS: LegalDoc[] = [
         titolo: 'Oggetto',
         paragrafi: [
           `I servizi sono erogati da ${TITOLARE}.`,
-          'Talenti Edili mette a disposizione: (a) il Talent Profile System, sistema di analisi psicoattitudinale con elaborazione tramite Intelligenza Artificiale; (b) una banca dei talenti di profili professionali del settore edile; (c) servizi di ricerca e selezione del personale, regolati da specifico incarico scritto.',
+          'Talenti Edili mette a disposizione: (a) il Talent Profile System, sistema di analisi psicoattitudinale con elaborazione tramite Intelligenza Artificiale; (b) una piattaforma di ricerca di profili professionali del settore edile; (c) servizi di ricerca e selezione del personale, regolati da specifico incarico scritto.',
         ],
       },
       {

@@ -13,7 +13,7 @@ Talenti Edili non è solo un software gestionale né una banca dati di curriculu
 
 ## I tre modi di usarlo
 
-1. **piattaforma** (https://talentiedili.it/piattaforma) — l'impresa cerca fra profili edili che hanno già completato l'analisi psicoattitudinale. I risultati sono ordinati per compatibilità reale con il ruolo, non per data di candidatura. I profili sono anonimi finché l'impresa non li sblocca. Per chi ha fretta.
+1. **piattaforma** (https://talentiedili.it/piattaforma) — l'impresa trova il candidato giusto: cerca per ruolo e zona fra profili che hanno già completato l'analisi psicoattitudinale, ordinati per compatibilità reale con il ruolo. I profili sono anonimi finché l'impresa non li sblocca. Per chi ha fretta.
 2. **Ricerca e selezione** (https://talentiedili.it/ricerca-e-selezione-personale-edile) — servizio chiavi in mano: prima chiamata sul ruolo, ricerca attiva, scrematura, analisi psicoattitudinale su tutti i 3 candidati, consegna di i 3 candidati migliori con report completo entro 21 giorni, più piano di inserimento a 90 giorni e garanzia di sostituzione. Per chi non ha struttura HR interna.
 3. **Talent Profile System** (https://talentiedili.it/talent-profile-system) — il sistema di analisi usato in autonomia dall'impresa sui propri candidati. Per chi assume spesso e vuole internalizzare il metodo.
 

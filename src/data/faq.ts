@@ -22,7 +22,7 @@ export const FAQ_GRUPPI: FaqGruppo[] = [
     domande: [
       {
         q: 'Che cos’è Talenti Edili?',
-        a: 'Talenti Edili è il sistema di selezione e gestione del personale per le imprese edili che unisce Intelligenza Artificiale e analisi psicoattitudinale. Funziona in tre modi: una banca dei talenti di profili già analizzati, un servizio di ricerca e selezione chiavi in mano, e il Talent Profile System utilizzabile in autonomia.',
+        a: 'Talenti Edili è il sistema di selezione e gestione del personale per le imprese edili che unisce Intelligenza Artificiale e analisi psicoattitudinale. Funziona in tre modi: la piattaforma dove trovi da solo il candidato giusto, il servizio di ricerca e selezione chiavi in mano, e il Talent Profile System utilizzabile in autonomia.',
       },
       {
         q: 'Talenti Edili è solo un software?',
@@ -30,7 +30,7 @@ export const FAQ_GRUPPI: FaqGruppo[] = [
       },
       {
         q: 'Che differenza c’è fra piattaforma, ricerca e selezione e Talent Profile System?',
-        a: 'La piattaforma è l’archivio di candidati già analizzati in cui cerchi tu. La ricerca e selezione è il servizio in cui cerchiamo, verifichiamo e analizziamo noi, consegnandoti tre candidati scelti. Il Talent Profile System è il sistema di analisi che usi in autonomia sui tuoi candidati. I tre si possono usare insieme o separatamente.',
+        a: 'Sulla piattaforma trovi da solo il candidato giusto, fra profili di cui vedi già com’è fatta la persona. Con la ricerca e selezione cerchiamo, verifichiamo e analizziamo noi, e ti presentiamo i tre migliori. Il Talent Profile System è il sistema di analisi che usi in autonomia sui tuoi candidati. I tre si possono usare insieme o separatamente.',
       },
       {
         q: 'Serve solo alle imprese edili?',

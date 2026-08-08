@@ -39,7 +39,7 @@ export const SELEZIONI: CategoriaSelezione[] = [
     metaDescription:
       'Troviamo venditori e commerciali per imprese edili, serramentisti e impiantisti: ricerca attiva, analisi psicoattitudinale e i 3 candidati migliori in 21 giorni.',
     intro:
-      'Commerciali tecnici, venditori di serramenti e impianti, account per il B2B edile. Cerchiamo noi, testiamo noi: tu scegli fra tre candidati scelti con i numeri in mano.',
+      'Commerciali tecnici, venditori di serramenti e impianti, account per il B2B edile. Ti troviamo il venditore giusto: tu scegli fra tre proposte, con i numeri in mano.',
     definizione:
       'È il servizio di ricerca e selezione di Talenti Edili dedicato alle venditori del settore edile: commerciale tecnico, venditore di serramenti e infissi, venditore di impianti e materiali, account B2B verso imprese e studi tecnici. Facciamo ricerca attiva sul territorio, verifichiamo i risultati di vendita dichiarati e sottoponiamo ognuno dei 3 candidati all’analisi psicoattitudinale Talent Profile — che sui commerciali misura le variabili decisive: quanto regge i "no", costanza, orientamento al risultato reale e onestà nel riportare i numeri. Consegniamo i 3 candidati migliori entro 21 giorni, con report completo e domande da fare al colloquio.',
     difficolta: [

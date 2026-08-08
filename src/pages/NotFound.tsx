@@ -14,7 +14,7 @@ const SCORCIATOIE = [
   {
     icon: Search,
     title: "Cerca sulla piattaforma",
-    desc: "Profili edili già analizzati, ordinati per compatibilità.",
+    desc: "Trova il candidato giusto per ruolo e zona.",
     to: "/piattaforma",
   },
   {
