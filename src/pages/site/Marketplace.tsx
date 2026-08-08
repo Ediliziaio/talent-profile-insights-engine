@@ -28,7 +28,7 @@ import {
 import { breadcrumbLd, faqLd, serviceLd, webPageLd } from '@/lib/seo';
 import { RUOLI } from '@/data/ruoli';
 
-const PATH = '/marketplace-talenti-edili';
+const PATH = '/banca-talenti';
 
 const COME_FUNZIONA = [
   {
@@ -39,7 +39,7 @@ const COME_FUNZIONA = [
   {
     icon: Gauge,
     title: 'Vedi la compatibilità prima di chiamare',
-    desc: 'Ogni profilo del marketplace ha già completato l’analisi psicoattitudinale: vedi il punteggio di compatibilità, i tratti misurati e le aree di rischio.',
+    desc: 'Ogni profilo della Banca Talenti ha già completato l’analisi psicoattitudinale: vedi il punteggio di compatibilità, i tratti misurati e le aree di rischio.',
   },
   {
     icon: UserCheck,
@@ -83,15 +83,15 @@ const DIFFERENZE = [
 
 const FAQ = [
   {
-    q: 'Che cos’è il marketplace di Talenti Edili?',
+    q: 'Che cos’è la Banca Talenti?',
     a: 'È un bacino di profili del settore edile che hanno già completato l’analisi psicoattitudinale Talent Profile. A differenza di un portale di annunci, non cerchi fra curriculum autodichiarati: cerchi fra persone già misurate su 15 tratti, ordinate per compatibilità con il ruolo che devi coprire.',
   },
   {
     q: 'In cosa è diverso da un portale di annunci di lavoro?',
-    a: 'Un portale ti mostra chi si è candidato; il marketplace ti mostra chi è compatibile. Ogni profilo ha già il report psicoattitudinale elaborato dall’Intelligenza Artificiale, con punteggio di compatibilità, punti di forza, aree di rischio e domande da fare al colloquio.',
+    a: 'Un portale ti mostra chi si è candidato; la Banca Talenti ti mostra chi è compatibile. Ogni profilo ha già il report psicoattitudinale elaborato dall’Intelligenza Artificiale, con punteggio di compatibilità, punti di forza, aree di rischio e domande da fare al colloquio.',
   },
   {
-    q: 'Come finiscono i candidati nel marketplace?',
+    q: 'Come finiscono i candidati nella Banca Talenti?',
     a: 'I candidati si registrano gratuitamente dalla pagina dedicata, completano l’analisi psicoattitudinale in 15 minuti e autorizzano esplicitamente la visibilità del proprio profilo alle imprese. Nessun profilo è presente senza consenso.',
   },
   {
@@ -99,11 +99,11 @@ const FAQ = [
     a: 'No. In elenco vedi il profilo professionale e psicoattitudinale in forma anonima. I dati di contatto compaiono solo quando sblocchi quel profilo specifico, nel rispetto del GDPR.',
   },
   {
-    q: 'Quanto costa cercare nel marketplace?',
+    q: 'Quanto costa cercare nella Banca Talenti?',
     a: 'La ricerca e la consultazione dei profili in forma anonima sono incluse nei piani. Si paga solo lo sblocco dei profili che decidi di contattare. Trovi il dettaglio nella pagina Prezzi.',
   },
   {
-    q: 'E se nel marketplace non c’è il profilo che cerco?',
+    q: 'E se nella Banca Talenti non c’è il profilo che cerco?',
     a: 'In quel caso passiamo al servizio di ricerca e selezione: andiamo a cercare attivamente la persona sul mercato, la analizziamo e ti consegniamo una rosa di tre candidati.',
   },
 ];
@@ -112,21 +112,21 @@ export default function Marketplace() {
   const jsonLd = useMemo(
     () => [
       webPageLd({
-        name: 'Marketplace Talenti Edili — profili edili già analizzati',
+        name: 'Banca Talenti Edili — profili edili già analizzati',
         description:
           'Cerca fra profili del settore edile che hanno già completato l’analisi psicoattitudinale. Compatibilità di ruolo, rischi e guida al colloquio prima ancora di chiamare.',
         path: PATH,
       }),
       serviceLd({
-        name: 'Marketplace Talenti Edili',
-        serviceType: 'Marketplace di profili professionali per l’edilizia',
+        name: 'Banca Talenti Edili',
+        serviceType: 'Banca Talenti di profili professionali per l’edilizia',
         description:
           'Bacino di candidati del settore edile già sottoposti ad analisi psicoattitudinale Talent Profile, ricercabili per ruolo, zona e compatibilità.',
         path: PATH,
       }),
       breadcrumbLd([
         { name: 'Home', path: '/' },
-        { name: 'Marketplace Talenti', path: PATH },
+        { name: 'Banca Talenti', path: PATH },
       ]),
       faqLd(FAQ),
     ],
@@ -136,14 +136,14 @@ export default function Marketplace() {
   return (
     <>
       <Seo
-        title="Marketplace Talenti Edili — trova profili edili già analizzati"
+        title="Banca Talenti Edili — trova profili edili già analizzati"
         description="Candidati edili che hanno già fatto l’analisi psicoattitudinale: vedi compatibilità, tratti e rischi prima di chiamare. Non annunci: profili misurati."
         path={PATH}
         jsonLd={jsonLd}
       />
 
       <PageHero
-        eyebrow="Marketplace"
+        eyebrow="Banca Talenti"
         title={
           <>
             Trova persone già analizzate.{' '}
@@ -152,13 +152,13 @@ export default function Marketplace() {
         }
         intro={
           <p>
-            Nel marketplace di Talenti Edili ogni profilo ha già completato l’analisi psicoattitudinale{' '}
+            Nella Banca Talenti ogni profilo ha già completato l’analisi psicoattitudinale{' '}
             <strong className="text-white">Talent Profile</strong>. Filtri per ruolo e zona, e vedi la
             compatibilità reale con la posizione che devi coprire prima ancora di alzare il telefono.
           </p>
         }
-        breadcrumb={[{ label: 'Home', to: '/' }, { label: 'Marketplace Talenti' }]}
-        primaryCta={{ label: 'Accedi al marketplace', to: '/contatti' }}
+        breadcrumb={[{ label: 'Home', to: '/' }, { label: 'Banca Talenti' }]}
+        primaryCta={{ label: 'Accedi alla Banca Talenti', to: '/contatti' }}
         secondaryCta={{ label: 'Vedi i ruoli coperti', to: '/ruoli' }}
       >
         <div className="flex flex-wrap gap-3 mt-8">
@@ -178,10 +178,10 @@ export default function Marketplace() {
       </PageHero>
 
       <DefinitionBlock
-        question="Che cos’è il marketplace di Talenti Edili?"
+        question="Che cos’è la Banca Talenti?"
         answer={
           <p>
-            Il marketplace di Talenti Edili è un bacino di profili del settore edile che hanno già
+            La Banca Talenti è il bacino di profili del settore edile che hanno già
             completato l’analisi psicoattitudinale <strong>Talent Profile</strong>. A differenza di un
             portale di annunci, non cerchi fra curriculum scritti dal candidato: cerchi fra persone
             misurate su 15 tratti, con il punteggio di compatibilità calcolato dall’Intelligenza
@@ -219,7 +219,7 @@ export default function Marketplace() {
         <div className="max-w-5xl mx-auto px-4 md:px-8">
           <SectionHeading
             badge="Confronto"
-            title="Portale di annunci o marketplace di profili analizzati?"
+            title="Portale di annunci o Banca Talenti di profili analizzati?"
           />
           <div className="hidden md:block landing-card overflow-hidden rounded-xl">
             <table className="w-full text-sm">
@@ -230,7 +230,7 @@ export default function Marketplace() {
                     Portale di annunci
                   </th>
                   <th className="text-center p-5 font-bold text-green-800 text-base bg-green-100/80">
-                    Marketplace Talenti Edili
+                    Banca Talenti Edili
                   </th>
                 </tr>
               </thead>
@@ -274,7 +274,7 @@ export default function Marketplace() {
         <div className="max-w-5xl mx-auto px-4 md:px-8">
           <SectionHeading
             badge="Ruoli"
-            title="I ruoli che trovi nel marketplace"
+            title="I ruoli che trovi nella Banca Talenti"
             sub="Ogni ruolo ha un peso diverso sui 15 tratti misurati: per questo la stessa persona può essere compatibile con una posizione e non con un’altra."
           />
           <motion.div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" variants={stagger}>
@@ -310,7 +310,7 @@ export default function Marketplace() {
             <div>
               <h2 className="text-xl font-bold mb-2">Sei un’impresa?</h2>
               <p className="text-sm text-[#6b7280] leading-relaxed mb-4">
-                Il marketplace è incluso nei piani: consulti i profili anonimi e sblocchi solo
+                La Banca Talenti è inclusa nei piani: consulti i profili anonimi e sblocchi solo
                 quelli che ti interessano.
               </p>
               <Link
@@ -323,7 +323,7 @@ export default function Marketplace() {
             <div>
               <h2 className="text-xl font-bold mb-2">Cerchi lavoro in edilizia?</h2>
               <p className="text-sm text-[#6b7280] leading-relaxed mb-4">
-                Entri gratis: 15 minuti di analisi e sei nel marketplace, in forma anonima, finché
+                Entri gratis: 15 minuti di analisi e sei nella Banca Talenti, in forma anonima, finché
                 non decidi tu.
               </p>
               <Link
@@ -339,17 +339,17 @@ export default function Marketplace() {
 
       <FaqSection
         faq={FAQ}
-        title="Domande frequenti sul marketplace"
+        title="Domande frequenti sul Banca Talenti"
         sub="Come funziona la ricerca, cosa vedi e come sono tutelati i dati dei candidati."
       />
 
-      <AltriServizi escludi="/marketplace-talenti-edili" />
+      <AltriServizi escludi="/banca-talenti" />
 
       <CtaBand
-        title="Apri il marketplace sulla tua prossima posizione"
+        title="Apri la Banca Talenti sulla tua prossima posizione"
         sub="Dicci che ruolo devi coprire: ti mostriamo quanti profili compatibili ci sono già oggi nella tua zona."
         ctaLabel="Voglio vedere i profili disponibili"
-        origine="marketplace"
+        origine="Banca Talenti"
       />
     </>
   );

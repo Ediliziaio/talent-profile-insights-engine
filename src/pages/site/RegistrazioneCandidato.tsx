@@ -185,7 +185,7 @@ export default function RegistrazioneCandidato() {
         title={
           <>
             Crea il tuo profilo.{' '}
-            <span className="text-[#f09133]">Quindici minuti e sei nel marketplace.</span>
+            <span className="text-[#f09133]">Quindici minuti e sei nella Banca Talenti.</span>
           </>
         }
         intro={
@@ -324,16 +324,16 @@ export default function RegistrazioneCandidato() {
               )}
               <div className="flex gap-3 items-start">
                 <Checkbox
-                  id="reg-marketplace"
+                  id="reg-Banca Talenti"
                   checked={form.consensoMarketplace}
                   onCheckedChange={(v) => set('consensoMarketplace', v === true)}
                   className="mt-0.5"
                 />
                 <Label
-                  htmlFor="reg-marketplace"
+                  htmlFor="reg-Banca Talenti"
                   className="text-sm font-normal leading-snug cursor-pointer"
                 >
-                  Voglio essere visibile alle imprese nel marketplace, in forma anonima. I contatti
+                  Voglio essere visibile alle imprese nella Banca Talenti, in forma anonima. I contatti
                   restano nascosti finché un’impresa non sblocca il profilo. (Revocabile in ogni
                   momento)
                 </Label>
@@ -365,7 +365,7 @@ export default function RegistrazioneCandidato() {
           <p>
             Completi l’<strong>analisi psicoattitudinale</strong> (242 domande, circa 15 minuti, dal
             telefono) e ricevi il tuo profilo su 15 tratti con i ruoli edili in cui rendi di più. Se
-            hai attivato la visibilità, le imprese ti trovano nel marketplace{' '}
+            hai attivato la visibilità, le imprese ti trovano nella Banca Talenti{' '}
             <strong>in forma anonima</strong>: vedono profilo e compatibilità, mai nome o contatti.
             Solo quando un’impresa sblocca il tuo profilo i tuoi recapiti diventano visibili — e per
             te resta tutto gratuito, sempre.

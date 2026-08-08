@@ -22,15 +22,15 @@ export const FAQ_GRUPPI: FaqGruppo[] = [
     domande: [
       {
         q: 'Che cos’è Talenti Edili?',
-        a: 'Talenti Edili è il sistema di selezione e gestione del personale per le imprese edili che unisce Intelligenza Artificiale e analisi psicoattitudinale. Funziona in tre modi: un marketplace di profili già analizzati, un servizio di ricerca e selezione chiavi in mano, e il Talent Profile System utilizzabile in autonomia.',
+        a: 'Talenti Edili è il sistema di selezione e gestione del personale per le imprese edili che unisce Intelligenza Artificiale e analisi psicoattitudinale. Funziona in tre modi: una banca dei talenti di profili già analizzati, un servizio di ricerca e selezione chiavi in mano, e il Talent Profile System utilizzabile in autonomia.',
       },
       {
         q: 'Talenti Edili è solo un software?',
         a: 'No. È un sistema: un metodo di analisi psicoattitudinale validato, un livello di Intelligenza Artificiale che interpreta i dati e strumenti operativi per il colloquio e l’inserimento. La piattaforma online è il modo in cui il sistema viene erogato, non il sistema stesso. Quando serve mettiamo anche le persone, con il servizio di ricerca e selezione.',
       },
       {
-        q: 'Che differenza c’è fra marketplace, ricerca e selezione e Talent Profile System?',
-        a: 'Il marketplace è il bacino di profili già analizzati in cui cerchi tu. La ricerca e selezione è il servizio in cui cerchiamo, verifichiamo e analizziamo noi, consegnandoti tre finalisti. Il Talent Profile System è il sistema di analisi che usi in autonomia sui tuoi candidati. I tre si possono usare insieme o separatamente.',
+        q: 'Che differenza c’è fra Banca Talenti, ricerca e selezione e Talent Profile System?',
+        a: 'La Banca Talenti è il bacino di profili già analizzati in cui cerchi tu. La ricerca e selezione è il servizio in cui cerchiamo, verifichiamo e analizziamo noi, consegnandoti tre finalisti. Il Talent Profile System è il sistema di analisi che usi in autonomia sui tuoi candidati. I tre si possono usare insieme o separatamente.',
       },
       {
         q: 'Serve solo alle imprese edili?',
@@ -103,10 +103,10 @@ export const FAQ_GRUPPI: FaqGruppo[] = [
   {
     id: 'servizio',
     approfondimento: { label: 'Il servizio di ricerca e selezione', to: '/ricerca-e-selezione-personale-edile' },
-    titolo: 'Marketplace e servizio di selezione',
+    titolo: 'Banca Talenti e servizio di selezione',
     domande: [
       {
-        q: 'Come finiscono i candidati nel marketplace?',
+        q: 'Come finiscono i candidati nella Banca Talenti?',
         a: 'I candidati si registrano gratuitamente, completano l’analisi psicoattitudinale in 15 minuti e autorizzano esplicitamente la visibilità del proprio profilo alle imprese. Nessun profilo è presente senza consenso.',
       },
       {
@@ -138,7 +138,7 @@ export const FAQ_GRUPPI: FaqGruppo[] = [
       },
       {
         q: 'Il candidato paga qualcosa?',
-        a: 'Mai. Per chi cerca lavoro l’analisi psicoattitudinale e la presenza nel marketplace sono gratuite e restano gratuite.',
+        a: 'Mai. Per chi cerca lavoro l’analisi psicoattitudinale e la presenza nella Banca Talenti sono gratuite e restano gratuite.',
       },
       {
         q: 'Posso provarlo prima di decidere?',
@@ -156,7 +156,7 @@ export const FAQ_GRUPPI: FaqGruppo[] = [
         a: 'Sì. Tutti i dati sono crittografati e conservati su server europei, nel pieno rispetto del GDPR. Il candidato presta consenso esplicito prima di iniziare l’analisi psicoattitudinale.',
       },
       {
-        q: 'L’impresa vede i dati personali di tutti i candidati del marketplace?',
+        q: 'L’impresa vede i dati personali di tutti i candidati della Banca Talenti?',
         a: 'No. In elenco i profili sono anonimi: si vede la parte professionale e psicoattitudinale. I dati di contatto compaiono solo quando l’impresa sblocca quel profilo specifico.',
       },
       {

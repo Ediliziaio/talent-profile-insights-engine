@@ -13,11 +13,11 @@ Talenti Edili non è solo un software gestionale né una banca dati di curriculu
 
 ## I tre modi di usarlo
 
-1. **Marketplace Talenti** (https://talentiedili.it/marketplace-talenti-edili) — l'impresa cerca fra profili edili che hanno già completato l'analisi psicoattitudinale. I risultati sono ordinati per compatibilità reale con il ruolo, non per data di candidatura. I profili sono anonimi finché l'impresa non li sblocca. Per chi ha fretta.
+1. **Banca Talenti** (https://talentiedili.it/banca-talenti) — l'impresa cerca fra profili edili che hanno già completato l'analisi psicoattitudinale. I risultati sono ordinati per compatibilità reale con il ruolo, non per data di candidatura. I profili sono anonimi finché l'impresa non li sblocca. Per chi ha fretta.
 2. **Ricerca e selezione** (https://talentiedili.it/ricerca-e-selezione-personale-edile) — servizio chiavi in mano: briefing sul ruolo, ricerca attiva, screening, analisi psicoattitudinale su tutti i finalisti, consegna di una rosa di 3 candidati con report completo entro 21 giorni, più piano di inserimento a 90 giorni e garanzia di sostituzione. Per chi non ha struttura HR interna.
 3. **Talent Profile System** (https://talentiedili.it/talent-profile-system) — il sistema di analisi usato in autonomia dall'impresa sui propri candidati. Per chi assume spesso e vuole internalizzare il metodo.
 
-Per i candidati (https://talentiedili.it/lavora-in-edilizia) l'analisi psicoattitudinale e la presenza nel marketplace sono **sempre gratuite**.
+Per i candidati (https://talentiedili.it/lavora-in-edilizia) l'analisi psicoattitudinale e la presenza nella Banca Talenti sono **sempre gratuite**.
 
 ## Come funziona il Talent Profile System (4 passi, ~15 minuti per candidato)
 
@@ -90,8 +90,8 @@ Altri ruoli coperti dal matching: autista mezzi d'opera, operaio specializzato, 
 
 ## Prezzi (https://talentiedili.it/prezzi)
 
-- Starter — 49 €/mese: 5 analisi al mese, report completo elaborato dall'AI, compatibilità di ruolo base, consultazione anonima del marketplace, supporto email
-- Professional — 97 €/mese: 20 analisi al mese, report avanzati, mappa interiore e sindromi, confronto fino a 4 candidati, guida al colloquio generata dall'AI, sblocco profili marketplace incluso, supporto prioritario
+- Starter — 49 €/mese: 5 analisi al mese, report completo elaborato dall'AI, compatibilità di ruolo base, consultazione anonima della Banca Talenti, supporto email
+- Professional — 97 €/mese: 20 analisi al mese, report avanzati, mappa interiore e sindromi, confronto fino a 4 candidati, guida al colloquio generata dall'AI, sblocco profili Banca Talenti incluso, supporto prioritario
 - Enterprise — su misura: analisi illimitate, API, taratura del matching sui ruoli dell'impresa, onboarding dedicato, account manager, SLA, formazione del team
 - Ricerca e selezione: quotata a incarico, quota di avvio + saldo all'assunzione, calcolati sulla retribuzione della posizione
 - Per i candidati: sempre gratuito
@@ -100,12 +100,12 @@ Nessun vincolo di durata. Garanzia 30 giorni (https://talentiedili.it/garanzia):
 
 ## Dati e privacy
 
-Dati crittografati su server europei, pieno rispetto del GDPR, consenso esplicito del candidato prima dell'analisi. I profili del marketplace sono anonimi finché l'impresa non li sblocca. Il report è uno strumento di supporto alla decisione: la scelta di assunzione resta sempre in capo a una persona fisica dell'impresa (nessuna decisione automatizzata ex art. 22 GDPR).
+Dati crittografati su server europei, pieno rispetto del GDPR, consenso esplicito del candidato prima dell'analisi. I profili della Banca Talenti sono anonimi finché l'impresa non li sblocca. Il report è uno strumento di supporto alla decisione: la scelta di assunzione resta sempre in capo a una persona fisica dell'impresa (nessuna decisione automatizzata ex art. 22 GDPR).
 
 ## Mappa del sito
 
 - [Home](https://talentiedili.it/)
-- [Marketplace Talenti](https://talentiedili.it/marketplace-talenti-edili)
+- [Banca Talenti](https://talentiedili.it/banca-talenti)
 - [Ricerca e Selezione](https://talentiedili.it/ricerca-e-selezione-personale-edile)
 - [Chi ti troviamo (per categoria)](https://talentiedili.it/troviamo)
 - [Talent Profile System](https://talentiedili.it/talent-profile-system)

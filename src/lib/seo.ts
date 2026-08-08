@@ -156,7 +156,7 @@ export const howToLd = (steps: { title: string; desc: string }[]) => ({
   })),
 });
 
-/** Servizio erogato dall'azienda (marketplace, ricerca e selezione, sistema) */
+/** Servizio erogato dall'azienda (Banca Talenti, ricerca e selezione, sistema) */
 export const serviceLd = (s: {
   name: string;
   description: string;

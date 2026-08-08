@@ -51,7 +51,7 @@ export function render(url: string): RenderResult {
           <SiteLayout>
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="/marketplace-talenti-edili" element={<Marketplace />} />
+              <Route path="/banca-talenti" element={<Marketplace />} />
               <Route path="/ricerca-e-selezione-personale-edile" element={<RicercaSelezione />} />
               <Route path="/troviamo" element={<Troviamo />} />
               <Route path="/troviamo/:slug" element={<TroviamoDettaglio />} />

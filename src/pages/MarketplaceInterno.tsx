@@ -45,7 +45,7 @@ import { RUOLI, ALTRI_RUOLI } from '@/data/ruoli';
 const PAGE_SIZE = 24;
 const OPZIONI_RUOLO = [...RUOLI.map((r) => r.nome), ...ALTRI_RUOLI, 'Altro'];
 
-/** Card anonima di un profilo del marketplace */
+/** Card anonima di un profilo della Banca Talenti */
 function ProfiloCard({
   p,
   isSuperadmin,
@@ -212,7 +212,7 @@ export default function MarketplaceInterno() {
       <div className="p-4 md:p-6 space-y-5 max-w-6xl mx-auto">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Store className="h-6 w-6 text-primary" /> Marketplace Talenti
+            <Store className="h-6 w-6 text-primary" /> Banca Talenti
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
             Candidati che hanno completato l’analisi e scelto di essere visibili. I profili sono
@@ -263,7 +263,7 @@ export default function MarketplaceInterno() {
         ) : error ? (
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Marketplace non ancora attivo</CardTitle>
+              <CardTitle className="text-base">Banca Talenti non ancora attivo</CardTitle>
             </CardHeader>
             <CardContent className="text-sm text-muted-foreground space-y-2">
               <p>

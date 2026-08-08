@@ -29,7 +29,7 @@ const PIANI = [
       '5 analisi psicoattitudinali/mese',
       'Report completo elaborato dall’AI',
       'Compatibilità di ruolo base',
-      'Consultazione anonima del marketplace',
+      'Consultazione anonima della Banca Talenti',
       'Supporto email',
     ],
     cta: 'Inizia con Starter',
@@ -46,7 +46,7 @@ const PIANI = [
       'Mappa interiore + sindromi comportamentali',
       'Confronto fino a 4 candidati',
       'Guida al colloquio generata dall’AI',
-      'Sblocco profili marketplace incluso',
+      'Sblocco dei profili incluso',
       'Supporto prioritario',
     ],
     cta: 'Scegli Professional',
@@ -103,7 +103,7 @@ const FAQ = [
     a: 'Le analisi si azzerano ogni mese. Se hai picchi stagionali — molto comune in edilizia — conviene salire di piano nei mesi di assunzione e scendere dopo: il cambio è immediato e senza penali.',
   },
   {
-    q: 'Il costo del marketplace è a parte?',
+    q: 'Il costo della Banca Talenti è a parte?',
     a: 'La ricerca e la consultazione dei profili in forma anonima sono incluse in tutti i piani. Con Starter lo sblocco dei profili è a consumo; con Professional ed Enterprise è incluso nei limiti del piano.',
   },
   {
@@ -112,7 +112,7 @@ const FAQ = [
   },
   {
     q: 'Il candidato paga qualcosa?',
-    a: 'Mai. Per chi cerca lavoro l’analisi psicoattitudinale e la presenza nel marketplace sono gratuite e restano gratuite.',
+    a: 'Mai. Per chi cerca lavoro l’analisi psicoattitudinale e la presenza nella Banca Talenti sono gratuite e restano gratuite.',
   },
 ];
 
@@ -139,7 +139,7 @@ export default function Prezzi() {
     <>
       <Seo
         title="Prezzi — quanto costa Talenti Edili | Piani da 49 €/mese"
-        description="Piani da 49 €/mese per 5 analisi psicoattitudinali, 97 €/mese per 20. Marketplace incluso, selezione quotata a incarico. Garanzia 30 giorni."
+        description="Piani da 49 €/mese per 5 analisi psicoattitudinali, 97 €/mese per 20. Banca Talenti incluso, selezione quotata a incarico. Garanzia 30 giorni."
         path={PATH}
         jsonLd={jsonLd}
       />
@@ -169,7 +169,7 @@ export default function Prezzi() {
           <SectionHeading
             badge="Sistema"
             title="Usa il sistema in autonomia"
-            sub="Mandi tu i link ai candidati e l’Intelligenza Artificiale ti restituisce i report. Tutti i piani includono la consultazione del marketplace."
+            sub="Mandi tu i link ai candidati e l’Intelligenza Artificiale ti restituisce i report. Tutti i piani includono la consultazione della Banca Talenti."
           />
           <motion.div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start" variants={stagger}>
             {PIANI.map((p) => (

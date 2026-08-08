@@ -9,7 +9,7 @@ import { SELEZIONI } from '@/data/selezioni';
  */
 export const PUBLIC_PATHS: string[] = [
   '/',
-  '/marketplace-talenti-edili',
+  '/banca-talenti',
   '/ricerca-e-selezione-personale-edile',
   '/troviamo',
   ...SELEZIONI.map((s) => `/troviamo/${s.slug}`),
