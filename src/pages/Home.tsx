@@ -331,24 +331,44 @@ const FAQ_DATA = [
   },
 ];
 
+/* Ogni problema rimanda alla parte del sistema che lo risolve: la mappa
+   problema→soluzione è la spina dorsale della home. */
 const PROBLEMS = [
   {
-    icon: TrendingDown,
-    title: 'Chi entra in cantiere non resta',
-    desc: 'Il 46% dei neoassunti lascia entro 18 mesi. In edilizia spesso molto prima: due settimane, e sei di nuovo a cercare.',
-    stat: '46%',
+    icon: Users,
+    title: 'Pochi candidati di qualità',
+    desc: 'Pubblichi annunci e arrivano curriculum che non c\'entrano niente. I bravi non stanno sui portali: sono già al lavoro.',
+    stat: '1/20',
+    soluzione: 'La Piattaforma',
+    soluzioneDesc: 'Candidati edili già analizzati, filtrabili per ruolo e zona',
+    to: '/piattaforma',
+  },
+  {
+    icon: Clock,
+    title: 'Non hai tempo di selezionare',
+    desc: 'Fra un cantiere e l\'altro, i colloqui li fai di sera. E la selezione fatta di fretta è quella che si paga più cara.',
+    stat: '21gg',
+    soluzione: 'Ricerca e Selezione',
+    soluzioneDesc: 'La facciamo noi: rosa di 3 finalisti misurati in 21 giorni',
+    to: '/troviamo',
   },
   {
     icon: AlertTriangle,
-    title: 'Assumi a sensazione, non con i dati',
-    desc: 'Senza un\'analisi psicoattitudinale decidi su impressioni e bias. Il risultato non è sfortuna: è un errore che si ripete.',
-    stat: '73%',
+    title: 'Assunzioni sbagliate',
+    desc: 'Al colloquio sembrava perfetto. Senza dati decidi su impressioni: non è sfortuna, è un errore che si ripete. E costa €30.000.',
+    stat: '€30K',
+    soluzione: 'Talent Profile System',
+    soluzioneDesc: '242 domande, 15 tratti, report AI prima della firma',
+    to: '/talent-profile-system',
   },
   {
-    icon: Calculator,
-    title: 'Ogni errore ti costa €30.000',
-    desc: 'Stipendio bruciato, formazione persa, produttività della squadra, costo di riassunzione. E il cantiere che slitta.',
-    stat: '€30K',
+    icon: TrendingDown,
+    title: 'Chi assumi non resta',
+    desc: 'Il 46% dei neoassunti lascia entro 18 mesi. In edilizia spesso molto prima: due settimane, e sei di nuovo a cercare.',
+    stat: '46%',
+    soluzione: 'Piano 90 giorni',
+    soluzioneDesc: 'Inserimento guidato e indicazioni di gestione per chi resta',
+    to: '/guide/ridurre-turnover-cantiere',
   },
 ];
 
@@ -603,10 +623,10 @@ export default function Home() {
                 transition={{ duration: 0.5, ease: 'easeOut' }}
                 className="text-base md:text-lg text-white/90 font-semibold leading-relaxed max-w-xl mb-5"
               >
-                Talenti Edili è il sistema di selezione del personale per le imprese edili che unisce{' '}
+                Più di un software di selezione: la piattaforma completa che unisce{' '}
                 <span className="text-[#f09133]">Intelligenza Artificiale</span> e{' '}
-                <span className="text-[#f09133]">analisi psicoattitudinale</span>. Non un software: un
-                metodo, il Talent Profile System.
+                <span className="text-[#f09133]">analisi psicoattitudinale</span> per trovare,
+                valutare e far crescere le persone della tua impresa edile.
               </motion.p>
               <motion.ul
                 variants={fadeUp}
@@ -1057,7 +1077,7 @@ export default function Home() {
             Perché le imprese edili continuano a sbagliare assunzioni
           </h2>
           <p className="text-center text-[#6b7280] text-base mb-6 max-w-2xl mx-auto">
-            Curriculum, referenze e colloquio a sensazione hanno un limite strutturale: non misurano niente.
+            Quattro problemi, quattro soluzioni. Ogni pezzo della piattaforma esiste per risolverne uno.
           </p>
           {/* Shock value */}
           <motion.div
@@ -1072,7 +1092,7 @@ export default function Home() {
           </motion.div>
           <div className="gradient-separator mb-10" />
           <motion.div
-            className="grid sm:grid-cols-3 gap-6"
+            className="grid sm:grid-cols-2 gap-6"
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
@@ -1081,18 +1101,27 @@ export default function Home() {
             {PROBLEMS.map((p, i) => (
               <motion.div
                 key={i}
-                className="landing-card p-6 border-l-[6px] border-l-red-400 relative overflow-hidden bg-gradient-to-br from-white to-rose-50/30"
+                className="landing-card p-6 border-l-[6px] border-l-red-400 relative overflow-hidden bg-gradient-to-br from-white to-rose-50/30 flex flex-col"
                 variants={fadeUp}
                 transition={cardTransition}
                 whileHover={{ y: -5, boxShadow: '0 12px 40px rgba(0,0,0,0.08)' }}
               >
-                {/* Decorative stat number */}
                 <span className="absolute top-2 right-3 text-6xl font-black text-red-100/50 select-none pointer-events-none leading-none">{p.stat}</span>
-                <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mb-4">
-                  <p.icon className="h-8 w-8 text-red-500" />
+                <div className="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center mb-4">
+                  <p.icon className="h-7 w-7 text-red-500" />
                 </div>
                 <h3 className="text-lg font-bold mb-2">{p.title}</h3>
-                <p className="text-[#6b7280] text-sm leading-relaxed">{p.desc}</p>
+                <p className="text-[#6b7280] text-sm leading-relaxed mb-4 flex-1">{p.desc}</p>
+                {/* Ponte problema→soluzione */}
+                <Link
+                  to={p.to}
+                  className="rounded-lg border border-green-200 bg-green-50/70 px-4 py-3 block hover:border-green-400 transition-colors"
+                >
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-green-700 block mb-0.5">
+                    La soluzione: {p.soluzione}
+                  </span>
+                  <span className="text-sm text-[#3d3935]">{p.soluzioneDesc} →</span>
+                </Link>
               </motion.div>
             ))}
           </motion.div>

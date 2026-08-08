@@ -64,7 +64,7 @@ export default function TestCompletato() {
         <CardFooter className="flex flex-col gap-3 justify-center">
           <p className="text-xs text-muted-foreground text-center">
             I tuoi risultati sono stati salvati. Dalla tua area puoi rivedere il profilo e gestire
-            la visibilità nella Banca Talenti.
+            la visibilità sulla piattaforma.
           </p>
           <Button asChild className="w-full sm:w-auto">
             <Link to="/area-candidato">Vai alla tua area</Link>

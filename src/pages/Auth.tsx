@@ -88,7 +88,7 @@ export default function Auth() {
     
     setCandidateLoading(true);
 
-    // Auto-registrati dalla Banca Talenti: accesso standard con email
+    // Auto-registrati dalla piattaforma: accesso standard con email
     if (validation.data.username.includes('@')) {
       const { error } = await signIn(validation.data.username, validation.data.password);
       setCandidateLoading(false);

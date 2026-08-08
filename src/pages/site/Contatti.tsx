@@ -12,9 +12,9 @@ const PERCORSI = [
   {
     icon: Search,
     title: 'Cerco personale adesso',
-    desc: 'Ti mostriamo quanti profili compatibili ci sono già nella Banca Talenti per il ruolo che devi coprire.',
-    to: '/banca-talenti',
-    label: 'Vedi la Banca Talenti',
+    desc: 'Ti mostriamo quanti profili compatibili ci sono già sulla piattaforma per il ruolo che devi coprire.',
+    to: '/piattaforma',
+    label: 'Vedi la piattaforma',
   },
   {
     icon: Briefcase,
@@ -61,7 +61,7 @@ export default function Contatti() {
     <>
       <Seo
         title="Contatti — richiedi una demo | Talenti Edili"
-        description="Parla con noi di selezione del personale edile: demo del Talent Profile System, Banca Talenti o servizio di ricerca e selezione. Rispondiamo entro 24 ore lavorative."
+        description="Parla con noi di selezione del personale edile: demo del Talent Profile System, piattaforma o servizio di ricerca e selezione. Rispondiamo entro 24 ore lavorative."
         path={PATH}
         jsonLd={jsonLd}
       />

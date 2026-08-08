@@ -13,9 +13,9 @@ const SCORCIATOIE = [
   },
   {
     icon: Search,
-    title: "Cerca nella Banca Talenti",
+    title: "Cerca sulla piattaforma",
     desc: "Profili edili già analizzati, ordinati per compatibilità.",
-    to: "/banca-talenti",
+    to: "/piattaforma",
   },
   {
     icon: Compass,

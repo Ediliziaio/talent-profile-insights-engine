@@ -21,7 +21,7 @@ export const loginEmailSchema = z.object({
 
 export const loginCandidateSchema = z.object({
   // Accetta sia lo username assegnato dall'azienda sia l'email di chi si è
-  // registrato dalla Banca Talenti (il limite più largo serve alle email lunghe).
+  // registrato dalla piattaforma (il limite più largo serve alle email lunghe).
   username: z
     .string()
     .trim()

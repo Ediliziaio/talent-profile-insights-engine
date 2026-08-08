@@ -118,7 +118,7 @@ const App = () => (
               {/* ─── Sito pubblico ─── */}
               <Route element={<PublicSite />}>
                 <Route path="/" element={<RootRoute />} />
-                <Route path="/banca-talenti" element={<Marketplace />} />
+                <Route path="/piattaforma" element={<Marketplace />} />
                 <Route path="/ricerca-e-selezione-personale-edile" element={<RicercaSelezione />} />
                 <Route path="/troviamo" element={<Troviamo />} />
                 <Route path="/troviamo/:slug" element={<TroviamoDettaglio />} />
@@ -141,7 +141,8 @@ const App = () => (
 
               {/* Slug legacy */}
               <Route path="/home" element={<Navigate to="/" replace />} />
-              <Route path="/marketplace-talenti-edili" element={<Navigate to="/banca-talenti" replace />} />
+              <Route path="/marketplace-talenti-edili" element={<Navigate to="/piattaforma" replace />} />
+              <Route path="/banca-talenti" element={<Navigate to="/piattaforma" replace />} />
 
               {/* ─── Area riservata ─── */}
               <Route path="/auth" element={

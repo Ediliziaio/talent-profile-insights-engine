@@ -29,8 +29,8 @@ export const FAQ_GRUPPI: FaqGruppo[] = [
         a: 'No. È un sistema: un metodo di analisi psicoattitudinale validato, un livello di Intelligenza Artificiale che interpreta i dati e strumenti operativi per il colloquio e l’inserimento. La piattaforma online è il modo in cui il sistema viene erogato, non il sistema stesso. Quando serve mettiamo anche le persone, con il servizio di ricerca e selezione.',
       },
       {
-        q: 'Che differenza c’è fra Banca Talenti, ricerca e selezione e Talent Profile System?',
-        a: 'La Banca Talenti è il bacino di profili già analizzati in cui cerchi tu. La ricerca e selezione è il servizio in cui cerchiamo, verifichiamo e analizziamo noi, consegnandoti tre finalisti. Il Talent Profile System è il sistema di analisi che usi in autonomia sui tuoi candidati. I tre si possono usare insieme o separatamente.',
+        q: 'Che differenza c’è fra piattaforma, ricerca e selezione e Talent Profile System?',
+        a: 'La piattaforma è il bacino di profili già analizzati in cui cerchi tu. La ricerca e selezione è il servizio in cui cerchiamo, verifichiamo e analizziamo noi, consegnandoti tre finalisti. Il Talent Profile System è il sistema di analisi che usi in autonomia sui tuoi candidati. I tre si possono usare insieme o separatamente.',
       },
       {
         q: 'Serve solo alle imprese edili?',
@@ -103,10 +103,10 @@ export const FAQ_GRUPPI: FaqGruppo[] = [
   {
     id: 'servizio',
     approfondimento: { label: 'Il servizio di ricerca e selezione', to: '/ricerca-e-selezione-personale-edile' },
-    titolo: 'Banca Talenti e servizio di selezione',
+    titolo: 'piattaforma e servizio di selezione',
     domande: [
       {
-        q: 'Come finiscono i candidati nella Banca Talenti?',
+        q: 'Come finiscono i candidati sulla piattaforma?',
         a: 'I candidati si registrano gratuitamente, completano l’analisi psicoattitudinale in 15 minuti e autorizzano esplicitamente la visibilità del proprio profilo alle imprese. Nessun profilo è presente senza consenso.',
       },
       {
@@ -138,7 +138,7 @@ export const FAQ_GRUPPI: FaqGruppo[] = [
       },
       {
         q: 'Il candidato paga qualcosa?',
-        a: 'Mai. Per chi cerca lavoro l’analisi psicoattitudinale e la presenza nella Banca Talenti sono gratuite e restano gratuite.',
+        a: 'Mai. Per chi cerca lavoro l’analisi psicoattitudinale e la presenza sulla piattaforma sono gratuite e restano gratuite.',
       },
       {
         q: 'Posso provarlo prima di decidere?',
@@ -156,7 +156,7 @@ export const FAQ_GRUPPI: FaqGruppo[] = [
         a: 'Sì. Tutti i dati sono crittografati e conservati su server europei, nel pieno rispetto del GDPR. Il candidato presta consenso esplicito prima di iniziare l’analisi psicoattitudinale.',
       },
       {
-        q: 'L’impresa vede i dati personali di tutti i candidati della Banca Talenti?',
+        q: 'L’impresa vede i dati personali di tutti i candidati della piattaforma?',
         a: 'No. In elenco i profili sono anonimi: si vede la parte professionale e psicoattitudinale. I dati di contatto compaiono solo quando l’impresa sblocca quel profilo specifico.',
       },
       {

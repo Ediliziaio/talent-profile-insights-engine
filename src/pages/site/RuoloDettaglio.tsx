@@ -55,7 +55,7 @@ export default function RuoloDettaglio() {
         intro={<p>{ruolo.sintesi}</p>}
         breadcrumb={[{ label: 'Home', to: '/' }, { label: 'Ruoli', to: '/ruoli' }, { label: ruolo.nome }]}
         primaryCta={{ label: `Analizza un ${ruolo.nome.toLowerCase()}`, to: '/contatti' }}
-        secondaryCta={{ label: 'Cerca nella Banca Talenti', to: '/banca-talenti' }}
+        secondaryCta={{ label: 'Cerca sulla piattaforma', to: '/piattaforma' }}
       />
 
       <DefinitionBlock
@@ -170,7 +170,7 @@ export default function RuoloDettaglio() {
 
       <CtaBand
         title={`Devi assumere un ${ruolo.nome.toLowerCase()}?`}
-        sub="Possiamo analizzare i candidati che hai già, cercarne di nuovi nella Banca Talenti o gestire noi tutta la selezione."
+        sub="Possiamo analizzare i candidati che hai già, cercarne di nuovi sulla piattaforma o gestire noi tutta la selezione."
         ctaLabel="Parliamone"
         origine={`ruolo-${ruolo.slug}`}
       />

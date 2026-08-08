@@ -24,7 +24,7 @@ import { Candidato, ProfiloCandidato } from '@/types/database';
 import { getProfiloTipoV5Label } from '@/lib/scoringV5';
 
 /**
- * Area riservata del candidato: stato dell'analisi, visibilità Banca Talenti,
+ * Area riservata del candidato: stato dell'analisi, visibilità piattaforma,
  * dati di contatto. Se la riga candidati non esiste ancora (registrazione con
  * conferma email, o migration applicata dopo il signup) la ricrea dai metadati
  * salvati nell'utente auth (self-heal).
@@ -127,7 +127,7 @@ export default function AreaCandidato() {
             title: visibile ? 'Profilo visibile' : 'Profilo nascosto',
             description: visibile
               ? 'Le imprese ora possono trovarti in forma anonima.'
-              : 'Non compari più nella Banca Talenti.',
+              : 'Non compari più sulla piattaforma.',
           }),
       }
     );
@@ -224,7 +224,7 @@ export default function AreaCandidato() {
               <div className="space-y-4">
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   242 domande, circa 15 minuti, anche dal telefono. Senza l’analisi il tuo profilo
-                  non può comparire nella Banca Talenti.
+                  non può comparire sulla piattaforma.
                 </p>
                 <Button asChild className="bg-[#f09133] hover:bg-[#e07a1f] text-white">
                   <Link to="/test/privacy">Inizia l’analisi</Link>
@@ -234,18 +234,18 @@ export default function AreaCandidato() {
           </CardContent>
         </Card>
 
-        {/* ─── Visibilità Banca Talenti ─── */}
+        {/* ─── Visibilità piattaforma ─── */}
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-base">
               <HardHat className="h-5 w-5 text-primary" />
-              Visibilità nella Banca Talenti
+              Visibilità sulla piattaforma
             </CardTitle>
           </CardHeader>
           <CardContent>
             {!marketplaceDisponibile ? (
               <p className="text-sm text-muted-foreground">
-                La Banca Talenti sarà disponibile a breve: torna a controllare qui.
+                La piattaforma sarà disponibile a breve: torna a controllare qui.
               </p>
             ) : (
               <div className="space-y-3">
@@ -266,13 +266,13 @@ export default function AreaCandidato() {
                     checked={!!candidato?.marketplace_visible}
                     onCheckedChange={toggleMarketplace}
                     disabled={updateMutation.isPending || !testFatto}
-                    aria-label="Visibilità nella Banca Talenti"
+                    aria-label="Visibilità sulla piattaforma"
                   />
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed">
                   {testFatto
                     ? 'Le imprese vedono ruolo, zona e profilo psicoattitudinale — mai il tuo nome o i tuoi contatti. Quelli diventano visibili solo all’impresa che sblocca il tuo profilo. Puoi disattivare quando vuoi.'
-                    : 'Completa prima l’analisi: nella Banca Talenti compaiono solo profili con analisi completata.'}
+                    : 'Completa prima l’analisi: sulla piattaforma compaiono solo profili con analisi completata.'}
                 </p>
               </div>
             )}

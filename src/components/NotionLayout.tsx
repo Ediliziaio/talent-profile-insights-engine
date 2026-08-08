@@ -25,7 +25,7 @@ export function NotionLayout({ children }: NotionLayoutProps) {
   const navItems = [
     { href: '/dashboard', label: 'Dashboard', icon: Home, show: true },
     { href: '/candidati', label: 'Candidati', icon: Users, show: isSuperadmin || isAzienda },
-    { href: '/marketplace', label: 'Banca Talenti', icon: Store, show: isSuperadmin || isAzienda },
+    { href: '/marketplace', label: 'Trova candidati', icon: Store, show: isSuperadmin || isAzienda },
     { href: '/aziende', label: 'Aziende', icon: BarChart3, show: isSuperadmin },
     { href: '/pagamenti', label: 'Pagamenti', icon: CreditCard, show: isSuperadmin },
     { href: '/impostazioni', label: 'Impostazioni', icon: Settings, show: false },

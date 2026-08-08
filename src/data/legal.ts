@@ -53,7 +53,7 @@ export const LEGAL_DOCS: LegalDoc[] = [
         elenco: [
           'Erogazione del servizio richiesto — base giuridica: esecuzione del contratto (art. 6.1.b GDPR).',
           'Elaborazione del profilo psicoattitudinale e calcolo della compatibilità di ruolo — base giuridica: consenso esplicito del candidato (art. 6.1.a GDPR), prestato prima dell’inizio del questionario.',
-          'Visibilità del profilo del candidato alle imprese iscritte alla Banca Talenti — base giuridica: consenso esplicito e revocabile del candidato.',
+          'Visibilità del profilo del candidato alle imprese iscritte alla piattaforma — base giuridica: consenso esplicito e revocabile del candidato.',
           'Riscontro alle richieste di contatto e di demo — base giuridica: misure precontrattuali su richiesta dell’interessato (art. 6.1.b GDPR).',
           'Adempimenti di legge, contabili e fiscali — base giuridica: obbligo legale (art. 6.1.c GDPR).',
           'Sicurezza della piattaforma e prevenzione degli abusi — base giuridica: legittimo interesse (art. 6.1.f GDPR).',
@@ -195,7 +195,7 @@ export const LEGAL_DOCS: LegalDoc[] = [
         titolo: 'Obblighi del candidato',
         paragrafi: [
           'Il candidato si impegna a fornire informazioni veritiere e a rispondere personalmente al questionario. Risposte fornite da terzi o palesemente incoerenti possono comportare la sospensione del profilo.',
-          'L’accesso del candidato all’analisi psicoattitudinale e alla Banca Talenti è gratuito.',
+          'L’accesso del candidato all’analisi psicoattitudinale e alla piattaforma è gratuito.',
         ],
       },
       {

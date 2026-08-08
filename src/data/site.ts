@@ -3,7 +3,7 @@
  *
  * Il portale ha tre porte d'ingresso, che vanno tenute distinte in tutta la
  * navigazione e nei dati strutturati:
- *  1. Banca Talenti  — l'impresa cerca fra talenti già profilati
+ *  1. La Piattaforma — l'impresa cerca fra candidati già analizzati
  *  2. Ricerca e selezione — la ricerca la facciamo noi, chiavi in mano
  *  3. Talent Profile System — l'impresa usa il sistema in autonomia
  */
@@ -25,8 +25,8 @@ export const NAV: NavItem[] = [
     label: 'Servizi',
     children: [
       {
-        label: 'Banca Talenti',
-        to: '/banca-talenti',
+        label: 'La Piattaforma',
+        to: '/piattaforma',
         desc: 'Cerca fra profili edili già analizzati e pronti a partire',
       },
       {
@@ -65,7 +65,7 @@ export const FOOTER_COLUMNS: { title: string; links: NavChild[] }[] = [
   {
     title: 'Servizi',
     links: [
-      { label: 'Banca Talenti', to: '/banca-talenti' },
+      { label: 'La Piattaforma', to: '/piattaforma' },
       { label: 'Ricerca e Selezione', to: '/ricerca-e-selezione-personale-edile' },
       { label: 'Chi ti troviamo', to: '/troviamo' },
       { label: 'Talent Profile System', to: '/talent-profile-system' },
@@ -110,8 +110,8 @@ export const CONTATTI = {
 /** I tre pilastri: usati in home, footer e dati strutturati */
 export const PILASTRI = [
   {
-    slug: '/banca-talenti',
-    eyebrow: 'Banca Talenti',
+    slug: '/piattaforma',
+    eyebrow: 'La Piattaforma',
     title: 'Trova talenti già analizzati',
     desc:
       'Un bacino di profili edili che hanno già completato l’analisi psicoattitudinale. Filtri per ruolo, zona e compatibilità, e vedi il profilo completo prima ancora di chiamarli.',
