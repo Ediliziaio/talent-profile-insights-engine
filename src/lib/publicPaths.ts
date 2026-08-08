@@ -14,6 +14,7 @@ export const PUBLIC_PATHS: string[] = [
   '/ruoli',
   ...RUOLI.map((r) => `/ruoli/${r.slug}`),
   '/lavora-in-edilizia',
+  '/registrazione-candidato',
   '/prezzi',
   '/faq',
   '/guide',

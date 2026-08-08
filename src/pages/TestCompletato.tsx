@@ -1,5 +1,5 @@
 import { useAuth } from '@/hooks/useAuth';
-import { Navigate } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Brain, CheckCircle2, PartyPopper, Loader2 } from 'lucide-react';
@@ -63,8 +63,12 @@ export default function TestCompletato() {
         </CardContent>
         <CardFooter className="flex flex-col gap-3 justify-center">
           <p className="text-xs text-muted-foreground text-center">
-            Puoi chiudere questa pagina. I tuoi risultati sono stati salvati.
+            I tuoi risultati sono stati salvati. Dalla tua area puoi rivedere il profilo e gestire
+            la visibilità nel marketplace.
           </p>
+          <Button asChild className="w-full sm:w-auto">
+            <Link to="/area-candidato">Vai alla tua area</Link>
+          </Button>
           <Button variant="outline" onClick={signOut}>
             Esci dalla piattaforma
           </Button>

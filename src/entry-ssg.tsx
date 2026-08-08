@@ -23,6 +23,7 @@ import TalentProfileSystem from '@/pages/site/TalentProfileSystem';
 import Ruoli from '@/pages/site/Ruoli';
 import RuoloDettaglio from '@/pages/site/RuoloDettaglio';
 import LavoraInEdilizia from '@/pages/site/LavoraInEdilizia';
+import RegistrazioneCandidato from '@/pages/site/RegistrazioneCandidato';
 import Prezzi from '@/pages/site/Prezzi';
 import ChiSiamo from '@/pages/site/ChiSiamo';
 import Contatti from '@/pages/site/Contatti';
@@ -54,6 +55,7 @@ export function render(url: string): RenderResult {
               <Route path="/ruoli" element={<Ruoli />} />
               <Route path="/ruoli/:slug" element={<RuoloDettaglio />} />
               <Route path="/lavora-in-edilizia" element={<LavoraInEdilizia />} />
+              <Route path="/registrazione-candidato" element={<RegistrazioneCandidato />} />
               <Route path="/prezzi" element={<Prezzi />} />
               <Route path="/chi-siamo" element={<ChiSiamo />} />
               <Route path="/contatti" element={<Contatti />} />

@@ -20,16 +20,46 @@ export const loginEmailSchema = z.object({
 });
 
 export const loginCandidateSchema = z.object({
+  // Accetta sia lo username assegnato dall'azienda sia l'email di chi si è
+  // registrato dal marketplace (il limite più largo serve alle email lunghe).
   username: z
     .string()
     .trim()
-    .min(1, 'Username obbligatorio')
-    .max(VALIDATION.USERNAME_MAX_LENGTH, `Username troppo lungo (max ${VALIDATION.USERNAME_MAX_LENGTH} caratteri)`)
+    .min(1, 'Email o username obbligatori')
+    .max(VALIDATION.EMAIL_MAX_LENGTH, 'Valore troppo lungo')
     .transform(val => val.toLowerCase()),
   password: z
     .string()
     .min(1, 'Password obbligatoria'),
 });
+
+export const registrazioneCandidatoSchema = z.object({
+  nome: z.string().trim().min(1, 'Nome obbligatorio').max(VALIDATION.NAME_MAX_LENGTH, 'Nome troppo lungo'),
+  cognome: z.string().trim().min(1, 'Cognome obbligatorio').max(VALIDATION.NAME_MAX_LENGTH, 'Cognome troppo lungo'),
+  email: z
+    .string()
+    .trim()
+    .min(1, 'Email obbligatoria')
+    .email('Email non valida')
+    .max(VALIDATION.EMAIL_MAX_LENGTH, 'Email troppo lunga'),
+  password: z
+    .string()
+    .min(8, 'Minimo 8 caratteri')
+    .max(72, 'Massimo 72 caratteri'),
+  telefono: z
+    .string()
+    .trim()
+    .min(1, 'Telefono obbligatorio')
+    .regex(VALIDATION.PHONE_REGEX, 'Numero non valido'),
+  provincia: z.string().trim().min(2, 'Provincia obbligatoria').max(60, 'Provincia troppo lunga'),
+  funzione: z.string().trim().min(1, 'Indica il ruolo che cerchi'),
+  consensoPrivacy: z.literal(true, {
+    errorMap: () => ({ message: 'Il consenso privacy è necessario per registrarsi' }),
+  }),
+  consensoMarketplace: z.boolean(),
+});
+
+export type RegistrazioneCandidatoInput = z.infer<typeof registrazioneCandidatoSchema>;
 
 // ============ CANDIDATO SCHEMAS ============
 

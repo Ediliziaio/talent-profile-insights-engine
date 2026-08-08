@@ -52,6 +52,9 @@ const Faq = lazy(() => import('./pages/site/Faq'));
 const Guide = lazy(() => import('./pages/site/Guide'));
 const GuidaDettaglio = lazy(() => import('./pages/site/GuidaDettaglio'));
 const Legal = lazy(() => import('./pages/site/Legal'));
+const RegistrazioneCandidato = lazy(() => import('./pages/site/RegistrazioneCandidato'));
+const AreaCandidato = lazy(() => import('./pages/AreaCandidato'));
+const MarketplaceInterno = lazy(() => import('./pages/MarketplaceInterno'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -95,7 +98,7 @@ function RootRoute() {
   // che il prerender ha già scritto nell'HTML, così non si vede sfarfallare
   // uno skeleton al primo caricamento. Chi è loggato viene poi reindirizzato.
   if (!loading && user) {
-    return <Navigate to={profile?.ruolo === 'candidato' ? '/test/privacy' : '/dashboard'} replace />;
+    return <Navigate to={profile?.ruolo === 'candidato' ? '/area-candidato' : '/dashboard'} replace />;
   }
 
   return <Home />;
@@ -119,6 +122,7 @@ const App = () => (
                 <Route path="/ruoli" element={<Ruoli />} />
                 <Route path="/ruoli/:slug" element={<RuoloDettaglio />} />
                 <Route path="/lavora-in-edilizia" element={<LavoraInEdilizia />} />
+                <Route path="/registrazione-candidato" element={<RegistrazioneCandidato />} />
                 <Route path="/prezzi" element={<Prezzi />} />
                 <Route path="/chi-siamo" element={<ChiSiamo />} />
                 <Route path="/contatti" element={<Contatti />} />
@@ -139,6 +143,18 @@ const App = () => (
                 <Suspense fallback={<FormSkeleton />}>
                   <Auth />
                 </Suspense>
+              } />
+              <Route path="/area-candidato" element={
+                <Suspense fallback={<FormSkeleton />}>
+                  <AreaCandidato />
+                </Suspense>
+              } />
+              <Route path="/marketplace" element={
+                <ProtectedRoute allowedRoles={['superadmin', 'azienda']}>
+                  <Suspense fallback={<DashboardSkeleton />}>
+                    <MarketplaceInterno />
+                  </Suspense>
+                </ProtectedRoute>
               } />
               <Route path="/dashboard" element={
                 <ProtectedRoute allowedRoles={['superadmin', 'azienda']}>

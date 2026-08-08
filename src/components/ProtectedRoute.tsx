@@ -30,7 +30,7 @@ export function ProtectedRoute({
   if (allowedRoles && profile && !allowedRoles.includes(profile.ruolo)) {
     // Redirect based on role
     if (profile.ruolo === 'candidato') {
-      return <Navigate to="/test/privacy" replace />;
+      return <Navigate to="/area-candidato" replace />;
     }
     return <Navigate to="/dashboard" replace />;
   }

@@ -121,7 +121,7 @@ export default function LavoraInEdilizia() {
           </p>
         }
         breadcrumb={[{ label: 'Home', to: '/' }, { label: 'Lavora in edilizia' }]}
-        primaryCta={{ label: 'Inizia gratis', to: '/auth' }}
+        primaryCta={{ label: 'Registrati gratis', to: '/registrazione-candidato' }}
         secondaryCta={{ label: 'Vedi i ruoli', to: '/ruoli' }}
       />
 

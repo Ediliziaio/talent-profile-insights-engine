@@ -88,6 +88,18 @@ export default function Auth() {
     
     setCandidateLoading(true);
 
+    // Auto-registrati dal marketplace: accesso standard con email
+    if (validation.data.username.includes('@')) {
+      const { error } = await signIn(validation.data.username, validation.data.password);
+      setCandidateLoading(false);
+      if (error) {
+        toast({ title: 'Errore', description: 'Email o password non validi', variant: 'destructive' });
+      } else {
+        navigate('/area-candidato');
+      }
+      return;
+    }
+
     try {
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/candidate-login`,
@@ -172,16 +184,16 @@ export default function Auth() {
             <TabsContent value="candidate">
               <form onSubmit={handleCandidateLogin} className="space-y-4 mt-4">
                 <div className="text-center text-xs sm:text-sm text-muted-foreground mb-4">
-                  Accedi con le credenziali fornite dalla tua azienda
+                  Con l'email se ti sei registrato dal sito, con lo username se te l'ha dato la tua azienda
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="candidate-username" className="text-sm">Username</Label>
+                  <Label htmlFor="candidate-username" className="text-sm">Email o username</Label>
                   <Input 
                     id="candidate-username" 
                     type="text" 
                     value={candidateUsername} 
                     onChange={e => setCandidateUsername(e.target.value)} 
-                    placeholder="es. teknofinestre-a1b2"
+                    placeholder="mario@rossi.it oppure teknofinestre-a1b2"
                     className={`h-11 text-base ${candidateErrors.username ? 'border-destructive' : ''}`}
                   />
                   {candidateErrors.username && (
@@ -202,6 +214,12 @@ export default function Auth() {
                     <p className="text-xs text-destructive">{candidateErrors.password}</p>
                   )}
                 </div>
+                <p className="text-xs text-muted-foreground text-center">
+                  Non hai un account?{' '}
+                  <a href="/registrazione-candidato" className="font-semibold text-primary underline">
+                    Registrati gratis
+                  </a>
+                </p>
                 <Button type="submit" className="w-full h-12 text-base bg-accent hover:bg-accent/90" disabled={candidateLoading}>
                   {candidateLoading ? (
                     <>

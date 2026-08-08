@@ -28,7 +28,8 @@ export interface Azienda {
 export interface Candidato {
   id: string;
   user_id: string | null;
-  azienda_id: string;
+  /** null per i candidati auto-registrati dal marketplace */
+  azienda_id: string | null;
   cognome: string;
   nome: string;
   eta: number | null;
@@ -43,6 +44,29 @@ export interface Candidato {
   username: string | null;
   created_at: string;
   updated_at: string;
+  // Campi marketplace (migration 20260808180000; opzionali finché non applicata)
+  marketplace_visible?: boolean;
+  marketplace_consenso_at?: string | null;
+  provincia?: string | null;
+  anni_esperienza?: number | null;
+}
+
+/** Riga della vista anonima marketplace_profili */
+export interface MarketplaceProfilo {
+  id: string;
+  funzione: string | null;
+  ruolo_attuale: string | null;
+  eta: number | null;
+  provincia: string | null;
+  anni_esperienza: number | null;
+  created_at: string;
+  profilo_tipo_v5: ProfiloTipoV5 | null;
+  essere_pct: number | null;
+  fare_pct: number | null;
+  avere_pct: number | null;
+  traits_v5: Record<string, number> | null;
+  reliability_index: ReliabilityIndex | null;
+  sbloccato: boolean;
 }
 
 export interface AccessoAzienda {
