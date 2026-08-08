@@ -247,6 +247,42 @@ export default function RicercaSelezione() {
         </div>
       </Section>
 
+      {/* ─── Obiezioni anticipate — le quattro che sentiamo sempre ─── */}
+      <Section className="py-16 md:py-20 bg-white">
+        <div className="max-w-5xl mx-auto px-4 md:px-8">
+          <SectionHeading
+            badge="Parliamoci chiaro"
+            title="Le quattro obiezioni che sentiamo sempre"
+            sub="E le risposte oneste, prima che tu debba farle al telefono."
+          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {[
+              {
+                q: '“Seleziono da vent’anni, so riconoscere le persone.”',
+                a: 'Probabilmente è vero — sulle persone che assomigliano a quelle che hai già visto. Il problema è l’eccezione: il candidato perfetto al colloquio e disastroso in squadra. L’esperienza non lo becca, perché è allenato proprio a superare l’esperienza. I dati sì.',
+              },
+              {
+                q: '“I test non funzionano sui muratori.”',
+                a: 'I test scritti per impiegati, no. Il Talent Profile è in italiano semplice, si fa dal telefono in 15 minuti e non chiede di scrivere una riga. Lo completano ogni settimana operai che non usano il computer — e i loro capisquadra si stupiscono di quanto il report ci prenda.',
+              },
+              {
+                q: '“Costa troppo.”',
+                a: 'Un incarico di selezione costa una frazione dei 30.000 € che brucia una sola assunzione sbagliata — e in edilizia una su tre lo è. La domanda giusta non è quanto costa selezionare bene: è quanto ti sta costando selezionare a sensazione.',
+              },
+              {
+                q: '“Non ho tempo per queste cose.”',
+                a: 'È esattamente il motivo per cui esiste il servizio: il tempo lo mettiamo noi. Tu fai il briefing iniziale (mezz’ora) e i colloqui finali con tre persone già misurate. Tutto il resto — ricerca, screening, verifica, analisi — non passa dalla tua scrivania.',
+              },
+            ].map((o) => (
+              <div key={o.q} className="landing-card rounded-xl border border-[#e5e0db] p-6">
+                <h3 className="font-bold text-lg mb-2 text-[#1e3a5f]">{o.q}</h3>
+                <p className="text-[#6b7280] text-sm leading-relaxed">{o.a}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </Section>
+
       <Section className="py-16 md:py-20 bg-white">
         <div className="max-w-5xl mx-auto px-4 md:px-8">
           <SectionHeading

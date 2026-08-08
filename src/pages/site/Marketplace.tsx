@@ -366,6 +366,25 @@ export default function Marketplace() {
         </div>
       </Section>
 
+      {/* ─── Prova sociale, ripetuta anche qui come fa Guru sulle pagine servizio ─── */}
+      <Section className="px-4 md:px-8 py-8">
+        <div className="landing-counter-box max-w-7xl mx-auto py-10 md:py-12 px-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            {[
+              { n: '+1000', l: 'imprese clienti' },
+              { n: '+5000', l: 'analisi completate' },
+              { n: '30+', l: 'ruoli edili mappati' },
+              { n: '.75/1', l: 'validazione psicometrica' },
+            ].map((s) => (
+              <div key={s.l}>
+                <div className="text-3xl md:text-4xl font-bold text-[#f09133]">{s.n}</div>
+                <div className="text-white/70 text-sm mt-1">{s.l}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </Section>
+
       <FaqSection
         faq={FAQ}
         title="Domande frequenti sul piattaforma"
