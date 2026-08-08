@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { DOMANDE } from '@/data/questionario';
 import { calcolaProfiloV5, determinaProfiloTipoV5, RispostaInputV5 } from '@/lib/scoringV5';
 import { getActiveSyndromes, formatSyndromesForDB, TraitScores } from '@/lib/syndromes';
+import { calcolaValiditaEstesa, TEMPO_MS_MAX_VALIDO } from '@/lib/validityV5';
 import { QUESTIONS_PER_PAGE, ANSWER_OPTIONS, type AnswerValue } from '@/lib/constants';
 import { Brain, ChevronLeft, ChevronRight, Send, Loader2, CheckCircle2, CloudUpload } from 'lucide-react';
 import { Candidato, RispostaValueV5 } from '@/types/database';
@@ -143,6 +144,20 @@ export default function Questionario() {
   const [savingId, setSavingId] = useState<number | null>(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
+  /* Misura dei tempi di risposta (per l'attendibilità estesa).
+     tempiRef: ms fra una risposta e la successiva, per domanda.
+     lastAnswerTsRef: istante dell'ultima risposta (o dell'ultimo cambio pagina,
+     così la prima domanda di ogni pagina non ingloba il tempo di lettura
+     accumulato altrove). Se la colonna tempo_ms non esiste ancora nel DB,
+     tempoMsSupportato disattiva l'invio senza rompere il salvataggio. */
+  const tempiRef = React.useRef<Record<number, number>>({});
+  const lastAnswerTsRef = React.useRef<number>(performance.now());
+  const tempoMsSupportatoRef = React.useRef(true);
+
+  useEffect(() => {
+    lastAnswerTsRef.current = performance.now();
+  }, [currentPage]);
+
   const totalPages = Math.ceil(DOMANDE.length / QUESTIONS_PER_PAGE);
   const startIndex = currentPage * QUESTIONS_PER_PAGE;
   const endIndex = Math.min(startIndex + QUESTIONS_PER_PAGE, DOMANDE.length);
@@ -200,15 +215,29 @@ export default function Questionario() {
     mutationFn: async ({ domandaId, valore }: { domandaId: number; valore: AnswerValue }) => {
       if (!candidato) throw new Error('Candidato non trovato');
 
+      const base = {
+        candidato_id: candidato.id,
+        domanda_id: domandaId,
+        valore,
+      };
+      const tempo = tempiRef.current[domandaId];
+
+      if (tempoMsSupportatoRef.current && tempo !== undefined) {
+        const { error } = await supabase
+          .from('risposte')
+          .upsert({ ...base, tempo_ms: tempo }, { onConflict: 'candidato_id,domanda_id' });
+        if (!error) return;
+        // Colonna assente (migration non applicata): riprova senza e smetti di provarci
+        if (/tempo_ms/.test(error.message)) {
+          tempoMsSupportatoRef.current = false;
+        } else {
+          throw error;
+        }
+      }
+
       const { error } = await supabase
         .from('risposte')
-        .upsert({
-          candidato_id: candidato.id,
-          domanda_id: domandaId,
-          valore,
-        }, {
-          onConflict: 'candidato_id,domanda_id',
-        });
+        .upsert(base, { onConflict: 'candidato_id,domanda_id' });
 
       if (error) throw error;
     },
@@ -227,6 +256,16 @@ export default function Questionario() {
   });
 
   const handleAnswer = useCallback((domandaId: number, valore: AnswerValue) => {
+    // Registra il tempo solo alla prima risposta: la correzione di una risposta
+    // già data non dice nulla sulla velocità di lettura.
+    if (tempiRef.current[domandaId] === undefined) {
+      const now = performance.now();
+      const delta = Math.round(now - lastAnswerTsRef.current);
+      if (delta > 0 && delta <= TEMPO_MS_MAX_VALIDO) {
+        tempiRef.current[domandaId] = delta;
+      }
+      lastAnswerTsRef.current = now;
+    }
     setRisposte((prev) => ({ ...prev, [domandaId]: valore }));
     saveMutation.mutate({ domandaId, valore });
   }, [saveMutation]);
@@ -274,6 +313,10 @@ export default function Questionario() {
       
       // Calcola profilo V5
       const profilo = calcolaProfiloV5(risposteArray, domandeV5);
+
+      // Attendibilità estesa: coerenza intra-tratto, risposte in serie, tempi.
+      // Affianca il reliability_index del manuale, non lo sostituisce.
+      const validitaEstesa = calcolaValiditaEstesa(risposteArray, domandeV5, tempiRef.current);
       
       // Rileva sindromi comportamentali
       const traitScores: TraitScores = {
@@ -359,9 +402,19 @@ export default function Questionario() {
         assessment_version: 'v5',
       };
 
-      const { error: profiloError } = await supabase
+      // Prova a salvare anche i segnali di validità; se la colonna non esiste
+      // ancora (migration non applicata) riprova senza, senza bloccare il test.
+      let { error: profiloError } = await supabase
         .from('profili_candidato')
-        .upsert([profiloData], { onConflict: 'candidato_id' });
+        .upsert([{ ...profiloData, validity_flags: validitaEstesa as unknown as Json }], {
+          onConflict: 'candidato_id',
+        });
+
+      if (profiloError && /validity_flags/.test(profiloError.message)) {
+        ({ error: profiloError } = await supabase
+          .from('profili_candidato')
+          .upsert([profiloData], { onConflict: 'candidato_id' }));
+      }
 
       if (profiloError) throw profiloError;
 

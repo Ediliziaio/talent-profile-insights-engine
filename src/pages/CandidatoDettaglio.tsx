@@ -13,6 +13,8 @@ import { GestioneAvanzataV3 } from '@/components/GestioneAvanzataV3';
 import { HeroCardV3 } from '@/components/HeroCardV3';
 import { AlertBannerV3 } from '@/components/AlertBannerV3';
 import { ProfiloUnificatoTab } from '@/components/ProfiloUnificatoTab';
+import { SafetyIndexCard } from '@/components/SafetyIndexCard';
+import { ValiditySignalsCard } from '@/components/ValiditySignalsCard';
 import { MappaInterioreTab } from '@/components/MappaInterioreTab';
 import { ColloquioTabV3 } from '@/components/ColloquioTabV3';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -338,6 +340,20 @@ export default function CandidatoDettaglio() {
                         Dati V5 non disponibili per questo candidato.
                       </CardContent>
                     </Card>
+                  )}
+
+                  {isV5 && traitsV5 && (
+                    <SafetyIndexCard
+                      traits={traitsV5 as Record<TraitCode, number>}
+                      reliabilityIndex={reliabilityIndex}
+                    />
+                  )}
+
+                  {isV5 && (
+                    <ValiditySignalsCard
+                      candidatoId={candidato.id}
+                      validityFlags={(profilo as { validity_flags?: import('@/lib/validityV5').ValiditaEstesa | null })?.validity_flags}
+                    />
                   )}
                 </TabsContent>
 
