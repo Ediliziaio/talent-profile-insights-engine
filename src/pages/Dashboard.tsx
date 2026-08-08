@@ -16,7 +16,7 @@ import {
   PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, 
   Legend, LineChart, Line, CartesianGrid, AreaChart, Area
 } from 'recharts';
-import { format, subDays, subMonths, parseISO, isAfter } from 'date-fns';
+import { format, subDays, subMonths, parseISO } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -45,35 +45,32 @@ export default function Dashboard() {
   const { data: dashboardData, isLoading: isLoadingData } = useQuery({
     queryKey: ['dashboard-data', currentAziendaId, isSuperadmin, period],
     queryFn: async () => {
-      // Parallel fetch for better performance
+      // Filtri lato server: prima si scaricava tutto e si filtrava nel client,
+      // il che scala col totale dei candidati invece che col periodo osservato
+      // (e per le aziende contava sulla sola RLS: l'eq è anche difesa in più).
+      let candidatiQuery = supabase
+        .from('candidati')
+        .select('*, aziende(nome), analisi_candidato(fit_score, fit_verdict), profili_candidato(leadership_pct, maturita_pct, potenziale_pct)')
+        .order('created_at', { ascending: false });
+
+      if (!isSuperadmin && currentAziendaId) {
+        candidatiQuery = candidatiQuery.eq('azienda_id', currentAziendaId);
+      }
+      if (dateRange) {
+        candidatiQuery = candidatiQuery.gte('created_at', dateRange.toISOString());
+      }
+
       const [candidatiResult, aziendeResult] = await Promise.all([
-        supabase
-          .from('candidati')
-          .select('*, aziende(nome), analisi_candidato(fit_score, fit_verdict), profili_candidato(leadership_pct, maturita_pct, potenziale_pct)')
-          .order('created_at', { ascending: false }),
-        isSuperadmin 
+        candidatiQuery,
+        isSuperadmin
           ? supabase.from('aziende').select('*, candidati(id, test_completato)')
           : Promise.resolve({ data: null, error: null })
       ]);
-      
+
       if (candidatiResult.error) throw candidatiResult.error;
-      
-      let candidati = candidatiResult.data || [];
-      
-      // Filter by azienda if not superadmin
-      if (!isSuperadmin && currentAziendaId) {
-        candidati = candidati.filter(c => c.azienda_id === currentAziendaId);
-      }
-      
-      // Filter by date if period selected
-      if (dateRange) {
-        candidati = candidati.filter(c => 
-          c.created_at && isAfter(parseISO(c.created_at), dateRange)
-        );
-      }
-      
+
       return {
-        candidati,
+        candidati: candidatiResult.data || [],
         aziende: aziendeResult.data || []
       };
     },

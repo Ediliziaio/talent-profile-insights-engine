@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -72,7 +72,7 @@ import { useToast } from '@/hooks/use-toast';
 import { 
   Plus, Users, Copy, Check, Eye, Key, RefreshCw, Download, ArrowUpDown, 
   TestTube2, Trash2, CalendarIcon, Search, AlertTriangle, Filter, 
-  CheckCircle2, Clock, TrendingUp, UserCheck, Mail, Phone, X
+  CheckCircle2, Clock, TrendingUp, UserCheck, Mail, Phone, X, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { Candidato, Azienda, AccessoAzienda, ProfiloCandidato, RUOLI_AZIENDALI, FUNZIONI } from '@/types/database';
 import { getProfiloTipoV5Label } from '@/lib/scoringV5';
@@ -119,6 +119,7 @@ export default function Candidati() {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [sortField, setSortField] = useState<SortField>('created_at');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
+  const [page, setPage] = useState(0);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [singleDeleteId, setSingleDeleteId] = useState<string | null>(null);
@@ -244,97 +245,108 @@ export default function Candidati() {
     enabled: !!currentAziendaId && currentAziendaId !== 'all',
   });
 
-  const { data: candidati, isLoading } = useQuery({
-    queryKey: ['candidati', filterAzienda, filterStato, filterRuolo, filterFunzione, filterFitVerdict, filterSesso, filterEta, searchTerm],
-    queryFn: async () => {
-      let query = supabase
-        .from('candidati')
-        .select('*, aziende(nome), profili_candidato(*), analisi_candidato(fit_score, fit_verdict)')
-        .order('created_at', { ascending: false });
+  const PAGE_SIZE = 50;
 
-      if (filterAzienda && filterAzienda !== 'all') {
-        query = query.eq('azienda_id', filterAzienda);
-      }
-      if (filterStato === 'completato') {
-        query = query.eq('test_completato', true);
-      } else if (filterStato === 'da_fare') {
-        query = query.eq('test_completato', false);
-      }
-      if (filterRuolo && filterRuolo !== 'all') {
-        query = query.eq('ruolo_attuale', filterRuolo);
-      }
-      if (filterFunzione && filterFunzione !== 'all') {
-        query = query.eq('funzione', filterFunzione);
-      }
+  /* Costruisce la query filtrata lato server. Riusata dalla lista paginata e
+     dall'export CSV (che scarica tutte le pagine del filtro corrente). */
+  const buildCandidatiQuery = useCallback(() => {
+    // Con il filtro sul verdetto l'embed deve diventare inner join, ma solo in
+    // quel caso: !inner fisso escluderebbe chi non ha ancora completato il test.
+    const embedAnalisi = filterFitVerdict && filterFitVerdict !== 'all'
+      ? 'analisi_candidato!inner(fit_score, fit_verdict)'
+      : 'analisi_candidato(fit_score, fit_verdict)';
 
-      const { data, error } = await query;
-      if (error) throw error;
-      
-      // Filter by fit verdict if specified
-      let filteredData = (data || []) as unknown as CandidatoWithRelations[];
-      if (filterFitVerdict && filterFitVerdict !== 'all') {
-        filteredData = filteredData.filter(c => {
-          const verdict = Array.isArray(c.analisi_candidato) ? c.analisi_candidato[0]?.fit_verdict : null;
-          return verdict === filterFitVerdict;
-        });
-      }
-      
-      // Filter by sex
-      if (filterSesso && filterSesso !== 'all') {
-        filteredData = filteredData.filter(c => c.sesso === filterSesso);
-      }
-      
-      // Filter by age range
-      if (filterEta && filterEta !== 'all') {
-        filteredData = filteredData.filter(c => {
-          if (!c.eta) return false;
-          switch (filterEta) {
-            case '18-30': return c.eta >= 18 && c.eta <= 30;
-            case '31-45': return c.eta >= 31 && c.eta <= 45;
-            case '46-60': return c.eta >= 46 && c.eta <= 60;
-            case '60+': return c.eta > 60;
-            default: return true;
-          }
-        });
-      }
-      
-      // Text search
-      if (searchTerm && searchTerm.trim()) {
-        const search = searchTerm.toLowerCase().trim();
-        filteredData = filteredData.filter(c => 
-          c.nome?.toLowerCase().includes(search) ||
-          c.cognome?.toLowerCase().includes(search) ||
-          c.email?.toLowerCase().includes(search) ||
-          c.ruolo_attuale?.toLowerCase().includes(search) ||
-          c.funzione?.toLowerCase().includes(search)
+    let query = supabase
+      .from('candidati')
+      .select(`*, aziende(nome), profili_candidato(*), ${embedAnalisi}`, { count: 'exact' });
+
+    if (filterAzienda && filterAzienda !== 'all') {
+      query = query.eq('azienda_id', filterAzienda);
+    }
+    if (filterStato === 'completato') {
+      query = query.eq('test_completato', true);
+    } else if (filterStato === 'da_fare') {
+      query = query.eq('test_completato', false);
+    }
+    if (filterRuolo && filterRuolo !== 'all') {
+      query = query.eq('ruolo_attuale', filterRuolo);
+    }
+    if (filterFunzione && filterFunzione !== 'all') {
+      query = query.eq('funzione', filterFunzione);
+    }
+    if (filterFitVerdict && filterFitVerdict !== 'all') {
+      query = query.eq('analisi_candidato.fit_verdict', filterFitVerdict);
+    }
+    if (filterSesso && filterSesso !== 'all') {
+      query = query.eq('sesso', filterSesso);
+    }
+    if (filterEta && filterEta !== 'all') {
+      const [min, max] =
+        filterEta === '18-30' ? [18, 30]
+        : filterEta === '31-45' ? [31, 45]
+        : filterEta === '46-60' ? [46, 60]
+        : [61, null];
+      query = query.gte('eta', min);
+      if (max !== null) query = query.lte('eta', max);
+    }
+    if (searchTerm && searchTerm.trim()) {
+      // I caratteri speciali di PostgREST nel termine romperebbero l'espressione or()
+      const term = searchTerm.trim().replace(/[%,()]/g, ' ').trim();
+      if (term) {
+        const pattern = `%${term}%`;
+        query = query.or(
+          ['nome', 'cognome', 'email', 'ruolo_attuale', 'funzione']
+            .map((c) => `${c}.ilike.${pattern}`)
+            .join(',')
         );
       }
-      
-      // Date filter - created_at
-      if (filterDateFrom || filterDateTo) {
-        filteredData = filteredData.filter(c => {
-          if (!c.created_at) return false;
-          const createdDate = parseISO(c.created_at);
-          if (filterDateFrom && createdDate < startOfDay(filterDateFrom)) return false;
-          if (filterDateTo && createdDate > endOfDay(filterDateTo)) return false;
-          return true;
-        });
-      }
-      
-      // Date filter - data_test
-      if (filterTestDateFrom || filterTestDateTo) {
-        filteredData = filteredData.filter(c => {
-          if (!c.data_test) return false;
-          const testDate = parseISO(c.data_test);
-          if (filterTestDateFrom && testDate < startOfDay(filterTestDateFrom)) return false;
-          if (filterTestDateTo && testDate > endOfDay(filterTestDateTo)) return false;
-          return true;
-        });
-      }
-      
-      return filteredData;
+    }
+    if (filterDateFrom) query = query.gte('created_at', startOfDay(filterDateFrom).toISOString());
+    if (filterDateTo) query = query.lte('created_at', endOfDay(filterDateTo).toISOString());
+    if (filterTestDateFrom) query = query.gte('data_test', startOfDay(filterTestDateFrom).toISOString());
+    if (filterTestDateTo) query = query.lte('data_test', endOfDay(filterTestDateTo).toISOString());
+
+    // Ordinamento lato server: con la paginazione l'ordine client varrebbe
+    // solo dentro la singola pagina. analisi_candidato è one-to-one, quindi
+    // PostgREST può ordinare il parent per fit_score con la sintassi embed(col).
+    if (sortField === 'fit_score') {
+      query = query.order('analisi_candidato(fit_score)', {
+        ascending: sortOrder === 'asc',
+      });
+    } else {
+      query = query.order(sortField, { ascending: sortOrder === 'asc', nullsFirst: false });
+    }
+    // Spareggio stabile: senza, le righe a parità di valore possono
+    // ripresentarsi o sparire cambiando pagina.
+    query = query.order('id', { ascending: true });
+
+    return query;
+  }, [filterAzienda, filterStato, filterRuolo, filterFunzione, filterFitVerdict, filterSesso, filterEta, searchTerm, filterDateFrom, filterDateTo, filterTestDateFrom, filterTestDateTo, sortField, sortOrder]);
+
+  const { data: candidatiPage, isLoading } = useQuery({
+    queryKey: ['candidati', filterAzienda, filterStato, filterRuolo, filterFunzione, filterFitVerdict, filterSesso, filterEta, searchTerm, filterDateFrom, filterDateTo, filterTestDateFrom, filterTestDateTo, sortField, sortOrder, page],
+    queryFn: async () => {
+      const { data, error, count } = await buildCandidatiQuery().range(
+        page * PAGE_SIZE,
+        page * PAGE_SIZE + PAGE_SIZE - 1
+      );
+      if (error) throw error;
+      return {
+        rows: (data || []) as unknown as CandidatoWithRelations[],
+        count: count ?? 0,
+      };
     },
+    placeholderData: (prev) => prev,
   });
+
+  const candidati = candidatiPage?.rows;
+  const totalCount = candidatiPage?.count ?? 0;
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+
+  // Cambio filtri, ricerca o ordinamento: si riparte dalla prima pagina
+  useEffect(() => {
+    setPage(0);
+  }, [filterAzienda, filterStato, filterRuolo, filterFunzione, filterFitVerdict, filterSesso, filterEta, searchTerm, filterDateFrom, filterDateTo, filterTestDateFrom, filterTestDateTo, sortField, sortOrder]);
 
   // Mutation per generare/rigenerare credenziali azienda
   const credentialsMutation = useMutation({
@@ -556,37 +568,32 @@ export default function Candidati() {
     }
   };
 
-  const sortedCandidati = useMemo(() => {
-    if (!candidati) return [];
-    return [...candidati].sort((a, b) => {
-      let aVal: any;
-      let bVal: any;
-      
-      if (sortField === 'fit_score') {
-        aVal = Array.isArray(a.analisi_candidato) ? (a.analisi_candidato[0]?.fit_score ?? -1) : -1;
-        bVal = Array.isArray(b.analisi_candidato) ? (b.analisi_candidato[0]?.fit_score ?? -1) : -1;
-      } else {
-        aVal = a[sortField];
-        bVal = b[sortField];
-      }
-      
-      if (aVal === null || aVal === undefined) aVal = '';
-      if (bVal === null || bVal === undefined) bVal = '';
-      
-      if (typeof aVal === 'string') aVal = aVal.toLowerCase();
-      if (typeof bVal === 'string') bVal = bVal.toLowerCase();
-      
-      if (aVal < bVal) return sortOrder === 'asc' ? -1 : 1;
-      if (aVal > bVal) return sortOrder === 'asc' ? 1 : -1;
-      return 0;
-    });
-  }, [candidati, sortField, sortOrder]);
+  // L'ordinamento è applicato dal server (vedi buildCandidatiQuery): qui si
+  // espone solo la pagina corrente con il nome storico usato dal resto del file.
+  const sortedCandidati = candidati ?? [];
 
-  const exportCSV = () => {
-    if (!sortedCandidati || sortedCandidati.length === 0) return;
+  const EXPORT_MAX = 10_000;
+
+  const exportCSV = async () => {
+    if (totalCount === 0) return;
+
+    // L'export riguarda l'intero filtro corrente, non la pagina visibile:
+    // si scaricano tutte le pagine (con un tetto di sicurezza per il browser).
+    let tutti: CandidatoWithRelations[] = [];
+    try {
+      for (let from = 0; from < Math.min(totalCount, EXPORT_MAX); from += 1000) {
+        const { data, error } = await buildCandidatiQuery().range(from, from + 999);
+        if (error) throw error;
+        tutti = tutti.concat((data || []) as unknown as CandidatoWithRelations[]);
+        if (!data || data.length < 1000) break;
+      }
+    } catch {
+      toast({ title: 'Errore export', description: 'Riprova più tardi.', variant: 'destructive' });
+      return;
+    }
 
     const headers = ['Cognome', 'Nome', 'Sesso', 'Età', 'Ruolo', 'Funzione', 'Email', 'Telefono', 'Stato Test', 'Data Creazione', 'Azienda', 'Profilo', 'Leadership%', 'Maturità%', 'Potenziale%'];
-    const rows = sortedCandidati.map(c => [
+    const rows = tutti.map(c => [
       c.cognome,
       c.nome,
       c.sesso || '',
@@ -615,7 +622,10 @@ export default function Candidati() {
     link.click();
     URL.revokeObjectURL(link.href);
 
-    toast({ title: 'Esportazione completata', description: `${sortedCandidati.length} candidati esportati` });
+    toast({
+      title: 'Esportazione completata',
+      description: `${tutti.length} candidati esportati${totalCount > EXPORT_MAX ? ` (primi ${EXPORT_MAX} di ${totalCount})` : ''}`,
+    });
   };
 
   const getBadgeVariant = (tipo: string | null) => {
@@ -1222,9 +1232,9 @@ export default function Candidati() {
             )}
 
             {/* Results count */}
-            {(searchTerm || hasActiveFilters) && sortedCandidati && (
+            {(searchTerm || hasActiveFilters) && (
               <p className="text-sm text-muted-foreground">
-                {sortedCandidati.length} risultati trovati
+                {totalCount} risultati trovati
               </p>
             )}
 
@@ -1553,6 +1563,33 @@ export default function Candidati() {
                 )}
               </CardContent>
             </Card>
+
+            {/* Paginazione server-side */}
+            {totalCount > PAGE_SIZE && (
+              <div className="flex items-center justify-between gap-3 flex-wrap">
+                <p className="text-sm text-muted-foreground">
+                  Pagina {page + 1} di {totalPages} — {totalCount} candidati
+                </p>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={page === 0 || isLoading}
+                    onClick={() => setPage((p) => Math.max(0, p - 1))}
+                  >
+                    <ChevronLeft className="h-4 w-4 mr-1" /> Precedente
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={page >= totalPages - 1 || isLoading}
+                    onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                  >
+                    Successiva <ChevronRight className="h-4 w-4 ml-1" />
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Delete Confirmation Dialog */}

@@ -14,8 +14,7 @@ import { calcolaProfiloV5, RispostaInputV5 } from '@/lib/scoringV5';
 import { getActiveSyndromes, TraitScores } from '@/lib/syndromes';
 import { 
   calculateRoleMatchingV5, 
-  calculateAllRolesCompatibilityV5 
-} from '@/lib/roleMatchingV5';
+  calculateAllRolesCompatibilityV5, RUOLI_V5 } from '@/lib/roleMatchingV5';
 
 // Mock data per test offline (basato su dati reali estratti)
 const mockDomande: DomandaV5[] = [
@@ -271,6 +270,7 @@ describe('RicalcoloV5 - Pipeline Completa', () => {
     console.log('\n' + '='.repeat(60));
     
     expect(profilo.assessment_version).toBe('v5');
-    expect(matching.tuttiRuoli.length).toBe(17);
+    // Ancorato al motore: aggiungere ruoli a ROLE_PROFILES_V5 non deve rompere la pipeline
+    expect(matching.tuttiRuoli.length).toBe(RUOLI_V5.length);
   });
 });

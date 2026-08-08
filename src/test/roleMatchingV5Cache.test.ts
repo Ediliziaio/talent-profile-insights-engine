@@ -8,6 +8,7 @@ import {
   calculateRoleMatchingV5Cached,
   calculateAllRolesCompatibilityV5Cached,
 } from '../lib/roleMatchingV5Cache';
+import { RUOLI_V5 } from '../lib/roleMatchingV5';
 import { TraitScores } from '../lib/syndromes';
 
 // Profilo di test
@@ -82,10 +83,13 @@ describe('RoleMatchingV5Cache', () => {
   });
 
   describe('calculateAllRolesCompatibilityV5Cached', () => {
-    it('should return all 17 roles', () => {
+    it('should return every configured role', () => {
       const result = calculateAllRolesCompatibilityV5Cached('Venditore/Commerciale', testProfile, 35);
-      
-      expect(result.tuttiRuoli.length).toBe(17);
+
+      // Ancorato al motore, non a un numero fisso: aggiungere un ruolo a
+      // ROLE_PROFILES_V5 non deve rompere questo test.
+      expect(result.tuttiRuoli.length).toBe(RUOLI_V5.length);
+      expect(result.tuttiRuoli.length).toBeGreaterThanOrEqual(24);
     });
 
     it('should cache results', () => {

@@ -1,6 +1,9 @@
 /**
- * Test E2E del ricalcolo V5 con dati reali dal database
- * Questo test richiede connessione al database
+ * Test E2E del ricalcolo V5 con dati reali dal database.
+ *
+ * Interroga il database di PRODUZIONE: non deve girare dentro `npm test`
+ * (flaky per rete/dati, e nessuna suite unitaria deve dipendere da dati vivi).
+ * Si esegue esplicitamente con: npm run test:e2e
  */
 
 import { describe, it, expect } from 'vitest';
@@ -26,7 +29,7 @@ const funzioneToRuoloV5: Record<string, string> = {
   'Amministrazione': 'Responsabile Amministrativo',
 };
 
-describe('RicalcoloV5 - E2E con Database Reale', () => {
+describe.runIf(process.env.RUN_E2E === '1')('RicalcoloV5 - E2E con Database Reale', () => {
   it('dovrebbe caricare domande dal database', async () => {
     try {
       const domande = await loadDomandeV5();
