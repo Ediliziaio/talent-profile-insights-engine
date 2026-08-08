@@ -117,7 +117,7 @@ export default function LavoraInEdilizia() {
         intro={
           <p>
             Quindici minuti dal telefono, gratis. Scopri in quali ruoli edili rendi di più e finisci
-            nel bacino che le imprese consultano quando cercano una persona come te — non in una pila
+            nell’archivio che le imprese consultano quando cercano una persona come te — non in una pila
             di curriculum.
           </p>
         }

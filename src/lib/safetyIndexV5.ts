@@ -3,14 +3,14 @@
  *
  * Stima la propensione a mantenere comportamenti sicuri in cantiere a partire
  * dai tratti V5 già misurati e validati. NON introduce domande nuove e NON è
- * uno screening clinico: descrive un pattern di comportamento lavorativo
+ * una diagnosi clinica: descrive un pattern di comportamento lavorativo
  * atteso, da verificare al colloquio e durante l'inserimento.
  *
  * Base del modello (letteratura su safety behavior + esperienza di cantiere):
  * chi salta le procedure raramente lo fa per ignoranza — lo fa quando la
  * pressione supera la disciplina. I quattro tratti usati:
  *
- *  - ADS (Autodisciplina)      35% — la tenuta della procedura quando nessuno guarda
+ *  - ADS (Autodisciplina)      35% — il rispetto delle regole quando nessuno guarda
  *  - GP  (Gestione Pressioni)  30% — cosa succede alla disciplina sotto stress
  *  - PRI (Principi)            20% — il rapporto con le regole come valore, non come obbligo
  *  - RC  (Resistenza/Verifica) 15% — la tendenza a verificare prima di agire
@@ -64,7 +64,7 @@ const LABELS: Record<string, string> = {
 };
 
 export const DISCLAIMER_IPS =
-  'Indicazione di propensione comportamentale derivata dai tratti misurati. Non è una diagnosi, non è una previsione certa e non sostituisce formazione, DPI e vigilanza: orienta colloquio e piano di inserimento.';
+  'Indica come la persona tende a comportarsi, in base al test. Non è una diagnosi né una certezza, e non sostituisce formazione, DPI e controlli: serve a capire dove guardare al colloquio e nei primi mesi.';
 
 /** Riporta un tratto da −100/+100 a 0–100. */
 const a100 = (t: number) => Math.round(Math.min(100, Math.max(0, (t + 100) / 2)));
@@ -163,7 +163,7 @@ export function calcolaSafetyIndex(
     fascia = 'AFFIDABILE';
     label = 'Propensione affidabile';
     descrizione =
-      'Il profilo indica disciplina stabile e tenuta sotto pressione: la propensione attesa è a mantenere le procedure anche senza supervisione diretta.';
+      'Disciplina stabile e buona resistenza alla pressione: è il profilo che tende a rispettare le procedure anche quando nessuno controlla.';
   } else if (indice >= 50) {
     fascia = 'ADEGUATO';
     label = 'Propensione adeguata';

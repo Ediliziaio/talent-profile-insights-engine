@@ -60,7 +60,7 @@ const PIANI = [
     features: [
       'Analisi illimitate',
       'API dedicata',
-      'Taratura del matching sui tuoi ruoli',
+      'Taratura dell’abbinamento persona-ruolo sui tuoi ruoli',
       'Onboarding personalizzato',
       'Account manager dedicato',
       'SLA garantito',
@@ -85,7 +85,7 @@ const SERVIZIO = [
   {
     fascia: 'Ruoli direzionali',
     esempi: 'Direttore tecnico, responsabile di commessa, direzione operativa',
-    nota: 'Incarico dedicato con ricerca diretta. Preventivo su briefing.',
+    nota: 'Incarico dedicato con ricerca diretta. Preventivo su prima chiamata.',
   },
 ];
 
@@ -108,7 +108,7 @@ const FAQ = [
   },
   {
     q: 'Quanto costa il servizio di ricerca e selezione?',
-    a: 'Dipende dal ruolo e dalla difficoltà della ricerca. Funziona con una quota di avvio e un saldo all’assunzione, calcolati sulla retribuzione della posizione. Le fasce indicative sono in questa pagina; per un numero preciso serve mezz’ora di briefing.',
+    a: 'Dipende dal ruolo e dalla difficoltà della ricerca. Funziona con una quota di avvio e un saldo all’assunzione, calcolati sulla retribuzione della posizione. Le fasce indicative sono in questa pagina; per un numero preciso serve mezz’ora di chiamata.',
   },
   {
     q: 'Il candidato paga qualcosa?',

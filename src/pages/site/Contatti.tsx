@@ -19,7 +19,7 @@ const PERCORSI = [
   {
     icon: Briefcase,
     title: 'Voglio che la selezione la facciate voi',
-    desc: 'Briefing di mezz’ora sul ruolo e ti diciamo tempi, fattibilità e costo prima di partire.',
+    desc: 'Mezz’ora al telefono sul ruolo e ti diciamo tempi, fattibilità e costo prima di partire.',
     to: '/ricerca-e-selezione-personale-edile',
     label: 'Ricerca e selezione',
   },

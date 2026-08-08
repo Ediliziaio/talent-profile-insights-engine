@@ -24,31 +24,31 @@ const PATH = '/ricerca-e-selezione-personale-edile';
 const FASI = [
   {
     icon: Handshake,
-    title: 'Briefing sul ruolo reale',
+    title: 'Prima chiamata: capiamo il ruolo vero',
     desc: 'Non partiamo dall’annuncio: partiamo dal cantiere. Chi comanda, che squadra troverà, che tipo di committente, cosa ha fatto fallire i tentativi precedenti.',
     tempo: 'Giorno 1',
   },
   {
     icon: Megaphone,
     title: 'Ricerca attiva',
-    desc: 'Annunci mirati, bacino Talenti Edili e ricerca diretta sul territorio. In edilizia le persone giuste raramente stanno rispondendo agli annunci.',
+    desc: 'Annunci mirati, archivio Talenti Edili e ricerca diretta sul territorio. In edilizia le persone giuste raramente stanno rispondendo agli annunci.',
     tempo: 'Giorni 2–10',
   },
   {
     icon: Filter,
-    title: 'Screening e verifica',
+    title: 'Scrematura e verifica',
     desc: 'Colloquio telefonico, verifica di esperienza reale, disponibilità, patenti e abilitazioni. Scartiamo qui, non ti facciamo perdere tempo dopo.',
     tempo: 'Giorni 5–15',
   },
   {
     icon: Brain,
     title: 'Analisi psicoattitudinale',
-    desc: 'Ogni candidato che arriva in short list ha completato il Talent Profile: 242 domande, 15 tratti, report elaborato dall’Intelligenza Artificiale.',
+    desc: 'Ogni candidato arrivato in fondo ha completato il Talent Profile: 242 domande, 15 tratti, report elaborato dall’Intelligenza Artificiale.',
     tempo: 'Giorni 10–18',
   },
   {
     icon: Users,
-    title: 'Rosa finale di 3 candidati',
+    title: 'Ti presentiamo i 3 migliori',
     desc: 'Ti consegniamo tre profili con report completo, compatibilità di ruolo, aree di rischio e la guida al colloquio personalizzata per ciascuno.',
     tempo: 'Entro il giorno 21',
   },
@@ -61,12 +61,12 @@ const FASI = [
 ];
 
 const INCLUSO = [
-  'Briefing sul ruolo e sul contesto di cantiere',
+  'Prima chiamata per capire ruolo e cantiere',
   'Stesura e pubblicazione degli annunci',
-  'Ricerca attiva sul territorio e nel bacino Talenti Edili',
-  'Screening telefonico e verifica delle esperienze dichiarate',
-  'Analisi psicoattitudinale Talent Profile su tutti i finalisti',
-  'Report completo elaborato dall’AI per ogni candidato in rosa',
+  'Ricerca attiva sul territorio e nell’archivio Talenti Edili',
+  'Prima scrematura al telefono e verifica delle esperienze dichiarate',
+  'Analisi psicoattitudinale Talent Profile su tutti i 3 candidati',
+  'Report completo elaborato dall’AI per ognuno dei 3',
   'Guida al colloquio personalizzata',
   'Piano di inserimento a 90 giorni',
   'Sostituzione gratuita se la persona lascia entro il periodo concordato',
@@ -94,15 +94,15 @@ const QUANDO_SERVE = [
 const FAQ = [
   {
     q: 'Che cos’è il servizio di ricerca e selezione di Talenti Edili?',
-    a: 'È un servizio chiavi in mano in cui la selezione la facciamo noi: definiamo il ruolo con te, cerchiamo attivamente i candidati sul mercato, li sottoponiamo all’analisi psicoattitudinale Talent Profile e ti consegniamo una rosa di tre finalisti con report completo, compatibilità di ruolo e guida al colloquio.',
+    a: 'È un servizio chiavi in mano in cui la selezione la facciamo noi: definiamo il ruolo con te, cerchiamo attivamente i candidati sul mercato, li sottoponiamo all’analisi psicoattitudinale Talent Profile e ti consegniamo i 3 candidati migliori con report completo, compatibilità di ruolo e guida al colloquio.',
   },
   {
-    q: 'Quanto tempo serve per ricevere la rosa di candidati?',
-    a: 'Di norma consegniamo la short list entro 21 giorni dal briefing. Sui ruoli molto specialistici o in zone con poca offerta i tempi possono allungarsi: te lo diciamo prima di partire, non dopo.',
+    q: 'Quanto tempo serve per ricevere i 3 candidati?',
+    a: 'Di norma consegniamo i 3 candidati entro 21 giorni dalla prima chiamata. Sui ruoli molto specialistici o in zone con poca offerta i tempi possono allungarsi: te lo diciamo prima di partire, non dopo.',
   },
   {
     q: 'In cosa siete diversi da un’agenzia interinale?',
-    a: 'Un’agenzia ti manda persone; noi ti diciamo perché quella persona funzionerà in quel ruolo e cosa rischi con lei. Ogni finalista arriva con un’analisi psicoattitudinale su 15 tratti e un report elaborato dall’Intelligenza Artificiale. E la persona la assumi tu, direttamente: non c’è somministrazione.',
+    a: 'Un’agenzia ti manda persone; noi ti diciamo perché quella persona funzionerà in quel ruolo e cosa rischi con lei. Ognuno dei 3 candidati arriva con un’analisi psicoattitudinale su 15 tratti e un report elaborato dall’Intelligenza Artificiale. E la persona la assumi tu, direttamente: non c’è somministrazione.',
   },
   {
     q: 'Cosa succede se la persona che assumo se ne va dopo due mesi?',
@@ -110,11 +110,11 @@ const FAQ = [
   },
   {
     q: 'Selezionate anche operai o solo ruoli di responsabilità?',
-    a: 'Entrambi. Su operai e squadre il valore sta nel ridurre il turnover dei primi mesi; su ruoli di responsabilità sta nell’evitare l’errore singolo che costa una commessa. Il metodo è lo stesso, cambia il peso dei tratti nel matching.',
+    a: 'Entrambi. Su operai e squadre il valore sta nel ridurre il turnover dei primi mesi; su ruoli di responsabilità sta nell’evitare l’errore singolo che costa una commessa. Il metodo è lo stesso, cambia il peso dei tratti nel abbinamento.',
   },
   {
     q: 'Quanto costa il servizio?',
-    a: 'Il costo dipende dal ruolo e dalla difficoltà della ricerca, e viene definito in fase di incarico con una quota di avvio e un saldo all’assunzione. Nella pagina Prezzi trovi le fasce indicative; per un preventivo puntuale serve mezz’ora di briefing.',
+    a: 'Il costo dipende dal ruolo e dalla difficoltà della ricerca, e viene definito in fase di incarico con una quota di avvio e un saldo all’assunzione. Nella pagina Prezzi trovi le fasce indicative; per un preventivo puntuale serve mezz’ora di chiamata.',
   },
 ];
 
@@ -124,14 +124,14 @@ export default function RicercaSelezione() {
       webPageLd({
         name: 'Ricerca e selezione del personale edile',
         description:
-          'Servizio chiavi in mano di ricerca e selezione per imprese edili, con analisi psicoattitudinale e Intelligenza Artificiale su ogni finalista.',
+          'Servizio chiavi in mano di ricerca e selezione per imprese edili, con analisi psicoattitudinale e Intelligenza Artificiale su ognuno dei 3 candidati.',
         path: PATH,
       }),
       serviceLd({
         name: 'Ricerca e selezione del personale edile',
         serviceType: 'Ricerca e selezione del personale',
         description:
-          'Ricerca attiva, screening, analisi psicoattitudinale Talent Profile e consegna di una rosa di tre candidati con report completo e guida al colloquio.',
+          'Ricerca attiva, scrematura, analisi psicoattitudinale Talent Profile e consegna di i 3 candidati migliori con report completo e guida al colloquio.',
         path: PATH,
         offers: [
           { name: 'Selezione ruoli operativi', description: 'Operai specializzati, capisquadra, mestieri di cantiere' },
@@ -152,7 +152,7 @@ export default function RicercaSelezione() {
     <>
       <Seo
         title="Ricerca e selezione personale edile | Talenti Edili"
-        description="Cerchiamo, verifichiamo e analizziamo i candidati con il Talent Profile System: 3 finalisti con report e guida al colloquio in 21 giorni."
+        description="Cerchiamo, verifichiamo e analizziamo i candidati con il Talent Profile System: 3 candidati scelti con report e guida al colloquio in 21 giorni."
         path={PATH}
         jsonLd={jsonLd}
       />
@@ -162,13 +162,13 @@ export default function RicercaSelezione() {
         title={
           <>
             La selezione la facciamo noi.{' '}
-            <span className="text-[#f09133]">Tu scegli fra tre persone misurate.</span>
+            <span className="text-[#f09133]">Tu scegli fra tre candidati già testati.</span>
           </>
         }
         intro={
           <p>
-            Ricerca attiva, screening, verifica e analisi psicoattitudinale: gestiamo tutto. Entro 21
-            giorni ricevi <strong className="text-white">tre finalisti</strong>, ognuno con report
+            Ricerca attiva, scrematura, verifica e analisi psicoattitudinale: gestiamo tutto. Entro 21
+            giorni ricevi <strong className="text-white">tre candidati scelti</strong>, ognuno con report
             Talent Profile, compatibilità di ruolo, aree di rischio e le domande da fargli al
             colloquio.
           </p>
@@ -183,9 +183,9 @@ export default function RicercaSelezione() {
         answer={
           <p>
             È un servizio di <strong>ricerca e selezione chiavi in mano per imprese edili</strong>:
-            definiamo con te il ruolo reale, cerchiamo attivamente i candidati sul territorio e nel
-            bacino Talenti Edili, li verifichiamo e li sottoponiamo all’analisi psicoattitudinale{' '}
-            <strong>Talent Profile</strong>. Ti consegniamo una rosa di tre finalisti — ciascuno con
+            definiamo con te il ruolo reale, cerchiamo attivamente i candidati sul territorio e nell’archivio
+            Talenti Edili, li verifichiamo e li sottoponiamo all’analisi psicoattitudinale{' '}
+            <strong>Talent Profile</strong>. Ti consegniamo i 3 candidati migliori — ciascuno con
             report elaborato dall’Intelligenza Artificiale, punteggio di compatibilità con il ruolo,
             aree di rischio comportamentale e guida al colloquio — più il piano di inserimento per i
             primi 90 giorni.
@@ -271,7 +271,7 @@ export default function RicercaSelezione() {
               },
               {
                 q: '“Non ho tempo per queste cose.”',
-                a: 'È esattamente il motivo per cui esiste il servizio: il tempo lo mettiamo noi. Tu fai il briefing iniziale (mezz’ora) e i colloqui finali con tre persone già misurate. Tutto il resto — ricerca, screening, verifica, analisi — non passa dalla tua scrivania.',
+                a: 'È esattamente il motivo per cui esiste il servizio: il tempo lo mettiamo noi. Tu fai la prima chiamata (mezz’ora) e i colloqui finali con tre candidati già testati. Tutto il resto — ricerca, scrematura, verifica, analisi — non passa dalla tua scrivania.',
               },
             ].map((o) => (
               <div key={o.q} className="landing-card rounded-xl border border-[#e5e0db] p-6">
@@ -318,7 +318,7 @@ export default function RicercaSelezione() {
 
       <CtaBand
         title="Raccontaci il ruolo che non riesci a coprire"
-        sub="Mezz’ora di briefing e ti diciamo se è un problema di ricerca, di selezione o di ruolo mal definito. Senza impegno."
+        sub="Mezz’ora di chiamata e ti diciamo se è un problema di ricerca, di selezione o di ruolo mal definito. Senza impegno."
         ctaLabel="Voglio parlare con un selezionatore"
         origine="ricerca-selezione"
       />

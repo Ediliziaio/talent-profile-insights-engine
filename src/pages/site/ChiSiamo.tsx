@@ -43,7 +43,7 @@ const PRINCIPI = [
 const FAQ = [
   {
     q: 'Chi c’è dietro Talenti Edili?',
-    a: 'Talenti Edili nasce dall’incontro fra chi lavora da anni con le imprese edili italiane e i professionisti — psicologi del lavoro, psicoterapeuti, esperti di risorse umane — che hanno costruito il modello psicometrico alla base del Talent Profile System.',
+    a: 'Talenti Edili nasce dall’incontro fra chi lavora da anni con le imprese edili italiane e i professionisti — psicologi del lavoro, psicoterapeuti, esperti di risorse umane — che hanno costruito il modello scientifico alla base del Talent Profile System.',
   },
   {
     q: 'Siete una società di software o di consulenza?',
@@ -51,7 +51,7 @@ const FAQ = [
   },
   {
     q: 'Perché solo edilizia?',
-    a: 'Perché il matching funziona quando è tarato su ruoli reali, non su categorie generiche. Un capisquadra non è un “team leader”: ha vincoli, pressioni e dinamiche specifiche. Restare verticali sull’edilizia è quello che rende utile il punteggio di compatibilità.',
+    a: 'Perché l’abbinamento persona-ruolo funziona quando è tarato su ruoli reali, non su categorie generiche. Un capisquadra non è un “team leader”: ha vincoli, pressioni e dinamiche specifiche. Restare verticali sull’edilizia è quello che rende utile il punteggio di compatibilità.',
   },
 ];
 
@@ -145,7 +145,7 @@ export default function ChiSiamo() {
             <strong>ricerca e selezione</strong> chiavi in mano, e il{' '}
             <strong>Talent Profile System</strong> — analisi psicoattitudinale con Intelligenza
             Artificiale — utilizzabile in autonomia. Il denominatore comune è sempre lo stesso: nessuna
-            decisione su una persona senza prima averla misurata.
+            decisione su una persona senza prima averla testata.
           </p>
         }
       />

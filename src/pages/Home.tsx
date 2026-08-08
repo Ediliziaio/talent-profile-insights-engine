@@ -307,7 +307,7 @@ const FAQ_DATA = [
   },
   {
     q: 'È validata scientificamente?',
-    a: 'Sì. Il Talent Profile System si basa su modelli psicometrici riconosciuti, con un coefficiente di validazione di .75 su 1. Le domande sono costruite per rendere inefficaci le risposte di comodo: il candidato non può prepararsi e non può barare.',
+    a: 'Sì. Il Talent Profile System si basa su metodi scientifici riconosciuti, con un coefficiente di validazione di .75 su 1. Le domande sono costruite per rendere inefficaci le risposte di comodo: il candidato non può prepararsi e non può barare.',
   },
   {
     q: 'Per quali ruoli dell\'edilizia funziona?',
@@ -349,7 +349,7 @@ const PROBLEMS = [
     desc: 'Fra un cantiere e l\'altro, i colloqui li fai di sera. E la selezione fatta di fretta è quella che si paga più cara.',
     stat: '21gg',
     soluzione: 'Ricerca e Selezione',
-    soluzioneDesc: 'La facciamo noi: rosa di 3 finalisti misurati in 21 giorni',
+    soluzioneDesc: 'La facciamo noi: i 3 candidati migliori già testati in 21 giorni',
     to: '/troviamo',
   },
   {
@@ -1916,7 +1916,7 @@ export default function Home() {
                 <div className="hidden md:block absolute left-0 top-1/4 bottom-1/4 w-px bg-white/10" />
                 <div className="text-5xl md:text-6xl font-bold text-[#f09133] mb-2" style={{ textShadow: '0 0 30px rgba(240,145,51,0.3)' }}>.75/1</div>
                 <Star className="h-5 w-5 text-white/70 mx-auto mb-1" />
-                <div className="text-white/70 text-sm font-medium">Validazione psicometrica</div>
+                <div className="text-white/70 text-sm font-medium">Validazione scientifica</div>
                 <div className="text-white/70 text-xs mt-0.5">certificata</div>
               </motion.div>
             </motion.div>

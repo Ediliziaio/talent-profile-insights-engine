@@ -34,7 +34,7 @@ const AREE = [
   {
     icon: Compass,
     nome: 'Essere',
-    desc: 'Chi è la persona a prescindere dal lavoro: stabilità emotiva, principi, tenuta sotto pressione, immagine di sé.',
+    desc: 'Chi è la persona a prescindere dal lavoro: stabilità emotiva, principi, quanto regge la pressione, immagine di sé.',
     esempi: ['Stabilità emotiva', 'Autostima', 'Principi e coerenza', 'Gestione dello stress', 'Apertura'],
   },
   {
@@ -88,7 +88,7 @@ const OUTPUT = [
   {
     icon: ShieldCheck,
     title: 'Aree di rischio',
-    desc: 'Le dinamiche che al colloquio non emergono: rigidità, conflittualità, tenuta sotto pressione, sindromi comportamentali.',
+    desc: 'Le dinamiche che al colloquio non emergono: rigidità, conflittualità, quanto regge la pressione, sindromi comportamentali.',
   },
   {
     icon: Lightbulb,
@@ -118,15 +118,15 @@ const FAQ = [
   },
   {
     q: 'Che ruolo ha esattamente l’Intelligenza Artificiale?',
-    a: 'L’AI non inventa il profilo: parte dai punteggi calcolati dal modello psicometrico e li traduce in indicazioni operative — quale ruolo, quali rischi, quali domande fare, come gestire quella persona nei primi 90 giorni. È il livello che sostituisce le ore di lavoro di un consulente nell’interpretazione dei dati.',
+    a: 'L’AI non inventa il profilo: parte dai punteggi calcolati dal modello scientifico e li traduce in indicazioni operative — quale ruolo, quali rischi, quali domande fare, come gestire quella persona nei primi 90 giorni. È il livello che sostituisce le ore di lavoro di un consulente nell’interpretazione dei dati.',
   },
   {
     q: 'È validato scientificamente?',
-    a: 'Sì. Il Talent Profile System si basa su modelli psicometrici riconosciuti, con un coefficiente di validazione di .75 su 1. Le domande sono costruite per rendere inefficaci le risposte di comodo.',
+    a: 'Sì. Il Talent Profile System si basa su metodi scientifici riconosciuti, con un coefficiente di validazione di .75 su 1. Le domande sono costruite per rendere inefficaci le risposte di comodo.',
   },
   {
     q: 'Il candidato può barare?',
-    a: 'È molto difficile. Le 242 domande contengono item di controllo incrociati: rispondere in modo strategico su una scala genera incoerenze rilevabili su altre. Il sistema segnala i profili con risposte non coerenti.',
+    a: 'È molto difficile. Le 242 domande contengono domande di controllo incrociate: rispondere in modo strategico su una scala genera incoerenze rilevabili su altre. Il sistema segnala i profili con risposte non coerenti.',
   },
   {
     q: 'Serve una struttura HR per usarlo?',

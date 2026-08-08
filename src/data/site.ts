@@ -32,7 +32,7 @@ export const NAV: NavItem[] = [
       {
         label: 'Ricerca e Selezione',
         to: '/ricerca-e-selezione-personale-edile',
-        desc: 'La selezione la facciamo noi: ti consegniamo la rosa finale',
+        desc: 'La selezione la facciamo noi: ti consegniamo i 3 candidati migliori',
       },
       {
         label: 'Chi ti troviamo',
@@ -114,15 +114,15 @@ export const PILASTRI = [
     eyebrow: 'La Piattaforma',
     title: 'Trova talenti già analizzati',
     desc:
-      'Un bacino di profili edili che hanno già completato l’analisi psicoattitudinale. Filtri per ruolo, zona e compatibilità, e vedi il profilo completo prima ancora di chiamarli.',
-    per: 'Per chi ha fretta e vuole scegliere fra persone già misurate.',
+      'Un archivio di candidati edili che hanno già completato l’analisi psicoattitudinale. Filtri per ruolo, zona e compatibilità, e vedi il profilo completo prima ancora di chiamarli.',
+    per: 'Per chi ha fretta e vuole scegliere fra candidati già testati.',
   },
   {
     slug: '/ricerca-e-selezione-personale-edile',
     eyebrow: 'Servizio',
     title: 'Facciamo noi la selezione',
     desc:
-      'Ricerca, screening e analisi psicoattitudinale li gestiamo noi. Tu ricevi una rosa di 3 candidati con report completo, compatibilità di ruolo e guida al colloquio.',
+      'Ricerca, scrematura e analisi psicoattitudinale li gestiamo noi. Tu ricevi i 3 candidati migliori con report completo, compatibilità di ruolo e guida al colloquio.',
     per: 'Per chi non ha tempo né una struttura HR interna.',
   },
   {

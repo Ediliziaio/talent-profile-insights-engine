@@ -62,7 +62,7 @@ export const GUIDE: Guida[] = [
         titolo: 'Intervenire prima: misurare la compatibilità con il ruolo',
         paragrafi: [
           'Le prime due cause si affrontano solo prima dell’assunzione. Un colloquio, per quanto ben fatto, misura come una persona si racconta in mezz’ora — non come reagirà alla terza settimana di pioggia con il cronoprogramma in ritardo.',
-          'L’analisi psicoattitudinale serve esattamente a questo: misura tratti stabili (tenuta sotto pressione, bisogno di autonomia, tolleranza alla monotonia, reazione al richiamo) e li confronta con quello che quel ruolo, in quella squadra, chiederà davvero. Non produce un giudizio sulla persona: produce un punteggio di compatibilità con una posizione precisa.',
+          'L’analisi psicoattitudinale serve esattamente a questo: misura tratti stabili (quanto regge la pressione, bisogno di autonomia, tolleranza alla monotonia, reazione al richiamo) e li confronta con quello che quel ruolo, in quella squadra, chiederà davvero. Non produce un giudizio sulla persona: produce un punteggio di compatibilità con una posizione precisa.',
           'La domanda utile non è “questo candidato è bravo?”, è “questo candidato regge questo ruolo con questo capisquadra?”. Sono due domande diverse e solo la seconda predice il turnover.',
         ],
       },
@@ -142,7 +142,7 @@ export const GUIDE: Guida[] = [
         ],
         elenco: [
           'Stipendio erogato senza resa piena: circa 7.500 € per tre mesi, di cui una quota rilevante corrisponde a un rendimento sotto la soglia utile.',
-          'Costo di ricerca: annunci, tempo di screening, colloqui. Difficilmente sotto i 2.000–3.000 € se si contano le ore di chi ha fatto la selezione.',
+          'Costo di ricerca: annunci, tempo di scrematura, colloqui. Difficilmente sotto i 2.000–3.000 € se si contano le ore di chi ha fatto la selezione.',
           'Formazione e affiancamento: le ore di un collega esperto sottratte al suo lavoro. Su tre mesi vale intorno al 15% della RAL, circa 4.500 €.',
           'Produttività persa della squadra: chi affianca rallenta, chi corregge errori rallenta. Stimabile intorno al 40% del costo del periodo, circa 3.000 €.',
           'Sostituzione: si ricomincia da capo, con gli stessi costi di ricerca e un’urgenza maggiore che di solito peggiora la qualità della scelta.',
@@ -275,7 +275,7 @@ export const GUIDE: Guida[] = [
       },
       {
         q: 'Il test attitudinale sostituisce il colloquio?',
-        a: 'No, lo precede e lo indirizza. L’analisi psicoattitudinale misura tratti stabili che il colloquio non può osservare — tenuta sotto pressione, precisione sotto fatica, reazione al richiamo — e indica dove approfondire. Il colloquio verifica quei punti su episodi reali.',
+        a: 'No, lo precede e lo indirizza. L’analisi psicoattitudinale misura tratti stabili che il colloquio non può osservare — quanto regge la pressione, precisione sotto fatica, reazione al richiamo — e indica dove approfondire. Il colloquio verifica quei punti su episodi reali.',
       },
     ],
     ruoliCorrelati: ['capocantiere', 'capisquadra', 'geometra-di-cantiere'],

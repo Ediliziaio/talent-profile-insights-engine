@@ -37,11 +37,11 @@ export const SELEZIONI: CategoriaSelezione[] = [
     h1: 'Troviamo i venditori per la tua impresa edile',
     metaTitle: 'Ricerca e selezione venditori settore edilizia | Talenti Edili',
     metaDescription:
-      'Troviamo venditori e commerciali per imprese edili, serramentisti e impiantisti: ricerca attiva, analisi psicoattitudinale e rosa di 3 finalisti in 21 giorni.',
+      'Troviamo venditori e commerciali per imprese edili, serramentisti e impiantisti: ricerca attiva, analisi psicoattitudinale e i 3 candidati migliori in 21 giorni.',
     intro:
-      'Commerciali tecnici, venditori di serramenti e impianti, account per il B2B edile. Cerchiamo noi, misuriamo noi: tu scegli fra tre finalisti con i numeri in mano.',
+      'Commerciali tecnici, venditori di serramenti e impianti, account per il B2B edile. Cerchiamo noi, testiamo noi: tu scegli fra tre candidati scelti con i numeri in mano.',
     definizione:
-      'È il servizio di ricerca e selezione di Talenti Edili dedicato alle figure commerciali del settore edile: commerciale tecnico, venditore di serramenti e infissi, venditore di impianti e materiali, account B2B verso imprese e studi tecnici. Facciamo ricerca attiva sul territorio, verifichiamo i risultati di vendita dichiarati e sottoponiamo ogni finalista all’analisi psicoattitudinale Talent Profile — che sui commerciali misura le variabili decisive: tenuta al rifiuto, costanza, orientamento al risultato reale e onestà nel riportare i numeri. Consegniamo una rosa di tre finalisti entro 21 giorni, con report completo e domande da fare al colloquio.',
+      'È il servizio di ricerca e selezione di Talenti Edili dedicato alle venditori del settore edile: commerciale tecnico, venditore di serramenti e infissi, venditore di impianti e materiali, account B2B verso imprese e studi tecnici. Facciamo ricerca attiva sul territorio, verifichiamo i risultati di vendita dichiarati e sottoponiamo ognuno dei 3 candidati all’analisi psicoattitudinale Talent Profile — che sui commerciali misura le variabili decisive: quanto regge i "no", costanza, orientamento al risultato reale e onestà nel riportare i numeri. Consegniamo i 3 candidati migliori entro 21 giorni, con report completo e domande da fare al colloquio.',
     difficolta: [
       {
         titolo: 'Al colloquio vendono benissimo — sé stessi',
@@ -66,7 +66,7 @@ export const SELEZIONI: CategoriaSelezione[] = [
     ],
     comeSelezioniamo: [
       {
-        titolo: 'Tenuta al rifiuto, non parlantina',
+        titolo: 'Quanto regge i "no", non la parlantina',
         testo:
           'Il Talent Profile misura la resilienza commerciale: come reagisce al no, quanto regge la costanza di visita quando gli ordini non arrivano, se molla dopo il secondo trimestre lento.',
       },
@@ -83,7 +83,7 @@ export const SELEZIONI: CategoriaSelezione[] = [
       {
         titolo: 'Prova sul campo del settore',
         testo:
-          'Ai finalisti chiediamo di ragionare su una trattativa edile vera: impresa che tira sul prezzo, capitolato che cambia, pagamento a 90 giorni. Chi conosce solo la vendita da manuale si vede subito.',
+          'Ai candidati arrivati in fondo chiediamo di ragionare su una trattativa edile vera: impresa che tira sul prezzo, capitolato che cambia, pagamento a 90 giorni. Chi conosce solo la vendita da manuale si vede subito.',
       },
     ],
     figureTipiche: [
@@ -98,15 +98,15 @@ export const SELEZIONI: CategoriaSelezione[] = [
     faq: [
       {
         q: 'Quanto tempo serve per trovare un venditore?',
-        a: 'La rosa di tre finalisti arriva di norma entro 21 giorni dal briefing. Sui responsabili commerciali o su zone con poca offerta i tempi possono allungarsi: lo diciamo prima di partire.',
+        a: 'La i 3 candidati migliori arriva di norma entro 21 giorni dalla prima chiamata. Sui responsabili commerciali o su zone con poca offerta i tempi possono allungarsi: lo diciamo prima di partire.',
       },
       {
         q: 'Come verificate che un venditore sia davvero bravo?',
-        a: 'Su tre livelli: verifica delle referenze e della storia contrattuale, analisi psicoattitudinale con il tratto specifico di attitudine alla vendita (VEN) e tenuta al rifiuto, e una prova di ragionamento su una trattativa edile reale. Il colloquio da solo non basta: il commerciale è l’unico candidato allenato a superarlo.',
+        a: 'Su tre livelli: verifica delle referenze e della storia contrattuale, analisi psicoattitudinale con il tratto specifico di attitudine alla vendita (VEN) e quanto regge i "no", e una prova di ragionamento su una trattativa edile reale. Il colloquio da solo non basta: il commerciale è l’unico candidato allenato a superarlo.',
       },
       {
         q: 'Trovate anche venditori porta a porta o solo tecnici?',
-        a: 'Copriamo tutte le figure commerciali del settore edile: dal venditore di showroom all’agente di zona, dal commerciale tecnico B2B al responsabile commerciale. Il metodo si adatta: cambiano i pesi dei tratti, non il processo.',
+        a: 'Copriamo tutte le venditori del settore edile: dal venditore di showroom all’agente di zona, dal commerciale tecnico B2B al responsabile commerciale. Il metodo si adatta: cambiano i pesi dei tratti, non il processo.',
       },
       {
         q: 'Cosa succede se il venditore non produce risultati?',
@@ -121,11 +121,11 @@ export const SELEZIONI: CategoriaSelezione[] = [
     h1: 'Troviamo gli amministrativi per la tua impresa edile',
     metaTitle: 'Ricerca e selezione amministrativi edili | Talenti Edili',
     metaDescription:
-      'Impiegati amministrativi, contabili di cantiere e addetti paghe per imprese edili: selezione con analisi psicoattitudinale, 3 finalisti in 21 giorni.',
+      'Impiegati amministrativi, contabili di cantiere e addetti paghe per imprese edili: selezione con analisi psicoattitudinale, 3 candidati scelti in 21 giorni.',
     intro:
       'Contabilità di cantiere, fatturazione con reverse charge e SAL, gestione fornitori e subappalti: l’amministrazione edile è un mestiere a sé. Troviamo chi lo sa fare — e chi regge il ritmo di un’impresa vera.',
     definizione:
-      'È il servizio di ricerca e selezione di Talenti Edili per le figure amministrative delle imprese edili: impiegati amministrativi, contabili di cantiere, addetti a fatturazione e SAL, gestione fornitori e subappalti, supporto paghe. L’amministrazione edile ha specificità che un amministrativo generico non conosce — reverse charge, ritenute di garanzia, contabilità per commessa, DURC e congruità — e per questo verifichiamo le competenze sul campo, non sul CV. L’analisi psicoattitudinale misura le variabili che decidono la tenuta nel ruolo: precisione sotto scadenza, metodo, affidabilità e capacità di dire le cose scomode ai titolari. Rosa di tre finalisti entro 21 giorni.',
+      'È il servizio di ricerca e selezione di Talenti Edili per le figure amministrative delle imprese edili: impiegati amministrativi, contabili di cantiere, addetti a fatturazione e SAL, gestione fornitori e subappalti, supporto paghe. L’amministrazione edile ha specificità che un amministrativo generico non conosce — reverse charge, ritenute di garanzia, contabilità per commessa, DURC e congruità — e per questo verifichiamo le competenze sul campo, non sul CV. L’analisi psicoattitudinale misura le variabili che decidono la tenuta nel ruolo: precisione sotto scadenza, metodo, affidabilità e capacità di dire le cose scomode ai titolari. I 3 candidati migliori entro 21 giorni.',
     difficolta: [
       {
         titolo: 'L’edilizia è un’amministrazione a parte',
@@ -152,12 +152,12 @@ export const SELEZIONI: CategoriaSelezione[] = [
       {
         titolo: 'Precisione sotto scadenza, misurata',
         testo:
-          'Il Talent Profile misura disciplina, metodo e tenuta alla pressione: la combinazione che distingue chi chiude il mese sempre da chi lo chiude quando è tranquillo.',
+          'Il Talent Profile misura disciplina, metodo e resistenza alla pressione: la combinazione che distingue chi chiude il mese sempre da chi lo chiude quando è tranquillo.',
       },
       {
         titolo: 'Verifica delle competenze edili',
         testo:
-          'Ai finalisti sottoponiamo casi reali del settore: una fattura in reverse charge, un SAL con ritenuta, un DURC scaduto di un subappaltatore. Chi conosce solo l’amministrazione generica si ferma lì.',
+          'Ai candidati arrivati in fondo sottoponiamo casi reali del settore: una fattura in reverse charge, un SAL con ritenuta, un DURC scaduto di un subappaltatore. Chi conosce solo l’amministrazione generica si ferma lì.',
       },
       {
         titolo: 'Affidabilità e riservatezza',
@@ -186,11 +186,11 @@ export const SELEZIONI: CategoriaSelezione[] = [
       },
       {
         q: 'Come valutate la precisione di un amministrativo?',
-        a: 'Con l’analisi psicoattitudinale (disciplina, metodo, tenuta alla pressione) e con una prova pratica su documenti edili reali. "Sono una persona precisa" detto al colloquio non è un dato: il punteggio sul tratto e la prova lo sono.',
+        a: 'Con l’analisi psicoattitudinale (disciplina, metodo, quanto regge la pressione) e con una prova pratica su documenti edili reali. "Sono una persona precisa" detto al colloquio non è un dato: il punteggio sul tratto e la prova lo sono.',
       },
       {
         q: 'Serve anche per un part-time o solo full-time?',
-        a: 'Entrambi. Molte imprese sotto i 15 dipendenti cercano un amministrativo part-time: il processo di selezione è identico, cambia solo il bacino di ricerca.',
+        a: 'Entrambi. Molte imprese sotto i 15 dipendenti cercano un amministrativo part-time: il processo di selezione è identico, cambia solo la zona di ricerca.',
       },
       {
         q: 'Potete valutare la persona che ho già in amministrazione?',
@@ -205,11 +205,11 @@ export const SELEZIONI: CategoriaSelezione[] = [
     h1: 'Troviamo capicantiere e capisquadra',
     metaTitle: 'Ricerca e selezione capicantiere e capisquadra | Talenti Edili',
     metaDescription:
-      'Troviamo capicantiere e capisquadra per imprese edili: ricerca attiva fra chi non risponde agli annunci, analisi psicoattitudinale e rosa di 3 finalisti.',
+      'Troviamo capicantiere e capisquadra per imprese edili: ricerca attiva fra chi non risponde agli annunci, analisi psicoattitudinale e i 3 candidati migliori.',
     intro:
       'I ruoli che decidono se il cantiere consegna o slitta. Non stanno sui portali di annunci: vanno cercati attivamente — e misurati prima, perché qui l’errore costa una commessa.',
     definizione:
-      'È il servizio di ricerca e selezione di Talenti Edili per i ruoli di guida del cantiere: capocantiere, capisquadra, assistente di cantiere in crescita. Sono le figure più difficili da trovare in Italia — chi è bravo è già al lavoro e non risponde agli annunci — e le più costose da sbagliare: un capocantiere inadatto non rallenta sé stesso, rallenta l’intero cantiere. Facciamo ricerca diretta sul territorio, verifichiamo i cantieri realmente gestiti e misuriamo con l’analisi psicoattitudinale le tre variabili che il curriculum non dice: capacità di decidere sotto pressione, autorevolezza senza conflitto, rispetto rigoroso della sicurezza. Rosa di tre finalisti con report completo e guida al colloquio.',
+      'È il servizio di ricerca e selezione di Talenti Edili per i ruoli di guida del cantiere: capocantiere, capisquadra, assistente di cantiere in crescita. Sono le figure più difficili da trovare in Italia — chi è bravo è già al lavoro e non risponde agli annunci — e le più costose da sbagliare: un capocantiere inadatto non rallenta sé stesso, rallenta l’intero cantiere. Facciamo ricerca diretta sul territorio, verifichiamo i cantieri realmente gestiti e misuriamo con l’analisi psicoattitudinale le tre variabili che il curriculum non dice: capacità di decidere sotto pressione, autorevolezza senza conflitto, rispetto rigoroso della sicurezza. I 3 candidati migliori con report completo e guida al colloquio.',
     difficolta: [
       {
         titolo: 'I bravi non cercano lavoro',
@@ -236,7 +236,7 @@ export const SELEZIONI: CategoriaSelezione[] = [
       {
         titolo: 'Ricerca diretta, non annunci',
         testo:
-          'Mappiamo il territorio e i cantieri della zona, contattiamo direttamente chi guida squadre oggi. La maggioranza dei nostri finalisti su questi ruoli non era "in cerca di lavoro".',
+          'Mappiamo il territorio e i cantieri della zona, contattiamo direttamente chi guida squadre oggi. La maggioranza dei nostri candidati su questi ruoli non era "in cerca di lavoro".',
       },
       {
         titolo: 'Cantieri verificati, non dichiarati',
@@ -244,14 +244,14 @@ export const SELEZIONI: CategoriaSelezione[] = [
           'Chiediamo quali cantieri ha gestito, con che squadre, che importi e che committenti — e verifichiamo. La differenza fra "ho fatto il capocantiere" e "ho risposto di un cantiere da 2 milioni" emerge qui.',
       },
       {
-        titolo: 'Decisione, autorevolezza, sicurezza: misurate',
+        titolo: 'Decisione, autorevolezza, sicurezza: testate',
         testo:
           'L’analisi psicoattitudinale pesa i tratti critici del ruolo: decisione rapida, gestione dello stress, leadership senza autoritarismo, orientamento alla regola. Più l’Indice di Propensione alla Sicurezza dedicato.',
       },
       {
         titolo: 'Guida al colloquio su episodi reali',
         testo:
-          'Ti consegniamo le domande giuste per ciascun finalista: la fornitura saltata a due giorni dal getto, l’operaio bravo che ignora i DPI, il cronoprogramma da rinegoziare con la direzione lavori.',
+          'Ti consegniamo le domande giuste per ciascuno dei 3: la fornitura saltata a due giorni dal getto, l’operaio bravo che ignora i DPI, il cronoprogramma da rinegoziare con la direzione lavori.',
       },
     ],
     figureTipiche: [
@@ -272,7 +272,7 @@ export const SELEZIONI: CategoriaSelezione[] = [
       },
       {
         q: 'Come valutate la gestione della sicurezza?',
-        a: 'Con i tratti di orientamento alla regola e tenuta alla pressione, combinati nell’Indice di Propensione alla Sicurezza, e con domande su episodi reali: l’ultima volta che ha fermato una lavorazione, come ha gestito chi ignorava i DPI. Le abilitazioni sono un prerequisito, non un criterio.',
+        a: 'Con i tratti di orientamento alla regola e quanto regge la pressione, combinati nell’Indice di Propensione alla Sicurezza, e con domande su episodi reali: l’ultima volta che ha fermato una lavorazione, come ha gestito chi ignorava i DPI. Le abilitazioni sono un prerequisito, non un criterio.',
       },
       {
         q: 'Quanto costa sbagliare un capocantiere?',
@@ -287,11 +287,11 @@ export const SELEZIONI: CategoriaSelezione[] = [
     h1: 'Troviamo operai specializzati',
     metaTitle: 'Ricerca e selezione operai specializzati | Talenti Edili',
     metaDescription:
-      'Troviamo muratori, carpentieri, ferraioli e gruisti che restano: selezione con analisi psicoattitudinale su affidabilità, sicurezza e tenuta nel tempo.',
+      'Troviamo muratori, carpentieri, ferraioli e gruisti che restano: selezione con analisi psicoattitudinale su affidabilità, sicurezza e costanza nel tempo.',
     intro:
       'Muratori, carpentieri, ferraioli, gruisti. Il problema non è trovarli: è trovare quelli che lunedì si presentano, rispettano la sicurezza e a marzo sono ancora lì.',
     definizione:
-      'È il servizio di ricerca e selezione di Talenti Edili per gli operai specializzati: muratori, carpentieri, ferraioli, gruisti, piastrellisti, intonacatori, addetti ponteggi. Sulla manodopera specializzata la prova pratica dice se sanno lavorare; non dice se si presenteranno con costanza, se rispetteranno le procedure quando nessuno guarda e se reggeranno sei mesi allo stesso ritmo — le tre variabili che fanno saltare i cronoprogrammi. L’analisi psicoattitudinale misura esattamente queste: affidabilità, propensione alla sicurezza, tenuta nel tempo. Selezioniamo su chi resta, non solo su chi sa fare, e con la garanzia di sostituzione se il rapporto si interrompe nel periodo concordato.',
+      'È il servizio di ricerca e selezione di Talenti Edili per gli operai specializzati: muratori, carpentieri, ferraioli, gruisti, piastrellisti, intonacatori, addetti ponteggi. Sulla manodopera specializzata la prova pratica dice se sanno lavorare; non dice se si presenteranno con costanza, se rispetteranno le procedure quando nessuno guarda e se reggeranno sei mesi allo stesso ritmo — le tre variabili che fanno saltare i cronoprogrammi. L’analisi psicoattitudinale misura esattamente queste: affidabilità, propensione alla sicurezza, costanza nel tempo. Selezioniamo su chi resta, non solo su chi sa fare, e con la garanzia di sostituzione se il rapporto si interrompe nel periodo concordato.',
     difficolta: [
       {
         titolo: 'La prova pratica misura la mano, non la tenuta',
@@ -301,12 +301,12 @@ export const SELEZIONI: CategoriaSelezione[] = [
       {
         titolo: 'Il turnover operaio sembra normale — non lo è',
         testo:
-          'Ci si abitua a perdere due operai a stagione come fosse fisiologico. Non lo è: è selezione fatta solo sulla manualità, senza guardare affidabilità e compatibilità con la squadra.',
+          'Ci si abitua a perdere due operai a stagione come fosse fisiologico. Non lo è: è selezione fatta solo sulla manualità, senza guardare l’affidabilità e compatibilità con la squadra.',
       },
       {
         titolo: 'La sicurezza dipende dal profilo, non dal corso',
         testo:
-          'Il profilo statisticamente più esposto agli infortuni è chi rispetta le regole finché non ha fretta. Si individua prima, misurando disciplina e tenuta alla pressione insieme.',
+          'Il profilo statisticamente più esposto agli infortuni è chi rispetta le regole finché non ha fretta. Si individua prima, misurando disciplina e quanto regge la pressione insieme.',
       },
       {
         titolo: 'Squadra sbagliata, cantiere lento',
@@ -321,19 +321,19 @@ export const SELEZIONI: CategoriaSelezione[] = [
           'La durata dei rapporti precedenti dice più di qualunque colloquio: verifichiamo dove ha lavorato, quanto è rimasto e perché è finita. I pattern di abbandono si vedono prima.',
       },
       {
-        titolo: 'Affidabilità e costanza misurate',
+        titolo: 'Affidabilità e costanza, nero su bianco',
         testo:
           'L’analisi psicoattitudinale — 15 minuti dal telefono, in italiano semplice — misura i tratti che predicono la presenza: disciplina, costanza, stabilità. Nessun test di cultura generale.',
       },
       {
         titolo: 'Indice di Propensione alla Sicurezza',
         testo:
-          'Ogni finalista arriva con l’indice dedicato: la combinazione di disciplina, tenuta alla pressione e rispetto delle regole che distingue chi lavora in sicurezza da chi "di solito" lo fa.',
+          'Ognuno dei 3 candidati arriva con l’indice dedicato: la combinazione di disciplina, quanto regge la pressione e rispetto delle regole che distingue chi lavora in sicurezza da chi "di solito" lo fa.',
       },
       {
         titolo: 'Compatibilità con la tua squadra',
         testo:
-          'Nel briefing capiamo chi c’è già in squadra e chi la guida: il matching tiene conto del contesto reale, non del ruolo astratto. Un ottimo operaio nella squadra sbagliata resta un problema.',
+          'Nella prima chiamata capiamo chi c’è già in squadra e chi la guida: il sistema tiene conto del contesto reale, non del ruolo astratto. Un ottimo operaio nella squadra sbagliata resta un problema.',
       },
     ],
     figureTipiche: [
@@ -373,11 +373,11 @@ export const SELEZIONI: CategoriaSelezione[] = [
     h1: 'Troviamo geometri e tecnici di cantiere',
     metaTitle: 'Ricerca e selezione geometri e tecnici | Talenti Edili',
     metaDescription:
-      'Troviamo geometri di cantiere, project manager e direttori tecnici: selezione su rigore, autorevolezza e gestione economica della commessa. Rosa di 3 finalisti.',
+      'Troviamo geometri di cantiere, project manager e direttori tecnici: selezione su rigore, autorevolezza e gestione economica della commessa. I 3 candidati migliori.',
     intro:
       'Geometri di cantiere, project manager, direttori tecnici: le figure che tengono insieme disegno, numeri e squadre. Il titolo lo hanno in tanti; farsi ascoltare in cantiere è un’altra cosa.',
     definizione:
-      'È il servizio di ricerca e selezione di Talenti Edili per i ruoli tecnici dell’impresa edile: geometra di cantiere, project manager, direttore tecnico, responsabile di commessa, tecnico BIM. Su queste figure il mercato seleziona quasi sempre sul titolo e sul software — e sbaglia, perché il 60% del lavoro reale è far accettare decisioni a squadre e fornitori che non le hanno prese, e tenere i numeri della commessa anche quando dicono cose scomode. L’analisi psicoattitudinale misura le variabili decisive: rigore, autorevolezza, gestione del conflitto, disciplina sui numeri. Rosa di tre finalisti in 21 giorni con report completo e guida al colloquio.',
+      'È il servizio di ricerca e selezione di Talenti Edili per i ruoli tecnici dell’impresa edile: geometra di cantiere, project manager, direttore tecnico, responsabile di commessa, tecnico BIM. Su queste figure il mercato seleziona quasi sempre sul titolo e sul software — e sbaglia, perché il 60% del lavoro reale è far accettare decisioni a squadre e fornitori che non le hanno prese, e tenere i numeri della commessa anche quando dicono cose scomode. L’analisi psicoattitudinale misura le variabili decisive: rigore, autorevolezza, gestione del conflitto, disciplina sui numeri. I 3 candidati migliori in 21 giorni con report completo e guida al colloquio.',
     difficolta: [
       {
         titolo: 'Il titolo non predice l’autorevolezza',
@@ -404,7 +404,7 @@ export const SELEZIONI: CategoriaSelezione[] = [
       {
         titolo: 'Rigore e autorevolezza insieme',
         testo:
-          'Il matching pesa la combinazione rara: precisione tecnica più capacità di farsi ascoltare. Uno dei due senza l’altro, su questi ruoli, è un problema annunciato.',
+          'Il sistema pesa la combinazione rara: precisione tecnica più capacità di farsi ascoltare. Uno dei due senza l’altro, su questi ruoli, è un problema annunciato.',
       },
       {
         titolo: 'Disciplina sui numeri',
@@ -419,7 +419,7 @@ export const SELEZIONI: CategoriaSelezione[] = [
       {
         titolo: 'Colloquio su casi reali',
         testo:
-          'La variante che il committente non vuole riconoscere, il capisquadra che fa di testa sua, il consuntivo in rosso: ogni finalista arriva con le domande giuste da fargli, generate sul suo profilo.',
+          'La variante che il committente non vuole riconoscere, il capisquadra che fa di testa sua, il consuntivo in rosso: ognuno dei 3 arriva con le domande giuste da fargli, generate sul suo profilo.',
       },
     ],
     figureTipiche: [
@@ -434,11 +434,11 @@ export const SELEZIONI: CategoriaSelezione[] = [
     faq: [
       {
         q: 'Trovate geometri disposti a stare in cantiere?',
-        a: 'È il primo filtro della ricerca: nel briefing definiamo quanto cantiere reale prevede il ruolo e selezioniamo chi ci sta bene — misurandolo, perché la preferenza ufficio/cantiere emerge chiaramente dai tratti. Il geometra che si rifugia in ufficio è uno dei fallimenti più comuni su questa posizione.',
+        a: 'È il primo filtro della ricerca: nella prima chiamata definiamo quanto cantiere reale prevede il ruolo e selezioniamo chi ci sta bene — misurandolo, perché la preferenza ufficio/cantiere emerge chiaramente dai tratti. Il geometra che si rifugia in ufficio è uno dei fallimenti più comuni su questa posizione.',
       },
       {
         q: 'Che differenza c’è fra selezionare un PM e un direttore tecnico?',
-        a: 'Il project manager risponde del risultato economico di una o più commesse; il direttore tecnico delle scelte tecniche dell’intera impresa, e si regge su delega e visione. Il matching pesa i tratti in modo diverso: promuovere un ottimo PM a direttore tecnico senza misurare la capacità di delega è un errore frequente.',
+        a: 'Il project manager risponde del risultato economico di una o più commesse; il direttore tecnico delle scelte tecniche dell’intera impresa, e si regge su delega e visione. Il sistema pesa i tratti in modo diverso: promuovere un ottimo PM a direttore tecnico senza misurare la capacità di delega è un errore frequente.',
       },
       {
         q: 'Valutate anche la conoscenza del BIM e dei software?',
@@ -457,11 +457,11 @@ export const SELEZIONI: CategoriaSelezione[] = [
     h1: 'Troviamo preventivisti e computisti',
     metaTitle: 'Ricerca e selezione preventivisti e computisti | Talenti Edili',
     metaDescription:
-      'Troviamo preventivisti e computisti per imprese edili: selezione su precisione, tenuta sulle scadenze di gara e onestà nei numeri. Rosa di 3 finalisti in 21 giorni.',
+      'Troviamo preventivisti e computisti per imprese edili: selezione su precisione, rispetto delle scadenze di gara e onestà nei numeri. I 3 candidati migliori in 21 giorni.',
     intro:
-      'Ogni errore del preventivista diventa una commessa firmata in perdita. Troviamo chi unisce precisione, tenuta sulle scadenze di gara e — la dote più rara — onestà nei numeri.',
+      'Ogni errore del preventivista diventa una commessa firmata in perdita. Troviamo chi unisce precisione, rispetto delle scadenze di gara e — la dote più rara — onestà nei numeri.',
     definizione:
-      'È il servizio di ricerca e selezione di Talenti Edili per preventivisti e computisti: le figure che traducono i progetti in offerte e decidono, voce per voce, il margine dell’impresa. Un preventivista sbagliato non fa danni visibili: li firma qualcun altro mesi dopo, a consuntivo. Selezioniamo su tre variabili misurate — precisione ostinata, tenuta sotto le scadenze compresse delle gare e onestà intellettuale nel dichiarare le incertezze invece di coprirle con ipotesi ottimistiche — più la verifica pratica su un computo reale. Rosa di tre finalisti entro 21 giorni con report completo.',
+      'È il servizio di ricerca e selezione di Talenti Edili per preventivisti e computisti: chi trasforma i progetti in offerte e decide, voce per voce, il margine dell’impresa. Un preventivista sbagliato non fa danni visibili: li firma qualcun altro mesi dopo, a consuntivo. Guardiamo tre cose — precisione, capacità di rispettare le scadenze di gara e onestà nel dichiarare le incertezze invece di coprirle con ipotesi ottimistiche — più la verifica pratica su un computo reale. I 3 candidati migliori entro 21 giorni con report completo.',
     difficolta: [
       {
         titolo: 'L’errore è invisibile fino al consuntivo',
@@ -488,7 +488,7 @@ export const SELEZIONI: CategoriaSelezione[] = [
       {
         titolo: 'Prova su un computo reale',
         testo:
-          'Ai finalisti sottoponiamo un caso di preventivazione del tuo tipo di lavori: come imposta l’analisi prezzi, cosa chiede, quali incertezze dichiara. Chi improvvisa si vede alla seconda voce.',
+          'Ai candidati arrivati in fondo sottoponiamo un caso di preventivazione del tuo tipo di lavori: come imposta l’analisi prezzi, cosa chiede, quali incertezze dichiara. Chi improvvisa si vede alla seconda voce.',
       },
       {
         titolo: 'Onestà nei numeri, misurata',
@@ -517,7 +517,7 @@ export const SELEZIONI: CategoriaSelezione[] = [
     faq: [
       {
         q: 'Come si valuta un preventivista prima di assumerlo?',
-        a: 'Su tre livelli: una prova pratica su un computo del vostro tipo di lavori, l’analisi psicoattitudinale sui tratti decisivi (precisione, metodo, onestà nei numeri, tenuta alla pressione) e la verifica delle commesse realmente preventivate e del loro esito a consuntivo, quando disponibile.',
+        a: 'Su tre livelli: una prova pratica su un computo del vostro tipo di lavori, l’analisi psicoattitudinale sui tratti decisivi (precisione, metodo, onestà nei numeri, quanto regge la pressione) e la verifica delle commesse realmente preventivate e del loro esito a consuntivo, quando disponibile.',
       },
       {
         q: 'Meglio un preventivista veloce o uno preciso?',
@@ -525,11 +525,11 @@ export const SELEZIONI: CategoriaSelezione[] = [
       },
       {
         q: 'Trovate preventivisti specializzati (serramenti, impianti)?',
-        a: 'Sì: la specializzazione merceologica è un filtro del briefing. Un preventivista di serramenti e uno di opere strutturali condividono il metodo ma non i prezzi: cerchiamo nel bacino giusto.',
+        a: 'Sì: la specializzazione merceologica è un filtro del prima chiamata. Un preventivista di serramenti e uno di opere strutturali condividono il metodo ma non i prezzi: cerchiamo nel giro giusto.',
       },
       {
         q: 'Il preventivista può lavorare da remoto?',
-        a: 'In parte sì, ed è un vantaggio nella ricerca: allarga il bacino. Ma il legame col cantiere resta necessario — nel briefing definiamo quanto campo prevede il ruolo e selezioniamo di conseguenza.',
+        a: 'In parte sì, ed è un vantaggio nella ricerca: allarga la ricerca. Ma il legame col cantiere resta necessario — nella prima chiamata definiamo quanto campo prevede il ruolo e selezioniamo di conseguenza.',
       },
     ],
     ruoliCorrelati: ['preventivista', 'geometra-di-cantiere'],

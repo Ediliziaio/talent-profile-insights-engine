@@ -209,7 +209,7 @@ export const LEGAL_DOCS: LegalDoc[] = [
       {
         titolo: 'Proprietà intellettuale',
         paragrafi: [
-          'Il metodo Talent Profile System, il modello di matching, i testi dei report, il marchio e i contenuti del sito sono di proprietà del titolare. L’abbonamento concede un diritto d’uso non esclusivo e non trasferibile, limitato alla durata del rapporto.',
+          'Il metodo Talent Profile System, il modello di abbinamento persona-ruolo, i testi dei report, il marchio e i contenuti del sito sono di proprietà del titolare. L’abbonamento concede un diritto d’uso non esclusivo e non trasferibile, limitato alla durata del rapporto.',
         ],
       },
       {

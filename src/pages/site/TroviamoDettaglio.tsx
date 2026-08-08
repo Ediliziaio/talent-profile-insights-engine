@@ -19,7 +19,7 @@ import { SELEZIONI, getSelezione } from '@/data/selezioni';
 import { getRuolo } from '@/data/ruoli';
 
 const CONSEGNA = [
-  'Rosa di 3 finalisti entro 21 giorni dal briefing',
+  'I 3 candidati migliori entro 21 giorni dalla prima chiamata',
   'Report psicoattitudinale completo per ciascuno',
   'Verifica di esperienze e referenze dichiarate',
   'Guida al colloquio generata sul profilo di ognuno',
@@ -131,7 +131,7 @@ export default function TroviamoDettaglio() {
           <SectionHeading
             badge="Il metodo"
             title={`Come selezioniamo ${categoria.nomeBreve}`}
-            sub="Ricerca attiva, verifica delle esperienze e analisi psicoattitudinale Talent Profile su ogni finalista. Ecco cosa cambia per questa categoria."
+            sub="Ricerca attiva, verifica delle esperienze e analisi psicoattitudinale Talent Profile su ognuno dei 3 candidati. Ecco cosa cambia per questa categoria."
           />
           <motion.div className="grid grid-cols-1 md:grid-cols-2 gap-5" variants={stagger}>
             {categoria.comeSelezioniamo.map((c, i) => (
@@ -245,7 +245,7 @@ export default function TroviamoDettaglio() {
 
       <CtaBand
         title={`Devi assumere ${categoria.nomeBreve}?`}
-        sub="Mezz’ora di briefing sul ruolo reale: ti diciamo tempi, fattibilità e costo prima di partire. Senza impegno."
+        sub="Mezz’ora di chiamata sul ruolo reale: ti diciamo tempi, fattibilità e costo prima di partire. Senza impegno."
         ctaLabel="Inizia la ricerca"
         origine={`troviamo-${categoria.slug}`}
       />

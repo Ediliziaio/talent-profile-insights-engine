@@ -49,7 +49,7 @@ const COME_FUNZIONA = [
   {
     icon: Clock,
     title: 'Chiami e chiudi',
-    desc: 'Arrivi al colloquio sapendo già cosa chiedere e dove sono i punti deboli. Il tempo che prima usavi per lo screening lo usi per decidere.',
+    desc: 'Arrivi al colloquio sapendo già cosa chiedere e dove sono i punti deboli. Il tempo che prima usavi per la prima scrematura lo usi per decidere.',
   },
 ];
 
@@ -84,7 +84,7 @@ const DIFFERENZE = [
 const FAQ = [
   {
     q: 'Che cos’è la piattaforma?',
-    a: 'È un bacino di profili del settore edile che hanno già completato l’analisi psicoattitudinale Talent Profile. A differenza di un portale di annunci, non cerchi fra curriculum autodichiarati: cerchi fra persone già misurate su 15 tratti, ordinate per compatibilità con il ruolo che devi coprire.',
+    a: 'È un archivio di candidati del settore edile che hanno già completato l’analisi psicoattitudinale Talent Profile. A differenza di un portale di annunci, non cerchi fra curriculum autodichiarati: cerchi fra candidati già testati su 15 tratti, ordinati per compatibilità con il ruolo che devi coprire.',
   },
   {
     q: 'In cosa è diverso da un portale di annunci di lavoro?',
@@ -104,7 +104,7 @@ const FAQ = [
   },
   {
     q: 'E se sulla piattaforma non c’è il profilo che cerco?',
-    a: 'In quel caso passiamo al servizio di ricerca e selezione: andiamo a cercare attivamente la persona sul mercato, la analizziamo e ti consegniamo una rosa di tre candidati.',
+    a: 'In quel caso passiamo al servizio di ricerca e selezione: andiamo a cercare attivamente la persona sul mercato, la analizziamo e ti consegniamo i 3 candidati migliori.',
   },
 ];
 
@@ -183,11 +183,11 @@ export default function Marketplace() {
         answer={
           <p>
             È la piattaforma con cui un’impresa edile gestisce tutta la selezione in un posto solo:
-            un bacino di candidati del settore che hanno già completato l’analisi psicoattitudinale{' '}
+            un archivio di candidati del settore che hanno già completato l’analisi psicoattitudinale{' '}
             <strong>Talent Profile</strong>, gli strumenti per analizzare i propri candidati, il
             confronto fianco a fianco, la guida al colloquio e il piano di inserimento a 90 giorni. A
             differenza di un portale di annunci non cerchi fra curriculum scritti dal candidato:
-            cerchi fra persone misurate su 15 tratti, con compatibilità calcolata dall’Intelligenza
+            cerchi fra candidati testati su 15 tratti, con compatibilità calcolata dall’Intelligenza
             Artificiale sul ruolo che devi coprire e le aree di rischio in chiaro.
           </p>
         }
@@ -374,7 +374,7 @@ export default function Marketplace() {
               { n: '+1000', l: 'imprese clienti' },
               { n: '+5000', l: 'analisi completate' },
               { n: '30+', l: 'ruoli edili mappati' },
-              { n: '.75/1', l: 'validazione psicometrica' },
+              { n: '.75/1', l: 'validazione scientifica' },
             ].map((s) => (
               <div key={s.l}>
                 <div className="text-3xl md:text-4xl font-bold text-[#f09133]">{s.n}</div>

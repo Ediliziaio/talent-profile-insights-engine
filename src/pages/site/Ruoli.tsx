@@ -26,11 +26,11 @@ const FAQ = [
   },
   {
     q: 'Perché lo stesso candidato è compatibile con un ruolo e non con un altro?',
-    a: 'Perché ogni ruolo pesa i 15 tratti in modo diverso. Su un capocantiere contano soprattutto decisione, gestione dello stress e leadership; su un preventivista contano precisione, metodo e onestà nei numeri. Il matching non produce un giudizio sulla persona, ma un punteggio di compatibilità con una posizione precisa.',
+    a: 'Perché ogni ruolo pesa i 15 tratti in modo diverso. Su un capocantiere contano soprattutto decisione, gestione dello stress e leadership; su un preventivista contano precisione, metodo e onestà nei numeri. Il sistema non dà un giudizio sulla persona, ma un punteggio di compatibilità con una posizione precisa.',
   },
   {
     q: 'Il mio ruolo non è in elenco: si può aggiungere?',
-    a: 'Sì. Il modello di matching può essere calibrato su ruoli specifici della tua impresa partendo dalla mansione reale, non dalla denominazione contrattuale. Serve una sessione di taratura con chi quel ruolo lo conosce dall’interno.',
+    a: 'Sì. Il modello di abbinamento persona-ruolo può essere calibrato su ruoli specifici della tua impresa partendo dalla mansione reale, non dalla denominazione contrattuale. Serve una sessione di taratura con chi quel ruolo lo conosce dall’interno.',
   },
 ];
 
@@ -150,7 +150,7 @@ export default function Ruoli() {
         <div className="max-w-4xl mx-auto px-4 md:px-8">
           <SectionHeading
             badge="Copertura completa"
-            title="Gli altri ruoli coperti dal matching"
+            title="Gli altri ruoli coperti dal abbinamento"
             sub="Non tutti hanno una pagina dedicata, ma sono tutti nel modello di compatibilità."
           />
           <div className="flex flex-wrap justify-center gap-2">

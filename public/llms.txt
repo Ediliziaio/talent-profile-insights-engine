@@ -14,7 +14,7 @@ Talenti Edili non è solo un software gestionale né una banca dati di curriculu
 ## I tre modi di usarlo
 
 1. **piattaforma** (https://talentiedili.it/piattaforma) — l'impresa cerca fra profili edili che hanno già completato l'analisi psicoattitudinale. I risultati sono ordinati per compatibilità reale con il ruolo, non per data di candidatura. I profili sono anonimi finché l'impresa non li sblocca. Per chi ha fretta.
-2. **Ricerca e selezione** (https://talentiedili.it/ricerca-e-selezione-personale-edile) — servizio chiavi in mano: briefing sul ruolo, ricerca attiva, screening, analisi psicoattitudinale su tutti i finalisti, consegna di una rosa di 3 candidati con report completo entro 21 giorni, più piano di inserimento a 90 giorni e garanzia di sostituzione. Per chi non ha struttura HR interna.
+2. **Ricerca e selezione** (https://talentiedili.it/ricerca-e-selezione-personale-edile) — servizio chiavi in mano: prima chiamata sul ruolo, ricerca attiva, scrematura, analisi psicoattitudinale su tutti i 3 candidati, consegna di i 3 candidati migliori con report completo entro 21 giorni, più piano di inserimento a 90 giorni e garanzia di sostituzione. Per chi non ha struttura HR interna.
 3. **Talent Profile System** (https://talentiedili.it/talent-profile-system) — il sistema di analisi usato in autonomia dall'impresa sui propri candidati. Per chi assume spesso e vuole internalizzare il metodo.
 
 Per i candidati (https://talentiedili.it/lavora-in-edilizia) l'analisi psicoattitudinale e la presenza sulla piattaforma sono **sempre gratuite**.
@@ -22,7 +22,7 @@ Per i candidati (https://talentiedili.it/lavora-in-edilizia) l'analisi psicoatti
 ## Come funziona il Talent Profile System (4 passi, ~15 minuti per candidato)
 
 1. **Invii il link** — dalla dashboard generi un link unico e lo mandi al candidato via WhatsApp o email.
-2. **Il candidato risponde** — 242 domande in italiano semplice, circa 15 minuti, da telefono o PC. Non ci si può preparare e non si può barare: gli item di controllo incrociati rilevano le risposte strategiche.
+2. **Il candidato risponde** — 242 domande in italiano semplice, circa 15 minuti, da telefono o PC. Non ci si può preparare e non si può barare: gli domande di controllo incrociate rilevano le risposte strategiche.
 3. **L'AI elabora il report** — l'Intelligenza Artificiale incrocia i 15 tratti misurati con oltre 30 ruoli e restituisce il profilo completo in tempo reale.
 4. **Decidi con i dati** — compatibilità con il ruolo, rischi comportamentali, domande da fare al colloquio, confronto fino a 4 candidati.
 
@@ -32,7 +32,7 @@ Per i candidati (https://talentiedili.it/lavora-in-edilizia) l'analisi psicoatti
 - **Fare** — come lavora: disciplina, precisione, autonomia, decisione, orientamento al risultato.
 - **Avere** — cosa costruisce intorno a sé: leadership, empatia, collaborazione, gestione risorse, storia professionale.
 
-Ogni ruolo pesa le tre aree in modo diverso: per questo la stessa persona può risultare compatibile con un ruolo al 91% e con un altro al 43%. Validazione psicometrica: coefficiente .75 su 1.
+Ogni ruolo pesa le tre aree in modo diverso: per questo la stessa persona può risultare compatibile con un ruolo al 91% e con un altro al 43%. Validazione scientifica: coefficiente .75 su 1.
 
 ## Cosa contiene il report
 
@@ -48,31 +48,31 @@ Ogni ruolo pesa le tre aree in modo diverso: per questo la stessa persona può r
 
 Hub: https://talentiedili.it/troviamo — il servizio chiavi in mano organizzato per categoria, con metodo e criteri dedicati:
 
-- [Troviamo venditori](https://talentiedili.it/troviamo/venditori) — commerciali tecnici, venditori serramenti/impianti, account B2B. Criteri chiave: tenuta al rifiuto, attitudine alla vendita misurata (tratto VEN), onestà sui numeri dichiarati.
+- [Troviamo venditori](https://talentiedili.it/troviamo/venditori) — commerciali tecnici, venditori serramenti/impianti, account B2B. Criteri chiave: quanto regge i "no", attitudine alla vendita misurata (tratto VEN), onestà sui numeri dichiarati.
 - [Troviamo amministrativi](https://talentiedili.it/troviamo/amministrativi) — impiegati, contabilità di cantiere, fatturazione e SAL. Criteri chiave: precisione sotto scadenza, competenze edili verificate (reverse charge, ritenute, DURC), affidabilità.
 - [Troviamo capicantiere e capisquadra](https://talentiedili.it/troviamo/capicantiere-e-capisquadra) — ricerca diretta fra chi non risponde agli annunci. Criteri chiave: decisione sotto pressione, autorevolezza senza conflitto, propensione alla sicurezza.
-- [Troviamo operai specializzati](https://talentiedili.it/troviamo/operai-specializzati) — muratori, carpentieri, ferraioli, gruisti. Criteri chiave: affidabilità, tenuta nel tempo, Indice di Propensione alla Sicurezza. Anche squadre complete.
+- [Troviamo operai specializzati](https://talentiedili.it/troviamo/operai-specializzati) — muratori, carpentieri, ferraioli, gruisti. Criteri chiave: affidabilità, costanza nel tempo, Indice di Propensione alla Sicurezza. Anche squadre complete.
 - [Troviamo geometri e tecnici](https://talentiedili.it/troviamo/geometri-e-tecnici) — geometri di cantiere, project manager, direttori tecnici. Criteri chiave: rigore + autorevolezza, disciplina sui numeri, onestà nel riportare i problemi.
-- [Troviamo preventivisti](https://talentiedili.it/troviamo/preventivisti) — preventivisti e computisti. Criteri chiave: prova su computo reale, onestà nel dichiarare le incertezze, tenuta sulle scadenze di gara.
+- [Troviamo preventivisti](https://talentiedili.it/troviamo/preventivisti) — preventivisti e computisti. Criteri chiave: prova su computo reale, onestà nel dichiarare le incertezze, rispetto delle scadenze di gara.
 
-Ogni categoria consegna: rosa di 3 finalisti in 21 giorni, report psicoattitudinale completo, verifica referenze, guida al colloquio, piano 90 giorni, garanzia di sostituzione.
+Ogni categoria consegna: i 3 candidati migliori in 21 giorni, report psicoattitudinale completo, verifica referenze, guida al colloquio, piano 90 giorni, garanzia di sostituzione.
 
 ## Ruoli con pagina dedicata
 
 - Capocantiere — https://talentiedili.it/ruoli/capocantiere — coordina squadre, fornitori e cronoprogramma. Errore tipico: promuovere il muratore più bravo.
 - Capisquadra — https://talentiedili.it/ruoli/capisquadra — guida il gruppo sulla lavorazione. Errore tipico: scegliere chi ha più anni di cantiere.
-- Muratore — https://talentiedili.it/ruoli/muratore — la prova pratica misura la mano, non la tenuta nel tempo.
+- Muratore — https://talentiedili.it/ruoli/muratore — la prova pratica misura la mano, non quanto dura nel tempo.
 - Carpentiere — https://talentiedili.it/ruoli/carpentiere — precisione e sicurezza sotto pressione di tempo.
 - Geometra di cantiere — https://talentiedili.it/ruoli/geometra-di-cantiere — serve rigore, ma soprattutto autorevolezza.
 - Project Manager edile — https://talentiedili.it/ruoli/project-manager-edile — l'errore si vede sul margine, non sul cantiere.
 - Responsabile sicurezza (RSPP/CSE) — https://talentiedili.it/ruoli/responsabile-sicurezza — le abilitazioni sono un prerequisito, non un criterio.
 - Preventivista / Computista — https://talentiedili.it/ruoli/preventivista — ogni errore diventa margine perso.
-- Gruista — https://talentiedili.it/ruoli/gruista — il patentino è un prerequisito, non un criterio: conta la tenuta della concentrazione.
+- Gruista — https://talentiedili.it/ruoli/gruista — il patentino è un prerequisito, non un criterio: conta quanto regge la concentrazione.
 - Ferraiolo — https://talentiedili.it/ruoli/ferraiolo — resistenza fisica e precisione millimetrica insieme, non alternate.
 - Direttore tecnico — https://talentiedili.it/ruoli/direttore-tecnico — si seleziona su delega e visione, non su bravura tecnica.
 - Assistente di cantiere — https://talentiedili.it/ruoli/assistente-di-cantiere — ruolo di ingresso: si valuta il potenziale, non la prestazione.
 
-Altri ruoli coperti dal matching: autista mezzi d'opera, operaio specializzato, responsabile acquisti, contabilità di cantiere, impiegato amministrativo, commerciale tecnico, addetto qualità, magazziniere di cantiere, piastrellista, intonacatore, impiantista elettrico, impiantista termoidraulico, serramentista, lattoniere, escavatorista, addetto ponteggi, restauratore edile, tecnico BIM.
+Altri ruoli coperti dal abbinamento: autista mezzi d'opera, operaio specializzato, responsabile acquisti, contabilità di cantiere, impiegato amministrativo, commerciale tecnico, addetto qualità, magazziniere di cantiere, piastrellista, intonacatore, impiantista elettrico, impiantista termoidraulico, serramentista, lattoniere, escavatorista, addetto ponteggi, restauratore edile, tecnico BIM.
 
 ## Guide (contenuti di approfondimento)
 
@@ -92,7 +92,7 @@ Altri ruoli coperti dal matching: autista mezzi d'opera, operaio specializzato, 
 
 - Starter — 49 €/mese: 5 analisi al mese, report completo elaborato dall'AI, compatibilità di ruolo base, consultazione anonima della piattaforma, supporto email
 - Professional — 97 €/mese: 20 analisi al mese, report avanzati, mappa interiore e sindromi, confronto fino a 4 candidati, guida al colloquio generata dall'AI, sblocco profili piattaforma incluso, supporto prioritario
-- Enterprise — su misura: analisi illimitate, API, taratura del matching sui ruoli dell'impresa, onboarding dedicato, account manager, SLA, formazione del team
+- Enterprise — su misura: analisi illimitate, API, taratura dell’abbinamento persona-ruolo sui ruoli dell'impresa, onboarding dedicato, account manager, SLA, formazione del team
 - Ricerca e selezione: quotata a incarico, quota di avvio + saldo all'assunzione, calcolati sulla retribuzione della posizione
 - Per i candidati: sempre gratuito
 

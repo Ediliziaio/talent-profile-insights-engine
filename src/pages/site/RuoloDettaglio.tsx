@@ -68,7 +68,7 @@ export default function RuoloDettaglio() {
           <SectionHeading
             badge="Tratti chiave"
             title={`I tratti che pesano di più su un ${ruolo.nome.toLowerCase()}`}
-            sub="Il Talent Profile System misura 15 tratti, ma su questo ruolo il matching li pesa così."
+            sub="Il Talent Profile System misura 15 tratti, ma su questo ruolo l’abbinamento persona-ruolo li pesa così."
           />
           <motion.div className="grid grid-cols-1 md:grid-cols-2 gap-4" variants={stagger}>
             {ruolo.tratti.map((t, i) => (

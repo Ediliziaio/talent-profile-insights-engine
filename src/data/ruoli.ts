@@ -19,7 +19,7 @@ export interface Ruolo {
   metaDescription: string;
   /** Risposta diretta alla domanda "che cosa fa e come si seleziona" — blocco AEO */
   definizione: string;
-  /** I tratti che pesano di più nel matching per questo ruolo */
+  /** I tratti che pesano di più nel abbinamento per questo ruolo */
   tratti: { nome: string; perche: string }[];
   /** Segnali che il candidato non regge il ruolo */
   rischi: string[];
@@ -66,7 +66,7 @@ export const RUOLI: Ruolo[] = [
     faq: [
       {
         q: 'Che caratteristiche deve avere un buon capocantiere?',
-        a: 'Leadership operativa, tenuta sotto stress, capacità di decidere in fretta, rispetto rigoroso delle regole di sicurezza e comunicazione diretta. Sono tratti psicoattitudinali, non tecnici: si misurano, non si intuiscono al colloquio.',
+        a: 'Leadership operativa, quanto regge lo stress, capacità di decidere in fretta, rispetto rigoroso delle regole di sicurezza e comunicazione diretta. Sono tratti psicoattitudinali, non tecnici: si misurano, non si intuiscono al colloquio.',
       },
       {
         q: 'Si può capire prima se un capocantiere reggerà il ruolo?',
@@ -129,7 +129,7 @@ export const RUOLI: Ruolo[] = [
       'Il mestiere dove la selezione sembra facile e invece decide affidabilità, sicurezza e ritmo del cantiere.',
     metaTitle: 'Come selezionare un muratore affidabile | Talenti Edili',
     metaDescription:
-      'Selezionare un muratore non significa solo valutare la mano. Come si misurano affidabilità, rispetto della sicurezza e tenuta nel tempo prima di assumerlo.',
+      'Selezionare un muratore non significa solo valutare la mano. Come si misurano affidabilità, rispetto della sicurezza e costanza nel tempo prima di assumerlo.',
     definizione:
       'Il muratore è la spina dorsale operativa del cantiere. La prova pratica dice se sa lavorare; non dice se si presenterà lunedì, se rispetterà le procedure di sicurezza quando nessuno guarda, se reggerà tre mesi consecutivi allo stesso ritmo. Sono esattamente le variabili che fanno saltare i cronoprogrammi — e sono variabili psicoattitudinali, misurabili prima dell’assunzione.',
     tratti: [
@@ -156,7 +156,7 @@ export const RUOLI: Ruolo[] = [
     faq: [
       {
         q: 'Serve davvero un test psicoattitudinale per un operaio?',
-        a: 'Serve se il problema che hai non è la manualità ma il turnover. La prova pratica valuta la competenza; l’analisi psicoattitudinale valuta affidabilità, rispetto della sicurezza e tenuta nel tempo — cioè le ragioni per cui le persone se ne vanno o si fanno male.',
+        a: 'Serve se il problema che hai non è la manualità ma il turnover. La prova pratica valuta la competenza; l’analisi psicoattitudinale valuta affidabilità, rispetto della sicurezza e costanza nel tempo — cioè le ragioni per cui le persone se ne vanno o si fanno male.',
       },
       {
         q: 'Quanto tempo richiede al candidato?',
@@ -172,7 +172,7 @@ export const RUOLI: Ruolo[] = [
       'Precisione e sicurezza sotto pressione di tempo: il profilo dove l’approssimazione si paga subito.',
     metaTitle: 'Come selezionare un carpentiere edile | Talenti Edili',
     metaDescription:
-      'Come valutare un carpentiere prima di assumerlo: precisione, rispetto delle procedure di sicurezza, tenuta sotto pressione e domande da fare al colloquio.',
+      'Come valutare un carpentiere prima di assumerlo: precisione, rispetto delle procedure di sicurezza, quanto regge la pressione e domande da fare al colloquio.',
     definizione:
       'Il carpentiere costruisce ciò che regge il getto: casseforme, banchinaggi, strutture provvisorie. È un ruolo dove l’errore non si vede finché non è tardi, e dove la fretta è la principale nemica della sicurezza. Il profilo che funziona unisce precisione ostinata e capacità di lavorare in altezza sotto pressione di tempo senza abbassare gli standard.',
     tratti: [
@@ -325,12 +325,12 @@ export const RUOLI: Ruolo[] = [
     nome: 'Preventivista / Computista',
     categoria: 'Ufficio',
     sintesi:
-      'Ogni suo errore diventa margine perso. Precisione e onestà intellettuale valgono più della velocità.',
+      'Ogni suo errore diventa margine perso. Precisione e onestà valgono più della velocità.',
     metaTitle: 'Come selezionare un preventivista edile | Talenti Edili',
     metaDescription:
       'Preventivista e computista: come valutare precisione, gestione della pressione sui tempi di gara e onestà nei numeri prima di assumere.',
     definizione:
-      'Il preventivista traduce un progetto in numeri: computi, analisi prezzi, offerte di gara. È il ruolo in cui un errore silenzioso diventa una commessa in perdita firmata da qualcun altro. Il profilo che funziona unisce precisione ostinata, capacità di reggere scadenze di gara compresse e — soprattutto — l’onestà intellettuale di dichiarare un’incertezza invece di coprirla con un’ipotesi ottimistica.',
+      'Il preventivista traduce un progetto in numeri: computi, analisi prezzi, offerte di gara. È il ruolo in cui un errore silenzioso diventa una commessa in perdita firmata da qualcun altro. Il profilo che funziona unisce precisione ostinata, capacità di reggere scadenze di gara compresse e — soprattutto — l’onestà di dichiarare un’incertezza invece di coprirla con un’ipotesi ottimistica.',
     tratti: [
       { nome: 'Precisione', perche: 'La differenza fra margine e perdita spesso sta in due voci di computo.' },
       { nome: 'Tenuta sulle scadenze', perche: 'Le gare hanno una data e i progetti arrivano sempre tardi.' },
@@ -369,7 +369,7 @@ export const RUOLI: Ruolo[] = [
     metaDescription:
       'Selezionare un gruista significa valutare concentrazione, sangue freddo e rispetto assoluto delle procedure. Tratti che contano, rischi e domande da fare.',
     definizione:
-      'Il gruista manovra la gru di cantiere: solleva, trasla e posiziona carichi coordinandosi a voce o a gesti con chi sta a terra. È uno dei pochi ruoli in cui un singolo errore di attenzione può costare una vita, e in cui la routine è il nemico principale: dopo qualche mese il rischio non è l’inesperienza, è l’automatismo. Per questo la selezione deve misurare tenuta della concentrazione e rapporto con la procedura, non solo il patentino.',
+      'Il gruista manovra la gru di cantiere: solleva, trasla e posiziona carichi coordinandosi a voce o a gesti con chi sta a terra. È uno dei pochi ruoli in cui un singolo errore di attenzione può costare una vita, e in cui la routine è il nemico principale: dopo qualche mese il rischio non è l’inesperienza, è l’automatismo. Per questo la selezione deve misurare concentrazione che regge nel tempo e rapporto con la procedura, non solo il patentino.',
     tratti: [
       { nome: 'Concentrazione prolungata', perche: 'Otto ore di attenzione costante valgono più di un’ora di manovra brillante.' },
       { nome: 'Sangue freddo', perche: 'Quando un carico oscilla, la reazione impulsiva è quella sbagliata.' },
@@ -394,7 +394,7 @@ export const RUOLI: Ruolo[] = [
     faq: [
       {
         q: 'Basta il patentino per valutare un gruista?',
-        a: 'No. Il patentino certifica la capacità tecnica di manovra, obbligatoria per legge. Non dice nulla su tenuta della concentrazione, gestione della pressione del cantiere e propensione a saltare i controlli quando si è in ritardo: sono queste le variabili che precedono gli incidenti, e si misurano con un’analisi psicoattitudinale.',
+        a: 'No. Il patentino certifica la capacità tecnica di manovra, obbligatoria per legge. Non dice nulla su concentrazione che regge nel tempo, gestione della pressione del cantiere e propensione a saltare i controlli quando si è in ritardo: sono queste le variabili che precedono gli incidenti, e si misurano con un’analisi psicoattitudinale.',
       },
       {
         q: 'Come si valuta la propensione al rischio di un gruista?',
@@ -410,7 +410,7 @@ export const RUOLI: Ruolo[] = [
       'Lavoro fisico durissimo su schemi che non ammettono errori. Resistenza e precisione insieme, non alternate.',
     metaTitle: 'Come selezionare un ferraiolo | Talenti Edili',
     metaDescription:
-      'Il ferraiolo unisce fatica fisica e precisione millimetrica. Come valutare resistenza, tenuta nel tempo e attenzione al dettaglio prima di assumere.',
+      'Il ferraiolo unisce fatica fisica e precisione millimetrica. Come valutare resistenza, costanza nel tempo e attenzione al dettaglio prima di assumere.',
     definizione:
       'Il ferraiolo sagoma e posa l’armatura in ferro che verrà annegata nel getto: legature, staffe, copriferro, interferri. È un ruolo che chiede due qualità che raramente convivono — resistenza fisica elevata e precisione millimetrica su schemi tecnici — e in cui l’errore diventa invisibile appena arriva il calcestruzzo. Selezionarlo bene significa verificare che la precisione regga anche quando la fatica è alta, non solo alla prima ora del mattino.',
     tratti: [
@@ -436,7 +436,7 @@ export const RUOLI: Ruolo[] = [
       'Valutare la produttività della prima settimana. Il ferraiolo si giudica al secondo mese: quando la fatica è cumulata, si vede chi tiene la precisione e chi comincia ad approssimare.',
     faq: [
       {
-        q: 'Come si valuta la tenuta fisica di un ferraiolo prima di assumerlo?',
+        q: 'Come si valuta la resistenza fisica di un ferraiolo prima di assumerlo?',
         a: 'Non con una prova pratica, che misura la giornata buona. L’analisi psicoattitudinale misura resistenza alla fatica e costanza come tratti stabili, e li incrocia con la storia lavorativa: la durata dei rapporti precedenti dice più di qualunque test di forza.',
       },
     ],
@@ -533,7 +533,7 @@ export const getRuolo = (slug?: string) => RUOLI.find((r) => r.slug === slug);
 
 export const CATEGORIE: CategoriaRuolo[] = ['Cantiere', 'Tecnico', 'Ufficio'];
 
-/** Ruoli aggiuntivi coperti dal matching ma senza pagina dedicata */
+/** Ruoli aggiuntivi coperti dal abbinamento ma senza pagina dedicata */
 export const ALTRI_RUOLI = [
   'Autista mezzi d’opera',
   'Operaio specializzato',

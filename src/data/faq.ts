@@ -30,7 +30,7 @@ export const FAQ_GRUPPI: FaqGruppo[] = [
       },
       {
         q: 'Che differenza c’è fra piattaforma, ricerca e selezione e Talent Profile System?',
-        a: 'La piattaforma è il bacino di profili già analizzati in cui cerchi tu. La ricerca e selezione è il servizio in cui cerchiamo, verifichiamo e analizziamo noi, consegnandoti tre finalisti. Il Talent Profile System è il sistema di analisi che usi in autonomia sui tuoi candidati. I tre si possono usare insieme o separatamente.',
+        a: 'La piattaforma è l’archivio di candidati già analizzati in cui cerchi tu. La ricerca e selezione è il servizio in cui cerchiamo, verifichiamo e analizziamo noi, consegnandoti tre candidati scelti. Il Talent Profile System è il sistema di analisi che usi in autonomia sui tuoi candidati. I tre si possono usare insieme o separatamente.',
       },
       {
         q: 'Serve solo alle imprese edili?',
@@ -53,15 +53,15 @@ export const FAQ_GRUPPI: FaqGruppo[] = [
       },
       {
         q: 'Che ruolo ha esattamente l’Intelligenza Artificiale?',
-        a: 'L’AI non inventa il profilo: parte dai punteggi calcolati dal modello psicometrico e li traduce in indicazioni operative — quale ruolo, quali rischi, quali domande fare al colloquio, come gestire quella persona nei primi 90 giorni. Fa in tempo reale il lavoro che prima richiedeva ore di un consulente.',
+        a: 'L’AI non inventa il profilo: parte dai punteggi calcolati dal modello scientifico e li traduce in indicazioni operative — quale ruolo, quali rischi, quali domande fare al colloquio, come gestire quella persona nei primi 90 giorni. Fa in tempo reale il lavoro che prima richiedeva ore di un consulente.',
       },
       {
         q: 'È validato scientificamente?',
-        a: 'Sì. Il Talent Profile System si basa su modelli psicometrici riconosciuti, con un coefficiente di validazione di .75 su 1. Le domande sono costruite per rendere inefficaci le risposte di comodo.',
+        a: 'Sì. Il Talent Profile System si basa su metodi scientifici riconosciuti, con un coefficiente di validazione di .75 su 1. Le domande sono costruite per rendere inefficaci le risposte di comodo.',
       },
       {
         q: 'Il candidato può barare?',
-        a: 'È molto difficile. Le 242 domande contengono item di controllo incrociati: rispondere in modo strategico su una scala genera incoerenze rilevabili su altre. Il sistema segnala i profili con risposte non coerenti.',
+        a: 'È molto difficile. Le 242 domande contengono domande di controllo incrociate: rispondere in modo strategico su una scala genera incoerenze rilevabili su altre. Il sistema segnala i profili con risposte non coerenti.',
       },
       {
         q: 'Perché lo stesso candidato è compatibile con un ruolo e non con un altro?',
@@ -110,12 +110,12 @@ export const FAQ_GRUPPI: FaqGruppo[] = [
         a: 'I candidati si registrano gratuitamente, completano l’analisi psicoattitudinale in 15 minuti e autorizzano esplicitamente la visibilità del proprio profilo alle imprese. Nessun profilo è presente senza consenso.',
       },
       {
-        q: 'Quanto tempo serve per ricevere la rosa di candidati?',
-        a: 'Di norma consegniamo la short list di tre finalisti entro 21 giorni dal briefing. Sui ruoli molto specialistici o in zone con poca offerta i tempi possono allungarsi: te lo diciamo prima di partire, non dopo.',
+        q: 'Quanto tempo serve per ricevere i 3 candidati?',
+        a: 'Di norma consegniamo i 3 candidati migliori entro 21 giorni dalla prima chiamata. Sui ruoli molto specialistici o in zone con poca offerta i tempi possono allungarsi: te lo diciamo prima di partire, non dopo.',
       },
       {
         q: 'In cosa siete diversi da un’agenzia interinale?',
-        a: 'Un’agenzia ti manda persone; noi ti diciamo perché quella persona funzionerà in quel ruolo e cosa rischi con lei. Ogni finalista arriva con un’analisi psicoattitudinale su 15 tratti e un report elaborato dall’AI. E la persona la assumi tu, direttamente: non c’è somministrazione.',
+        a: 'Un’agenzia ti manda persone; noi ti diciamo perché quella persona funzionerà in quel ruolo e cosa rischi con lei. Ognuno dei 3 candidati arriva con un’analisi psicoattitudinale su 15 tratti e un report elaborato dall’AI. E la persona la assumi tu, direttamente: non c’è somministrazione.',
       },
       {
         q: 'Cosa succede se la persona assunta se ne va dopo due mesi?',
