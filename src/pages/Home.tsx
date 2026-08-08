@@ -527,12 +527,18 @@ export default function Home() {
     setLeadSubmitting(true);
     try {
       const supabase = await getSupabase();
-      const { error } = await supabase.from('leads').insert({
+      const base = {
         nome: leadForm.nome.trim(),
         email: leadForm.email.trim(),
         azienda: leadForm.azienda.trim() || null,
         num_dipendenti: leadForm.num_dipendenti || null,
-      });
+      };
+      let { error } = await supabase
+        .from('leads')
+        .insert({ ...base, origine: 'home' } as never);
+      if (error && /origine/.test(error.message)) {
+        ({ error } = await supabase.from('leads').insert(base));
+      }
       if (error) throw error;
       setLeadSubmitted(true);
       toast({ title: 'Richiesta inviata!', description: 'Ti contatteremo entro 24 ore.' });
@@ -563,8 +569,8 @@ export default function Home() {
   return (
     <>
       <Seo
-        title="Talenti Edili — Selezione del personale edile con AI e analisi psicoattitudinale"
-        description="Talenti Edili è il sistema che unisce Intelligenza Artificiale e analisi psicoattitudinale per aiutare le imprese edili a scegliere operai, capisquadra e tecnici giusti. Basato sul Talent Profile System: 242 domande, 15 tratti, report in 15 minuti."
+        title="Talenti Edili — selezione del personale edile con AI"
+        description="Il sistema che unisce Intelligenza Artificiale e analisi psicoattitudinale per scegliere operai, capisquadra e tecnici giusti. Report in 15 minuti."
         path="/"
         jsonLd={homeJsonLd}
       />

@@ -67,7 +67,7 @@ export default function Garanzia() {
     <>
       <Seo
         title="Garanzia 30 giorni — Talenti Edili"
-        description="Se Talenti Edili non ti fa risparmiare almeno un'assunzione sbagliata nei primi 30 giorni, ti rimborsiamo l'intero importo. Una mail, nessuna domanda, rimborso entro 5 giorni lavorativi."
+        description="Se non ti fa risparmiare almeno un'assunzione sbagliata nei primi 30 giorni, ti rimborsiamo tutto. Una mail, nessuna domanda, rimborso in 5 giorni."
         path="/garanzia"
         jsonLd={jsonLd}
       />

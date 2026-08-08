@@ -165,3 +165,9 @@ GRANT SELECT ON public.marketplace_profili TO authenticated;
 
 COMMENT ON VIEW public.marketplace_profili IS
   'Elenco anonimo dei candidati che hanno scelto il marketplace. Niente dati di contatto: quelli arrivano solo con lo sblocco (marketplace_sblocchi).';
+
+-- 7) Provenienza dei lead: da quale pagina/campagna arriva la richiesta.
+--    Il client salva in modo difensivo (fallback senza colonna se assente).
+ALTER TABLE public.leads ADD COLUMN IF NOT EXISTS origine text;
+COMMENT ON COLUMN public.leads.origine IS
+  'Pagina o campagna che ha generato il lead (es. "troviamo-venditori", "prezzi", "home").';

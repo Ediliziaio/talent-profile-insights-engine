@@ -64,8 +64,8 @@ export default function Ruoli() {
   return (
     <>
       <Seo
-        title="Ruoli edili — come selezionare ogni figura di cantiere | Talenti Edili"
-        description="Capocantiere, capisquadra, muratore, geometra, RSPP, preventivista: per ogni ruolo edile i tratti psicoattitudinali che contano, i rischi tipici e le domande da fare al colloquio."
+        title="Ruoli edili: come selezionare ogni figura | Talenti Edili"
+        description="Capocantiere, capisquadra, muratore, geometra, RSPP: per ogni ruolo edile i tratti che contano, i rischi tipici e le domande da fare al colloquio."
         path={PATH}
         jsonLd={jsonLd}
       />

@@ -171,8 +171,8 @@ export default function TalentProfileSystem() {
   return (
     <>
       <Seo
-        title="Talent Profile System — analisi psicoattitudinale con AI | Talenti Edili"
-        description="Il sistema alla base di Talenti Edili: 242 domande, 15 tratti misurati su tre aree, report elaborato dall’Intelligenza Artificiale con compatibilità su 30+ ruoli edili in 15 minuti."
+        title="Talent Profile System: analisi psicoattitudinale con AI"
+        description="242 domande, 15 tratti su tre aree, report elaborato dall’AI con compatibilità su oltre 30 ruoli edili. Tutto in 15 minuti, dal telefono."
         path={PATH}
         jsonLd={jsonLd}
       />

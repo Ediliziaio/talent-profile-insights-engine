@@ -267,12 +267,20 @@ export function LeadForm({
       setSubmitting(true);
       try {
         const supabase = await getSupabase();
-        const { error } = await supabase.from('leads').insert({
+        const base = {
           nome: form.nome.trim(),
           email: form.email.trim(),
           azienda: form.azienda.trim() || null,
           num_dipendenti: form.num_dipendenti || null,
-        });
+        };
+        // La provenienza rende il lead lavorabile ("arriva dalla pagina
+        // venditori"); se la colonna non esiste ancora, si salva senza.
+        let { error } = await supabase
+          .from('leads')
+          .insert({ ...base, origine: origine ?? null } as never);
+        if (error && /origine/.test(error.message)) {
+          ({ error } = await supabase.from('leads').insert(base));
+        }
         if (error) throw error;
         setSubmitted(true);
         toast({ title: 'Richiesta inviata!', description: 'Ti contattiamo entro 24 ore lavorative.' });
@@ -282,7 +290,7 @@ export function LeadForm({
         setSubmitting(false);
       }
     },
-    [form]
+    [form, origine]
   );
 
   if (submitted) {

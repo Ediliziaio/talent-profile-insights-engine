@@ -119,7 +119,7 @@ export const GUIDE: Guida[] = [
     slug: 'costo-assunzione-sbagliata',
     titolo: 'Quanto costa davvero un’assunzione sbagliata in edilizia',
     h1: 'Quanto costa davvero un’assunzione sbagliata in edilizia',
-    metaTitle: 'Quanto costa un’assunzione sbagliata in edilizia — il calcolo reale',
+    metaTitle: 'Quanto costa un’assunzione sbagliata in edilizia',
     metaDescription:
       'Il costo di un errore di selezione in edilizia supera i 30.000 €. Le sei voci che lo compongono, comprese quelle che non finiscono in nessun bilancio.',
     pubblicata: '2026-08-07',
@@ -192,7 +192,7 @@ export const GUIDE: Guida[] = [
     slug: 'colloquio-selezione-edilizia',
     titolo: 'Come fare un colloquio di selezione in edilizia',
     h1: 'Come fare un colloquio di selezione in edilizia',
-    metaTitle: 'Come fare un colloquio di selezione in edilizia — domande e metodo',
+    metaTitle: 'Colloquio di selezione in edilizia: domande e metodo',
     metaDescription:
       'Le domande che funzionano davvero in un colloquio di selezione in edilizia, quelle da evitare e come strutturare mezz’ora per capire chi hai davanti.',
     pubblicata: '2026-08-07',

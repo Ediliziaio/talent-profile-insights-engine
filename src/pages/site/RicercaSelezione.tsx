@@ -151,8 +151,8 @@ export default function RicercaSelezione() {
   return (
     <>
       <Seo
-        title="Ricerca e selezione del personale edile — la facciamo noi | Talenti Edili"
-        description="Servizio di ricerca e selezione per imprese edili: cerchiamo, verifichiamo e analizziamo i candidati con il Talent Profile System. Ti consegniamo 3 finalisti con report e guida al colloquio in 21 giorni."
+        title="Ricerca e selezione personale edile | Talenti Edili"
+        description="Cerchiamo, verifichiamo e analizziamo i candidati con il Talent Profile System: 3 finalisti con report e guida al colloquio in 21 giorni."
         path={PATH}
         jsonLd={jsonLd}
       />

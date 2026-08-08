@@ -2,13 +2,14 @@ import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Smartphone, Eye, Lock, Gift, Compass, TrendingUp } from 'lucide-react';
 import { Seo } from '@/components/Seo';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 import {
   Section,
   SectionHeading,
   PageHero,
   DefinitionBlock,
   FaqSection,
-  CtaBand,
   fadeUp,
   stagger,
   cardTransition,
@@ -99,8 +100,8 @@ export default function LavoraInEdilizia() {
   return (
     <>
       <Seo
-        title="Lavoro in edilizia — registrati gratis e scopri il tuo profilo | Talenti Edili"
-        description="Cerchi lavoro in edilizia? Fai l’analisi psicoattitudinale gratuita in 15 minuti dal telefono, scopri in quali ruoli rendi di più e fatti trovare dalle imprese giuste."
+        title="Lavoro in edilizia: registrati gratis | Talenti Edili"
+        description="Fai l’analisi psicoattitudinale gratuita in 15 minuti dal telefono, scopri in quali ruoli rendi di più e fatti trovare dalle imprese giuste."
         path={PATH}
         jsonLd={jsonLd}
       />
@@ -186,12 +187,37 @@ export default function LavoraInEdilizia() {
         sub="Costi, privacy, tempi e cosa ricevi in cambio."
       />
 
-      <CtaBand
-        title="Quindici minuti, e sai per cosa sei fatto"
-        sub="Lascia i tuoi dati: ti mandiamo il link all’analisi psicoattitudinale. È gratis e resta gratis."
-        ctaLabel="Voglio fare l’analisi gratuita"
-        origine="candidati"
-      />
+      {/* CTA finale: qui il pubblico è il candidato, non l'impresa — niente
+          form lead aziendale, si va dritti alla registrazione gratuita. */}
+      <Section className="px-4 md:px-8 py-8">
+        <div
+          className="py-16 md:py-20 max-w-7xl mx-auto relative overflow-hidden rounded-[1.5rem] text-center"
+          style={{ background: 'radial-gradient(ellipse at 50% 30%, #2a4f7a 0%, #1e3a5f 60%, #162d4a 100%)' }}
+        >
+          <div className="max-w-2xl mx-auto px-4 md:px-8 relative z-10">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+              Quindici minuti, e sai per cosa sei fatto
+            </h2>
+            <p className="text-base md:text-lg text-white/70 leading-relaxed mb-8">
+              Ti registri gratis, fai l’analisi dal telefono e decidi tu se essere visibile alle
+              imprese. Nessun costo, ora né mai.
+            </p>
+            <Button
+              asChild
+              size="lg"
+              className="bg-[#f09133] hover:bg-[#e07a1f] text-white rounded-xl px-10 h-12 font-semibold shadow-[0_4px_20px_rgba(240,145,51,0.4)]"
+            >
+              <Link to="/registrazione-candidato">Registrati gratis</Link>
+            </Button>
+            <p className="text-xs text-white/70 mt-4">
+              Hai già un account?{' '}
+              <Link to="/auth" className="underline hover:text-[#f09133]">
+                Accedi
+              </Link>
+            </p>
+          </div>
+        </div>
+      </Section>
     </>
   );
 }

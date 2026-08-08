@@ -46,8 +46,8 @@ export default function Guide() {
   return (
     <>
       <Seo
-        title="Guide per imprese edili — turnover, costi di selezione, colloqui"
-        description="Guide pratiche per chi assume in edilizia: come ridurre il turnover in cantiere, quanto costa davvero un'assunzione sbagliata e come condurre un colloquio che serva a qualcosa."
+        title="Guide per chi assume in edilizia | Talenti Edili"
+        description="Guide pratiche per chi assume in edilizia: ridurre il turnover in cantiere, il costo reale di un'assunzione sbagliata, il colloquio che funziona."
         path={PATH}
         jsonLd={jsonLd}
       />

@@ -37,7 +37,7 @@ export const RUOLI: Ruolo[] = [
     categoria: 'Cantiere',
     sintesi:
       'Tiene insieme squadre, fornitori e cronoprogramma. Il ruolo dove un errore di selezione costa di più.',
-    metaTitle: 'Come selezionare un capocantiere — analisi psicoattitudinale | Talenti Edili',
+    metaTitle: 'Come selezionare un capocantiere | Talenti Edili',
     metaDescription:
       'Che caratteristiche deve avere un capocantiere e come si valuta prima di assumerlo. I tratti che contano, i segnali di rischio e le domande da fare al colloquio.',
     definizione:
@@ -287,7 +287,7 @@ export const RUOLI: Ruolo[] = [
     categoria: 'Tecnico',
     sintesi:
       'Il ruolo dove il profilo sbagliato non genera conflitto: genera silenzio, e il silenzio precede l’infortunio.',
-    metaTitle: 'Come selezionare un responsabile sicurezza in edilizia | Talenti Edili',
+    metaTitle: 'Come selezionare un RSPP in edilizia | Talenti Edili',
     metaDescription:
       'RSPP e CSE: come valutare rigore, autorevolezza e capacità di far rispettare le procedure prima di affidare la sicurezza del cantiere.',
     definizione:
@@ -447,7 +447,7 @@ export const RUOLI: Ruolo[] = [
     categoria: 'Tecnico',
     sintesi:
       'Risponde delle scelte tecniche di tutta l’impresa. Un errore qui non tocca un cantiere: li tocca tutti.',
-    metaTitle: 'Come selezionare un direttore tecnico in edilizia | Talenti Edili',
+    metaTitle: 'Come selezionare un direttore tecnico | Talenti Edili',
     metaDescription:
       'Il direttore tecnico risponde delle scelte tecniche dell’impresa. Come valutarne visione d’insieme, assunzione di responsabilità e capacità di delega.',
     definizione:

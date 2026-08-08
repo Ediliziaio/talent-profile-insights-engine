@@ -78,7 +78,7 @@ export default function ChiSiamo() {
     <>
       <Seo
         title="Chi siamo — perché esiste Talenti Edili"
-        description="Nasciamo per dare alle imprese edili italiane un modo serio di decidere sulle persone: analisi psicoattitudinale per misurare, Intelligenza Artificiale per interpretare."
+        description="Diamo alle imprese edili un modo serio di decidere sulle persone: analisi psicoattitudinale per misurare, Intelligenza Artificiale per interpretare."
         path={PATH}
         jsonLd={jsonLd}
       />

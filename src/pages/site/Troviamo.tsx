@@ -47,8 +47,8 @@ export default function Troviamo() {
   return (
     <>
       <Seo
-        title="Chi ti troviamo — venditori, amministrativi, capicantiere e altri | Talenti Edili"
-        description="Il servizio di ricerca e selezione di Talenti Edili per categoria: venditori, amministrativi, capicantiere e capisquadra, operai specializzati, geometri e tecnici, preventivisti."
+        title="Chi ti troviamo: venditori, capicantiere, tecnici"
+        description="Ricerca e selezione per categoria: venditori, amministrativi, capicantiere, operai specializzati, geometri e tecnici, preventivisti."
         path={PATH}
         jsonLd={jsonLd}
       />

@@ -119,9 +119,9 @@ export const SELEZIONI: CategoriaSelezione[] = [
     slug: 'amministrativi',
     nomeBreve: 'amministrativi',
     h1: 'Troviamo gli amministrativi per la tua impresa edile',
-    metaTitle: 'Ricerca e selezione impiegati amministrativi edilizia | Talenti Edili',
+    metaTitle: 'Ricerca e selezione amministrativi edili | Talenti Edili',
     metaDescription:
-      'Troviamo impiegati amministrativi, contabili di cantiere e addetti paghe per imprese edili: selezione con analisi psicoattitudinale e rosa di 3 finalisti in 21 giorni.',
+      'Impiegati amministrativi, contabili di cantiere e addetti paghe per imprese edili: selezione con analisi psicoattitudinale, 3 finalisti in 21 giorni.',
     intro:
       'Contabilità di cantiere, fatturazione con reverse charge e SAL, gestione fornitori e subappalti: l’amministrazione edile è un mestiere a sé. Troviamo chi lo sa fare — e chi regge il ritmo di un’impresa vera.',
     definizione:
@@ -285,7 +285,7 @@ export const SELEZIONI: CategoriaSelezione[] = [
     slug: 'operai-specializzati',
     nomeBreve: 'operai specializzati',
     h1: 'Troviamo operai specializzati',
-    metaTitle: 'Ricerca e selezione operai specializzati edilizia | Talenti Edili',
+    metaTitle: 'Ricerca e selezione operai specializzati | Talenti Edili',
     metaDescription:
       'Troviamo muratori, carpentieri, ferraioli e gruisti che restano: selezione con analisi psicoattitudinale su affidabilità, sicurezza e tenuta nel tempo.',
     intro:
@@ -371,7 +371,7 @@ export const SELEZIONI: CategoriaSelezione[] = [
     slug: 'geometri-e-tecnici',
     nomeBreve: 'geometri e tecnici',
     h1: 'Troviamo geometri e tecnici di cantiere',
-    metaTitle: 'Ricerca e selezione geometri e tecnici di cantiere | Talenti Edili',
+    metaTitle: 'Ricerca e selezione geometri e tecnici | Talenti Edili',
     metaDescription:
       'Troviamo geometri di cantiere, project manager e direttori tecnici: selezione su rigore, autorevolezza e gestione economica della commessa. Rosa di 3 finalisti.',
     intro:

@@ -139,7 +139,7 @@ export default function Prezzi() {
     <>
       <Seo
         title="Prezzi — quanto costa Talenti Edili | Piani da 49 €/mese"
-        description="Piani del Talent Profile System da 49 €/mese per 5 analisi psicoattitudinali, 97 €/mese per 20. Marketplace incluso, ricerca e selezione quotata a incarico. Garanzia 30 giorni."
+        description="Piani da 49 €/mese per 5 analisi psicoattitudinali, 97 €/mese per 20. Marketplace incluso, selezione quotata a incarico. Garanzia 30 giorni."
         path={PATH}
         jsonLd={jsonLd}
       />

@@ -34,7 +34,7 @@ export default function Faq() {
   return (
     <>
       <Seo
-        title="Domande frequenti su Talenti Edili — AI e analisi psicoattitudinale"
+        title="Domande frequenti — Talenti Edili"
         description="Come funziona Talenti Edili, che cos’è il Talent Profile System, quanto dura l’analisi psicoattitudinale, quanto costa e come sono tutelati i dati dei candidati."
         path={PATH}
         jsonLd={jsonLd}

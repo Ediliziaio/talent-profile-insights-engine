@@ -137,7 +137,7 @@ export default function Marketplace() {
     <>
       <Seo
         title="Marketplace Talenti Edili — trova profili edili già analizzati"
-        description="Cerca fra candidati del settore edile che hanno già fatto l’analisi psicoattitudinale. Vedi compatibilità di ruolo, tratti e rischi prima di chiamare. Non annunci: profili misurati."
+        description="Candidati edili che hanno già fatto l’analisi psicoattitudinale: vedi compatibilità, tratti e rischi prima di chiamare. Non annunci: profili misurati."
         path={PATH}
         jsonLd={jsonLd}
       />
@@ -300,6 +300,39 @@ export default function Marketplace() {
             <Link to="/ruoli" className="text-sm font-semibold text-[#1e3a5f] hover:text-[#f09133] transition-colors">
               Vedi tutti i 30+ ruoli coperti →
             </Link>
+          </div>
+        </div>
+      </Section>
+
+      <Section className="py-14 md:py-16 bg-white">
+        <div className="max-w-4xl mx-auto px-4 md:px-8">
+          <div className="rounded-2xl border-2 border-[#f09133]/30 bg-[#fef9c3]/30 p-7 md:p-9 grid md:grid-cols-2 gap-8">
+            <div>
+              <h2 className="text-xl font-bold mb-2">Sei un’impresa?</h2>
+              <p className="text-sm text-[#6b7280] leading-relaxed mb-4">
+                Il marketplace è incluso nei piani: consulti i profili anonimi e sblocchi solo
+                quelli che ti interessano.
+              </p>
+              <Link
+                to="/prezzi"
+                className="text-sm font-semibold text-[#1e3a5f] hover:text-[#f09133] transition-colors"
+              >
+                Vedi i piani →
+              </Link>
+            </div>
+            <div>
+              <h2 className="text-xl font-bold mb-2">Cerchi lavoro in edilizia?</h2>
+              <p className="text-sm text-[#6b7280] leading-relaxed mb-4">
+                Entri gratis: 15 minuti di analisi e sei nel marketplace, in forma anonima, finché
+                non decidi tu.
+              </p>
+              <Link
+                to="/registrazione-candidato"
+                className="text-sm font-semibold text-[#1e3a5f] hover:text-[#f09133] transition-colors"
+              >
+                Registrati gratis →
+              </Link>
+            </div>
           </div>
         </div>
       </Section>
