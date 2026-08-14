@@ -430,7 +430,7 @@ export default function Dashboard() {
           <div>
             <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">Dashboard</h1>
             <p className="text-muted-foreground mt-0.5 sm:mt-1 text-xs sm:text-sm">
-              {isSuperadmin ? 'Panoramica globale del sistema' : 'I tuoi candidati in un colpo d’occhio'}
+              {isSuperadmin ? 'Come vanno le aziende e i loro candidati' : 'I tuoi candidati in un colpo d’occhio'}
             </p>
           </div>
           <Select value={period} onValueChange={setPeriod}>
@@ -504,7 +504,10 @@ export default function Dashboard() {
         )}
 
         {/* ─── Cosa fare adesso — la coda di lavoro, prima dei numeri ─── */}
-        {daFare && allCandidati.length > 0 && (
+        {/* La coda di lavoro ("leggi i report", "chi sollecitare", "devi
+            assumere?") è di chi assume. Il superadmin non assume nessuno:
+            gliela mostravamo lo stesso. */}
+        {isAzienda && daFare && allCandidati.length > 0 && (
           <div className="grid gap-3 grid-cols-1 md:grid-cols-3">
             <Card className={daFare.daLeggere.length ? 'border-green-300 bg-green-50/40' : undefined}>
               <CardContent className="p-4">
@@ -576,7 +579,9 @@ export default function Dashboard() {
             Ogni numero è un link alla lista già filtrata: il conteggio da solo
             non dice cosa farne, il link sì. */}
         <div className="space-y-2">
-          <h2 className="text-sm font-semibold text-muted-foreground">I tuoi candidati</h2>
+          <h2 className="text-sm font-semibold text-muted-foreground">
+            {isSuperadmin ? 'Candidati su tutte le aziende' : 'I tuoi candidati'}
+          </h2>
           <div className="grid gap-2 sm:gap-3 grid-cols-3">
             <StatCard
               icon={Users}
@@ -666,12 +671,22 @@ export default function Dashboard() {
 
         {/* Aziende stats for superadmin */}
         {isSuperadmin && aziendeStats && (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="text-sm font-semibold text-muted-foreground">Le aziende</h2>
+              <Link
+                to="/aziende"
+                className="text-sm font-medium text-primary hover:underline whitespace-nowrap"
+              >
+                Gestiscile →
+              </Link>
+            </div>
           <div className="grid gap-3 grid-cols-2 md:grid-cols-5">
             <Card>
               <CardContent className="p-3 md:p-4">
                 <div className="flex items-center gap-2">
                   <Building2 className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground">Aziende Totali</span>
+                  <span className="text-xs text-muted-foreground">In tutto</span>
                 </div>
                 <div className="text-xl font-bold mt-1">{aziendeStats.totale}</div>
               </CardContent>
@@ -689,7 +704,7 @@ export default function Dashboard() {
               <CardContent className="p-3 md:p-4">
                 <div className="flex items-center gap-2">
                   <div className="h-2 w-2 rounded-full bg-gray-400" />
-                  <span className="text-xs text-muted-foreground">Disattive</span>
+                  <span className="text-xs text-muted-foreground">Disattivate</span>
                 </div>
                 <div className="text-xl font-bold text-muted-foreground mt-1">{aziendeStats.disattive}</div>
               </CardContent>
@@ -707,11 +722,12 @@ export default function Dashboard() {
               <CardContent className="p-3 md:p-4">
                 <div className="flex items-center gap-2">
                   <BarChart3 className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground">Media/Azienda</span>
+                  <span className="text-xs text-muted-foreground">Candidati per azienda</span>
                 </div>
                 <div className="text-xl font-bold mt-1">{aziendeStats.mediaCandidati}</div>
               </CardContent>
             </Card>
+          </div>
           </div>
         )}
 
@@ -760,7 +776,7 @@ export default function Dashboard() {
           {/* Status distribution */}
           <Card>
             <CardHeader className="pb-1 sm:pb-2 px-3 sm:px-6 pt-3 sm:pt-6">
-              <CardTitle className="text-sm sm:text-base">Stato Test</CardTitle>
+              <CardTitle className="text-sm sm:text-base">Chi ha fatto il test</CardTitle>
             </CardHeader>
             <CardContent className="px-2 sm:px-6 pb-3 sm:pb-6">
               <div className="h-[140px] sm:h-[180px]">
@@ -790,7 +806,7 @@ export default function Dashboard() {
           {/* Verdict distribution */}
           <Card>
             <CardHeader className="pb-1 sm:pb-2 px-3 sm:px-6 pt-3 sm:pt-6">
-              <CardTitle className="text-sm sm:text-base">Verdetti Fit</CardTitle>
+              <CardTitle className="text-sm sm:text-base">Esito dei test</CardTitle>
             </CardHeader>
             <CardContent className="px-2 sm:px-6 pb-3 sm:pb-6">
               <div className="h-[140px] sm:h-[180px]">
@@ -809,7 +825,7 @@ export default function Dashboard() {
           {/* Funzione distribution */}
           <Card>
             <CardHeader className="pb-1 sm:pb-2 px-3 sm:px-6 pt-3 sm:pt-6">
-              <CardTitle className="text-sm sm:text-base">Per Funzione</CardTitle>
+              <CardTitle className="text-sm sm:text-base">Per ruolo</CardTitle>
             </CardHeader>
             <CardContent className="px-2 sm:px-6 pb-3 sm:pb-6">
               <div className="h-[140px] sm:h-[180px]">
@@ -859,7 +875,7 @@ export default function Dashboard() {
           {/* Fit score distribution */}
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-base">Distribuzione Fit Score</CardTitle>
+              <CardTitle className="text-base">Quanto sono compatibili</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="h-[180px]">
@@ -972,9 +988,9 @@ export default function Dashboard() {
             <CardHeader className="pb-2">
               <CardTitle className="text-lg flex items-center gap-2">
                 <TrendingUp className="h-5 w-5 text-success" />
-                Top Performers
+                I più compatibili
               </CardTitle>
-              <CardDescription>Migliori Fit Score</CardDescription>
+              <CardDescription>Chi ha il punteggio più alto</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">

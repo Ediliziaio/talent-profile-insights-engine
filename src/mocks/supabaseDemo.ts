@@ -16,6 +16,13 @@
 const AZIENDA_ID = 'demo-azienda-0001';
 const USER_ID = 'demo-user-0001';
 
+/* Ruolo della sessione demo: `?demo=superadmin` nell'URL per vedere le
+   schermate di chi gestisce le aziende, senza riavviare il server. */
+const RUOLO_DEMO: 'azienda' | 'superadmin' =
+  typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('demo') === 'superadmin'
+    ? 'superadmin'
+    : 'azienda';
+
 const oggi = new Date();
 const giorniFa = (n: number) => new Date(oggi.getTime() - n * 86_400_000).toISOString();
 
@@ -40,6 +47,39 @@ const AZIENDE: Riga[] = [
     pec: 'costruzionibianchi@pec.it',
     created_at: giorniFa(400),
   },
+  {
+    id: 'demo-azienda-0002',
+    nome: 'Edilnova Costruzioni Spa',
+    attiva: true,
+    settore: 'Costruzioni generali',
+    email_contatto: 'info@edilnova.it',
+    telefono: '0295551234',
+    citta: 'Milano',
+    provincia: 'MI',
+    partita_iva: '09876543210',
+    created_at: giorniFa(210),
+  },
+  {
+    id: 'demo-azienda-0003',
+    nome: 'Impresa Verdi & Figli Snc',
+    attiva: true,
+    settore: 'Ristrutturazioni',
+    email_contatto: 'verdi@impresaverdi.it',
+    telefono: '0459998877',
+    citta: 'Verona',
+    provincia: 'VR',
+    created_at: giorniFa(60),
+  },
+  {
+    id: 'demo-azienda-0004',
+    nome: 'Cantieri del Sud Srl',
+    attiva: false,
+    settore: 'Opere pubbliche',
+    email_contatto: 'amministrazione@cantieridelsud.it',
+    citta: 'Bari',
+    provincia: 'BA',
+    created_at: giorniFa(520),
+  },
 ];
 
 const PROFILES: Riga[] = [
@@ -49,8 +89,8 @@ const PROFILES: Riga[] = [
     email: 'demo@costruzionibianchi.it',
     nome: 'Giulia',
     cognome: 'Bianchi',
-    ruolo: 'azienda',
-    azienda_id: AZIENDA_ID,
+    ruolo: RUOLO_DEMO,
+    azienda_id: RUOLO_DEMO === 'superadmin' ? null : AZIENDA_ID,
     created_at: giorniFa(400),
   },
   {

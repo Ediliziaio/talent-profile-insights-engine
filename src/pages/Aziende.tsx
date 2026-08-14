@@ -53,7 +53,8 @@ import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { 
   Plus, Pencil, Trash2, Building2, Copy, Check, Download, Search, Users, 
-  ArrowUpDown, Filter, CheckCircle2, XCircle, TrendingUp, Eye, Key, Loader2
+  ArrowUpDown, Filter, CheckCircle2, XCircle, TrendingUp, Eye, Key, Loader2,
+  AlertTriangle, Clock
 } from 'lucide-react';
 import { Azienda } from '@/types/database';
 import { format } from 'date-fns';
@@ -66,6 +67,8 @@ type SortOrder = 'asc' | 'desc';
 
 type AziendaWithStats = Azienda & {
   candidati_count: number;
+  /** Data dell'ultimo candidato inserito: dice se l'azienda si è fermata. */
+  ultimo_candidato_il: string | null;
   test_completati: number;
   fit_medio: number | null;
   idonei: number;
@@ -138,17 +141,21 @@ export default function Aziende() {
       // Fetch all candidati with their analisi
       const { data: candidatiData, error: candidatiError } = await supabase
         .from('candidati')
-        .select('azienda_id, test_completato, analisi_candidato(fit_score, fit_verdict)');
+        .select('azienda_id, test_completato, created_at, analisi_candidato(fit_score, fit_verdict)');
       
       if (candidatiError) throw candidatiError;
 
       // Calculate stats per company
-      const statsMap = new Map<string, { count: number; completati: number; fitScores: number[]; idonei: number }>();
-      
+      const statsMap = new Map<
+        string,
+        { count: number; completati: number; fitScores: number[]; idonei: number; ultimo: string | null }
+      >();
+
       candidatiData?.forEach(c => {
-        const stats = statsMap.get(c.azienda_id) || { count: 0, completati: 0, fitScores: [], idonei: 0 };
+        const stats = statsMap.get(c.azienda_id) || { count: 0, completati: 0, fitScores: [], idonei: 0, ultimo: null };
         stats.count++;
         if (c.test_completato) stats.completati++;
+        if (c.created_at && (!stats.ultimo || c.created_at > stats.ultimo)) stats.ultimo = c.created_at;
         
         const analisi = Array.isArray(c.analisi_candidato) ? c.analisi_candidato[0] : null;
         if (analisi?.fit_score) stats.fitScores.push(analisi.fit_score);
@@ -158,7 +165,7 @@ export default function Aziende() {
       });
 
       return (aziendeData as Azienda[]).map(a => {
-        const stats = statsMap.get(a.id) || { count: 0, completati: 0, fitScores: [], idonei: 0 };
+        const stats = statsMap.get(a.id) || { count: 0, completati: 0, fitScores: [], idonei: 0, ultimo: null };
         const avgFit = stats.fitScores.length > 0 
           ? Math.round(stats.fitScores.reduce((acc, s) => acc + s, 0) / stats.fitScores.length)
           : null;
@@ -169,6 +176,7 @@ export default function Aziende() {
           test_completati: stats.completati,
           fit_medio: avgFit,
           idonei: stats.idonei,
+          ultimo_candidato_il: stats.ultimo,
         };
       }) as AziendaWithStats[];
     },
@@ -248,6 +256,27 @@ export default function Aziende() {
       totalCandidati,
       avgCandidati: aziende.length > 0 ? Math.round(totalCandidati / aziende.length * 10) / 10 : 0,
     };
+  }, [aziende]);
+
+  /* La domanda di chi gestisce le aziende non è "quante ne ho" ma "quale
+     sto per perdere". Un'impresa che si è iscritta e non ha mai caricato
+     nessuno, o che ha smesso, non si vede da nessun conteggio. */
+  const daSeguire = useMemo(() => {
+    if (!aziende?.length) return null;
+    const ora = Date.now();
+    const giorni = (d: string | null | undefined) =>
+      d ? (ora - new Date(d).getTime()) / 86_400_000 : Infinity;
+
+    const maiPartite = aziende.filter(
+      (a) => a.attiva && a.candidati_count === 0 && giorni(a.created_at) > 14
+    );
+    // "Ferma" = ha candidati ma nessuno inserito di recente. Senza la data
+    // dell'ultimo candidato si userebbe quella di iscrizione, che dopo un
+    // anno segnala come inattive anche le aziende che lavorano ogni giorno.
+    const ferme = aziende.filter(
+      (a) => a.attiva && a.candidati_count > 0 && giorni(a.ultimo_candidato_il) > 45
+    );
+    return maiPartite.length || ferme.length ? { maiPartite, ferme } : null;
   }, [aziende]);
 
   const handleSort = (field: SortField) => {
@@ -400,14 +429,14 @@ export default function Aziende() {
   const exportCSV = () => {
     if (!filteredAziende || filteredAziende.length === 0) return;
 
-    const headers = ['Nome', 'Settore', 'Email', 'Telefono', 'Indirizzo', 'Stato', 'Candidati', 'Completati', 'Fit Medio', 'Idonei', 'Data'];
+    const headers = ['Nome', 'Settore', 'Email', 'Telefono', 'Indirizzo', 'Stato', 'Candidati', 'Completati', 'Compatibilita media', 'Adatti', 'Data'];
     const rows = filteredAziende.map(a => [
       a.nome,
       a.settore || '',
       a.email_contatto || '',
       a.telefono || '',
       a.indirizzo || '',
-      a.attiva ? 'Attiva' : 'Disattiva',
+      a.attiva ? 'Attiva' : 'Disattivata',
       a.candidati_count.toString(),
       a.test_completati.toString(),
       a.fit_medio?.toString() || '',
@@ -612,9 +641,9 @@ export default function Aziende() {
             <SelectValue placeholder="Stato" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Tutti</SelectItem>
+            <SelectItem value="all">Tutte</SelectItem>
             <SelectItem value="attiva">Attive</SelectItem>
-            <SelectItem value="disattiva">Disattive</SelectItem>
+            <SelectItem value="disattiva">Disattivate</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -903,6 +932,47 @@ export default function Aziende() {
               </div>
             </div>
 
+            {/* Chi seguire, prima dei conteggi: i numeri dicono quante
+                aziende hai, non quale stai per perdere. */}
+            {daSeguire && (
+              <div className="grid gap-3 grid-cols-1 md:grid-cols-2">
+                {daSeguire.maiPartite.length > 0 && (
+                  <Card className="border-amber-300 bg-amber-50/50">
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-2 mb-1">
+                        <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0" />
+                        <span className="text-sm font-medium">Iscritte ma mai partite</span>
+                      </div>
+                      <p className="text-2xl font-bold text-amber-700">
+                        {daSeguire.maiPartite.length}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Attive da oltre due settimane, nessun candidato caricato:{' '}
+                        {daSeguire.maiPartite.slice(0, 3).map((a) => a.nome).join(', ')}
+                        {daSeguire.maiPartite.length > 3 && ' e altre'}.
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
+                {daSeguire.ferme.length > 0 && (
+                  <Card className="border-orange-300 bg-orange-50/50">
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Clock className="h-4 w-4 text-orange-600 shrink-0" />
+                        <span className="text-sm font-medium">Ferme da oltre 45 giorni</span>
+                      </div>
+                      <p className="text-2xl font-bold text-orange-700">{daSeguire.ferme.length}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Hanno usato la piattaforma e poi si sono fermate:{' '}
+                        {daSeguire.ferme.slice(0, 3).map((a) => a.nome).join(', ')}
+                        {daSeguire.ferme.length > 3 && ' e altre'}.
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            )}
+
             {/* KPI Cards */}
             <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
               <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
@@ -927,7 +997,7 @@ export default function Aziende() {
                 <CardContent className="p-3 md:p-4">
                   <div className="flex items-center gap-2">
                     <XCircle className="h-4 w-4 text-yellow-600" />
-                    <span className="text-xs text-muted-foreground">Disattive</span>
+                    <span className="text-xs text-muted-foreground">Disattivate</span>
                   </div>
                   <p className="text-xl md:text-2xl font-bold mt-1">{stats.disattive}</p>
                 </CardContent>
@@ -945,7 +1015,7 @@ export default function Aziende() {
                 <CardContent className="p-3 md:p-4">
                   <div className="flex items-center gap-2">
                     <TrendingUp className="h-4 w-4 text-accent" />
-                    <span className="text-xs text-muted-foreground">Media/Azienda</span>
+                    <span className="text-xs text-muted-foreground">Candidati per azienda</span>
                   </div>
                   <p className="text-xl md:text-2xl font-bold mt-1">{stats.avgCandidati}</p>
                 </CardContent>
@@ -990,35 +1060,35 @@ export default function Aziende() {
             ) : (
               <div className="flex flex-wrap items-center gap-2">
                 <Select value={filterStato} onValueChange={setFilterStato}>
-                  <SelectTrigger className="w-[110px] h-9">
+                  <SelectTrigger className="w-[150px] h-9">
                     <SelectValue placeholder="Stato" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Tutti</SelectItem>
+                    <SelectItem value="all">Stato: tutte</SelectItem>
                     <SelectItem value="attiva">Attive</SelectItem>
-                    <SelectItem value="disattiva">Disattive</SelectItem>
+                    <SelectItem value="disattiva">Disattivate</SelectItem>
                   </SelectContent>
                 </Select>
                 <Select value={filterSettore} onValueChange={setFilterSettore}>
-                  <SelectTrigger className="w-[130px] h-9">
+                  <SelectTrigger className="w-[160px] h-9">
                     <SelectValue placeholder="Settore" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Tutti</SelectItem>
+                    <SelectItem value="all">Settore: tutti</SelectItem>
                     {settori.map((s) => (
                       <SelectItem key={s} value={s!}>{s}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
                 <Select value={filterCandidati} onValueChange={setFilterCandidati}>
-                  <SelectTrigger className="w-[140px] h-9">
+                  <SelectTrigger className="w-[190px] h-9">
                     <SelectValue placeholder="Candidati" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Tutti</SelectItem>
-                    <SelectItem value="con">Con candidati</SelectItem>
-                    <SelectItem value="senza">Senza</SelectItem>
-                    <SelectItem value="in_attesa">In attesa</SelectItem>
+                    <SelectItem value="all">Candidati: tutte</SelectItem>
+                    <SelectItem value="con">Che hanno candidati</SelectItem>
+                    <SelectItem value="senza">Che non ne hanno</SelectItem>
+                    <SelectItem value="in_attesa">Con test in attesa</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -1121,7 +1191,7 @@ export default function Aziende() {
                         
                         <div className="flex flex-wrap items-center gap-3 text-sm">
                           <Badge variant={azienda.attiva ? 'default' : 'secondary'} className="text-xs">
-                            {azienda.attiva ? 'Attiva' : 'Disattiva'}
+                            {azienda.attiva ? 'Attiva' : 'Disattivata'}
                           </Badge>
                           <span className="flex items-center gap-1 text-muted-foreground">
                             <Users className="h-3 w-3" />
@@ -1141,39 +1211,38 @@ export default function Aziende() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <SortableHeader field="nome">Nome</SortableHeader>
-                        <SortableHeader field="settore">Settore</SortableHeader>
+                        <SortableHeader field="nome">Azienda</SortableHeader>
                         <TableHead>Contatto</TableHead>
                         <TableHead>Stato</TableHead>
                         <SortableHeader field="candidati_count">Candidati</SortableHeader>
-                        <SortableHeader field="test_completati">Completati</SortableHeader>
-                        <TableHead>Fit Medio</TableHead>
-                        <SortableHeader field="created_at">Data</SortableHeader>
-                        <TableHead className="text-right w-28">Azioni</TableHead>
+                        <TableHead>Compatibilità</TableHead>
+                        <SortableHeader field="created_at">Iscritta</SortableHeader>
+                        <TableHead className="text-right w-[132px]"><span className="sr-only">Azioni</span></TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {filteredAziende.map((azienda, index) => (
                         <TableRow key={azienda.id} className={index % 2 === 0 ? 'bg-muted/20' : ''}>
-                          <TableCell className="font-medium">
-                            <div className="flex items-center gap-2">
-                              <Building2 className="h-4 w-4 text-muted-foreground" />
-                              {azienda.nome}
+                          <TableCell className="font-medium min-w-[190px]">
+                            <div className="flex items-start gap-2">
+                              <Building2 className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+                              <div className="min-w-0">
+                                <div>{azienda.nome}</div>
+                                {/* Il settore era una colonna a sé con badge di colori
+                                    diversi, che sembravano voler dire qualcosa. È
+                                    un'informazione secondaria: sta sotto al nome. */}
+                                {azienda.settore && (
+                                  <div className="text-xs text-muted-foreground font-normal">
+                                    {azienda.settore}
+                                  </div>
+                                )}
+                              </div>
                             </div>
-                          </TableCell>
-                          <TableCell>
-                            {azienda.settore ? (
-                              <Badge variant={getSettoreBadgeColor(azienda.settore)} className="text-xs">
-                                {azienda.settore}
-                              </Badge>
-                            ) : (
-                              <span className="text-muted-foreground text-xs">-</span>
-                            )}
                           </TableCell>
                           <TableCell className="text-sm">
                             <div className="space-y-0.5">
                               {azienda.email_contatto && (
-                                <p className="text-xs truncate max-w-[150px]">{azienda.email_contatto}</p>
+                                <p className="text-xs truncate max-w-[140px]">{azienda.email_contatto}</p>
                               )}
                               {azienda.telefono && (
                                 <p className="text-xs text-muted-foreground">{azienda.telefono}</p>
@@ -1188,23 +1257,18 @@ export default function Aziende() {
                               variant={azienda.attiva ? 'default' : 'secondary'}
                               className={azienda.attiva ? 'bg-green-100 text-green-700 hover:bg-green-100' : ''}
                             >
-                              {azienda.attiva ? 'Attiva' : 'Off'}
+                              {azienda.attiva ? 'Attiva' : 'Disattivata'}
                             </Badge>
                           </TableCell>
-                          <TableCell>
+                          <TableCell className="whitespace-nowrap">
                             <div className="flex items-center gap-1">
                               <Users className="h-3 w-3 text-muted-foreground" />
                               <span className="font-medium">{azienda.candidati_count}</span>
                             </div>
-                          </TableCell>
-                          <TableCell>
-                            <span className={azienda.test_completati > 0 ? 'text-green-600 font-medium' : 'text-muted-foreground'}>
-                              {azienda.test_completati}
-                            </span>
                             {azienda.candidati_count > 0 && (
-                              <span className="text-muted-foreground text-xs ml-1">
-                                ({Math.round(azienda.test_completati / azienda.candidati_count * 100)}%)
-                              </span>
+                              <div className="text-xs text-muted-foreground">
+                                {azienda.test_completati} hanno fatto il test
+                              </div>
                             )}
                           </TableCell>
                           <TableCell>
