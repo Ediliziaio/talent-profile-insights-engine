@@ -236,8 +236,8 @@ describe('RoleMatchingV5 - Helper UI', () => {
   });
 
   it('getVerdictLabelV5 dovrebbe ritornare label corrette', () => {
-    expect(getVerdictLabelV5('IDONEO')).toBe('Idoneo');
-    expect(getVerdictLabelV5('NON_IDONEO')).toBe('Non Idoneo');
+    expect(getVerdictLabelV5('IDONEO')).toBe('Adatto');
+    expect(getVerdictLabelV5('NON_IDONEO')).toBe('Non adatto');
   });
 
   it('getVerdictColorV5 dovrebbe ritornare colori corretti', () => {

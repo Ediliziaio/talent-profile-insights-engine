@@ -73,9 +73,10 @@ import {
   Plus, Users, Copy, Check, Eye, Key, RefreshCw, Download, ArrowUpDown, 
   TestTube2, Trash2, CalendarIcon, Search, AlertTriangle, Filter, 
   CheckCircle2, Clock, TrendingUp, UserCheck, Mail, Phone, X, ChevronLeft, ChevronRight,
-  ChevronDown
+  ChevronDown, Send
 } from 'lucide-react';
 import { Candidato, Azienda, AccessoAzienda, ProfiloCandidato, RUOLI_AZIENDALI, FUNZIONI } from '@/types/database';
+import { InvitoCandidato, CandidatoDaInvitare } from '@/components/InvitoCandidato';
 import { getProfiloTipoV5Label } from '@/lib/scoringV5';
 import { format, subDays, subMonths, startOfDay, endOfDay, parseISO } from 'date-fns';
 import { it } from 'date-fns/locale';
@@ -113,6 +114,14 @@ export default function Candidati() {
   /* La card credenziali occupava lo spazio migliore sopra la lista pur servendo
      una volta sola: ora è chiusa di default e si apre a richiesta. */
   const [mostraCredenziali, setMostraCredenziali] = useState(false);
+  /* Invito/sollecito: il messaggio da mandare al candidato era da scrivere a
+     mano ogni volta. `password` è valorizzata solo subito dopo la creazione,
+     l'unico momento in cui la conosciamo. */
+  const [daInvitare, setDaInvitare] = useState<{
+    candidato: CandidatoDaInvitare;
+    password?: string | null;
+    sollecito: boolean;
+  } | null>(null);
   const [filterAzienda, setFilterAzienda] = useState<string>('all');
   /* Lo stato può arrivare dall'URL: la dashboard linka /candidati?stato=completato
      per portare l'utente direttamente sulla coda che ha appena visto. */
@@ -140,12 +149,9 @@ export default function Candidati() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [singleDeleteId, setSingleDeleteId] = useState<string | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [generatedCredentials, setGeneratedCredentials] = useState<{
-    username: string;
-    password: string;
-    nome: string;
-    cognome: string;
-  } | null>(null);
+  const [generatedCredentials, setGeneratedCredentials] = useState<
+    (CandidatoDaInvitare & { password: string }) | null
+  >(null);
   const [generatedPassword, setGeneratedPassword] = useState<string | null>(null);
 
   // Date filters
@@ -534,10 +540,15 @@ export default function Candidati() {
       setIsDialogOpen(false);
       resetForm();
       setGeneratedCredentials({
+        id: result.candidato.id,
         username: result.username,
         password: result.password,
         nome: result.candidato.nome,
         cognome: result.candidato.cognome,
+        email: result.candidato.email ?? null,
+        telefono: result.candidato.telefono ?? null,
+        funzione: result.candidato.funzione ?? null,
+        ruolo_attuale: result.candidato.ruolo_attuale ?? null,
       });
       toast({
         title: 'Candidato creato',
@@ -706,6 +717,38 @@ export default function Candidati() {
 
     return { total: totalCount, completati, inAttesa, idonei, avgFit };
   }, [statsRows, totalCount]);
+
+  /* Registra che l'invito è partito, così due persone della stessa azienda
+     non scrivono al medesimo candidato. Dipende dalle colonne aggiunte da
+     20260814120000_tracciamento_inviti.sql: finché la migration non è
+     applicata l'aggiornamento fallisce, l'invito parte lo stesso e la data
+     semplicemente non compare. */
+  const registraInvito = useMutation({
+    mutationFn: async (candidatoId: string) => {
+      const attuale = candidati?.find((c) => c.id === candidatoId) as
+        | (CandidatoWithRelations & { inviti_inviati?: number })
+        | undefined;
+      const { error } = await supabase
+        .from('candidati')
+        .update({
+          data_ultimo_invito: new Date().toISOString(),
+          inviti_inviati: (attuale?.inviti_inviati ?? 0) + 1,
+        } as never)
+        .eq('id', candidatoId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['candidati'] });
+    },
+    onError: (e) => {
+      console.warn('Invito non registrato (migration non applicata?):', e);
+    },
+  });
+
+  /* Oltre 5 giorni dall'inserimento senza test: non è più un invito, è un
+     sollecito. Stessa soglia usata dalla dashboard. */
+  const giorniDaCreazione = (c: { created_at: string | null }) =>
+    c.created_at ? (Date.now() - new Date(c.created_at).getTime()) / 86_400_000 : 0;
 
   const hasActiveFilters = filterStato !== 'all' || filterSesso !== 'all' || filterEta !== 'all' || 
     filterRuolo !== 'all' || filterFunzione !== 'all' || filterFitVerdict !== 'all' ||
@@ -983,7 +1026,9 @@ export default function Candidati() {
                       <TrendingUp className="h-4 w-4 text-blue-600" />
                       <span className="text-xs text-muted-foreground">Compatibilità media</span>
                     </div>
-                    <p className="text-xl md:text-2xl font-bold mt-1">{stats.avgFit}%</p>
+                    <p className="text-xl md:text-2xl font-bold mt-1">
+                      {stats.completati > 0 ? `${stats.avgFit}%` : '—'}
+                    </p>
                   </CardContent>
                 </Card>
               </div>
@@ -1372,19 +1417,16 @@ export default function Candidati() {
                                   </Button>
                                 ) : (
                                   <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8"
-                                    onClick={() => copyToClipboard(
-                                      `${window.location.origin}/auth`,
-                                      candidato.id
-                                    )}
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-8 px-2 text-xs whitespace-nowrap"
+                                    onClick={() => setDaInvitare({
+                                      candidato,
+                                      sollecito: giorniDaCreazione(candidato) > 5,
+                                    })}
                                   >
-                                    {copiedId === candidato.id ? (
-                                      <Check className="h-4 w-4 text-green-600" />
-                                    ) : (
-                                      <Copy className="h-4 w-4" />
-                                    )}
+                                    <Send className="h-3 w-3 mr-1" />
+                                    {giorniDaCreazione(candidato) > 5 ? 'Ricorda' : 'Invita'}
                                   </Button>
                                     )}
                                 <Button
@@ -1580,19 +1622,16 @@ export default function Candidati() {
                                   <div className="flex justify-end gap-1">
                                     {!candidato.test_completato ? (
                                       <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-7 w-7"
-                                        onClick={() => copyToClipboard(
-                                          `${window.location.origin}/auth`,
-                                          candidato.id
-                                        )}
+                                        variant="outline"
+                                        size="sm"
+                                        className="h-7 px-2 text-xs whitespace-nowrap"
+                                        onClick={() => setDaInvitare({
+                                          candidato,
+                                          sollecito: giorniDaCreazione(candidato) > 5,
+                                        })}
                                       >
-                                        {copiedId === candidato.id ? (
-                                          <Check className="h-3 w-3 text-green-600" />
-                                        ) : (
-                                          <Copy className="h-3 w-3" />
-                                        )}
+                                        <Send className="h-3 w-3 mr-1" />
+                                        {giorniDaCreazione(candidato) > 5 ? 'Ricorda' : 'Invita'}
                                       </Button>
                                     ) : (
                                       <Button 
@@ -1756,11 +1795,48 @@ export default function Candidati() {
                   </div>
                 </div>
               </div>
-              <DialogFooter>
-                <Button onClick={() => setGeneratedCredentials(null)}>Chiudi</Button>
+              <DialogFooter className="gap-2">
+                <Button variant="outline" onClick={() => setGeneratedCredentials(null)}>
+                  Chiudi
+                </Button>
+                {/* Il momento giusto per mandare l'invito è questo: è l'unico in
+                    cui la password è ancora visibile. */}
+                <Button
+                  onClick={() => {
+                    const c = generatedCredentials;
+                    if (!c) return;
+                    setDaInvitare({
+                      candidato: {
+                        id: c.id,
+                        nome: c.nome,
+                        cognome: c.cognome,
+                        email: c.email,
+                        telefono: c.telefono,
+                        username: c.username,
+                        funzione: c.funzione,
+                        ruolo_attuale: c.ruolo_attuale,
+                      },
+                      password: c.password,
+                      sollecito: false,
+                    });
+                    setGeneratedCredentials(null);
+                  }}
+                >
+                  <Send className="h-4 w-4 mr-1.5" />
+                  Manda l'invito
+                </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
+
+          <InvitoCandidato
+            candidato={daInvitare?.candidato ?? null}
+            password={daInvitare?.password}
+            sollecito={daInvitare?.sollecito ?? false}
+            open={!!daInvitare}
+            onOpenChange={(v) => !v && setDaInvitare(null)}
+            onInviato={(id) => registraInvito.mutate(id)}
+          />
 
           {/* Candidato Detail Drawer */}
           <CandidatoDrawer
