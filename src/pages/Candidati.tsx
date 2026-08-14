@@ -72,7 +72,8 @@ import { useToast } from '@/hooks/use-toast';
 import { 
   Plus, Users, Copy, Check, Eye, Key, RefreshCw, Download, ArrowUpDown, 
   TestTube2, Trash2, CalendarIcon, Search, AlertTriangle, Filter, 
-  CheckCircle2, Clock, TrendingUp, UserCheck, Mail, Phone, X, ChevronLeft, ChevronRight
+  CheckCircle2, Clock, TrendingUp, UserCheck, Mail, Phone, X, ChevronLeft, ChevronRight,
+  ChevronDown
 } from 'lucide-react';
 import { Candidato, Azienda, AccessoAzienda, ProfiloCandidato, RUOLI_AZIENDALI, FUNZIONI } from '@/types/database';
 import { getProfiloTipoV5Label } from '@/lib/scoringV5';
@@ -109,6 +110,9 @@ export default function Candidati() {
   const isMobile = useIsMobile();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  /* La card credenziali occupava lo spazio migliore sopra la lista pur servendo
+     una volta sola: ora è chiusa di default e si apre a richiesta. */
+  const [mostraCredenziali, setMostraCredenziali] = useState(false);
   const [filterAzienda, setFilterAzienda] = useState<string>('all');
   /* Lo stato può arrivare dall'URL: la dashboard linka /candidati?stato=completato
      per portare l'utente direttamente sulla coda che ha appena visto. */
@@ -119,7 +123,13 @@ export default function Candidati() {
   );
   const [filterRuolo, setFilterRuolo] = useState<string>('all');
   const [filterFunzione, setFilterFunzione] = useState<string>('all');
-  const [filterFitVerdict, setFilterFitVerdict] = useState<string>('all');
+  /* Stesso meccanismo per l'esito: /candidati?esito=IDONEO dalle card della dashboard. */
+  const esitoIniziale = searchParams.get('esito');
+  const [filterFitVerdict, setFilterFitVerdict] = useState<string>(
+    esitoIniziale === 'IDONEO' || esitoIniziale === 'VALUTARE' || esitoIniziale === 'NON_IDONEO'
+      ? esitoIniziale
+      : 'all'
+  );
   const [filterSesso, setFilterSesso] = useState<string>('all');
   const [filterEta, setFilterEta] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -255,16 +265,22 @@ export default function Candidati() {
 
   /* Costruisce la query filtrata lato server. Riusata dalla lista paginata e
      dall'export CSV (che scarica tutte le pagine del filtro corrente). */
-  const buildCandidatiQuery = useCallback(() => {
+  const buildCandidatiQuery = useCallback((leggera = false) => {
     // Con il filtro sul verdetto l'embed deve diventare inner join, ma solo in
     // quel caso: !inner fisso escluderebbe chi non ha ancora completato il test.
     const embedAnalisi = filterFitVerdict && filterFitVerdict !== 'all'
       ? 'analisi_candidato!inner(fit_score, fit_verdict)'
       : 'analisi_candidato(fit_score, fit_verdict)';
 
+    // La variante leggera serve ai contatori in alto: gli bastano tre campi su
+    // tutto il set filtrato, non le colonne complete della pagina visibile.
+    const colonne = leggera
+      ? `id, test_completato, ${embedAnalisi}`
+      : `*, aziende(nome), profili_candidato(*), ${embedAnalisi}`;
+
     let query = supabase
       .from('candidati')
-      .select(`*, aziende(nome), profili_candidato(*), ${embedAnalisi}`, { count: 'exact' });
+      .select(colonne, { count: 'exact' });
 
     if (filterAzienda && filterAzienda !== 'all') {
       query = query.eq('azienda_id', filterAzienda);
@@ -341,6 +357,21 @@ export default function Candidati() {
         rows: (data || []) as unknown as CandidatoWithRelations[],
         count: count ?? 0,
       };
+    },
+    placeholderData: (prev) => prev,
+  });
+
+  /* I contatori in alto si calcolavano sulla pagina corrente (50 righe): con
+     piu' di una pagina mostravano i numeri della pagina spacciandoli per totali.
+     Ora girano sul set filtrato completo, con una query leggera a parte. */
+  const { data: statsRows } = useQuery({
+    queryKey: ['candidati-stats', filterAzienda, filterStato, filterRuolo, filterFunzione, filterFitVerdict, filterSesso, filterEta, searchTerm, filterDateFrom, filterDateTo, filterTestDateFrom, filterTestDateTo],
+    queryFn: async () => {
+      // Tetto a 1000 righe: oltre, i contatori restano indicativi (il totale
+      // esatto arriva comunque da `count`, che PostgREST calcola lato server).
+      const { data, error } = await buildCandidatiQuery(true).range(0, 999);
+      if (error) throw error;
+      return (data || []) as unknown as CandidatoWithRelations[];
     },
     placeholderData: (prev) => prev,
   });
@@ -611,7 +642,7 @@ export default function Candidati() {
       c.test_completato ? 'Completato' : 'Da fare',
       new Date(c.created_at).toLocaleDateString('it-IT'),
       c.aziende?.nome || '',
-      c.profili_candidato?.profilo_tipo || '',
+      c.profili_candidato?.profilo_tipo_v5 || '',
       c.profili_candidato?.leadership_pct?.toFixed(0) || '',
       c.profili_candidato?.maturita_pct?.toFixed(0) || '',
       c.profili_candidato?.potenziale_pct?.toFixed(0) || ''
@@ -658,20 +689,23 @@ export default function Candidati() {
 
   // KPI Statistics
   const stats = useMemo(() => {
-    if (!candidati) return { total: 0, completati: 0, inAttesa: 0, idonei: 0, avgFit: 0 };
-    const completati = candidati.filter(c => c.test_completato).length;
-    const inAttesa = candidati.length - completati;
-    const idonei = candidati.filter(c => {
+    const righe = statsRows ?? [];
+    if (!righe.length) return { total: totalCount, completati: 0, inAttesa: totalCount, idonei: 0, avgFit: 0 };
+    const completati = righe.filter(c => c.test_completato).length;
+    const inAttesa = righe.length - completati;
+    const idonei = righe.filter(c => {
       const verdict = Array.isArray(c.analisi_candidato) ? c.analisi_candidato[0]?.fit_verdict : null;
       return verdict === 'IDONEO';
     }).length;
-    const fitScores = candidati
+    // I candidati senza test hanno fit_score undefined, non null: con `!== null`
+    // passavano il filtro e la media diventava NaN.
+    const fitScores = righe
       .map(c => Array.isArray(c.analisi_candidato) ? c.analisi_candidato[0]?.fit_score : null)
-      .filter((s): s is number => s !== null);
+      .filter((s): s is number => typeof s === 'number' && !Number.isNaN(s));
     const avgFit = fitScores.length > 0 ? Math.round(fitScores.reduce((a, b) => a + b, 0) / fitScores.length) : 0;
-    
-    return { total: candidati.length, completati, inAttesa, idonei, avgFit };
-  }, [candidati]);
+
+    return { total: totalCount, completati, inAttesa, idonei, avgFit };
+  }, [statsRows, totalCount]);
 
   const hasActiveFilters = filterStato !== 'all' || filterSesso !== 'all' || filterEta !== 'all' || 
     filterRuolo !== 'all' || filterFunzione !== 'all' || filterFitVerdict !== 'all' ||
@@ -906,7 +940,7 @@ export default function Candidati() {
                   <CardContent className="p-3 md:p-4">
                     <div className="flex items-center gap-2">
                       <CheckCircle2 className="h-4 w-4 text-green-600" />
-                      <span className="text-xs text-muted-foreground">Completati</span>
+                      <span className="text-xs text-muted-foreground">Test fatti</span>
                     </div>
                     <p className="text-xl md:text-2xl font-bold mt-1">{stats.completati}</p>
                   </CardContent>
@@ -915,7 +949,7 @@ export default function Candidati() {
                   <CardContent className="p-3 md:p-4">
                     <div className="flex items-center gap-2">
                       <Clock className="h-4 w-4 text-yellow-600" />
-                      <span className="text-xs text-muted-foreground">In Attesa</span>
+                      <span className="text-xs text-muted-foreground">In attesa</span>
                     </div>
                     <p className="text-xl md:text-2xl font-bold mt-1">{stats.inAttesa}</p>
                   </CardContent>
@@ -924,7 +958,7 @@ export default function Candidati() {
                   <CardContent className="p-3 md:p-4">
                     <div className="flex items-center gap-2">
                       <UserCheck className="h-4 w-4 text-accent" />
-                      <span className="text-xs text-muted-foreground">Idonei</span>
+                      <span className="text-xs text-muted-foreground">Adatti</span>
                     </div>
                     <p className="text-xl md:text-2xl font-bold mt-1">{stats.idonei}</p>
                   </CardContent>
@@ -933,7 +967,7 @@ export default function Candidati() {
                   <CardContent className="p-3 md:p-4">
                     <div className="flex items-center gap-2">
                       <TrendingUp className="h-4 w-4 text-blue-600" />
-                      <span className="text-xs text-muted-foreground">Fit Medio</span>
+                      <span className="text-xs text-muted-foreground">Compatibilità media</span>
                     </div>
                     <p className="text-xl md:text-2xl font-bold mt-1">{stats.avgFit}%</p>
                   </CardContent>
@@ -944,23 +978,36 @@ export default function Candidati() {
             {/* Credenziali Card */}
             {currentAziendaId && currentAziendaId !== 'all' && (
               <Card className="border-accent/30 bg-accent/5">
-                <CardHeader className="pb-2 pt-3 px-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Key className="h-4 w-4 text-accent" />
-                      <CardTitle className="text-sm md:text-base">Credenziali Candidati</CardTitle>
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => credentialsMutation.mutate({ aziendaId: currentAziendaId, regenerate: !!accessoAzienda })}
-                      disabled={credentialsMutation.isPending}
+                <CardHeader className="py-2 px-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setMostraCredenziali((v) => !v)}
+                      className="flex items-center gap-2 text-left min-w-0"
+                      aria-expanded={mostraCredenziali}
                     >
-                      <RefreshCw className={`h-3 w-3 mr-1 ${credentialsMutation.isPending ? 'animate-spin' : ''}`} />
-                      {accessoAzienda ? 'Rigenera' : 'Genera'}
-                    </Button>
+                      <Key className="h-4 w-4 text-accent shrink-0" />
+                      <CardTitle className="text-sm font-medium truncate">
+                        Link e password per far fare il test ai candidati
+                      </CardTitle>
+                      <ChevronDown
+                        className={`h-4 w-4 text-muted-foreground shrink-0 transition-transform ${mostraCredenziali ? 'rotate-180' : ''}`}
+                      />
+                    </button>
+                    {mostraCredenziali && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => credentialsMutation.mutate({ aziendaId: currentAziendaId, regenerate: !!accessoAzienda })}
+                        disabled={credentialsMutation.isPending}
+                      >
+                        <RefreshCw className={`h-3 w-3 mr-1 ${credentialsMutation.isPending ? 'animate-spin' : ''}`} />
+                        {accessoAzienda ? 'Rigenera' : 'Genera'}
+                      </Button>
+                    )}
                   </div>
                 </CardHeader>
+                {mostraCredenziali && (
                 <CardContent className="px-4 pb-3">
                   {isLoadingAccesso ? (
                     <div className="flex items-center gap-2 text-muted-foreground text-sm">
@@ -1015,10 +1062,12 @@ export default function Candidati() {
                     </div>
                   ) : (
                     <p className="text-muted-foreground text-sm">
-                      Clicca "Genera" per creare le credenziali di accesso.
+                      Clicca “Genera”: creiamo un utente e una password da consegnare ai candidati,
+                      con cui entrano e fanno il test.
                     </p>
                   )}
                 </CardContent>
+                )}
               </Card>
             )}
 
@@ -1148,46 +1197,46 @@ export default function Candidati() {
                   </Popover>
                   
                   <Select value={filterStato} onValueChange={setFilterStato}>
-                    <SelectTrigger className="w-[120px] h-9">
-                      <SelectValue placeholder="Stato" />
+                    <SelectTrigger className="w-[150px] h-9">
+                      <SelectValue placeholder="Stato test" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">Tutti</SelectItem>
-                      <SelectItem value="completato">Completato</SelectItem>
-                      <SelectItem value="da_fare">Da fare</SelectItem>
+                      <SelectItem value="all">Stato: tutti</SelectItem>
+                      <SelectItem value="completato">Test fatto</SelectItem>
+                      <SelectItem value="da_fare">Test da fare</SelectItem>
                     </SelectContent>
                   </Select>
                   <Select value={filterSesso} onValueChange={setFilterSesso}>
-                    <SelectTrigger className="w-[80px] h-9">
+                    <SelectTrigger className="w-[130px] h-9">
                       <SelectValue placeholder="Sesso" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">Tutti</SelectItem>
-                      <SelectItem value="M">M</SelectItem>
-                      <SelectItem value="F">F</SelectItem>
+                      <SelectItem value="all">Sesso: tutti</SelectItem>
+                      <SelectItem value="M">Uomini</SelectItem>
+                      <SelectItem value="F">Donne</SelectItem>
                     </SelectContent>
                   </Select>
                   <Select value={filterEta} onValueChange={setFilterEta}>
-                    <SelectTrigger className="w-[90px] h-9">
+                    <SelectTrigger className="w-[130px] h-9">
                       <SelectValue placeholder="Età" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">Tutte</SelectItem>
-                      <SelectItem value="18-30">18-30</SelectItem>
-                      <SelectItem value="31-45">31-45</SelectItem>
-                      <SelectItem value="46-60">46-60</SelectItem>
-                      <SelectItem value="60+">60+</SelectItem>
+                      <SelectItem value="all">Età: tutte</SelectItem>
+                      <SelectItem value="18-30">18-30 anni</SelectItem>
+                      <SelectItem value="31-45">31-45 anni</SelectItem>
+                      <SelectItem value="46-60">46-60 anni</SelectItem>
+                      <SelectItem value="60+">oltre 60 anni</SelectItem>
                     </SelectContent>
                   </Select>
                   <Select value={filterFitVerdict} onValueChange={setFilterFitVerdict}>
-                    <SelectTrigger className="w-[100px] h-9">
-                      <SelectValue placeholder="Fit" />
+                    <SelectTrigger className="w-[170px] h-9">
+                      <SelectValue placeholder="Esito" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">Tutti</SelectItem>
-                      <SelectItem value="IDONEO">Idoneo</SelectItem>
-                      <SelectItem value="VALUTARE">Valutare</SelectItem>
-                      <SelectItem value="NON_IDONEO">Non Idoneo</SelectItem>
+                      <SelectItem value="all">Esito: tutti</SelectItem>
+                      <SelectItem value="IDONEO">Adatti al ruolo</SelectItem>
+                      <SelectItem value="VALUTARE">Da valutare</SelectItem>
+                      <SelectItem value="NON_IDONEO">Non adatti</SelectItem>
                     </SelectContent>
                   </Select>
                   <Button variant="outline" size="sm" onClick={exportCSV} disabled={!sortedCandidati || sortedCandidati.length === 0} className="h-9">
@@ -1240,7 +1289,11 @@ export default function Candidati() {
             {/* Results count */}
             {(searchTerm || hasActiveFilters) && (
               <p className="text-sm text-muted-foreground">
-                {totalCount} risultati trovati
+                {totalCount === 0
+                  ? 'Nessun candidato con questi filtri'
+                  : totalCount === 1
+                    ? '1 candidato trovato'
+                    : `${totalCount} candidati trovati`}
               </p>
             )}
 
@@ -1282,7 +1335,7 @@ export default function Candidati() {
                                 </div>
                                 <div className="min-w-0 flex-1">
                                   <div className="flex items-center gap-1">
-                                    <p className="font-medium text-sm truncate">{candidato.cognome} {candidato.nome}</p>
+                                    <p className="font-medium text-sm truncate">{candidato.nome} {candidato.cognome}</p>
                                     {hasDuplicates && (
                                       <AlertTriangle className="h-3 w-3 text-yellow-500 shrink-0" />
                                     )}
@@ -1391,7 +1444,7 @@ export default function Candidati() {
                             <SortableHeader field="eta">Età</SortableHeader>
                             <SortableHeader field="ruolo_attuale">Ruolo</SortableHeader>
                             <TableHead>Stato</TableHead>
-                            <SortableHeader field="fit_score">Fit</SortableHeader>
+                            <SortableHeader field="fit_score">Compatibilità</SortableHeader>
                             <TableHead>Profilo</TableHead>
                             <SortableHeader field="created_at">Data</SortableHeader>
                             <TableHead className="text-right w-32">Azioni</TableHead>
@@ -1427,7 +1480,7 @@ export default function Candidati() {
                                     </div>
                                     <div className="min-w-0">
                                       <div className="flex items-center gap-2">
-                                        <p className="font-medium">{candidato.cognome} {candidato.nome}</p>
+                                        <p className="font-medium">{candidato.nome} {candidato.cognome}</p>
                                         {hasDuplicates && (
                                           <Tooltip>
                                             <TooltipTrigger>
@@ -1477,7 +1530,7 @@ export default function Candidati() {
                                       candidato.test_completato && 'bg-green-100 text-green-700 hover:bg-green-100'
                                     )}
                                   >
-                                    {candidato.test_completato ? 'OK' : 'Attesa'}
+                                    {candidato.test_completato ? 'Test fatto' : 'In attesa'}
                                   </Badge>
                                 </TableCell>
                                 <TableCell>
@@ -1495,9 +1548,9 @@ export default function Candidati() {
                                   )}
                                 </TableCell>
                                 <TableCell>
-                                  {candidato.test_completato && candidato.profili_candidato?.profilo_tipo ? (
-                                    <Badge variant={getBadgeVariant(candidato.profili_candidato.profilo_tipo)} className="text-xs">
-                                      {getProfiloTipoV5Label(candidato.profili_candidato.profilo_tipo as any)}
+                                  {candidato.test_completato && candidato.profili_candidato?.profilo_tipo_v5 ? (
+                                    <Badge variant={getBadgeVariant(candidato.profili_candidato.profilo_tipo_v5)} className="text-xs">
+                                      {getProfiloTipoV5Label(candidato.profili_candidato.profilo_tipo_v5 as any)}
                                     </Badge>
                                   ) : (
                                     <span className="text-muted-foreground text-xs">-</span>
@@ -1630,7 +1683,7 @@ export default function Candidati() {
                   {singleDeleteId ? (
                     (() => {
                       const c = candidati?.find(c => c.id === singleDeleteId);
-                      return `Stai per eliminare ${c?.cognome} ${c?.nome} e tutti i suoi dati. Questa azione non può essere annullata.`;
+                      return `Stai per eliminare ${c?.nome} ${c?.cognome} e tutti i suoi dati. Questa azione non può essere annullata.`;
                     })()
                   ) : (
                     `Stai per eliminare ${selectedIds.size} candidati e tutti i loro dati. Questa azione non può essere annullata.`

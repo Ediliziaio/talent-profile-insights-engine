@@ -13,7 +13,8 @@
     "test:watch": "vitest",
     "build:spa": "vite build",
     "build:ssg": "vite build --ssr src/entry-ssg.tsx --outDir dist-ssg",
-    "test:e2e": "RUN_E2E=1 vitest run src/test/ricalcoloV5-e2e.test.ts"
+    "test:e2e": "RUN_E2E=1 vitest run src/test/ricalcoloV5-e2e.test.ts",
+    "dev:demo": "vite --config vite.demo.config.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

@@ -20,6 +20,54 @@ import { format, subDays, subMonths, parseISO } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { useIsMobile } from '@/hooks/use-mobile';
 
+
+/* Card KPI: prima erano otto blocchi copiati a mano, con classi leggermente
+   diverse fra loro. Un componente solo tiene allineati spaziature e colori,
+   e permette di rendere il numero un link alla lista filtrata. */
+const TONI = {
+  primary: { card: 'from-primary/5 to-primary/10 border-primary/20', icona: 'text-primary', num: '' },
+  green: { card: 'from-green-500/5 to-green-500/10 border-green-500/20', icona: 'text-green-600', num: 'text-green-600' },
+  yellow: { card: 'from-yellow-500/5 to-yellow-500/10 border-yellow-500/20', icona: 'text-yellow-600', num: 'text-yellow-600' },
+  red: { card: 'from-red-500/5 to-red-500/10 border-red-500/20', icona: 'text-red-600', num: 'text-red-600' },
+  accent: { card: 'from-accent/5 to-accent/10 border-accent/20', icona: 'text-accent', num: 'text-accent' },
+} as const;
+
+function StatCard({
+  icon: Icon,
+  label,
+  value,
+  tone,
+  to,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  value: React.ReactNode;
+  tone: keyof typeof TONI;
+  to?: string;
+}) {
+  const t = TONI[tone];
+  const corpo = (
+    <Card
+      className={`bg-gradient-to-br ${t.card} h-full ${to ? 'transition-shadow hover:shadow-md' : ''}`}
+    >
+      <CardContent className="p-2.5 sm:p-3 md:p-4">
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <Icon className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${t.icona} shrink-0`} />
+          <span className="text-[10px] sm:text-xs text-muted-foreground truncate">{label}</span>
+        </div>
+        <div className={`text-xl sm:text-2xl md:text-3xl font-bold mt-0.5 sm:mt-1 ${t.num}`}>{value}</div>
+      </CardContent>
+    </Card>
+  );
+  return to ? (
+    <Link to={to} className="block h-full rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+      {corpo}
+    </Link>
+  ) : (
+    corpo
+  );
+}
+
 export default function Dashboard() {
   const { user, profile, loading } = useAuth();
   const isMobile = useIsMobile();
@@ -96,7 +144,9 @@ export default function Dashboard() {
       .map(c => (c.analisi_candidato as any)?.[0])
       .filter(Boolean);
     
-    const fitScores = analisi.map(a => a.fit_score).filter((s): s is number => s !== null);
+    const fitScores = analisi
+      .map(a => a.fit_score)
+      .filter((s): s is number => typeof s === 'number' && !Number.isNaN(s));
     const avgFitScore = fitScores.length > 0 
       ? Math.round(fitScores.reduce((a, b) => a + b, 0) / fitScores.length)
       : null;
@@ -364,7 +414,7 @@ export default function Dashboard() {
           <div>
             <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">Dashboard</h1>
             <p className="text-muted-foreground mt-0.5 sm:mt-1 text-xs sm:text-sm">
-              {isSuperadmin ? 'Panoramica globale del sistema' : 'Panoramica candidati della tua azienda'}
+              {isSuperadmin ? 'Panoramica globale del sistema' : 'I tuoi candidati in un colpo d’occhio'}
             </p>
           </div>
           <Select value={period} onValueChange={setPeriod}>
@@ -506,92 +556,69 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* KPI Cards - Row 1 */}
-        <div className="grid gap-2 sm:gap-3 grid-cols-2 md:grid-cols-4">
-          <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
-            <CardContent className="p-2.5 sm:p-3 md:p-4">
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary shrink-0" />
-                <span className="text-[10px] sm:text-xs text-muted-foreground truncate">Tot. Candidati</span>
-              </div>
-              <div className="text-xl sm:text-2xl md:text-3xl font-bold mt-0.5 sm:mt-1">{stats?.totale ?? '-'}</div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-green-500/5 to-green-500/10 border-green-500/20">
-            <CardContent className="p-2.5 sm:p-3 md:p-4">
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <ClipboardCheck className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-600 shrink-0" />
-                <span className="text-[10px] sm:text-xs text-muted-foreground truncate">Completati</span>
-              </div>
-              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-green-600 mt-0.5 sm:mt-1">{stats?.completati ?? '-'}</div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-yellow-500/5 to-yellow-500/10 border-yellow-500/20">
-            <CardContent className="p-2.5 sm:p-3 md:p-4">
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-yellow-600 shrink-0" />
-                <span className="text-[10px] sm:text-xs text-muted-foreground truncate">In Attesa</span>
-              </div>
-              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-yellow-600 mt-0.5 sm:mt-1">{stats?.inAttesa ?? '-'}</div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-blue-500/5 to-blue-500/10 border-blue-500/20">
-            <CardContent className="p-2.5 sm:p-3 md:p-4">
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <Percent className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-600 shrink-0" />
-                <span className="text-[10px] sm:text-xs text-muted-foreground truncate">Completamento</span>
-              </div>
-              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-blue-600 mt-0.5 sm:mt-1">{stats?.tassoCompletamento ?? 0}%</div>
-            </CardContent>
-          </Card>
+        {/* KPI: due gruppi con titolo invece di otto card indistinte in fila.
+            Ogni numero è un link alla lista già filtrata: il conteggio da solo
+            non dice cosa farne, il link sì. */}
+        <div className="space-y-2">
+          <h2 className="text-sm font-semibold text-muted-foreground">I tuoi candidati</h2>
+          <div className="grid gap-2 sm:gap-3 grid-cols-3">
+            <StatCard
+              icon={Users}
+              label="Candidati"
+              value={stats?.totale ?? '-'}
+              tone="primary"
+              to="/candidati"
+            />
+            <StatCard
+              icon={ClipboardCheck}
+              label="Hanno fatto il test"
+              value={stats?.completati ?? '-'}
+              tone="green"
+              to="/candidati?stato=completato"
+            />
+            <StatCard
+              icon={Clock}
+              label="Devono ancora farlo"
+              value={stats?.inAttesa ?? '-'}
+              tone="yellow"
+              to="/candidati?stato=da_fare"
+            />
+          </div>
         </div>
 
-        {/* KPI Cards - Row 2 */}
-        <div className="grid gap-2 sm:gap-3 grid-cols-2 md:grid-cols-4">
-          <Card className="bg-gradient-to-br from-accent/5 to-accent/10 border-accent/20">
-            <CardContent className="p-2.5 sm:p-3 md:p-4">
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <Target className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-accent shrink-0" />
-                <span className="text-[10px] sm:text-xs text-muted-foreground truncate">Fit Medio</span>
-              </div>
-              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-accent mt-0.5 sm:mt-1">
-                {stats?.avgFitScore != null ? `${stats.avgFitScore}%` : '-'}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-green-500/5 to-green-500/10 border-green-500/20">
-            <CardContent className="p-2.5 sm:p-3 md:p-4">
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <UserCheck className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-600 shrink-0" />
-                <span className="text-[10px] sm:text-xs text-muted-foreground truncate">Idonei</span>
-              </div>
-              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-green-600 mt-0.5 sm:mt-1">{stats?.idonei ?? 0}</div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-yellow-500/5 to-yellow-500/10 border-yellow-500/20">
-            <CardContent className="p-2.5 sm:p-3 md:p-4">
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <Activity className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-yellow-600 shrink-0" />
-                <span className="text-[10px] sm:text-xs text-muted-foreground truncate">Da Valutare</span>
-              </div>
-              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-yellow-600 mt-0.5 sm:mt-1">{stats?.valutare ?? 0}</div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-red-500/5 to-red-500/10 border-red-500/20">
-            <CardContent className="p-2.5 sm:p-3 md:p-4">
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <UserX className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-red-600 shrink-0" />
-                <span className="text-[10px] sm:text-xs text-muted-foreground truncate">Non Idonei</span>
-              </div>
-              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-red-600 mt-0.5 sm:mt-1">{stats?.nonIdonei ?? 0}</div>
-            </CardContent>
-          </Card>
+        <div className="space-y-2">
+          <h2 className="text-sm font-semibold text-muted-foreground">
+            Esito dei test <span className="font-normal">— su {stats?.completati ?? 0} candidati</span>
+          </h2>
+          <div className="grid gap-2 sm:gap-3 grid-cols-2 md:grid-cols-4">
+            <StatCard
+              icon={UserCheck}
+              label="Adatti al ruolo"
+              value={stats?.idonei ?? 0}
+              tone="green"
+              to="/candidati?esito=IDONEO"
+            />
+            <StatCard
+              icon={Activity}
+              label="Da valutare"
+              value={stats?.valutare ?? 0}
+              tone="yellow"
+              to="/candidati?esito=VALUTARE"
+            />
+            <StatCard
+              icon={UserX}
+              label="Non adatti"
+              value={stats?.nonIdonei ?? 0}
+              tone="red"
+              to="/candidati?esito=NON_IDONEO"
+            />
+            <StatCard
+              icon={Target}
+              label="Compatibilità media"
+              value={stats?.avgFitScore != null ? `${stats.avgFitScore}%` : '-'}
+              tone="accent"
+            />
+          </div>
         </div>
 
         {/* Aziende stats for superadmin */}
@@ -628,7 +655,7 @@ export default function Dashboard() {
               <CardContent className="p-3 md:p-4">
                 <div className="flex items-center gap-2">
                   <Users className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground">Tot. Candidati</span>
+                  <span className="text-xs text-muted-foreground">Candidati</span>
                 </div>
                 <div className="text-xl font-bold mt-1">{aziendeStats.totCandidati}</div>
               </CardContent>
@@ -651,9 +678,9 @@ export default function Dashboard() {
             <CardHeader className="pb-2">
               <CardTitle className="text-lg flex items-center gap-2">
                 <TrendingUp className="h-5 w-5 text-primary" />
-                Trend Candidati (30 giorni)
+                Andamento ultimi 30 giorni
               </CardTitle>
-              <CardDescription>Nuovi candidati e test completati per giorno</CardDescription>
+              <CardDescription>Nuovi candidati e test finiti, giorno per giorno</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="h-[200px]">
@@ -850,7 +877,7 @@ export default function Dashboard() {
             <CardHeader className="flex flex-row items-center justify-between pb-2 px-3 sm:px-6 pt-3 sm:pt-6">
               <div>
                 <CardTitle className="text-base sm:text-lg">Candidati Recenti</CardTitle>
-                <CardDescription className="text-xs sm:text-sm">Ultimi test completati</CardDescription>
+                <CardDescription className="text-xs sm:text-sm">Gli ultimi test finiti</CardDescription>
               </div>
               <Link to="/candidati">
                 <Button variant="ghost" size="sm" className="h-8 sm:h-9 px-2 sm:px-3 text-xs sm:text-sm">
