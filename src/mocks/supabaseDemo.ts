@@ -18,6 +18,11 @@ const USER_ID = 'demo-user-0001';
 
 /* Ruolo della sessione demo: `?demo=superadmin` nell'URL per vedere le
    schermate di chi gestisce le aziende, senza riavviare il server. */
+/* Chi è l'utente demo, per ruolo. Il superadmin è il gestore della
+   piattaforma (crea le aziende, dà gli accessi); l'azienda è un cliente che
+   entra nella propria area; il candidato è la persona che fa il test. Tre
+   identità diverse: prima condividevano la stessa email e sembravano la
+   stessa persona con un cappello diverso. */
 const DEMO_PARAM =
   typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('demo') : null;
 const RUOLO_DEMO: 'azienda' | 'superadmin' | 'candidato' =
@@ -82,27 +87,42 @@ const AZIENDE: Riga[] = [
   },
 ];
 
+const IDENTITA = {
+  superadmin: {
+    email: 'admin@talentiedili.it',
+    nome: 'Talenti Edili',
+    cognome: '(gestore piattaforma)',
+  },
+  azienda: { email: 'demo@costruzionibianchi.it', nome: 'Giulia', cognome: 'Bianchi' },
+  candidato: { email: 'marco.rossi@example.it', nome: 'Marco', cognome: 'Rossi' },
+}[RUOLO_DEMO];
+
 const PROFILES: Riga[] = [
   {
     id: 'demo-profile-0001',
     user_id: USER_ID,
-    email: 'demo@costruzionibianchi.it',
-    nome: 'Giulia',
-    cognome: 'Bianchi',
+    email: IDENTITA.email,
+    nome: IDENTITA.nome,
+    cognome: IDENTITA.cognome,
     ruolo: RUOLO_DEMO,
     azienda_id: RUOLO_DEMO === 'azienda' ? AZIENDA_ID : null,
     created_at: giorniFa(400),
   },
-  {
-    id: 'demo-profile-0002',
-    user_id: 'demo-user-0002',
-    email: 'ufficio@costruzionibianchi.it',
-    nome: 'Marta',
-    cognome: 'Conti',
-    ruolo: 'azienda',
-    azienda_id: AZIENDA_ID,
-    created_at: giorniFa(120),
-  },
+  // Il collega esiste solo nella vista azienda: il superadmin non ha soci.
+  ...(RUOLO_DEMO === 'azienda'
+    ? [
+        {
+          id: 'demo-profile-0002',
+          user_id: 'demo-user-0002',
+          email: 'ufficio@costruzionibianchi.it',
+          nome: 'Marta',
+          cognome: 'Conti',
+          ruolo: 'azienda',
+          azienda_id: AZIENDA_ID,
+          created_at: giorniFa(120),
+        },
+      ]
+    : []),
 ];
 
 /** traits verosimili: buon capocantiere, muratore medio, profilo a rischio */
@@ -278,7 +298,12 @@ const TABELLE: Record<string, Riga[]> = {
   marketplace_sblocchi: SBLOCCHI,
   risultati: [],
   risposte: [],
-  leads: [],
+  leads: [
+    { id: 'demo-lead-0001', nome: 'Antonio Ferro', email: 'a.ferro@ferrocostruzioni.it', telefono: '3391234567', azienda: 'Ferro Costruzioni Srl', num_dipendenti: '10-25', origine: 'troviamo-capicantiere', stato: 'nuova', note: null, created_at: giorniFa(3) },
+    { id: 'demo-lead-0002', nome: 'Silvia Marchetti', email: 'info@marchettiedile.it', telefono: '3487654321', azienda: 'Marchetti Edile', num_dipendenti: '5-10', origine: 'ricerca-e-selezione', stato: 'nuova', note: null, created_at: giorniFa(0.2) },
+    { id: 'demo-lead-0003', nome: 'Giuseppe Lo Iacono', email: 'g.loiacono@gmail.com', telefono: null, azienda: null, num_dipendenti: '1-5', origine: 'home', stato: 'contattata', note: 'Richiamato il 10. Vuole partire a settembre, gli mando il preventivo.', created_at: giorniFa(9) },
+    { id: 'demo-lead-0004', nome: 'Roberta Vinci', email: 'r.vinci@vincispa.it', telefono: '3355558888', azienda: 'Vinci Spa', num_dipendenti: '50+', origine: 'prezzi', stato: 'cliente', note: 'Attivata a gennaio.', created_at: giorniFa(230) },
+  ],
   abbonamenti: ABBONAMENTI,
   pagamenti: PAGAMENTI,
   accessi_azienda: [],
@@ -382,7 +407,7 @@ class FintaQuery implements PromiseLike<any> {
 
 const sessioneDemo = {
   access_token: 'demo-token',
-  user: { id: USER_ID, email: 'demo@costruzionibianchi.it', user_metadata: {} },
+  user: { id: USER_ID, email: IDENTITA.email, user_metadata: {} },
 };
 
 export const supabase: any = {

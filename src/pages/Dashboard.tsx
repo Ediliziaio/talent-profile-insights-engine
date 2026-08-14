@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   Users, ClipboardCheck, Clock, Target, TrendingUp, Eye, ArrowRight, 
-  Building2, AlertTriangle, UserCheck, UserX, Percent, BarChart3, Activity
+  Building2, AlertTriangle, UserCheck, UserX, Percent, BarChart3, Activity, Inbox
 } from 'lucide-react';
 import { 
   PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, 
@@ -20,6 +20,7 @@ import { format, subDays, subMonths, parseISO } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { FASI, faseDi } from '@/lib/faseSelezione';
+import { oreDaArrivo, statoDi as statoRichiestaDi } from '@/lib/statoRichiesta';
 
 
 /* Card KPI: prima erano otto blocchi copiati a mano, con classi leggermente
@@ -182,6 +183,32 @@ export default function Dashboard() {
     }
     return almenoUnaAvanzata ? conti : null;
   }, [allCandidati]);
+
+  /* Le richieste dal sito, per il superadmin. Prima non le vedeva nessuno:
+     il modulo pubblico prometteva una risposta entro 24 ore e il contatto
+     restava in una tabella che non apriva mai nessuno. */
+  const { data: richieste } = useQuery({
+    queryKey: ['richieste-dashboard'],
+    enabled: isSuperadmin,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('leads')
+        .select('id, created_at, stato')
+        .order('created_at', { ascending: true })
+        .limit(500);
+      if (error) return null;
+      return data as unknown as { id: string; created_at: string; stato?: string | null }[];
+    },
+  });
+
+  const codaRichieste = useMemo(() => {
+    if (!richieste) return null;
+    const daContattare = richieste.filter((r) => statoRichiestaDi(r) === 'nuova');
+    return {
+      daContattare: daContattare.length,
+      inRitardo: daContattare.filter((r) => oreDaArrivo(r.created_at) > 24).length,
+    };
+  }, [richieste]);
 
   // Stats per aziende (solo superadmin)
   const aziendeStats = useMemo(() => {
@@ -668,6 +695,40 @@ export default function Dashboard() {
             />
           </div>
         </div>
+
+        {/* Richieste dal sito, prima di tutto il resto: è l'unica coda del
+            superadmin con una promessa attaccata ("entro 24 ore"). */}
+        {isSuperadmin && codaRichieste && codaRichieste.daContattare > 0 && (
+          <Link to="/richieste" className="block rounded-lg">
+            <Card
+              className={
+                codaRichieste.inRitardo > 0
+                  ? 'border-red-300 bg-red-50/50 transition-shadow hover:shadow-md'
+                  : 'border-amber-300 bg-amber-50/50 transition-shadow hover:shadow-md'
+              }
+            >
+              <CardContent className="p-4 flex items-center gap-3">
+                <Inbox
+                  className={`h-5 w-5 shrink-0 ${codaRichieste.inRitardo > 0 ? 'text-red-600' : 'text-amber-600'}`}
+                />
+                <div className="min-w-0">
+                  <p className="font-semibold">
+                    {codaRichieste.daContattare}{' '}
+                    {codaRichieste.daContattare === 1
+                      ? 'richiesta dal sito da contattare'
+                      : 'richieste dal sito da contattare'}
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-0.5">
+                    {codaRichieste.inRitardo > 0
+                      ? `${codaRichieste.inRitardo} aspetta${codaRichieste.inRitardo === 1 ? '' : 'no'} da più di 24 ore: il sito ha promesso una risposta.`
+                      : 'Nessuna in ritardo. Aprile per rispondere.'}
+                  </p>
+                </div>
+                <ArrowRight className="h-4 w-4 text-muted-foreground ml-auto shrink-0" />
+              </CardContent>
+            </Card>
+          </Link>
+        )}
 
         {/* Aziende stats for superadmin */}
         {isSuperadmin && aziendeStats && (

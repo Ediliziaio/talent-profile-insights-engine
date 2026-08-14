@@ -518,7 +518,7 @@ export default function Home() {
   const [letterExpanded, setLetterExpanded] = useState(false);
 
   /* Lead form state */
-  const [leadForm, setLeadForm] = useState({ nome: '', email: '', azienda: '', num_dipendenti: '' });
+  const [leadForm, setLeadForm] = useState({ nome: '', email: '', telefono: '', azienda: '', num_dipendenti: '' });
   const [leadSubmitting, setLeadSubmitting] = useState(false);
   const [leadSubmitted, setLeadSubmitted] = useState(false);
 
@@ -550,14 +550,18 @@ export default function Home() {
       const base = {
         nome: leadForm.nome.trim(),
         email: leadForm.email.trim(),
+        // A un titolare di impresa si telefona: mancava il campo con cui
+        // richiamarlo, e il modulo prometteva comunque una risposta.
+        telefono: leadForm.telefono.trim() || null,
         azienda: leadForm.azienda.trim() || null,
         num_dipendenti: leadForm.num_dipendenti || null,
       };
       let { error } = await supabase
         .from('leads')
         .insert({ ...base, origine: 'home' } as never);
-      if (error && /origine/.test(error.message)) {
-        ({ error } = await supabase.from('leads').insert(base));
+      if (error && /origine|telefono/.test(error.message)) {
+        const { telefono: _telefono, ...senzaExtra } = base;
+        ({ error } = await supabase.from('leads').insert(senzaExtra));
       }
       if (error) throw error;
       setLeadSubmitted(true);
@@ -2113,6 +2117,17 @@ export default function Home() {
                   </div>
                 </div>
                 <div className="grid sm:grid-cols-2 gap-4 mb-6">
+                  <div className="sm:col-span-2">
+                    <label className="block text-sm font-medium text-white/80 mb-1.5">Telefono</label>
+                    <Input
+                      type="tel"
+                      maxLength={30}
+                      placeholder="Ti richiamiamo noi"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/70 focus:border-[#f09133]"
+                      value={leadForm.telefono}
+                      onChange={(e) => setLeadForm(prev => ({ ...prev, telefono: e.target.value }))}
+                    />
+                  </div>
                   <div>
                     <label className="block text-sm font-medium text-white/80 mb-1.5">Azienda</label>
                     <Input

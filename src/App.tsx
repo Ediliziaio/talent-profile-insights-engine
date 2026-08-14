@@ -30,6 +30,7 @@ const Candidati = lazy(() => import('./pages/Candidati'));
 const CandidatoDettaglio = lazy(() => import('./pages/CandidatoDettaglio'));
 const ConfrontoCandidati = lazy(() => import('./pages/ConfrontoCandidati'));
 const Impostazioni = lazy(() => import('./pages/Impostazioni'));
+const Richieste = lazy(() => import('./pages/Richieste'));
 const StoricoCandidato = lazy(() => import('./pages/StoricoCandidato'));
 const ConsensoPrivacy = lazy(() => import('./pages/ConsensoPrivacy'));
 const Questionario = lazy(() => import('./pages/Questionario'));
@@ -202,6 +203,13 @@ const App = () => (
                 <ProtectedRoute allowedRoles={['superadmin']}>
                   <Suspense fallback={<DashboardSkeleton />}>
                     <Pagamenti />
+                  </Suspense>
+                </ProtectedRoute>
+              } />
+              <Route path="/richieste" element={
+                <ProtectedRoute allowedRoles={['superadmin']}>
+                  <Suspense fallback={<CandidatiSkeleton />}>
+                    <Richieste />
                   </Suspense>
                 </ProtectedRoute>
               } />

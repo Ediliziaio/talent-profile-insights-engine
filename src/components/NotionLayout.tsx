@@ -1,7 +1,7 @@
 import { ReactNode, useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
-import { LogOut, Home, Users, BarChart3, Settings, BookOpen, ChevronLeft, ChevronRight, Menu, CreditCard, Store } from 'lucide-react';
+import { LogOut, Home, Users, BarChart3, Settings, BookOpen, ChevronLeft, ChevronRight, Menu, CreditCard, Store, Inbox } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
@@ -26,6 +26,7 @@ export function NotionLayout({ children }: NotionLayoutProps) {
     { href: '/dashboard', label: 'Dashboard', icon: Home, show: true },
     { href: '/candidati', label: 'Candidati', icon: Users, show: isSuperadmin || isAzienda },
     { href: '/marketplace', label: 'Trova candidati', icon: Store, show: isSuperadmin || isAzienda },
+    { href: '/richieste', label: 'Richieste', icon: Inbox, show: isSuperadmin },
     { href: '/aziende', label: 'Aziende', icon: BarChart3, show: isSuperadmin },
     { href: '/pagamenti', label: 'Pagamenti', icon: CreditCard, show: isSuperadmin },
     { href: '/impostazioni', label: 'Impostazioni', icon: Settings, show: isSuperadmin || isAzienda },

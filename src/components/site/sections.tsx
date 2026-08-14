@@ -256,7 +256,7 @@ export function LeadForm({
   ctaLabel?: string;
   origine?: string;
 }) {
-  const [form, setForm] = useState({ nome: '', email: '', azienda: '', num_dipendenti: '' });
+  const [form, setForm] = useState({ nome: '', email: '', telefono: '', azienda: '', num_dipendenti: '' });
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
@@ -270,6 +270,9 @@ export function LeadForm({
         const base = {
           nome: form.nome.trim(),
           email: form.email.trim(),
+          // A un titolare di impresa si telefona: mancava proprio il campo
+          // con cui lo si potesse richiamare.
+          telefono: form.telefono.trim() || null,
           azienda: form.azienda.trim() || null,
           num_dipendenti: form.num_dipendenti || null,
         };
@@ -278,8 +281,9 @@ export function LeadForm({
         let { error } = await supabase
           .from('leads')
           .insert({ ...base, origine: origine ?? null } as never);
-        if (error && /origine/.test(error.message)) {
-          ({ error } = await supabase.from('leads').insert(base));
+        if (error && /origine|telefono/.test(error.message)) {
+          const { telefono: _telefono, ...senzaExtra } = base;
+          ({ error } = await supabase.from('leads').insert(senzaExtra));
         }
         if (error) throw error;
         setSubmitted(true);
@@ -330,6 +334,19 @@ export function LeadForm({
             placeholder="Email di lavoro"
             value={form.email}
             onChange={(e) => setForm({ ...form, email: e.target.value })}
+            className="bg-white/95 border-0 h-12 rounded-xl"
+          />
+        </div>
+        <div>
+          <label htmlFor="lead-telefono" className="sr-only">
+            Telefono
+          </label>
+          <Input
+            id="lead-telefono"
+            type="tel"
+            placeholder="Telefono (ti richiamiamo)"
+            value={form.telefono}
+            onChange={(e) => setForm({ ...form, telefono: e.target.value })}
             className="bg-white/95 border-0 h-12 rounded-xl"
           />
         </div>
