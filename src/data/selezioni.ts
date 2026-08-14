@@ -41,7 +41,7 @@ export const SELEZIONI: CategoriaSelezione[] = [
     intro:
       'Commerciali tecnici, venditori di serramenti e impianti, account per il B2B edile. Ti troviamo il venditore giusto: tu scegli fra tre proposte, con i numeri in mano.',
     definizione:
-      'È il servizio di ricerca e selezione di Talenti Edili dedicato alle venditori del settore edile: commerciale tecnico, venditore di serramenti e infissi, venditore di impianti e materiali, account B2B verso imprese e studi tecnici. Facciamo ricerca attiva sul territorio, verifichiamo i risultati di vendita dichiarati e sottoponiamo ognuno dei 3 candidati all’analisi psicoattitudinale Talent Profile — che sui commerciali misura le variabili decisive: quanto regge i "no", costanza, orientamento al risultato reale e onestà nel riportare i numeri. Consegniamo i 3 candidati migliori entro 21 giorni, con report completo e domande da fare al colloquio.',
+      'È il servizio di ricerca e selezione di Talenti Edili dedicato ai venditori del settore edile: commerciale tecnico, venditore di serramenti e infissi, venditore di impianti e materiali, account B2B verso imprese e studi tecnici. Facciamo ricerca attiva sul territorio, verifichiamo i risultati di vendita dichiarati e facciamo l’analisi psicoattitudinale Talent Profile a tutti i candidati in gara — che sui commerciali misura le variabili decisive: quanto regge i "no", costanza, orientamento al risultato reale e onestà nel riportare i numeri. Consegniamo i 3 candidati migliori entro 21 giorni, con report completo e domande da fare al colloquio.',
     difficolta: [
       {
         titolo: 'Al colloquio vendono benissimo — sé stessi',
@@ -98,7 +98,7 @@ export const SELEZIONI: CategoriaSelezione[] = [
     faq: [
       {
         q: 'Quanto tempo serve per trovare un venditore?',
-        a: 'La i 3 candidati migliori arriva di norma entro 21 giorni dalla prima chiamata. Sui responsabili commerciali o su zone con poca offerta i tempi possono allungarsi: lo diciamo prima di partire.',
+        a: 'I 3 candidati migliori arrivano di norma entro 21 giorni dalla prima chiamata. Sui responsabili commerciali o su zone con poca offerta i tempi possono allungarsi: lo diciamo prima di partire.',
       },
       {
         q: 'Come verificate che un venditore sia davvero bravo?',
@@ -106,7 +106,7 @@ export const SELEZIONI: CategoriaSelezione[] = [
       },
       {
         q: 'Trovate anche venditori porta a porta o solo tecnici?',
-        a: 'Copriamo tutte le venditori del settore edile: dal venditore di showroom all’agente di zona, dal commerciale tecnico B2B al responsabile commerciale. Il metodo si adatta: cambiano i pesi dei tratti, non il processo.',
+        a: 'Copriamo tutti i venditori del settore edile: dal venditore di showroom all’agente di zona, dal commerciale tecnico B2B al responsabile commerciale. Il metodo si adatta: cambiano i pesi dei tratti, non il processo.',
       },
       {
         q: 'Cosa succede se il venditore non produce risultati?',

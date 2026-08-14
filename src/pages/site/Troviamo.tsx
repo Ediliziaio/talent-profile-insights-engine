@@ -89,7 +89,7 @@ export default function Troviamo() {
             <strong>geometri e tecnici</strong> e <strong>preventivisti</strong>. Per ognuna il
             processo è lo stesso — ricerca attiva, verifica delle esperienze, analisi
             psicoattitudinale Talent Profile, i 3 candidati migliori in 21 giorni — ma i criteri di
-            valutazione cambiano: su un venditore misuriamo la quanto regge i "no", su un
+            valutazione cambiano: su un venditore guardiamo quanto regge i "no", su un
             amministrativo la precisione sotto scadenza, su un capocantiere la decisione sotto
             pressione.
           </p>

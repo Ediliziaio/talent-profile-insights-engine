@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { NotionLayout } from '@/components/NotionLayout';
@@ -110,7 +110,13 @@ export default function Candidati() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [filterAzienda, setFilterAzienda] = useState<string>('all');
-  const [filterStato, setFilterStato] = useState<string>('all');
+  /* Lo stato può arrivare dall'URL: la dashboard linka /candidati?stato=completato
+     per portare l'utente direttamente sulla coda che ha appena visto. */
+  const [searchParams] = useSearchParams();
+  const statoIniziale = searchParams.get('stato');
+  const [filterStato, setFilterStato] = useState<string>(
+    statoIniziale === 'completato' || statoIniziale === 'da_fare' ? statoIniziale : 'all'
+  );
   const [filterRuolo, setFilterRuolo] = useState<string>('all');
   const [filterFunzione, setFilterFunzione] = useState<string>('all');
   const [filterFitVerdict, setFilterFitVerdict] = useState<string>('all');
@@ -1552,13 +1558,33 @@ export default function Candidati() {
                       </Table>
                     </div>
                   )
-                ) : (
-                  <div className="p-8 text-center text-muted-foreground">
-                    <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>Nessun candidato trovato</p>
-                    <p className="text-sm">
-                      {searchTerm || hasActiveFilters ? 'Modifica i filtri' : 'Crea il primo candidato'}
+                ) : searchTerm || hasActiveFilters ? (
+                  <div className="p-10 text-center">
+                    <Search className="h-10 w-10 mx-auto mb-3 text-muted-foreground opacity-40" />
+                    <p className="font-medium">Nessun candidato con questi filtri</p>
+                    <p className="text-sm text-muted-foreground mt-1 mb-4">
+                      Prova ad allargare la ricerca o azzera i filtri.
                     </p>
+                    <Button variant="outline" size="sm" onClick={resetFilters}>
+                      Azzera i filtri
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="p-10 text-center">
+                    <Users className="h-10 w-10 mx-auto mb-3 text-muted-foreground opacity-40" />
+                    <p className="font-medium">Non hai ancora candidati</p>
+                    <p className="text-sm text-muted-foreground mt-1 mb-4 max-w-md mx-auto">
+                      Aggiungi chi stai valutando e mandagli il link: risponde in 15 minuti dal
+                      telefono e tu ricevi il report. Oppure cerca fra chi il test l’ha già fatto.
+                    </p>
+                    <div className="flex gap-2 justify-center flex-wrap">
+                      <Button size="sm" onClick={() => setIsDialogOpen(true)}>
+                        <Plus className="h-4 w-4 mr-1" /> Aggiungi candidato
+                      </Button>
+                      <Button size="sm" variant="outline" onClick={() => navigate('/marketplace')}>
+                        Cerca candidati
+                      </Button>
+                    </div>
                   </div>
                 )}
               </CardContent>

@@ -78,8 +78,10 @@ export default function Dashboard() {
     staleTime: 1000 * 60 * 2, // 2 minutes cache
   });
 
-  const allCandidati = dashboardData?.candidati || [];
-  const aziende = dashboardData?.aziende || [];
+  /* Memoizzati: senza, il fallback `|| []` crea un array nuovo a ogni render
+     e invalida tutti gli useMemo a valle (stats, trend, grafici, code). */
+  const allCandidati = useMemo(() => dashboardData?.candidati ?? [], [dashboardData]);
+  const aziende = useMemo(() => dashboardData?.aziende ?? [], [dashboardData]);
 
   // Statistiche calcolate
   const stats = useMemo(() => {
@@ -233,6 +235,27 @@ export default function Dashboard() {
       }));
   }, [allCandidati]);
 
+  /* Coda di lavoro dell'impresa: la dashboard mostrava solo numeri, ma chi
+     apre la mattina vuole sapere cosa deve fare. Tre code, calcolate sui dati
+     già in memoria: nessuna query aggiuntiva. */
+  const daFare = useMemo(() => {
+    if (!allCandidati.length) return null;
+    const ora = Date.now();
+    const giorni = (d: string | null) => (d ? (ora - new Date(d).getTime()) / 86_400_000 : Infinity);
+
+    // Test finiti negli ultimi 7 giorni: i report ancora "caldi" da leggere
+    const daLeggere = allCandidati
+      .filter((c) => c.test_completato && giorni(c.data_test) <= 7)
+      .sort((a, b) => (b.data_test ?? '').localeCompare(a.data_test ?? ''));
+
+    // Invitati da più di 5 giorni che non hanno ancora fatto il test
+    const daSollecitare = allCandidati
+      .filter((c) => !c.test_completato && giorni(c.created_at) > 5)
+      .sort((a, b) => (a.created_at ?? '').localeCompare(b.created_at ?? ''));
+
+    return { daLeggere, daSollecitare };
+  }, [allCandidati]);
+
   const topPerformers = useMemo(() => {
     if (!allCandidati.length) return [];
     return allCandidati
@@ -357,6 +380,131 @@ export default function Dashboard() {
             </SelectContent>
           </Select>
         </div>
+
+        {/* ─── Primo accesso: zeri e grafici vuoti non aiutano nessuno ─── */}
+        {!isLoadingData && isAzienda && allCandidati.length === 0 && (
+          <Card className="border-primary/30 bg-gradient-to-br from-primary/[0.04] to-accent/[0.04]">
+            <CardContent className="p-6 md:p-8">
+              <h2 className="text-xl md:text-2xl font-bold mb-1">Benvenuto in Talenti Edili</h2>
+              <p className="text-muted-foreground text-sm mb-6">
+                Non hai ancora candidati. Ecco i tre modi per iniziare — bastano pochi minuti.
+              </p>
+              <div className="grid gap-4 md:grid-cols-3">
+                {[
+                  {
+                    n: '1',
+                    icon: Users,
+                    titolo: 'Invita chi stai già valutando',
+                    testo: 'Aggiungi un candidato e mandagli il link: risponde in 15 minuti dal telefono e tu ricevi il report.',
+                    cta: 'Aggiungi candidato',
+                    to: '/candidati',
+                  },
+                  {
+                    n: '2',
+                    icon: Target,
+                    titolo: 'Cerca il candidato giusto',
+                    testo: 'Chi ha già fatto il test è nella piattaforma: filtra per ruolo e zona e vedi subito com’è fatto.',
+                    cta: 'Cerca candidati',
+                    to: '/marketplace',
+                  },
+                  {
+                    n: '3',
+                    icon: UserCheck,
+                    titolo: 'Testa chi hai già in squadra',
+                    testo: 'Molte imprese partono da qui: capire chi è nel ruolo sbagliato e su chi conviene investire.',
+                    cta: 'Aggiungi i tuoi',
+                    to: '/candidati',
+                  },
+                ].map((p) => (
+                  <div key={p.n} className="rounded-xl border bg-background p-5">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center shrink-0">
+                        {p.n}
+                      </span>
+                      <p.icon className="h-4 w-4 text-primary" />
+                    </div>
+                    <h3 className="font-semibold text-sm mb-1.5">{p.titolo}</h3>
+                    <p className="text-xs text-muted-foreground leading-relaxed mb-4">{p.testo}</p>
+                    <Link to={p.to}>
+                      <Button size="sm" variant="outline" className="h-8 w-full text-xs">
+                        {p.cta} <ArrowRight className="h-3 w-3 ml-1" />
+                      </Button>
+                    </Link>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* ─── Cosa fare adesso — la coda di lavoro, prima dei numeri ─── */}
+        {daFare && allCandidati.length > 0 && (
+          <div className="grid gap-3 grid-cols-1 md:grid-cols-3">
+            <Card className={daFare.daLeggere.length ? 'border-green-300 bg-green-50/40' : undefined}>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 mb-1">
+                  <ClipboardCheck className="h-4 w-4 text-green-600 shrink-0" />
+                  <span className="text-sm font-medium">Test appena finiti</span>
+                </div>
+                <div className="text-2xl font-bold text-green-700">{daFare.daLeggere.length}</div>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {daFare.daLeggere.length
+                    ? 'Report degli ultimi 7 giorni da leggere'
+                    : 'Nessun test completato di recente'}
+                </p>
+                {daFare.daLeggere.length > 0 && (
+                  <Link to="/candidati?stato=completato">
+                    <Button size="sm" variant="outline" className="mt-3 h-8 w-full">
+                      Leggi i report <ArrowRight className="h-3 w-3 ml-1" />
+                    </Button>
+                  </Link>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card className={daFare.daSollecitare.length ? 'border-amber-300 bg-amber-50/40' : undefined}>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 mb-1">
+                  <Clock className="h-4 w-4 text-amber-600 shrink-0" />
+                  <span className="text-sm font-medium">Fermi da oltre 5 giorni</span>
+                </div>
+                <div className="text-2xl font-bold text-amber-700">{daFare.daSollecitare.length}</div>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {daFare.daSollecitare.length
+                    ? 'Invitati che non hanno ancora fatto il test'
+                    : 'Nessuno in ritardo: tutto in regola'}
+                </p>
+                {daFare.daSollecitare.length > 0 && (
+                  <Link to="/candidati?stato=da_fare">
+                    <Button size="sm" variant="outline" className="mt-3 h-8 w-full">
+                      Chi sollecitare <ArrowRight className="h-3 w-3 ml-1" />
+                    </Button>
+                  </Link>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card className="border-primary/30 bg-primary/[0.03]">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 mb-1">
+                  <UserCheck className="h-4 w-4 text-primary shrink-0" />
+                  <span className="text-sm font-medium">Devi assumere?</span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1 mb-3">
+                  Cerca il candidato giusto fra chi ha già fatto il test, o invita i tuoi.
+                </p>
+                <div className="flex gap-2">
+                  <Link to="/marketplace" className="flex-1">
+                    <Button size="sm" className="h-8 w-full">Cerca candidati</Button>
+                  </Link>
+                  <Link to="/candidati" className="flex-1">
+                    <Button size="sm" variant="outline" className="h-8 w-full">Invita</Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         {/* KPI Cards - Row 1 */}
         <div className="grid gap-2 sm:gap-3 grid-cols-2 md:grid-cols-4">
