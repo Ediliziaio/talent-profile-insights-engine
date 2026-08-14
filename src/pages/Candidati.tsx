@@ -768,6 +768,20 @@ export default function Candidati() {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Candidati</h1>
                 <div className="flex flex-wrap items-center gap-2">
+                  {/* Il confronto affiancato esisteva ma non era raggiungibile da
+                      nessuna parte: la selezione della lista è il punto naturale
+                      da cui partire. Max 4, come regge la pagina di confronto. */}
+                  {selectedIds.size >= 2 && (
+                    <Button
+                      size="sm"
+                      onClick={() =>
+                        navigate(`/confronto?ids=${Array.from(selectedIds).slice(0, 4).join(',')}`)
+                      }
+                    >
+                      <Users className="h-4 w-4 mr-1" />
+                      Confronta ({Math.min(selectedIds.size, 4)})
+                    </Button>
+                  )}
                   {selectedIds.size > 0 && (
                     <Button 
                       variant="destructive" 

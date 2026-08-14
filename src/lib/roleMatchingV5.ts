@@ -1389,10 +1389,10 @@ export function getVerdictBadgeVariantV5(verdict: FitVerdictV5): 'default' | 'se
 
 export function getVerdictLabelV5(verdict: FitVerdictV5): string {
   const labels: Record<FitVerdictV5, string> = {
-    'IDONEO': 'Idoneo',
-    'IDONEO_CON_RISERVA': 'Idoneo con Riserva',
-    'DA_VALUTARE': 'Da Valutare',
-    'NON_IDONEO': 'Non Idoneo',
+    'IDONEO': 'Adatto',
+    'IDONEO_CON_RISERVA': 'Adatto, con riserva',
+    'DA_VALUTARE': 'Da valutare',
+    'NON_IDONEO': 'Non adatto',
   };
   return labels[verdict];
 }
