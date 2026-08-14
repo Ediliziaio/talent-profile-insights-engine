@@ -345,3 +345,27 @@ describe('RoleMatchingV5 - Esempio Calcolo', () => {
     expect(result.ruoloRichiesto.verdict).toBe('IDONEO');
   });
 });
+
+describe('ruoli non configurati', () => {
+  /* La mappa FUNZIONE_TO_RUOLO_MAP punta a "Capocantiere" e
+     "Operaio/Installatore", che non esistono in ROLE_PROFILES_V5. Prima il
+     motore rispondeva 50% e "DA_VALUTARE": un numero inventato che sembrava
+     una misura, proprio sui ruoli che il prodotto vende. */
+  it('non restituisce una percentuale plausibile per un ruolo senza criteri', () => {
+    const risultato = calculateRoleMatchingV5('Capocantiere', idealSalesperson);
+    expect(risultato.ruoloConfigurato).toBe(false);
+    expect(risultato.compatibilitaPct).toBe(0);
+    expect(risultato.motivazione).toMatch(/non abbiamo ancora i criteri/i);
+  });
+
+  it('marca come configurati i ruoli che hanno un profilo', () => {
+    const risultato = calculateRoleMatchingV5('Responsabile Amministrativo', idealSalesperson);
+    expect(risultato.ruoloConfigurato).toBe(true);
+  });
+
+  it('mapFunzioneToRuoloV5 mappa funzioni edili su ruoli inesistenti', () => {
+    // Documenta il buco: la mappa promette ruoli che il motore non ha.
+    const ruolo = mapFunzioneToRuoloV5('Cantiere/Edilizia');
+    expect(RUOLI_V5).not.toContain(ruolo);
+  });
+});

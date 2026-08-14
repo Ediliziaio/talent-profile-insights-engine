@@ -84,6 +84,12 @@ export interface RoleMatchResultV5 {
   verdict: FitVerdictV5;
   motivazione: string;
   domandeColloquio: string[];
+  /**
+   * false quando il ruolo richiesto non ha un profilo in ROLE_PROFILES_V5.
+   * In quel caso `compatibilitaPct` non è una misura: serve a distinguere
+   * "misurato e viene 50%" da "non l'abbiamo misurato".
+   */
+  ruoloConfigurato: boolean;
 }
 
 export interface AllRolesCompatibilityV5 {
@@ -1210,17 +1216,23 @@ export function calculateRoleMatchingV5(
   const profile = ROLE_PROFILES_V5[ruolo];
   
   if (!profile) {
+    /* Qui prima si restituiva 50% e "DA_VALUTARE": un numero inventato che
+       sembrava una misura. Chi assumeva un capocantiere — ruolo mappato ma
+       mai definito in ROLE_PROFILES_V5 — leggeva "50%" e pensava che il
+       sistema avesse valutato qualcosa. Non aveva valutato niente.
+       Il flag permette all'interfaccia di dirlo invece di fingere. */
     return {
       ruolo,
       categoria: 'altro',
-      compatibilitaPct: 50,
+      compatibilitaPct: 0,
       requisitiSoddisfatti: [],
       requisitiMancanti: [],
       disqualifiersAttivi: [],
       syndromiRilevanti: [],
       verdict: 'DA_VALUTARE',
-      motivazione: 'Ruolo non configurato nel sistema V5.',
+      motivazione: `Per il ruolo "${ruolo}" non abbiamo ancora i criteri di valutazione: la compatibilità non è calcolabile.`,
       domandeColloquio: [],
+      ruoloConfigurato: false,
     };
   }
 
@@ -1325,6 +1337,7 @@ export function calculateRoleMatchingV5(
     ruolo,
     categoria: profile.categoria,
     compatibilitaPct,
+    ruoloConfigurato: true,
     requisitiSoddisfatti,
     requisitiMancanti,
     disqualifiersAttivi,

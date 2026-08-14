@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   BadgeCheck,
+  Building2,
   ClipboardList,
   Eye,
   EyeOff,
@@ -10,6 +11,8 @@ import {
   Loader2,
   LogOut,
   Pencil,
+  Trash2,
+  Trophy,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,8 +23,45 @@ import { Switch } from '@/components/ui/switch';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabase } from '@/lib/supabaseLazy';
 import { toast } from '@/hooks/use-toast';
-import { Candidato, ProfiloCandidato } from '@/types/database';
-import { getProfiloTipoV5Label } from '@/lib/scoringV5';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { Candidato, ProfiloCandidato, TraitCode } from '@/types/database';
+import { getProfiloTipoV5Label, getProfiloTipoV5Description } from '@/lib/scoringV5';
+import { RUOLI_V5 } from '@/lib/roleMatchingV5';
+import { calculateRoleMatchingV5Cached } from '@/lib/roleMatchingV5Cache';
+import { TraitScores } from '@/lib/syndromes';
+import { RUOLI, ALTRI_RUOLI } from '@/data/ruoli';
+
+const TRAIT_CODES: TraitCode[] = [
+  'ORG', 'AUT', 'GP', 'ADS', 'DET', 'VEN', 'HRM',
+  'LDR', 'PRO', 'COM', 'ESP', 'RC', 'FIN', 'SUC', 'PRI',
+];
+
+const OPZIONI_RUOLO = [...RUOLI.map((r) => r.nome), ...ALTRI_RUOLI, 'Altro'];
+
+function toTraitScores(raw: unknown): TraitScores | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const t = raw as Record<string, number>;
+  const out = {} as TraitScores;
+  for (const code of TRAIT_CODES) out[code] = t[code] ?? 0;
+  return out;
+}
 
 /**
  * Area riservata del candidato: stato dell'analisi, visibilità piattaforma,
@@ -35,6 +75,9 @@ export default function AreaCandidato() {
   const [editContatti, setEditContatti] = useState(false);
   const [telefono, setTelefono] = useState('');
   const [provincia, setProvincia] = useState('');
+  /* Il ruolo cercato è il campo su cui le imprese filtrano: era l'unico dato
+     importante che il candidato non poteva più toccare dopo l'iscrizione. */
+  const [funzione, setFunzione] = useState('');
 
   const { data, isLoading } = useQuery({
     queryKey: ['area-candidato', user?.id],
@@ -98,6 +141,53 @@ export default function AreaCandidato() {
   // Colonna assente = migration non applicata: il toggle non viene mostrato
   const marketplaceDisponibile = candidato ? 'marketplace_visible' in candidato : false;
 
+  /* Chi ha sbloccato il profilo. Il candidato decide di mettersi in vetrina
+     e poi non sa più niente: non è trasparente, ed è anche il dato che gli
+     dice se la scelta sta funzionando. */
+  const { data: sblocchi } = useQuery({
+    queryKey: ['sblocchi-candidato', candidato?.id],
+    enabled: !!candidato?.id,
+    queryFn: async () => {
+      const supabase = await getSupabase();
+      const { data: righe, error } = await supabase
+        .from('marketplace_sblocchi' as never)
+        .select('created_at, aziende(nome)')
+        .eq('candidato_id' as never, candidato!.id)
+        .order('created_at', { ascending: false });
+      // Tabella assente = migration non applicata: la sezione resta nascosta.
+      if (error) return null;
+      return righe as unknown as { created_at: string; aziende: { nome: string } | null }[];
+    },
+  });
+
+  const eliminaProfilo = useMutation({
+    mutationFn: async () => {
+      const supabase = await getSupabase();
+      const { data: sessione } = await supabase.auth.getSession();
+      if (!sessione.session) throw new Error('Sessione scaduta');
+      const risposta = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/delete-my-account`,
+        {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${sessione.session.access_token}` },
+        }
+      );
+      if (!risposta.ok) {
+        const esito = await risposta.json().catch(() => ({}));
+        throw new Error(esito.error ?? 'Cancellazione non riuscita');
+      }
+    },
+    onSuccess: async () => {
+      toast({
+        title: 'Profilo cancellato',
+        description: 'I tuoi dati sono stati eliminati. Grazie e in bocca al lupo.',
+      });
+      await signOut();
+    },
+    onError: (e: Error) =>
+      toast({ title: 'Cancellazione non riuscita', description: e.message, variant: 'destructive' }),
+  });
+
   const updateMutation = useMutation({
     mutationFn: async (patch: Record<string, unknown>) => {
       const supabase = await getSupabase();
@@ -135,10 +225,31 @@ export default function AreaCandidato() {
 
   const salvaContatti = () => {
     updateMutation.mutate(
-      { telefono: telefono.trim() || null, provincia: provincia.trim() || null },
+      {
+        telefono: telefono.trim() || null,
+        provincia: provincia.trim() || null,
+        funzione: funzione.trim() || null,
+      },
       { onSuccess: () => setEditContatti(false) }
     );
   };
+
+  /* Cosa il candidato riceve indietro. Finora: tre percentuali chiamate
+     "Essere / Fare / Avere" e un'etichetta. Per 242 domande è poco, e a chi
+     si iscrive spontaneamente chiediamo di mettersi in vetrina in cambio di
+     niente. I mestieri più adatti si calcolano dagli stessi tratti che già
+     abbiamo, senza chiedere altro. */
+  const mestieriAdatti = useMemo(() => {
+    const traits = toTraitScores(profiloCandidato?.traits_v5);
+    if (!traits) return [];
+    return RUOLI_V5.map((ruolo) => {
+      const m = calculateRoleMatchingV5Cached(ruolo, traits, candidato?.eta ?? undefined);
+      return { ruolo, compatibilita: m.compatibilitaPct, configurato: m.ruoloConfigurato };
+    })
+      .filter((m) => m.configurato)
+      .sort((a, b) => b.compatibilita - a.compatibilita)
+      .slice(0, 3);
+  }, [profiloCandidato?.traits_v5, candidato?.eta]);
 
   if (!authLoading && (!user || profile?.ruolo !== 'candidato')) {
     return <Navigate to={user ? '/dashboard' : '/auth'} replace />;
@@ -198,26 +309,56 @@ export default function AreaCandidato() {
                 {profiloCandidato && (
                   <div className="grid grid-cols-3 gap-3">
                     {[
-                      { label: 'Essere', v: profiloCandidato.essere_pct },
-                      { label: 'Fare', v: profiloCandidato.fare_pct },
-                      { label: 'Avere', v: profiloCandidato.avere_pct },
+                      /* "Essere / Fare / Avere" sono i nomi interni delle
+                         macro-aree: a chi ha fatto il test non dicono niente. */
+                      { label: 'Come ti gestisci', v: profiloCandidato.essere_pct },
+                      { label: 'Come lavori', v: profiloCandidato.fare_pct },
+                      { label: 'Come stai in squadra', v: profiloCandidato.avere_pct },
                     ].map((m) => (
                       <div key={m.label} className="rounded-lg bg-[#f7f4f0] p-3 text-center">
                         <div className="text-xl font-bold text-[#1e3a5f]">
                           {m.v !== null ? `${Math.round(m.v)}%` : '—'}
                         </div>
-                        <div className="text-xs text-muted-foreground">{m.label}</div>
+                        <div className="text-[11px] leading-tight text-muted-foreground mt-0.5">
+                          {m.label}
+                        </div>
                       </div>
                     ))}
                   </div>
                 )}
                 {profiloCandidato?.profilo_tipo_v5 && (
-                  <p className="text-sm text-muted-foreground">
-                    Profilo:{' '}
-                    <Badge variant="secondary">
+                  <div className="rounded-lg border border-[#e5e0db] p-3">
+                    <Badge variant="secondary" className="mb-1.5">
                       {getProfiloTipoV5Label(profiloCandidato.profilo_tipo_v5)}
                     </Badge>
-                  </p>
+                    <p className="text-sm text-[#3d3935] leading-relaxed">
+                      {getProfiloTipoV5Description(profiloCandidato.profilo_tipo_v5)}
+                    </p>
+                  </div>
+                )}
+
+                {mestieriAdatti.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-semibold flex items-center gap-1.5 mb-2">
+                      <Trophy className="h-4 w-4 text-[#f09133]" />
+                      I mestieri che ti calzano di più
+                    </h3>
+                    <ul className="space-y-1.5">
+                      {mestieriAdatti.map((m) => (
+                        <li
+                          key={m.ruolo}
+                          className="flex items-center justify-between gap-3 text-sm rounded-lg bg-[#f7f4f0] px-3 py-2"
+                        >
+                          <span>{m.ruolo}</span>
+                          <span className="font-bold text-[#1e3a5f]">{m.compatibilita}%</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
+                      Calcolato sulle tue risposte. Se uno di questi ti interessa, mettilo come
+                      ruolo cercato qui sotto: è il campo su cui le imprese cercano.
+                    </p>
+                  </div>
                 )}
               </div>
             ) : (
@@ -294,6 +435,7 @@ export default function AreaCandidato() {
                   onClick={() => {
                     setTelefono(candidato?.telefono ?? '');
                     setProvincia(candidato?.provincia ?? '');
+                    setFunzione(candidato?.funzione ?? '');
                     setEditContatti(true);
                   }}
                 >
@@ -323,6 +465,21 @@ export default function AreaCandidato() {
                       onChange={(e) => setProvincia(e.target.value)}
                       className="mt-1.5"
                     />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <Label htmlFor="ac-funzione">Ruolo cercato</Label>
+                    <Select value={funzione} onValueChange={setFunzione}>
+                      <SelectTrigger id="ac-funzione" className="mt-1.5">
+                        <SelectValue placeholder="Che lavoro cerchi?" />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-72">
+                        {OPZIONI_RUOLO.map((r) => (
+                          <SelectItem key={r} value={r}>
+                            {r}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
                 <div className="flex gap-2">
@@ -357,13 +514,77 @@ export default function AreaCandidato() {
           </CardContent>
         </Card>
 
-        <p className="text-xs text-muted-foreground text-center">
-          Per cancellare il profilo scrivi a{' '}
-          <a href="mailto:privacy@talentiedili.it" className="underline">
-            privacy@talentiedili.it
-          </a>
-          .
-        </p>
+        {/* ─── Chi ti ha sbloccato ─── */}
+        {sblocchi && sblocchi.length > 0 && (
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Building2 className="h-5 w-5 text-primary" />
+                Chi ha visto il tuo profilo
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-2">
+                {sblocchi.map((s, i) => (
+                  <li
+                    key={i}
+                    className="flex items-center justify-between gap-3 text-sm border-b border-[#e5e0db] last:border-0 pb-2 last:pb-0"
+                  >
+                    <span className="font-medium">{s.aziende?.nome ?? 'Un’impresa'}</span>
+                    <span className="text-muted-foreground text-xs">
+                      {new Date(s.created_at).toLocaleDateString('it-IT')}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
+                Queste imprese hanno il tuo nome e i tuoi contatti. Se non ti hanno ancora
+                scritto, puoi contattarle tu.
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* ─── Cancellazione ─── */}
+        <Card className="border-[#e5e0db]">
+          <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-medium">Cancella il profilo</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Spariscono i tuoi dati, le risposte al test e l’analisi. Non si torna indietro.
+              </p>
+            </div>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" size="sm" className="text-destructive shrink-0">
+                  <Trash2 className="h-4 w-4 mr-1.5" />
+                  Cancella
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Cancellare il tuo profilo?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Eliminiamo i tuoi dati, le risposte al test e l’analisi. Sparisci anche dalla
+                    piattaforma. Non si può tornare indietro: per rientrare dovrai rifare il test.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Lascia stare</AlertDialogCancel>
+                  <AlertDialogAction
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    onClick={() => eliminaProfilo.mutate()}
+                  >
+                    {eliminaProfilo.isPending && (
+                      <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
+                    )}
+                    Sì, cancella tutto
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </CardContent>
+        </Card>
       </main>
     </div>
   );

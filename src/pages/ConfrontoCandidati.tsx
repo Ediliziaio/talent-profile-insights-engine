@@ -210,7 +210,12 @@ export default function ConfrontoCandidati() {
      disqualifier bloccante toglie dalla corsa a prescindere dal punteggio. */
   const migliori = useMemo(() => {
     const ammessi = schede.filter(
-      (s) => s.match && !s.match.disqualifiersAttivi.some((d) => d.severity === 'blocking')
+      (s) =>
+        s.match &&
+        // Senza criteri per quel ruolo non c'è niente da confrontare:
+        // incoronare qualcuno sarebbe inventarsi un vincitore.
+        s.match.ruoloConfigurato &&
+        !s.match.disqualifiersAttivi.some((d) => d.severity === 'blocking')
     );
     if (!ammessi.length) return [];
     const max = Math.max(...ammessi.map((s) => s.match!.compatibilitaPct));
@@ -410,7 +415,14 @@ export default function ConfrontoCandidati() {
                         </p>
                       ) : (
                         <>
+                          {!match.ruoloConfigurato && (
+                            <div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
+                              <p className="text-xs text-amber-900">{match.motivazione}</p>
+                            </div>
+                          )}
+
                           {/* Compatibilità */}
+                          {match.ruoloConfigurato && (
                           <div className="rounded-lg bg-muted/60 p-3 space-y-2">
                             <div className="flex items-center justify-between gap-2">
                               <span className="text-xs text-muted-foreground">Compatibilità</span>
@@ -423,6 +435,7 @@ export default function ConfrontoCandidati() {
                               <span className="text-xl font-bold">{match.compatibilitaPct}%</span>
                             </div>
                           </div>
+                          )}
 
                           {/* Motivi bloccanti */}
                           {bloccanti.length > 0 && (

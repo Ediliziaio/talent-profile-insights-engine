@@ -18,10 +18,10 @@ const USER_ID = 'demo-user-0001';
 
 /* Ruolo della sessione demo: `?demo=superadmin` nell'URL per vedere le
    schermate di chi gestisce le aziende, senza riavviare il server. */
-const RUOLO_DEMO: 'azienda' | 'superadmin' =
-  typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('demo') === 'superadmin'
-    ? 'superadmin'
-    : 'azienda';
+const DEMO_PARAM =
+  typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('demo') : null;
+const RUOLO_DEMO: 'azienda' | 'superadmin' | 'candidato' =
+  DEMO_PARAM === 'superadmin' || DEMO_PARAM === 'candidato' ? DEMO_PARAM : 'azienda';
 
 const oggi = new Date();
 const giorniFa = (n: number) => new Date(oggi.getTime() - n * 86_400_000).toISOString();
@@ -90,7 +90,7 @@ const PROFILES: Riga[] = [
     nome: 'Giulia',
     cognome: 'Bianchi',
     ruolo: RUOLO_DEMO,
-    azienda_id: RUOLO_DEMO === 'superadmin' ? null : AZIENDA_ID,
+    azienda_id: RUOLO_DEMO === 'azienda' ? AZIENDA_ID : null,
     created_at: giorniFa(400),
   },
   {
@@ -135,7 +135,9 @@ const SEEDS: Seed[] = [
 
 const CANDIDATI: Riga[] = SEEDS.map((s, i) => ({
   id: `demo-cand-${String(i + 1).padStart(4, '0')}`,
-  user_id: null,
+  // In modalità candidato la prima riga è l'utente loggato: senza, l'area
+  // personale farebbe partire il self-heal e mostrerebbe un profilo vuoto.
+  user_id: i === 0 && RUOLO_DEMO === 'candidato' ? USER_ID : null,
   azienda_id: AZIENDA_ID,
   nome: s.nome,
   cognome: s.cognome,
@@ -150,10 +152,27 @@ const CANDIDATI: Riga[] = SEEDS.map((s, i) => ({
   data_test: s.giorniTest !== undefined ? giorniFa(s.giorniTest) : null,
   test_link_token: null,
   username: null,
-  marketplace_visible: false,
+  marketplace_visible: i === 0,
   created_at: giorniFa(s.giorniCreato),
   updated_at: giorniFa(s.giorniCreato),
 }));
+
+const SBLOCCHI: Riga[] = [
+  {
+    id: 'demo-sblocco-0001',
+    candidato_id: 'demo-cand-0001',
+    azienda_id: 'demo-azienda-0002',
+    created_at: giorniFa(4),
+    aziende: { nome: 'Edilnova Costruzioni Spa' },
+  },
+  {
+    id: 'demo-sblocco-0002',
+    candidato_id: 'demo-cand-0001',
+    azienda_id: 'demo-azienda-0003',
+    created_at: giorniFa(18),
+    aziende: { nome: 'Impresa Verdi & Figli Snc' },
+  },
+];
 
 const PROFILI: Riga[] = SEEDS.flatMap((s, i) => {
   if (s.giorniTest === undefined) return [];
@@ -210,7 +229,7 @@ const TABELLE: Record<string, Riga[]> = {
   profili_candidato: PROFILI,
   analisi_candidato: ANALISI,
   marketplace_profili: MARKETPLACE,
-  marketplace_sblocchi: [],
+  marketplace_sblocchi: SBLOCCHI,
   risultati: [],
   risposte: [],
   leads: [],
