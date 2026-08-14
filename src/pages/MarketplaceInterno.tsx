@@ -92,9 +92,11 @@ function ProfiloCard({
 
         <div className="grid grid-cols-3 gap-2">
           {[
-            { label: 'Essere', v: p.essere_pct },
-            { label: 'Fare', v: p.fare_pct },
-            { label: 'Avere', v: p.avere_pct },
+            /* "Essere / Fare / Avere" sono i nomi interni delle macro-aree:
+               a chi assume non dicono niente. Qui si scrive cosa misurano. */
+            { label: 'Come si gestisce', v: p.essere_pct },
+            { label: 'Come lavora', v: p.fare_pct },
+            { label: 'Come sta in squadra', v: p.avere_pct },
           ].map((m) => (
             <div key={m.label} className="rounded-lg bg-muted/60 p-2 text-center">
               <div className="text-sm font-bold text-[#1e3a5f]">
@@ -113,7 +115,7 @@ function ProfiloCard({
           )}
           {ips?.indice !== null && ips !== null && (
             <Badge variant="outline" className="text-[11px]">
-              <HardHat className="h-3 w-3 mr-1" /> Sicurezza {ips.indice}/100
+              <HardHat className="h-3 w-3 mr-1" /> Sicurezza in cantiere {ips.indice}/100
             </Badge>
           )}
           {p.reliability_index === 'CAUTION' && (
@@ -215,8 +217,9 @@ export default function MarketplaceInterno() {
             <Store className="h-6 w-6 text-primary" /> Trova candidati
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Candidati che hanno completato l’analisi e scelto di essere visibili. I profili sono
-            anonimi finché non li sblocchi.
+            Persone che hanno già fatto il test e vogliono essere contattate. Vedi cosa sanno fare
+            prima di sapere chi sono: nome e contatti compaiono quando sblocchi il profilo.
+            Lo sblocco vale per tutta l’azienda e non scade.
           </p>
         </div>
 
@@ -263,7 +266,7 @@ export default function MarketplaceInterno() {
         ) : error ? (
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">piattaforma non ancora attivo</CardTitle>
+              <CardTitle className="text-base">Sezione non ancora attiva</CardTitle>
             </CardHeader>
             <CardContent className="text-sm text-muted-foreground space-y-2">
               <p>
@@ -292,7 +295,7 @@ export default function MarketplaceInterno() {
         ) : (
           <>
             <p className="text-sm text-muted-foreground">
-              {totalCount} profil{totalCount === 1 ? 'o' : 'i'} disponibil{totalCount === 1 ? 'e' : 'i'}
+              {totalCount === 1 ? '1 persona disponibile' : `${totalCount} persone disponibili`}
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {profili.map((p) => (
@@ -338,9 +341,9 @@ export default function MarketplaceInterno() {
         <AlertDialog open={!!daSbloccare} onOpenChange={(open) => !open && setDaSbloccare(null)}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Sbloccare questo profilo?</AlertDialogTitle>
+              <AlertDialogTitle>Vuoi vedere chi è?</AlertDialogTitle>
               <AlertDialogDescription>
-                Vedrai nome, contatti e report completo di questo{' '}
+                Vedrai nome, contatti e report completo di questo/a{' '}
                 {daSbloccare?.funzione?.toLowerCase() || 'candidato'}
                 {daSbloccare?.provincia ? ` in provincia di ${daSbloccare.provincia}` : ''}. Lo
                 sblocco vale per tutta la tua azienda e resta attivo.

@@ -544,14 +544,16 @@ export function getFasciaInterpretativa(trait: TraitCode, score: number): {
  * Ottiene etichetta profilo V5
  */
 export function getProfiloTipoV5Label(tipo: ProfiloTipoV5): string {
+  // Etichette in italiano corrente: chi legge la scheda è un titolare
+  // d'impresa edile, non un HR manager abituato a "Executor" e "Strategist".
   const labels: Record<ProfiloTipoV5, string> = {
-    'LEADER': 'Leader',
-    'STRATEGIST': 'Strategist',
-    'EXECUTOR': 'Executor',
-    'SPECIALIST': 'Specialist',
-    'GROWTH_POTENTIAL': 'Growth Potential',
-    'IN_TRANSIZIONE': 'In Transizione',
-    'CRITICAL': 'Profilo Critico',
+    'LEADER': 'Sa guidare',
+    'STRATEGIST': 'Organizzatore',
+    'EXECUTOR': 'Concreto',
+    'SPECIALIST': 'Specialista',
+    'GROWTH_POTENTIAL': 'Da far crescere',
+    'IN_TRANSIZIONE': 'Da approfondire',
+    'CRITICAL': 'Da valutare con attenzione',
   };
   return labels[tipo] || 'Non definito';
 }
@@ -561,13 +563,13 @@ export function getProfiloTipoV5Label(tipo: ProfiloTipoV5): string {
  */
 export function getProfiloTipoV5Description(tipo: ProfiloTipoV5): string {
   const descriptions: Record<ProfiloTipoV5, string> = {
-    'LEADER': 'Eccelle in tutte le macro-aree. Adatto a ruoli di direzione e responsabilità elevata.',
-    'STRATEGIST': 'Forte visione e pianificazione, meno orientato all\'esecuzione. Ideale per ruoli strategici.',
-    'EXECUTOR': 'Eccellente nell\'esecuzione, meno nella visione. Adatto a ruoli operativi senior.',
-    'SPECIALIST': 'Forte specializzazione in un\'area specifica. Ideale per ruoli tecnici o di nicchia.',
-    'GROWTH_POTENTIAL': 'Profilo equilibrato con margini di crescita. Investimento formativo consigliato.',
-    'IN_TRANSIZIONE': 'Pattern misto che richiede approfondimento. Valutare sindromi attive.',
-    'CRITICAL': 'Presenza di sindromi critiche (S01-S04). Valutazione approfondita necessaria.',
+    'LEADER': 'Va bene in tutte le aree. Regge responsabilità e gestione di persone.',
+    'STRATEGIST': 'Bravo a organizzare e pianificare, meno a mettere le mani in pasta.',
+    'EXECUTOR': 'Molto forte nel fare, meno nel pianificare. Ottimo su ruoli operativi con esperienza.',
+    'SPECIALIST': 'Molto forte su un\'area sola. Adatto a ruoli tecnici o molto specifici.',
+    'GROWTH_POTENTIAL': 'Profilo equilibrato che può crescere. Conviene investire in formazione.',
+    'IN_TRANSIZIONE': 'Risposte poco coerenti fra loro: meglio approfondire al colloquio.',
+    'CRITICAL': 'Emergono segnali critici. Serve una valutazione approfondita prima di procedere.',
   };
   return descriptions[tipo] || 'Profilo in valutazione';
 }
