@@ -19,6 +19,7 @@ import {
 import { format, subDays, subMonths, parseISO } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { FASI, faseDi } from '@/lib/faseSelezione';
 
 
 /* Card KPI: prima erano otto blocchi copiati a mano, con classi leggermente
@@ -165,6 +166,21 @@ export default function Dashboard() {
       valutare,
       nonIdonei,
     };
+  }, [allCandidati]);
+
+  /* Conteggi per fase. Finché la migration non è applicata la colonna non
+     esiste e faseDi() risponde 'nuovo' per tutti: l'imbuto resta nascosto
+     invece di mostrare cinque zeri e un totale nella prima casella. */
+  const contiFase = useMemo(() => {
+    if (!allCandidati.length) return null;
+    const conti: Record<string, number> = {};
+    let almenoUnaAvanzata = false;
+    for (const c of allCandidati) {
+      const f = faseDi(c);
+      if (f !== 'nuovo') almenoUnaAvanzata = true;
+      conti[f] = (conti[f] ?? 0) + 1;
+    }
+    return almenoUnaAvanzata ? conti : null;
   }, [allCandidati]);
 
   // Stats per aziende (solo superadmin)
@@ -585,6 +601,33 @@ export default function Dashboard() {
             />
           </div>
         </div>
+
+        {/* A che punto è la selezione. Prima l'unico stato era "ha fatto il test
+            o no": tutto il resto (l'ho chiamato, l'ho visto, l'ho preso) viveva
+            fuori dalla piattaforma. */}
+        {contiFase && (
+          <div className="space-y-2">
+            <h2 className="text-sm font-semibold text-muted-foreground">A che punto sei</h2>
+            <div className="grid gap-2 sm:gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
+              {FASI.map((f) => (
+                <Link
+                  key={f.valore}
+                  to={`/candidati?fase=${f.valore}`}
+                  className="rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <Card className={`h-full border transition-shadow hover:shadow-md ${f.classe}`}>
+                    <CardContent className="p-2.5 sm:p-3">
+                      <div className="text-[10px] sm:text-xs opacity-80 truncate">{f.label}</div>
+                      <div className="text-xl sm:text-2xl font-bold mt-0.5">
+                        {contiFase[f.valore] ?? 0}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="space-y-2">
           <h2 className="text-sm font-semibold text-muted-foreground">

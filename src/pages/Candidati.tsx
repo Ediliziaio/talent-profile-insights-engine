@@ -77,6 +77,7 @@ import {
 } from 'lucide-react';
 import { Candidato, Azienda, AccessoAzienda, ProfiloCandidato, RUOLI_AZIENDALI, FUNZIONI } from '@/types/database';
 import { InvitoCandidato, CandidatoDaInvitare } from '@/components/InvitoCandidato';
+import { FASI, Fase, faseDi, faseInfo, MOTIVI_SCARTO } from '@/lib/faseSelezione';
 import { getProfiloTipoV5Label } from '@/lib/scoringV5';
 import { format, subDays, subMonths, startOfDay, endOfDay, parseISO } from 'date-fns';
 import { it } from 'date-fns/locale';
@@ -130,6 +131,15 @@ export default function Candidati() {
   const [filterStato, setFilterStato] = useState<string>(
     statoIniziale === 'completato' || statoIniziale === 'da_fare' ? statoIniziale : 'all'
   );
+  /* Anche la fase può arrivare dall'URL: la dashboard linka /candidati?fase=colloquio. */
+  const faseIniziale = searchParams.get('fase');
+  const [filterFase, setFilterFase] = useState<string>(
+    FASI.some((f) => f.valore === faseIniziale) ? (faseIniziale as string) : 'all'
+  );
+  /* Quando si scarta qualcuno si chiede il perché: col tempo è il dato che
+     dice se il punteggio del test prevede davvero come è andata. */
+  const [daScartare, setDaScartare] = useState<{ id: string; nome: string } | null>(null);
+  const [motivoScarto, setMotivoScarto] = useState('');
   const [filterRuolo, setFilterRuolo] = useState<string>('all');
   const [filterFunzione, setFilterFunzione] = useState<string>('all');
   /* Stesso meccanismo per l'esito: /candidati?esito=IDONEO dalle card della dashboard. */
@@ -296,6 +306,12 @@ export default function Candidati() {
     } else if (filterStato === 'da_fare') {
       query = query.eq('test_completato', false);
     }
+    if (filterFase && filterFase !== 'all') {
+      // `fase` non è nei tipi generati finché non si rigenera lo schema dopo
+      // la migration: il builder tipizzato la rifiuta, la query è valida.
+      type EqSuStringa = { eq: (colonna: string, valore: string) => typeof query };
+      query = (query as unknown as EqSuStringa).eq('fase', filterFase);
+    }
     if (filterRuolo && filterRuolo !== 'all') {
       query = query.eq('ruolo_attuale', filterRuolo);
     }
@@ -349,10 +365,10 @@ export default function Candidati() {
     query = query.order('id', { ascending: true });
 
     return query;
-  }, [filterAzienda, filterStato, filterRuolo, filterFunzione, filterFitVerdict, filterSesso, filterEta, searchTerm, filterDateFrom, filterDateTo, filterTestDateFrom, filterTestDateTo, sortField, sortOrder]);
+  }, [filterAzienda, filterStato, filterFase, filterRuolo, filterFunzione, filterFitVerdict, filterSesso, filterEta, searchTerm, filterDateFrom, filterDateTo, filterTestDateFrom, filterTestDateTo, sortField, sortOrder]);
 
   const { data: candidatiPage, isLoading } = useQuery({
-    queryKey: ['candidati', filterAzienda, filterStato, filterRuolo, filterFunzione, filterFitVerdict, filterSesso, filterEta, searchTerm, filterDateFrom, filterDateTo, filterTestDateFrom, filterTestDateTo, sortField, sortOrder, page],
+    queryKey: ['candidati', filterAzienda, filterStato, filterFase, filterRuolo, filterFunzione, filterFitVerdict, filterSesso, filterEta, searchTerm, filterDateFrom, filterDateTo, filterTestDateFrom, filterTestDateTo, sortField, sortOrder, page],
     queryFn: async () => {
       const { data, error, count } = await buildCandidatiQuery().range(
         page * PAGE_SIZE,
@@ -371,7 +387,7 @@ export default function Candidati() {
      piu' di una pagina mostravano i numeri della pagina spacciandoli per totali.
      Ora girano sul set filtrato completo, con una query leggera a parte. */
   const { data: statsRows } = useQuery({
-    queryKey: ['candidati-stats', filterAzienda, filterStato, filterRuolo, filterFunzione, filterFitVerdict, filterSesso, filterEta, searchTerm, filterDateFrom, filterDateTo, filterTestDateFrom, filterTestDateTo],
+    queryKey: ['candidati-stats', filterAzienda, filterStato, filterFase, filterRuolo, filterFunzione, filterFitVerdict, filterSesso, filterEta, searchTerm, filterDateFrom, filterDateTo, filterTestDateFrom, filterTestDateTo],
     queryFn: async () => {
       // Tetto a 1000 righe: oltre, i contatori restano indicativi (il totale
       // esatto arriva comunque da `count`, che PostgREST calcola lato server).
@@ -723,6 +739,27 @@ export default function Candidati() {
      20260814120000_tracciamento_inviti.sql: finché la migration non è
      applicata l'aggiornamento fallisce, l'invito parte lo stesso e la data
      semplicemente non compare. */
+  const cambiaFase = useMutation({
+    mutationFn: async ({ id, fase, motivo }: { id: string; fase: Fase; motivo?: string }) => {
+      const { error } = await supabase
+        .from('candidati')
+        .update({ fase, motivo_scarto: fase === 'scartato' ? (motivo ?? null) : null } as never)
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['candidati'] });
+      queryClient.invalidateQueries({ queryKey: ['candidati-stats'] });
+    },
+    onError: () => {
+      toast({
+        title: 'Fase non aggiornata',
+        description: 'Riprova. Se il problema resta, la migration della fase non è ancora applicata.',
+        variant: 'destructive',
+      });
+    },
+  });
+
   const registraInvito = useMutation({
     mutationFn: async (candidatoId: string) => {
       const attuale = candidati?.find((c) => c.id === candidatoId) as
@@ -750,13 +787,14 @@ export default function Candidati() {
   const giorniDaCreazione = (c: { created_at: string | null }) =>
     c.created_at ? (Date.now() - new Date(c.created_at).getTime()) / 86_400_000 : 0;
 
-  const hasActiveFilters = filterStato !== 'all' || filterSesso !== 'all' || filterEta !== 'all' || 
+  const hasActiveFilters = filterStato !== 'all' || filterFase !== 'all' || filterSesso !== 'all' || filterEta !== 'all' || 
     filterRuolo !== 'all' || filterFunzione !== 'all' || filterFitVerdict !== 'all' ||
     filterDateFrom !== undefined || filterDateTo !== undefined || 
     filterTestDateFrom !== undefined || filterTestDateTo !== undefined;
 
   const resetFilters = () => {
     setFilterStato('all');
+    setFilterFase('all');
     setFilterSesso('all');
     setFilterEta('all');
     setFilterRuolo('all');
@@ -1255,6 +1293,19 @@ export default function Candidati() {
                     </PopoverContent>
                   </Popover>
                   
+                  <Select value={filterFase} onValueChange={setFilterFase}>
+                    <SelectTrigger className="w-[160px] h-9">
+                      <SelectValue placeholder="Fase" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Fase: tutte</SelectItem>
+                      {FASI.map((f) => (
+                        <SelectItem key={f.valore} value={f.valore}>
+                          {f.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <Select value={filterStato} onValueChange={setFilterStato}>
                     <SelectTrigger className="w-[150px] h-9">
                       <SelectValue placeholder="Stato test" />
@@ -1499,7 +1550,8 @@ export default function Candidati() {
                             {isSuperadmin && <TableHead>Azienda</TableHead>}
                             <SortableHeader field="eta">Età</SortableHeader>
                             <SortableHeader field="ruolo_attuale">Ruolo</SortableHeader>
-                            <TableHead>Stato</TableHead>
+                            <TableHead className="w-10 text-center">Test</TableHead>
+                            <TableHead className="w-[150px]">Fase</TableHead>
                             <SortableHeader field="fit_score">Compatibilità</SortableHeader>
                             <TableHead>Profilo</TableHead>
                             <SortableHeader field="created_at">Data</SortableHeader>
@@ -1578,16 +1630,66 @@ export default function Candidati() {
                                   {candidato.sesso && <span className="text-muted-foreground ml-1">({candidato.sesso})</span>}
                                 </TableCell>
                                 <TableCell className="max-w-[120px] truncate">{candidato.ruolo_attuale || '-'}</TableCell>
+                                <TableCell className="text-center">
+                                  {/* Solo icona: la colonna Fase ha bisogno dello
+                                      spazio, e "fatto / non fatto" si legge
+                                      benissimo da un segno. */}
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <span className="flex justify-center">
+                                        {candidato.test_completato ? (
+                                          <CheckCircle2 className="h-4 w-4 text-green-600" />
+                                        ) : (
+                                          <Clock className="h-4 w-4 text-amber-500" />
+                                        )}
+                                      </span>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      {candidato.test_completato ? 'Test fatto' : 'Test non ancora fatto'}
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TableCell>
                                 <TableCell>
-                                  <Badge 
-                                    variant={candidato.test_completato ? 'default' : 'secondary'}
-                                    className={cn(
-                                      "text-xs",
-                                      candidato.test_completato && 'bg-green-100 text-green-700 hover:bg-green-100'
-                                    )}
+                                  {/* Cambio fase in linea: aprire la scheda per
+                                      spostare uno stato è un giro inutile. */}
+                                  <Select
+                                    value={faseDi(candidato)}
+                                    onValueChange={(v) => {
+                                      if (v === 'scartato') {
+                                        setMotivoScarto('');
+                                        setDaScartare({
+                                          id: candidato.id,
+                                          nome: `${candidato.nome} ${candidato.cognome}`,
+                                        });
+                                      } else {
+                                        cambiaFase.mutate({ id: candidato.id, fase: v as Fase });
+                                      }
+                                    }}
                                   >
-                                    {candidato.test_completato ? 'Test fatto' : 'In attesa'}
-                                  </Badge>
+                                    {/* Niente <SelectValue />: Radix ci ricopia dentro
+                                        tutti i figli della voce scelta, descrizione
+                                        compresa, e l'etichetta finiva troncata. */}
+                                    <SelectTrigger
+                                      className={cn(
+                                        'h-7 text-xs border px-2 min-w-[118px]',
+                                        faseInfo(faseDi(candidato)).classe
+                                      )}
+                                    >
+                                      <span className="truncate">
+                                        {faseInfo(faseDi(candidato)).label}
+                                      </span>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {FASI.map((f) => (
+                                        <SelectItem key={f.valore} value={f.valore}>
+                                          <span className="font-medium">{f.label}</span>
+                                          <span className="text-muted-foreground block text-[11px]">
+                                            {f.descrizione}
+                                          </span>
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
                                 </TableCell>
                                 <TableCell>
                                   {fitScore != null ? (
@@ -1837,6 +1939,61 @@ export default function Candidati() {
             onOpenChange={(v) => !v && setDaInvitare(null)}
             onInviato={(id) => registraInvito.mutate(id)}
           />
+
+          <Dialog open={!!daScartare} onOpenChange={(v) => !v && setDaScartare(null)}>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Perché scarti {daScartare?.nome}?</DialogTitle>
+                <DialogDescription>
+                  Serve a capire, col tempo, quanto il test azzecca. Puoi anche saltare.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex flex-wrap gap-2 py-2">
+                {MOTIVI_SCARTO.map((m) => (
+                  <Button
+                    key={m}
+                    type="button"
+                    variant={motivoScarto === m ? 'default' : 'outline'}
+                    size="sm"
+                    className="text-xs h-7"
+                    onClick={() => setMotivoScarto(m)}
+                  >
+                    {m}
+                  </Button>
+                ))}
+              </div>
+              <Input
+                value={motivoScarto}
+                onChange={(e) => setMotivoScarto(e.target.value)}
+                placeholder="…o scrivilo tu"
+              />
+              <DialogFooter className="gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    if (daScartare) cambiaFase.mutate({ id: daScartare.id, fase: 'scartato' });
+                    setDaScartare(null);
+                  }}
+                >
+                  Salta
+                </Button>
+                <Button
+                  onClick={() => {
+                    if (daScartare) {
+                      cambiaFase.mutate({
+                        id: daScartare.id,
+                        fase: 'scartato',
+                        motivo: motivoScarto.trim() || undefined,
+                      });
+                    }
+                    setDaScartare(null);
+                  }}
+                >
+                  Scarta
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
 
           {/* Candidato Detail Drawer */}
           <CandidatoDrawer
