@@ -125,14 +125,26 @@ export function PagamentiReportistica({ abbonamenti, pagamentiAll, candidatiAll,
     const trial = abbonamenti.filter(a => a.stato === 'trial').length;
     const scaduti = abbonamenti.filter(a => a.stato === 'scaduto').length;
     const sospesi = abbonamenti.filter(a => a.stato === 'sospeso').length;
-    const tassoConversione = (attivi + trial) > 0 ? Math.round((attivi / (attivi + trial)) * 100) : 0;
-    const churnRate = totalAbb > 0 ? Math.round(((scaduti + sospesi) / totalAbb) * 100) : 0;
-    const mrr = abbonamenti.filter(a => a.stato === 'attivo').reduce((s, a) => s + Number(a.importo_mensile), 0);
+    /* "Conversione Trial→Attivo" era attivi/(attivi+trial): senza trial vale
+       sempre 100%, e nel prodotto il trial non esiste. Al suo posto una cosa
+       su cui si può agire: chi scade a breve e va richiamato. */
+    const fra30Giorni = new Date();
+    fra30Giorni.setDate(fra30Giorni.getDate() + 30);
+    const oggi = new Date();
+    const inScadenza = abbonamenti.filter((a) => {
+      if (a.stato !== 'attivo' || !a.data_scadenza) return false;
+      const scadenza = new Date(a.data_scadenza);
+      return scadenza >= oggi && scadenza <= fra30Giorni;
+    }).length;
+
+    // Non è il churn (che è un tasso su un periodo): è la quota di abbonamenti
+    // che in questo momento non sono attivi. Chiamarlo churn era sbagliato.
+    const quotaNonAttivi = totalAbb > 0 ? Math.round(((scaduti + sospesi) / totalAbb) * 100) : 0;
     const pagamentiFalliti = filteredPagamenti.filter(p => p.stato === 'fallito').length;
     const ricavoTotale = filteredPagamenti.filter(p => p.stato === 'completato').reduce((s, p) => s + Number(p.importo), 0);
     const aziendeConPagamenti = new Set(filteredPagamenti.filter(p => p.stato === 'completato').map(p => p.azienda_id)).size;
     const arpa = aziendeConPagamenti > 0 ? ricavoTotale / aziendeConPagamenti : 0;
-    return { totalAbb, tassoConversione, churnRate, mrr, pagamentiFalliti, ricavoTotale, arpa };
+    return { totalAbb, inScadenza, quotaNonAttivi, pagamentiFalliti, ricavoTotale, arpa, trial };
   }, [abbonamenti, filteredPagamenti]);
 
   // --- Sparkline data (last 6 months) ---
@@ -284,25 +296,33 @@ export function PagamentiReportistica({ abbonamenti, pagamentiAll, candidatiAll,
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Conversione Trial→Attivo</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">In scadenza entro 30 giorni</CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent><div className="text-2xl font-bold">{extraMetrics.tassoConversione}%</div></CardContent>
+          <CardContent>
+            <div className="text-2xl font-bold">{extraMetrics.inScadenza}</div>
+            <p className="text-xs text-muted-foreground mt-1">Abbonamenti attivi da rinnovare.</p>
+          </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Churn Rate</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Non più attivi</CardTitle>
             <TrendingDown className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent><div className="text-2xl font-bold text-destructive">{extraMetrics.churnRate}%</div></CardContent>
+          <CardContent>
+            <div className="text-2xl font-bold text-destructive">{extraMetrics.quotaNonAttivi}%</div>
+            <p className="text-xs text-muted-foreground mt-1">Scaduti o sospesi sul totale.</p>
+          </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">MRR</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Incassato nel mese in corso</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">€{extraMetrics.mrr.toLocaleString('it-IT')}</div>
+            <div className="text-2xl font-bold">
+              €{(sparklineData.ricavo[5]?.value ?? 0).toLocaleString('it-IT')}
+            </div>
             <div className="flex items-center gap-2 mt-1">
               <DeltaBadge delta={sparklineData.deltaRicavo} currValue={sparklineData.ricavo[5]?.value} prevValue={sparklineData.ricavo[4]?.value} formatter={v => `€${v.toLocaleString('it-IT')}`} />
               <div className="flex-1"><MiniSparkline data={sparklineData.ricavo} color="hsl(142, 71%, 45%)" /></div>
@@ -311,7 +331,7 @@ export function PagamentiReportistica({ abbonamenti, pagamentiAll, candidatiAll,
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Pagamenti Falliti</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Pagamenti non riusciti</CardTitle>
             <AlertCircle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -328,7 +348,7 @@ export function PagamentiReportistica({ abbonamenti, pagamentiAll, candidatiAll,
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Ricavo Totale</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Incassato in tutto</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -341,7 +361,7 @@ export function PagamentiReportistica({ abbonamenti, pagamentiAll, candidatiAll,
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">ARPA</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Incasso medio per azienda</CardTitle>
             <Building className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -354,7 +374,7 @@ export function PagamentiReportistica({ abbonamenti, pagamentiAll, candidatiAll,
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Abbonamenti Totali</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Abbonamenti in tutto</CardTitle>
             <BarChart3 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent><div className="text-2xl font-bold">{extraMetrics.totalAbb}</div></CardContent>

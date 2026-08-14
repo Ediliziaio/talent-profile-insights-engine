@@ -236,7 +236,7 @@ export default function Pagamenti() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Entrate Mensili</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Entrate al mese</CardTitle>
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -245,25 +245,41 @@ export default function Pagamenti() {
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Abbonamenti Attivi</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Abbonamenti attivi</CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{metrics.attiviCount}</div>
             </CardContent>
           </Card>
-          <Card>
+          {/* Gli scaduti sono la cosa da fare, non un numero da guardare:
+              la card filtra la lista qui sotto. */}
+          <Card
+            role={metrics.scadutiCount > 0 ? 'button' : undefined}
+            tabIndex={metrics.scadutiCount > 0 ? 0 : undefined}
+            onClick={() => metrics.scadutiCount > 0 && setFiltroStato('scaduto')}
+            onKeyDown={(e) => {
+              if (metrics.scadutiCount > 0 && (e.key === 'Enter' || e.key === ' ')) {
+                e.preventDefault();
+                setFiltroStato('scaduto');
+              }
+            }}
+            className={metrics.scadutiCount > 0 ? 'cursor-pointer transition-shadow hover:shadow-md' : undefined}
+          >
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Scaduti / In Ritardo</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Scaduti</CardTitle>
               <AlertTriangle className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-destructive">{metrics.scadutiCount}</div>
+              {metrics.scadutiCount > 0 && (
+                <p className="text-xs text-muted-foreground mt-1">Clicca per vederli</p>
+              )}
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Incassi Ultimo Mese</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Incassato negli ultimi 30 giorni</CardTitle>
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -288,7 +304,7 @@ export default function Pagamenti() {
               <SelectValue placeholder="Stato" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="tutti">Tutti gli stati</SelectItem>
+              <SelectItem value="tutti">Stato: tutti</SelectItem>
               <SelectItem value="attivo">Attivo</SelectItem>
               <SelectItem value="trial">Trial</SelectItem>
               <SelectItem value="scaduto">Scaduto</SelectItem>
@@ -309,7 +325,7 @@ export default function Pagamenti() {
                   <TableHead>Azienda</TableHead>
                   <TableHead>Stato</TableHead>
                   <TableHead>Importo</TableHead>
-                  <TableHead>Data Inizio</TableHead>
+                  <TableHead>Dal</TableHead>
                   <TableHead>Scadenza</TableHead>
                   <TableHead className="text-right">Azioni</TableHead>
                 </TableRow>
@@ -370,7 +386,7 @@ export default function Pagamenti() {
         {/* Reportistica Completa */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-foreground">Reportistica Avanzata</h2>
+            <h2 className="text-lg font-semibold text-foreground">I numeri nel dettaglio</h2>
             <DateRangePicker
               label="Filtra periodo"
               fromDate={reportFromDate}

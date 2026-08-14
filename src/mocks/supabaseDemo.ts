@@ -174,6 +174,52 @@ const SBLOCCHI: Riga[] = [
   },
 ];
 
+const ABBONAMENTI: Riga[] = [
+  {
+    id: 'demo-abb-0001',
+    azienda_id: AZIENDA_ID,
+    stato: 'attivo',
+    importo_mensile: 290,
+    data_inizio: giorniFa(400),
+    data_scadenza: giorniFa(-320),
+    note: null,
+    created_at: giorniFa(400),
+    updated_at: giorniFa(400),
+    aziende: { nome: 'Costruzioni Bianchi Srl' },
+  },
+  {
+    id: 'demo-abb-0002',
+    azienda_id: 'demo-azienda-0002',
+    stato: 'attivo',
+    importo_mensile: 490,
+    data_inizio: giorniFa(210),
+    data_scadenza: giorniFa(-155),
+    note: null,
+    created_at: giorniFa(210),
+    updated_at: giorniFa(210),
+    aziende: { nome: 'Edilnova Costruzioni Spa' },
+  },
+  {
+    id: 'demo-abb-0003',
+    azienda_id: 'demo-azienda-0003',
+    stato: 'scaduto',
+    importo_mensile: 190,
+    data_inizio: giorniFa(430),
+    data_scadenza: giorniFa(65),
+    note: 'Rinnovo da concordare',
+    created_at: giorniFa(430),
+    updated_at: giorniFa(65),
+    aziende: { nome: 'Impresa Verdi & Figli Snc' },
+  },
+];
+
+const PAGAMENTI: Riga[] = [
+  { id: 'demo-pag-0001', abbonamento_id: 'demo-abb-0001', azienda_id: AZIENDA_ID, importo: 290, data_pagamento: giorniFa(12), metodo: 'bonifico', stato: 'completato', note: null, created_at: giorniFa(12) },
+  { id: 'demo-pag-0002', abbonamento_id: 'demo-abb-0002', azienda_id: 'demo-azienda-0002', importo: 490, data_pagamento: giorniFa(20), metodo: 'bonifico', stato: 'completato', note: null, created_at: giorniFa(20) },
+  { id: 'demo-pag-0003', abbonamento_id: 'demo-abb-0001', azienda_id: AZIENDA_ID, importo: 290, data_pagamento: giorniFa(42), metodo: 'bonifico', stato: 'completato', note: null, created_at: giorniFa(42) },
+  { id: 'demo-pag-0004', abbonamento_id: 'demo-abb-0003', azienda_id: 'demo-azienda-0003', importo: 190, data_pagamento: giorniFa(95), metodo: 'manuale', stato: 'completato', note: null, created_at: giorniFa(95) },
+];
+
 const PROFILI: Riga[] = SEEDS.flatMap((s, i) => {
   if (s.giorniTest === undefined) return [];
   const t = traits(s.traits);
@@ -233,6 +279,8 @@ const TABELLE: Record<string, Riga[]> = {
   risultati: [],
   risposte: [],
   leads: [],
+  abbonamenti: ABBONAMENTI,
+  pagamenti: PAGAMENTI,
   accessi_azienda: [],
   domande: [],
 };
