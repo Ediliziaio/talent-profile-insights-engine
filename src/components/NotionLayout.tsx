@@ -28,7 +28,7 @@ export function NotionLayout({ children }: NotionLayoutProps) {
     { href: '/marketplace', label: 'Trova candidati', icon: Store, show: isSuperadmin || isAzienda },
     { href: '/aziende', label: 'Aziende', icon: BarChart3, show: isSuperadmin },
     { href: '/pagamenti', label: 'Pagamenti', icon: CreditCard, show: isSuperadmin },
-    { href: '/impostazioni', label: 'Impostazioni', icon: Settings, show: false },
+    { href: '/impostazioni', label: 'Impostazioni', icon: Settings, show: isSuperadmin || isAzienda },
     { href: '/metodologia', label: 'Metodologia', icon: BookOpen, show: false },
   ];
 

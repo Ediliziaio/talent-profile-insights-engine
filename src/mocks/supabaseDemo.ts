@@ -24,7 +24,22 @@ interface Riga { [k: string]: any }
 /* ─────────────── dati demo ─────────────── */
 
 const AZIENDE: Riga[] = [
-  { id: AZIENDA_ID, nome: 'Costruzioni Bianchi Srl', attiva: true, created_at: giorniFa(400) },
+  {
+    id: AZIENDA_ID,
+    nome: 'Costruzioni Bianchi Srl',
+    attiva: true,
+    email_contatto: 'amministrazione@costruzionibianchi.it',
+    telefono: '0114567890',
+    indirizzo: 'Via Nizza 128',
+    citta: 'Torino',
+    cap: '10126',
+    provincia: 'TO',
+    partita_iva: '01234567890',
+    codice_fiscale: '01234567890',
+    codice_sdi: 'M5UXCR1',
+    pec: 'costruzionibianchi@pec.it',
+    created_at: giorniFa(400),
+  },
 ];
 
 const PROFILES: Riga[] = [
@@ -37,6 +52,16 @@ const PROFILES: Riga[] = [
     ruolo: 'azienda',
     azienda_id: AZIENDA_ID,
     created_at: giorniFa(400),
+  },
+  {
+    id: 'demo-profile-0002',
+    user_id: 'demo-user-0002',
+    email: 'ufficio@costruzionibianchi.it',
+    nome: 'Marta',
+    cognome: 'Conti',
+    ruolo: 'azienda',
+    azienda_id: AZIENDA_ID,
+    created_at: giorniFa(120),
   },
 ];
 
@@ -296,5 +321,6 @@ export const supabase: any = {
     signInWithPassword: () => Promise.resolve({ data: { session: sessioneDemo }, error: null }),
     signUp: () => Promise.resolve({ data: { session: sessioneDemo, user: sessioneDemo.user }, error: null }),
     signOut: () => Promise.resolve({ error: null }),
+    updateUser: () => Promise.resolve({ data: { user: sessioneDemo.user }, error: null }),
   },
 };
